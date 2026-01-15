@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+
+/* Animation pour le badge "Live", je mets en place une transition de couleur du rouge foncé au clair */
+@keyframes livePulse {
+  0%,
+  100% {
+    background-color: rgba(239, 68, 68, 0.95);
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.45);
+  }
+}
