@@ -11,3 +11,31 @@
     background-color: rgba(239, 68, 68, 0.45);
   }
 }
+
+/* Animation pour le point blanc "Live", je mets en place une transition de couleur du blanc au gris clair */
+@keyframes DotPulse {
+  0%, 100% {
+    background-color: #ffffff;
+    opacity: 1;
+  }
+  50% {
+    background-color: #d1d5db;
+    opacity: 1;
+  }
+}
+
+/* Slider horizontal */
+.slider-scrollbar::-webkit-scrollbar {
+  height: 10px;
+}
+.slider-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 999px;
+}
+.slider-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+}
+.slider-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.35);
+}
