@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AuthService } from "@/services/auth/auth.service";
+import { validateEmail, validatePassword } from "@/utils/validation/validation";
 import { useRouter } from "expo-router";
 
 /**
@@ -21,9 +22,24 @@ export const useRegister = () => {
     confirmPassword: string, 
     agree: boolean
   ) => {
+    setError(null);
+
     // Tous les champs sont obligatoires, validation basique pour éviter les appels inutiles à l'API
-    if (!email || !password) {
+    if (!email || !password || !confirmPassword) {
       setError("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    // Validation de l'email pour éviter les appels inutiles à l'API
+     if (!validateEmail(email)) {
+      setError("Veuillez entrer une adresse email valide.");
+      return;
+    }
+
+    // Validation du mot de passe pour s'assurer qu'il respecte les critères de sécurité RGPD avant de tenter l'inscription
+    const passwordCheck = validatePassword(password);
+    if (!passwordCheck.isValid) {
+      setError(passwordCheck.message);
       return;
     }
     
@@ -41,7 +57,6 @@ export const useRegister = () => {
 
     // Début de la phase asynchrone
     setIsLoading(true);
-    setError(null);
 
     try {
       // Tentative d'inscription via le service

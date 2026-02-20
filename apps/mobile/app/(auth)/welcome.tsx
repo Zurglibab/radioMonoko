@@ -33,11 +33,8 @@ export default function WelcomeScreen() {
       <View className="flex-1 justify-end px-8 pb-16">
         <View className="mb-12">
             <View className="flex-row items-center mb-6">
-                <View className="bg-white/10 p-2 rounded-full mr-3 border border-white/20">
-                    <Radio size={20} color="white" />
-                </View>
                 <Text className="text-white font-bold text-sm tracking-[4px] uppercase opacity-70">
-                    RadioMonoko
+                    RadioMonoco
                 </Text>
             </View>
             

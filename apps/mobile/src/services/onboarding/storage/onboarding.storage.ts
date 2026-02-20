@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Clé unique pour identifier l'état de l'onboarding dans le stockage local du téléphone
-const ONBOARDING_KEY = "@radiomonoko_onboarding_seen";
+const ONBOARDING_KEY = "@radiomonoco_onboarding_seen";
 
 /**
  * Flag de contrôle pour le développement.
