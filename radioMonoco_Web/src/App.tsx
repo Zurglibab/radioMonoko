@@ -1,20 +1,31 @@
 import{Routes, Route} from "react-router-dom";
 import Layout from "./components/utils/Layout.tsx";
+import Login from "./pages/Login.tsx";
+import Register from "./pages/Register.tsx";
+import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import Feed from "./pages/Feed.tsx";
 import HomePage from "./pages/HomePage.tsx";
 
 
 function App() {
     return (
         <Routes>
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
             <Route path="/" element={<Layout />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="search" element={<h1>Search</h1>} />
-                <Route path="feed" element={<h1>Feed</h1>} />
-                <Route path="collection" element={<h1>Collection</h1>} />
+                <Route index element={<HomePage/>} />
+
+                <Route
+                    path="feed"
+                    element={
+                        <ProtectedRoute>
+                            <Feed />
+                        </ProtectedRoute>
+                    }
+                />
             </Route>
         </Routes>
     )
 }
 
 export default App
-

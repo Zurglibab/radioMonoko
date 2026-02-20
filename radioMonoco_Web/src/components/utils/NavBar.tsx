@@ -61,13 +61,13 @@ const NavBar = ({ isConnected }: NavBarProps) => {
                     <div className="flex items-center gap-4">
                         <Link
                             to="/login"
-                            className="text-[10px] uppercase tracking-widest font-bold text-white hover:text-rose-500 transition-colors"
+                            className="px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold border-white text-white hover:bg-white hover:border-white hover:text-black border transition-all duration-300 rounded-sm"
                         >
                             Login
                         </Link>
                         <Link
                             to="/register"
-                            className="px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold border-rose-600 bg-rose-600 text-white hover:bg-transparent hover:border-white border transition-all duration-300 rounded-sm"
+                            className="px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold border-rose-600 bg-rose-600 text-white hover:bg-white hover:border-white border hover:text-black transition-all duration-300 rounded-sm"
                         >
                             Register
                         </Link>
