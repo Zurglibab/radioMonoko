@@ -76,7 +76,7 @@ const LiveRadios = () => {
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">En direct</span>
                             </div>
 
-                            <h3 className="text-5xl md:text-8xl font-black mb-4 uppercase tracking-tighter italic drop-shadow-2xl">
+                            <h3 className="text-5xl md:text-8xl font-black mb-4 uppercase tracking-tighter drop-shadow-2xl">
                                 {radio.title}
                             </h3>
                             <p className="text-neutral-200 max-w-2xl mb-10 text-lg md:text-xl font-medium drop-shadow-md">
