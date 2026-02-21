@@ -13,16 +13,9 @@ const TopMusics = () => {
         <section className="max-w-6xl mx-auto px-6 mb-24">
             <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
                 <div>
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="w-8 h-[1px] bg-rose-600"></span>
-                        <span className="text-xs font-bold uppercase tracking-[0.4em] text-rose-600">Global Ranking</span>
-                    </div>
                     <h2 className="text-5xl font-black tracking-tighter uppercase leading-none">
-                        Top Monde <br/> <span className="text-neutral-500 italic font-light text-4xl">du moment</span>
+                        Musiques <br/> <span className="text-neutral-500 italic font-light text-4xl">du moment</span>
                     </h2>
-                </div>
-                <div className="text-right">
-                    <p className="text-neutral-500 font-mono text-[10px] uppercase tracking-widest">Basé sur 2500+ radios</p>
                 </div>
             </div>
 

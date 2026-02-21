@@ -27,7 +27,7 @@ const NavBar = ({ isConnected }: NavBarProps) => {
     ];
 
     useEffect(() => {
-        const handleScroll = () => setShowLogo(window.scrollY > 150);
+        const handleScroll = () => setShowLogo(window.scrollY > 250);
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);

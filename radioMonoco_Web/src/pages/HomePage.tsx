@@ -11,7 +11,7 @@ const HomePage = () => {
     const [isScrolled, setIsScrolled] = useState(false);
 
     const handleScroll = useCallback(() => {
-        setIsScrolled(window.scrollY > 150);
+        setIsScrolled(window.scrollY > 250);
     }, []);
 
     useEffect(() => {
@@ -26,11 +26,8 @@ const HomePage = () => {
                 <div className="absolute inset-0 opacity-[0.15]"
                      style={{ backgroundImage: `radial-gradient(#ffffff 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }}>
                 </div>
-
                 <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px]"></div>
                 <div className="absolute top-[40%] right-[-10%] w-[400px] h-[400px] bg-white/[0.03] rounded-full blur-[100px]"></div>
-                <div className="absolute bottom-[10%] left-[20%] w-[300px] h-[300px] bg-white/[0.02] rounded-full blur-[80px]"></div>
-
                 <svg className="absolute inset-0 w-full h-full opacity-[0.03] contrast-150">
                     <filter id="noise">
                         <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
@@ -40,30 +37,22 @@ const HomePage = () => {
             </div>
 
             <div className="relative z-10">
-                <header className="relative flex flex-col items-center pt-24 pb-20 overflow-hidden">
-                    <div
-                        className={`flex flex-col items-center transition-all duration-700 ease-out ${
-                            isScrolled ? "opacity-0 scale-95 blur-sm translate-y-[-20px]" : "opacity-100 scale-100 blur-0 translate-y-0"
-                        }`}
-                    >
-                        <img
-                            src={logo}
-                            alt="RadioMonoco Logo"
-                            className="w-[320px] md:w-[400px] h-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.05)]"
-                        />
-                        <p className="mt-6 text-neutral-500 uppercase tracking-[0.4em] text-[10px] md:text-[11px] font-black">
-                            L'annuaire des ondes numériques
-                        </p>
-                    </div>
+                <header className={`absolute top-40 left-0 right-0 z-50 flex flex-col items-center transition-all duration-700 pointer-events-none ${
+                    isScrolled ? "opacity-0 -translate-y-10 blur-sm" : "opacity-100 translate-y-0"
+                }`}>
+                    <img
+                        src={logo}
+                        alt="RadioMonoco Logo"
+                        className="w-[280px] md:w-[380px] h-auto object-contain drop-shadow-[0_10px_40px_rgba(0,0,0,0.8)]"
+                    />
                 </header>
 
-                <main className="space-y-24 md:space-y-32 pb-24">
+                <main>
                     <LiveRadios />
-                    <div className="container mx-auto">
+
+                    <div className="container mx-auto px-6 space-y-24 md:space-y-32 py-24 md:py-32">
                         <Categories />
-                    </div>
-                    <TopMusics />
-                    <div className="container mx-auto">
+                        <TopMusics />
                         <PodCasts />
                     </div>
                 </main>
