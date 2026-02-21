@@ -148,13 +148,13 @@ const NavBar = ({ isConnected }: NavBarProps) => {
                         <div className="flex items-center gap-3">
                             <Link
                                 to="/login"
-                                className="px-6 py-2 text-[10px] font-black text-white/70 hover:text-white border border-white/10 hover:border-white/40 bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-full"
+                                className="px-6 py-2 text-[12px] font-black text-white/70 hover:text-white border border-white/10 hover:border-white/40 bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-full"
                             >
                                 Se connecter
                             </Link>
                             <Link
                                 to="/register"
-                                className="px-6 py-2 text-[10px] font-black text-white bg-rose-600  border border-white/10 hover:border-white  hover:bg-white hover:text-neutral-950 transition-all duration-300 rounded-full"
+                                className="px-6 py-2 text-[12px] font-black text-white bg-rose-600  border border-white/10 hover:border-white  hover:bg-white hover:text-neutral-950 transition-all duration-300 rounded-full"
                             >
                                 S'inscrire
                             </Link>
