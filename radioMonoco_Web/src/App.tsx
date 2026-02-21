@@ -10,13 +10,13 @@ import HomePage from "./pages/HomePage.tsx";
 function App() {
     return (
         <Routes>
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/" element={<Layout />}>
                 <Route index element={<HomePage/>} />
 
                 <Route
-                    path="feed"
+                    path="/feed"
                     element={
                         <ProtectedRoute>
                             <Feed />

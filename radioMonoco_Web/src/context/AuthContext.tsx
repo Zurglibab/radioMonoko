@@ -20,28 +20,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user')
+        const storedUser = localStorage.getItem('user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser))
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (error) {
+                console.error("Failed to parse stored user", error);
+                localStorage.removeItem('user');
+            }
         }
-    }, [])
+    }, []);
 
-    const register = async (email: string, password: string) => {
+    const register = async (email: string, _password: string) => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         const userTest: User = { id: '1', name: 'Test User', email };
         setUser(userTest);
         localStorage.setItem('user', JSON.stringify(userTest));
-    }
+    };
 
-    const login = async (email: string, password: string) => {
+    const login = async (email: string, _password: string) => {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
         const userTest: User = { id: '1', name: 'Test User', email };
         setUser(userTest);
         localStorage.setItem('user', JSON.stringify(userTest));
-    }
+    };
 
     const logout = () => {
         localStorage.removeItem('user');
         setUser(null);
-    }
+    };
 
     return (
         <AuthContext.Provider value={{ user, login, register, logout }}>
@@ -53,11 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
-        throw new Error('useAuth must be used insde the authprovider');
+        throw new Error('useAuth must be used inside the AuthProvider');
     }
     return context;
 };
-
-
-
-

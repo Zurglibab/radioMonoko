@@ -28,9 +28,17 @@ const NavBar = ({ isConnected }: NavBarProps) => {
         <nav className="fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-6 lg:px-12 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5 z-50">
 
             <div className="flex items-center gap-8">
-                <Link to="/search" className={LinkStyle}>Search</Link>
-                <Link to="/feed" className={LinkStyle}>Feed</Link>
-                <Link to="/collection" className={LinkStyle}>Collection</Link>
+                {isConnected ? (
+                    <>
+                        <Link to="/search" className={LinkStyle}>Search</Link>
+                        <Link to="/feed" className={LinkStyle}>Feed</Link>
+                    </>
+                ) : (
+                    <>
+                        <span className="text-sm font-semibold text-white transition duration-300 relative uppercase tracking-widest text-[11px] opacity-50 cursor-not-allowed">Search</span>
+                        <span className="text-sm font-semibold text-white transition duration-300 relative uppercase tracking-widest text-[11px] opacity-50 cursor-not-allowed">Feed</span>
+                    </>
+                )}
             </div>
 
             <div
@@ -49,7 +57,7 @@ const NavBar = ({ isConnected }: NavBarProps) => {
                 {isConnected ? (
                     <div className="flex items-center gap-2">
                         <button className={IconCircleStyle}>
-                            <HiOutlineBell className="text-xl text-white  transition-colors" />
+                            <HiOutlineBell className="text-xl text-white transition-colors" />
                             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-rose-600 rounded-full border-2 border-[#0a0a0a] animate-pulse"></span>
                         </button>
 
@@ -61,13 +69,13 @@ const NavBar = ({ isConnected }: NavBarProps) => {
                     <div className="flex items-center gap-4">
                         <Link
                             to="/login"
-                            className="px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold border-white text-white hover:bg-white hover:border-white hover:text-black border transition-all duration-300 rounded-sm"
+                            className="px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold border border-white text-white hover:bg-white hover:text-black transition-all duration-300 rounded-sm"
                         >
                             Login
                         </Link>
                         <Link
                             to="/register"
-                            className="px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold border-rose-600 bg-rose-600 text-white hover:bg-white hover:border-white border hover:text-black transition-all duration-300 rounded-sm"
+                            className="px-4 py-1.5 text-[10px] uppercase tracking-widest font-bold border border-rose-600 bg-rose-600 text-white hover:bg-white hover:border-white hover:text-black transition-all duration-300 rounded-sm"
                         >
                             Register
                         </Link>
