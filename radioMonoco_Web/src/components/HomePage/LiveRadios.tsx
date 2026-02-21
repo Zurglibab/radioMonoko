@@ -49,18 +49,22 @@ const LiveRadios = () => {
     return (
         <section className="relative w-full h-[85vh] md:h-screen overflow-hidden bg-black">
             <div
-                className={`flex h-full ${isTransitioning ? "transition-transform duration-1000 ease-in-out" : ""}`}
-                style={{ transform: `translateX(-${current * 100}%)` }}
+                className={`flex h-full w-full ${isTransitioning ? "transition-transform duration-1000 ease-in-out" : ""}`}
+                style={{
+                    transform: `translateX(-${current * 100}%)`,
+                    willChange: "transform"
+                }}
             >
                 {extendedRadios.map((radio, index) => (
-                    <div key={index} className="relative flex-shrink-0 w-full h-full">
+                    <div key={index} className="relative flex-shrink-0 w-full h-full overflow-hidden">
+                        {/* Overlays */}
                         <div className="absolute inset-0 bg-black/40 z-10" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20 z-10" />
 
                         <img
                             src={radio.img}
                             alt={radio.title}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover blur-sm scale-105"
                         />
 
                         <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-32 md:pb-40 px-6 text-center">
