@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import logo from "../assets/images/icon_large.png";
 
-import LiveRadios from "../components/HomePage/LiveRadios";
-import Categories from "../components/HomePage/Categories";
-import TopMusics from "../components/HomePage/TopMusics";
-import PodCasts from "../components/HomePage/PodCasts";
+import LiveRadios from "../components/homepage/LiveRadios";
+import Categories from "../components/homepage/Categories";
+import TopMusics from "../components/homepage/TopMusics";
+import PodCasts from "../components/homepage/PodCasts";
 import Footer from "../components/utils/Footer";
 
 const HomePage = () => {
