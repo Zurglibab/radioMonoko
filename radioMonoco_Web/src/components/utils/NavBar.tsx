@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // Ajout de useLocation
 import logoSmall from "../../assets/images/icon_small.png";
 import { HiOutlineBell, HiOutlineUserCircle } from "react-icons/hi2";
 import { HiOutlineCog, HiOutlineLogout, HiOutlineHeart, HiOutlineUserAdd, HiOutlineMenu, HiOutlineX, HiOutlineSearch } from "react-icons/hi";
@@ -17,9 +17,12 @@ const NavBar = ({ isConnected }: NavBarProps) => {
 
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation(); // Récupérer la route actuelle
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const notifRef = useRef<HTMLDivElement>(null);
+
+    const isHomePage = location.pathname === "/";
 
     const notifications = [
         { id: 1, text: 'Lucas a aimé votre critique', time: 'il y a 2m', icon: <HiOutlineHeart className="text-rose-500" /> },
@@ -27,10 +30,25 @@ const NavBar = ({ isConnected }: NavBarProps) => {
     ];
 
     useEffect(() => {
-        const handleScroll = () => setShowLogo(window.scrollY > 250);
+        const handleScroll = () => {
+            // Sur la home, on suit le scroll. Ailleurs, on reste visible.
+            if (isHomePage) {
+                setShowLogo(window.scrollY > 250);
+            } else {
+                setShowLogo(true);
+            }
+        };
+
+        // Initialisation de l'état au montage ou changement de route
+        if (!isHomePage) {
+            setShowLogo(true);
+        } else {
+            setShowLogo(window.scrollY > 250);
+        }
+
         window.addEventListener("scroll", handleScroll);
         return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+    }, [isHomePage]); // Se déclenche quand on change de page
 
     useEffect(() => {
         document.body.style.overflow = isMenuOpen ? 'hidden' : 'unset';
@@ -74,18 +92,13 @@ const NavBar = ({ isConnected }: NavBarProps) => {
                     </button>
 
                     {isConnected &&
-                        <button
-                            className="flex items-center gap-3 group"
-                        >
-                            <div
-                                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 group-hover:bg-rose-600 transition-all duration-300 cursor-pointer">
+                        <button className="flex items-center gap-3 group">
+                            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 group-hover:bg-rose-600 transition-all duration-300 cursor-pointer">
                                 <HiOutlineSearch className="text-xl text-white transition-transform group-hover:scale-110"/>
                             </div>
                         </button>
                     }
                 </div>
-
-
 
                 <div className={`absolute left-1/2 -translate-x-1/2 transition-all duration-700 ease-in-out ${showLogo ? "opacity-100 scale-100" : "opacity-0 scale-50 pointer-events-none"}`}>
                     <Link to="/">

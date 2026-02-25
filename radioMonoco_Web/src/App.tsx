@@ -5,6 +5,7 @@ import Register from "./pages/Register.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import Feed from "./pages/Feed.tsx";
 import HomePage from "./pages/HomePage.tsx";
+import RadioPage from "./pages/RadioPage.tsx";
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
+                <Route path={"/radio"} element={<RadioPage/>} />
             </Route>
         </Routes>
     )

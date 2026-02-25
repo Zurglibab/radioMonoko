@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import {useNavigate} from "react-router-dom";
 
 const radios = [
     { img: "https://www.radiofrance.fr/pikapi/images/894f4968-8833-4fbf-8fb9-cd6a7228e0ca/1200x680", title: "Radio Jazz Intense", desc: "Les classiques du jazz 24h/24 pour une ambiance tamisée." },
@@ -13,6 +14,8 @@ const LiveRadios = () => {
     const [isPaused] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(true);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const navigate = useNavigate();
 
     const handleNext = useCallback(() => {
         setIsTransitioning(true);
@@ -57,7 +60,6 @@ const LiveRadios = () => {
             >
                 {extendedRadios.map((radio, index) => (
                     <div key={index} className="relative flex-shrink-0 w-full h-full overflow-hidden">
-                        {/* Overlays */}
                         <div className="absolute inset-0 bg-black/40 z-10" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20 z-10" />
 
@@ -83,7 +85,10 @@ const LiveRadios = () => {
                                 {radio.desc}
                             </p>
 
-                            <button className="px-12 py-5 bg-white text-black font-black rounded-full hover:scale-105 hover:bg-neutral-100 transition-all active:scale-95 shadow-2xl cursor-pointer">
+                            <button
+                                className="px-12 py-5 bg-white text-black font-black rounded-full hover:scale-105 hover:bg-neutral-100 transition-all active:scale-95 shadow-2xl cursor-pointer"
+                                onClick={() => navigate('/radio')}
+                            >
                                 ÉCOUTER LE DIRECT
                             </button>
                         </div>
