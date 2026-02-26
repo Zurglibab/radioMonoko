@@ -1,42 +1,51 @@
 import { useState } from "react";
 import { AuthService } from "@/services/auth/auth.service";
 import { useRouter } from "expo-router";
+import { useAuthContext } from "@/context/AuthContext";
 
 /**
- * useAuth : Hook personnalisé pour centraliser la logique d'authentification.
- * Permet de gérer les états de chargement, les erreurs et la navigation de manière réutilisable dans toute l'application.
+ * useAuth : Hook personnalisé.
+ * Il fait le pont entre l'appel API (AuthService) et le stockage persistant (AuthContext).
+ * C'est ici que l'on gère les états éphémères (loading, erreurs locales).
  */
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  // Je récupère la méthode du contexte global pour sauvegarder la session
+  // Renommage pour éviter la confusion avec la fonction login locale
+  const { login: updateGlobalState } = useAuthContext();
+
   /**
-   * Méthode de connexion.
-   * Encapsule l'appel au service et gère les redirections post-connexion.
+   * login : Orchestre la procédure de connexion complète.
    */
   const login = async (email: string, password: string) => {
-    // Reset de l'état avant chaque tentative pour éviter les feedbacks erronés
+    // Je reset les états locaux avant de commencer
     setIsLoading(true);
     setError(null);
 
     try {
-      // Appel au service d'authentification pour tenter de connecter l'utilisateur
+      // J'appelle le service d'authentification pour obtenir l'user et le token
       const response = await AuthService.login(email, password);
-      console.log("Connecté :", response.user.username);
+      
+      console.log("Succès API, mise à jour du contexte...");
 
-      // Je redirige vers le dashboard principal en replace 
-      // pour empêcher le retour en arrière vers le formulaire
+      // Je mets à jour le contexte global avec les données reçues de l'API
+      await updateGlobalState(response.user, response.token);
+
+      // Je navigue vers l'écran principal de l'application
+      // replace() empêche de revenir au formulaire de login via le bouton retour du téléphone
       router.replace("/(tabs)/home");
+      
     } catch (err: any) {
-      // Je capture le message d'erreur pour l'afficher dans le composant UI
+      // En cas d'erreur, je capture le message et le stocke dans l'état local pour l'afficher à l'utilisateur
       setError(err.message || "Une erreur inconnue est survenue.");
     } finally {
-      // Le chargement se termine quoi qu'il arrive (succès ou échec)
+      // Toujours libérer l'UI à la fin du processus
       setIsLoading(false);
     }
   };
 
-  // J'expose uniquement ce dont les composants ont besoin
   return { login, isLoading, error };
 };
