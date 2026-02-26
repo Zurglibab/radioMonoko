@@ -1,57 +1,16 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { HiOutlineHeart, HiOutlineShare, HiOutlinePlay, HiOutlinePause, HiOutlineChevronLeft } from "react-icons/hi2";
-import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
-
-const AudioVisualizer = ({ isPlaying, barCount = 5, color = "bg-rose-600" }) => {
-    return (
-        <div className="flex items-end gap-[3px] h-6">
-            <style>
-                {`
-                    @keyframes equalizer {
-                        0%, 100% { height: 30%; }
-                        50% { height: 100%; }
-                    }
-                `}
-            </style>
-            {[...Array(barCount)].map((_, i) => (
-                <div
-                    key={i}
-                    className={`w-1 rounded-full ${color} transition-all duration-500 ${
-                        isPlaying ? "animate-[equalizer_0.8s_ease-in-out_infinite]" : "h-1 opacity-30"
-                    }`}
-                    style={{
-                        animationDelay: `${i * 0.15}s`,
-                        height: isPlaying ? `${Math.floor(Math.random() * 60) + 40}%` : "4px"
-                    }}
-                />
-            ))}
-        </div>
-    );
-};
+import { HiOutlineHeart, HiOutlineShare, HiOutlinePlay, HiOutlinePause } from "react-icons/hi2";
+import { useRadio, type Radio } from "../context/RadioContext";
 
 const RadioPage = () => {
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [volume, setVolume] = useState(80);
-    const [prevVolume, setPrevVolume] = useState(80);
-    const [isHoveringSlider, setIsHoveringSlider] = useState(false);
-    const navigate = useNavigate();
+    const { playRadio, isPlaying, currentRadio } = useRadio();
 
-    const toggleMute = () => {
-        if (volume > 0) {
-            setPrevVolume(volume);
-            setVolume(0);
-        } else {
-            setVolume(prevVolume || 80);
-        }
-    };
-
-    const radioInfo = {
+    const radioInfo: Radio = {
         name: "Mouv'",
         desc: "L'esprit hip-hop, le son Radio France.",
         img: "https://www.radiofrance.fr/pikapi/images/894f4968-8833-4fbf-8fb9-cd6a7228e0ca/1200x680",
         currentShow: "Mouv' Rap Club",
         host: "Pascal Cefran",
+        streamUrl: "https://icecast.radiofrance.fr/mouv-midfi.mp3?id=openapi",
     };
 
     const upcomingShows = [
@@ -59,6 +18,8 @@ const RadioPage = () => {
         { time: "19:00", title: "Mouv' 100% Rap", host: "Sélection Antenne" },
         { time: "20:00", title: "Dirty Swift", host: "DJ Swift" },
     ];
+
+    const isThisRadioPlaying = currentRadio?.name === radioInfo.name && isPlaying;
 
     return (
         <div className="min-h-screen bg-[#080808] text-white font-sans antialiased">
@@ -70,14 +31,6 @@ const RadioPage = () => {
             <div className="relative h-[55vh] md:h-[65vh] w-full overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#080808] z-10" />
                 <img src={radioInfo.img} alt={radioInfo.name} className="w-full h-full object-cover scale-105 blur-sm opacity-60" />
-
-                <button
-                    onClick={() => navigate(-1)}
-                    className="absolute top-8 left-6 md:left-12 z-30 flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-xl border border-white/10 rounded-full hover:bg-white/20 transition-all text-sm font-medium"
-                >
-                    <HiOutlineChevronLeft className="text-lg" />
-                    <span>Retour</span>
-                </button>
 
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center translate-y-8">
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-600 rounded-full mb-6 shadow-lg shadow-rose-900/20">
@@ -102,11 +55,16 @@ const RadioPage = () => {
                                     <h2 className="text-4xl md:text-5xl font-bold mb-2">{radioInfo.currentShow}</h2>
                                     <p className="text-lg text-neutral-400 font-light">Animé par <span className="text-white font-medium">{radioInfo.host}</span></p>
                                 </div>
+
                                 <button
-                                    onClick={() => setIsPlaying(!isPlaying)}
-                                    className="w-24 h-24 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-[0_0_40px_rgba(255,255,255,0.15)] active:scale-95"
+                                    onClick={() => playRadio(radioInfo)}
+                                    className="w-24 h-24 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-[0_0_40px_rgba(255,255,255,0.15)] active:scale-95 cursor-pointer"
                                 >
-                                    {isPlaying ? <HiOutlinePause className="text-4xl" /> : <HiOutlinePlay className="text-4xl ml-1" />}
+                                    {isThisRadioPlaying ? (
+                                        <HiOutlinePause className="text-4xl" />
+                                    ) : (
+                                        <HiOutlinePlay className="text-4xl ml-1" />
+                                    )}
                                 </button>
                             </div>
                         </section>
@@ -153,90 +111,6 @@ const RadioPage = () => {
                                 ))}
                             </div>
                         </section>
-                    </div>
-                </div>
-            </div>
-
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl h-24 bg-[#1a1a1a]/60 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] z-[50] shadow-2xl px-8 flex items-center">
-                <div className="w-full flex items-center justify-between">
-                    <div className="flex items-center gap-4 w-1/3">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden shadow-lg shrink-0 relative">
-                            <img src={radioInfo.img} className="w-full h-full object-cover" alt={radioInfo.name} />
-                            {isPlaying && (
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                    <AudioVisualizer isPlaying={isPlaying} barCount={3} color="bg-white" />
-                                </div>
-                            )}
-                        </div>
-                        <div className="hidden sm:block truncate">
-                            <p className="text-sm font-semibold truncate">{radioInfo.currentShow}</p>
-                            <p className="text-[10px] text-rose-600 font-bold uppercase tracking-widest">En Direct</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                        <button
-                            onClick={() => setIsPlaying(!isPlaying)}
-                            className="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-xl active:scale-95"
-                        >
-                            {isPlaying ? <HiOutlinePause className="text-2xl" /> : <HiOutlinePlay className="text-2xl ml-0.5" />}
-                        </button>
-                    </div>
-
-                    <div className="hidden md:flex items-center justify-end w-1/3 gap-4">
-                        <div className="flex items-center py-2">
-                            <button
-                                onClick={toggleMute}
-                                className="focus:outline-none cursor-pointer mr-2"
-                            >
-                                {volume === 0 ? (
-                                    <HiOutlineVolumeOff className="text-rose-600 text-xl" />
-                                ) : (
-                                    <HiOutlineVolumeUp className="text-neutral-400 text-xl hover:text-white transition-colors" />
-                                )}
-                            </button>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                value={volume}
-                                onMouseEnter={() => setIsHoveringSlider(true)}
-                                onMouseLeave={() => setIsHoveringSlider(false)}
-                                onChange={(e) => setVolume(parseInt(e.target.value))}
-                                className="w-20 md:w-24 h-1 rounded-full appearance-none cursor-pointer bg-neutral-700 transition-all
-                                /* Le thumb n'est visible que si isHoveringSlider est vrai */
-                                [&::-webkit-slider-thumb]:appearance-none
-                                [&::-webkit-slider-thumb]:h-3
-                                [&::-webkit-slider-thumb]:w-3
-                                [&::-webkit-slider-thumb]:rounded-full
-                                [&::-webkit-slider-thumb]:bg-white
-                                [&::-webkit-slider-thumb]:transition-opacity
-                                [&::-webkit-slider-thumb]:duration-200
-
-                                [&::-moz-range-thumb]:h-3
-                                [&::-moz-range-thumb]:w-3
-                                [&::-moz-range-thumb]:rounded-full
-                                [&::-moz-range-thumb]:bg-white
-                                [&::-moz-range-thumb]:border-none
-                                [&::-moz-range-thumb]:transition-opacity
-                                [&::-moz-range-thumb]:duration-200"
-                                style={{
-                                    background: `linear-gradient(to right, 
-                                        ${isHoveringSlider ? '#ec003f' : '#a3a3a3'} ${volume}%, 
-                                        #404040 ${volume}%)`,
-                                }}
-                            />
-                            <style>
-                                {`
-                                    input[type=range]::-webkit-slider-thumb {
-                                        opacity: ${isHoveringSlider ? 1 : 0};
-                                    }
-                                    input[type=range]::-moz-range-thumb {
-                                        opacity: ${isHoveringSlider ? 1 : 0};
-                                    }
-                                `}
-                            </style>
-                        </div>
                     </div>
                 </div>
             </div>
