@@ -1,29 +1,48 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { Radio, ChevronRight, UserCircle } from "lucide-react-native";
+import { ChevronRight, UserCircle } from "lucide-react-native";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useAuthContext } from "@/context/AuthContext";
 
 /**
- * WelcomeScreen : Point d'entrée de RadioMonoko.
- * Gère l'onboarding visuel et les trois flux d'accès : Login, Register et Guest mode.
+ * WelcomeScreen : Premier écran affiché aux utilisateurs non authentifiés.
+ * Propose les trois parcours d'entrée : Connexion, Inscription et Mode Invité.
  */
 export default function WelcomeScreen() {
   const router = useRouter();
+  
+  // Je récupère la méthode logout pour garantir un état propre en mode invité
+  const { logout } = useAuthContext();
+
+  /**
+   * handleGuestAccess : Assure que l'utilisateur entre dans l'app sans 
+   * session résiduelle. C'est une sécurité pour le mode public.
+   */
+  const handleGuestAccess = async () => {
+    try {
+      // On vide le SecureStore (token et user) avant de rediriger
+      await logout(); 
+      router.replace("/(tabs)/home");
+    } catch (error) {
+      console.error("Erreur lors de l'accès invité", error);
+      router.replace("/(tabs)/home");
+    }
+  };
 
   return (
     <View className="flex-1 bg-black">
       <StatusBar style="light" />
       
-      {/* Background Image */}
+      {/* Image de fond de l'écran d'accueil */}
       <Image 
         source={require("@/assets/images/welcome.jpg")}
         className="absolute w-full h-full opacity-60"
         resizeMode="cover"
       />
 
-      {/* Dégradé */}
+      {/* Overlay dégradé pour améliorer la lisibilité du texte */}
       <LinearGradient
         colors={['transparent', 'rgba(0,0,0,0.7)', 'black']}
         locations={[0, 0.4, 0.8]}
@@ -31,14 +50,14 @@ export default function WelcomeScreen() {
       />
 
       <View className="flex-1 justify-end px-8 pb-16">
+        {/* Introduction de l'écran d'accueil */}
         <View className="mb-12">
             <View className="flex-row items-center mb-6">
                 <Text className="text-white font-bold text-sm tracking-[4px] uppercase opacity-70">
-                    RadioMonoco
+                    RadioMonoko
                 </Text>
             </View>
             
-            {/* Accroche principale */}
             <Text className="text-white font-bold text-6xl mb-4 tracking-tighter leading-[55px]">
                 L'onde{"\n"}<Text className="text-white/50">partagée.</Text>
             </Text>
@@ -48,19 +67,19 @@ export default function WelcomeScreen() {
             </Text>
         </View>
 
-        {/* Bloc d'actions */}
+        {/* Les boutons d'accès */}
         <View className="gap-y-4">
             
-            {/* CTA Primaire : Priorité à la connexion (connexion) */}
+            {/* Bouton principal "se connecter" */}
             <TouchableOpacity 
                 onPress={() => router.push("/(auth)/login")}
                 activeOpacity={0.8}
-                className="bg-white w-full py-5 rounded-2xl items-center flex-row justify-center"
+                className="bg-white w-full py-5 rounded-2xl items-center flex-row justify-center shadow-xl"
             >
                 <Text className="text-black font-bold text-lg">Se connecter</Text>
             </TouchableOpacity>
 
-            {/* CTA Secondaire : Conversion nouveau membre (inscription) */}
+            {/* Bouton secondaire "s'inscrire" */}
             <TouchableOpacity 
                 onPress={() => router.push("/(auth)/register")}
                 activeOpacity={0.7}
@@ -70,9 +89,9 @@ export default function WelcomeScreen() {
                 <ChevronRight size={18} color="white" />
             </TouchableOpacity>
 
-            {/* Accès Invité */}
+            {/* Accès invité plus discret */}
             <TouchableOpacity 
-                onPress={() => router.replace("/(tabs)/home")} 
+                onPress={handleGuestAccess} 
                 activeOpacity={0.6}
                 className="mt-2 py-2 items-center flex-row justify-center"
             >
@@ -83,7 +102,7 @@ export default function WelcomeScreen() {
             </TouchableOpacity>
         </View>
 
-        {/* Footer de marque */}
+        {/* Footer discret pour la marque */}
         <View className="mt-12 items-center">
              <Text className="text-gray-600 text-[10px] tracking-widest uppercase font-bold">
                 Powered by RadioMonoko
