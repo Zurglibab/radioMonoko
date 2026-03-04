@@ -5,17 +5,15 @@ import { HiOutlineBell, HiOutlineUserCircle } from "react-icons/hi2";
 import { HiOutlineCog, HiOutlineLogout, HiOutlineHeart, HiOutlineUserAdd, HiOutlineMenu, HiOutlineX, HiOutlineSearch } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
 
-interface NavBarProps {
-    isConnected: boolean;
-}
 
-const NavBar = ({ isConnected }: NavBarProps) => {
+const NavBar = () => {
     const [showLogo, setShowLogo] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const { user, logout } = useAuth();
+    const isConnected = !!user;
     const navigate = useNavigate();
 
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -132,7 +130,7 @@ const NavBar = ({ isConnected }: NavBarProps) => {
                                     <div className="absolute top-12 right-0 w-64 bg-[#111] border border-white/10 rounded-2xl shadow-2xl py-3 animate-in fade-in zoom-in-95 duration-200 z-[60]">
                                         <div className="px-4 py-3 border-b border-white/5 mb-2">
                                             <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">Connecté</p>
-                                            <p className="text-white font-bold truncate">{user?.name || "Utilisateur"}</p>
+                                            <p className="text-white font-bold truncate">{user?.email || "Utilisateur"}</p>
                                         </div>
                                         <Link to="/settings" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-neutral-300 hover:bg-white/5 hover:text-white transition-colors">
                                             <HiOutlineCog className="text-lg" /> Paramètres

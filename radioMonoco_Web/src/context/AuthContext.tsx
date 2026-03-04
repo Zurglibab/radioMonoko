@@ -1,9 +1,9 @@
 import { createContext, useState, useEffect, useContext } from 'react';
 import type { ReactNode } from 'react';
+import authService from "../services/AuthService.ts";
+import api from "../services/Api.ts";
 
 interface User {
-    id: string;
-    name: string;
     email: string;
 }
 
@@ -20,35 +20,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (error) {
-                console.error("Failed to parse stored user", error);
-                localStorage.removeItem('user');
-            }
+        if (token && storedUser) {
+            api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            setUser(JSON.parse(storedUser));
         }
     }, []);
 
-    const register = async (email: string, _password: string) => {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const userTest: User = { id: '1', name: 'Test User', email };
-        setUser(userTest);
-        localStorage.setItem('user', JSON.stringify(userTest));
+    const register = async (email: string, password: string) => {
+        const token = await authService.register(email, password);
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify({email}));
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        setUser({ email });
     };
 
-    const login = async (email: string, _password: string) => {
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        const userTest: User = { id: '1', name: 'Test User', email };
-        setUser(userTest);
-        localStorage.setItem('user', JSON.stringify(userTest));
+    const login = async (email: string, password: string) => {
+        const token = await authService.login(email, password);
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify({email}));
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        setUser({ email });
     };
 
     const logout = () => {
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        delete api.defaults.headers.common["Authorization"];
         setUser(null);
     };
 
@@ -61,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if (context === undefined) {
+    if (!context) {
         throw new Error('useAuth must be used inside the AuthProvider');
     }
     return context;
