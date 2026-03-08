@@ -3,16 +3,23 @@ import { useAuth } from "../context/AuthContext.tsx";
 import { Link } from "react-router-dom";
 import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
+import {useNavigate} from "react-router-dom";
+
+
+
+
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             await login(email, password);
+            navigate("/");
         } catch (error) {
             console.error("Login failed", error);
         }
@@ -27,8 +34,8 @@ const Login = () => {
                      style={{ backgroundImage: `radial-gradient(#ffffff 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }}>
                 </div>
 
-                <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px]"></div>
-                <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-white/[0.03] rounded-full blur-[100px]"></div>
+                <div className="absolute top-[-10%] left-[-5%] w-125 h-125 bg-white/5 rounded-full blur-[120px]"></div>
+                <div className="absolute bottom-[-10%] right-[-5%] w-100 h-100 bg-white/3 rounded-full blur-[100px]"></div>
 
                 <svg className="absolute inset-0 w-full h-full opacity-[0.03] contrast-150">
                     <filter id="noise">

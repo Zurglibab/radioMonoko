@@ -20,7 +20,7 @@ const Register = () => {
 
         try {
             await register(email, password);
-            navigate("/feed");
+            navigate("/");
         } catch (error) {
             console.error("Registration failed", error);
         }
