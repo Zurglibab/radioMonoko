@@ -1,20 +1,55 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+const RadioBackground = ({ color, children }: { color: string; children: React.ReactNode }) => (
+    <div className={`absolute inset-0 flex items-center justify-center ${color} blur-sm`}>
+        <div className="w-[60%] md:w-[40%] opacity-90 drop-shadow-xl flex items-center justify-center">
+            {children}
+        </div>
+    </div>
+);
+
+const MouvLogo = () => (
+    <svg viewBox="0 0 88 44" xmlns="http://www.w3.org/2000/svg" className="w-full">
+        <path d="M66.999 14.004c-.226.175-.162.511-.302.742-.11.362-.274.712-.314 1.092.182.241-.123.515-.062.779-.07.22-.153.433-.105.635-.042.241-.117.471-.152.72a4.63 4.63 0 0 1-.06 1.062 1.65 1.65 0 0 0-.003.82c.06.3.163.595.328.854.32.06.335-.415.37-.64.112-.594.483-1.092.684-1.656.053-.107.065-.392.196-.287.143-.438.218-.895.334-1.34.054-.296.18-.572.242-.865.016-.299.044-.622-.098-.897-.105-.227-.202-.461-.386-.64a1.214 1.214 0 0 0-.632-.364l-.04-.015Zm-24.335-2.52c-1.207.074-2.427.247-3.582.628-.9.443-1.974.728-2.788 1.39-.404.144-.864.625-1.35.936-.646.597-1.458 1.202-1.866 1.952-.366.043-.167.405-.49.789-.398.51-.743 1.04-.77 1.688-.169.477-.287 1.167-.297 1.774-.03.98 0 1.978.185 2.944.13.802.327 1.58.734 2.282.159.481 1.102 1.494.729 1.624.409.624 1.016 1.067 1.386 1.672.133.47.64.73 1.007 1.129-.06-.498.618.641.481.178.468.568 1.285.693 1.936.992.55.272 1.19.486 1.716.643a15.54 15.54 0 0 0 1.577.21c.794.324 1.625.169 2.407.258 1.438-.151 2.965-.496 4.004-1.57.529-.458 1.066-.746 1.581-1.238.507-.72 1.216-1.088 1.618-1.823.564-.802 1.052-1.703 1.284-2.66.451-1.512.745-3.145.246-4.685-.403-.783-.618-1.826-1.484-2.185-.4-.18-.982-.558-.633.17.007 1.303-.126 2.596-.31 3.885a13.59 13.59 0 0 1-1.317 4.56c.382-.787.294.162-.021.17-.421.315-.909 1.427-1.526 1.904-.763.834-1.9 1.168-2.82 1.722-.857.348-1.76.41-2.677.372-.8-.03-1.521-.28-2.272-.482-1.046-.369-2.109-.809-2.898-1.63-.922-.898-1.842-1.874-2.228-3.126-.281-.866-.65-1.702-.667-2.63-.244-.954.332-1.772.279-2.698-.073-1.168.437-2.293.924-3.328.388-.767.947-1.436 1.49-2.096.495-.557 1.275-1.062 1.987-1.433 2.286-1.24 5.232-1.294 7.491.05.646.107 1.11.631 1.668.969.292.272.531.677.896.907.295.337 1.664 1.565.784.657-.74-.71.14.074.3.086.362.078.84.977 1.212 1.36-.15-.52-.423-1.126-.77-1.538a25.67 25.67 0 0 0-1.844-2.22c-.041-.19-.27-.766-.65-.921-.346-.184-.551-.555-.975-.783-.396-.05-.754-.216-1.012-.362.234.309-.886-.289-1.126-.346.558.374-.403-.116-.644-.11-.3-.044-.602-.032-.905-.036Zm6.657 14.206c.313.387-.637 1.336-.172.411.102-.095.035-.34.172-.41Zm10.275-10.382 1.903 13.477h1.76L65.2 15.308h-1.68l-1.112 9.549-.991-9.55h-1.822Zm-6.049 0v11.006c0 1.599 1.113 2.672 2.57 2.672 1.456 0 2.53-1.073 2.53-2.672V15.308h-1.7v11.088c0 .566-.284.891-.83.891-.506 0-.79-.325-.79-.891V15.308h-1.78Zm-25.33-.005 2.393.003v13.471h-1.576v-9.261l-1.36 9.261h-1.27l-1.353-9.247v9.247h-1.576V15.306l2.39-.003 1.176 8.644 1.176-8.644Zm12.598 6.401a1 1 0 0 0-.107.451c0 .579.495 1.048 1.105 1.048.09 0 .178-.01.262-.03l.124-.036v1.266a2.56 2.56 0 0 1-.386.03c-1.326 0-2.4-1.02-2.4-2.278 0-.103.007-.204.02-.303l.027-.148h1.355ZM42.673 19v1.029c.9.328 1.54 1.156 1.54 2.126 0 .113-.01.223-.026.331l-.03.16h-1.37a1 1 0 0 0 .13-.49c0-.58-.495-1.049-1.105-1.049-.076 0-.15.008-.222.021l-.105.026V19h1.188Z" fill="#262623" />
+    </svg>
+);
+
+const InterLogo = () => (
+    <svg viewBox="0 0 88 44" xmlns="http://www.w3.org/2000/svg" id="franceinter-rect"><path d="M0 0h88v44H0z" fill="#E20134"></path><path d="M52.959 16.165c0 .47-.076.912-.704.912-.36 0-.518-.222-.518-.477 0-.345.22-.531.821-.531h.4v.096Zm.966.608v-1.498c0-.856-.524-1.229-1.477-1.236-.98 0-1.398.414-1.507.959l.913.187c.042-.262.138-.435.552-.435.463 0 .553.249.553.504v.214h-.511c-1.05 0-1.698.38-1.698 1.194 0 .553.359 1.119 1.222 1.119.635 0 .876-.235 1.007-.435 0 .09.021.283.049.352h.945c-.02-.083-.048-.58-.048-.925Zm9.55-1.257c-.007-.414-.172-.766-.656-.766-.469 0-.662.325-.704.766h1.36Zm-1.38.608c0 .449.227.883.718.883.414 0 .531-.165.628-.38h.987c-.124.436-.518 1.154-1.636 1.154-1.18 0-1.691-.877-1.691-1.816 0-1.125.573-1.926 1.725-1.926 1.222 0 1.643.89 1.643 1.781 0 .124 0 .2-.014.304h-2.36Zm-1.076.421c-.117.594-.538 1.236-1.601 1.236-1.112 0-1.685-.767-1.685-1.843 0-1.057.642-1.899 1.733-1.899 1.2 0 1.54.87 1.553 1.27h-.96c-.061-.29-.227-.49-.614-.49-.455 0-.71.394-.71 1.084 0 .766.275 1.111.703 1.111.345 0 .525-.2.615-.469h.966Zm-6.696-1.519c0-.303 0-.635-.007-.904h.96c.02.097.034.345.041.456.118-.221.408-.539 1.036-.539.718 0 1.18.49 1.18 1.388v2.27h-.987v-2.16c0-.407-.131-.697-.573-.697-.421 0-.656.235-.656.87v1.988h-.994v-2.672Zm-5.584.07c0-.36 0-.67-.007-.974h.973c.014.083.028.435.028.628.159-.407.539-.704 1.146-.71v.945c-.718-.02-1.146.173-1.146 1.153v1.56h-.994v-2.603Zm-1.646 2.602v-2.83h-.29v-.746h.29v-.31c0-.74.366-1.222 1.14-1.222.158 0 .365.014.455.041v.78a1.729 1.729 0 0 0-.207-.014c-.29 0-.4.104-.4.49v.235h.504v.745h-.505v2.83h-.987Zm10.557 5.214c0-1.144 0-2.134-.022-3.102h3.101c.044.264.089 1.386.089 2.002.505-1.298 1.715-2.244 3.651-2.266v3.014c-2.288-.066-3.651.55-3.651 3.674v4.971H57.65v-8.293Zm-4.153 1.342c-.022-1.32-.55-2.442-2.09-2.442-1.496 0-2.112 1.034-2.243 2.442h4.333Zm-4.4 1.935c0 1.43.727 2.816 2.288 2.816 1.32 0 1.694-.527 2.002-1.21h3.146c-.396 1.386-1.65 3.674-5.214 3.674-3.761 0-5.39-2.793-5.39-5.785 0-3.586 1.827-6.138 5.5-6.138 3.894 0 5.236 2.838 5.236 5.676 0 .395 0 .638-.044.967h-7.523ZM38.87 19.81h1.76v-3.08h3.145v3.08h2.244v2.376h-2.243v5.631c0 .859.264 1.188 1.21 1.188.175 0 .483 0 .703-.021v2.155c-.616.22-1.474.22-2.112.22-2.221 0-2.947-1.188-2.947-3.19v-5.983h-1.76V19.81Zm-10.594 2.882c0-.968 0-2.024-.022-2.882h3.058c.066.308.11 1.1.132 1.452.374-.704 1.298-1.716 3.3-1.716 2.288 0 3.761 1.562 3.761 4.422v7.237H35.36V24.32c0-1.298-.418-2.222-1.826-2.222-1.342 0-2.09.748-2.09 2.772v6.335h-3.168v-8.513Zm-4.745-2.882h3.168v11.395H23.53V19.81Zm0-1.848v-2.816h3.168v2.816H23.53Z" fill="#fff"></path></svg>
+);
+
+const InfoLogo = () => (
+    <svg viewBox="0 0 88 44" xmlns="http://www.w3.org/2000/svg" id="franceinfo-rect"><path d="M0 0h88v44H0z" fill="#FFC300"></path><path d="M17.63 16.008a3.759 3.759 0 0 0-.984-.115c-.843 0-1.495.307-1.93.729-.434.421-.664 1.022-.664 2.019v.255h-1.598v1.406h1.598v4.793h1.661v-4.793h1.917v-1.406h-1.917v-.191c0-.575.09-.805.23-.984.205-.243.524-.358.933-.358.153 0 .358.025.499.064l.255-1.419Zm4.729 2.812c-.179-.026-.32-.051-.562-.051-.755 0-1.432.294-1.803.754v-.627h-1.597v6.199h1.661v-3.898c.205-.37.78-.895 1.509-.895.242 0 .485.026.6.064l.192-1.546Zm4.856 4.102c-.319.46-.869.767-1.495.767-.933 0-1.636-.716-1.636-1.687 0-.895.627-1.7 1.598-1.7.639 0 1.189.307 1.534.767v1.853Zm1.662-4.026h-1.598v.499a2.84 2.84 0 0 0-1.814-.626c-1.687 0-3.042 1.405-3.042 3.233 0 .844.307 1.61.792 2.173.55.639 1.419 1.048 2.34 1.048.625 0 1.213-.192 1.724-.627v.499h1.598v-6.199Zm3.067 6.199v-4.026c.23-.32.805-.767 1.508-.767.384 0 .716.128.933.345.23.23.371.55.371 1.163v3.285h1.661v-3.157c0-1.06-.23-1.687-.639-2.172a2.793 2.793 0 0 0-2.147-.997c-.69 0-1.278.242-1.75.626v-.499h-1.598v6.199h1.661Zm10.096-2.224c-.267.41-.804.818-1.482.818-1.01 0-1.712-.716-1.712-1.687 0-.946.716-1.7 1.674-1.7.6 0 1.1.307 1.431.742l1.176-1.036c-.575-.741-1.533-1.24-2.607-1.24-1.892 0-3.336 1.432-3.336 3.234 0 1.79 1.406 3.22 3.323 3.22 1.163 0 2.084-.421 2.812-1.392l-1.278-.959Zm6.378.294c-.294.32-.856.716-1.559.716-.882 0-1.585-.6-1.674-1.47h4.294c.026-.14.038-.307.038-.473 0-1.725-1.214-3.17-2.926-3.17-1.84 0-3.016 1.509-3.016 3.234 0 1.943 1.393 3.22 3.246 3.22.958 0 1.943-.396 2.543-1.111l-.946-.946Zm-3.156-1.968c.076-.563.639-1.087 1.329-1.087.677 0 1.176.537 1.227 1.087h-2.556Zm6.812-2.301h-1.662v6.199h1.662v-6.199Zm-1.917-2.198c0 .6.485 1.06 1.086 1.06.6 0 1.086-.46 1.086-1.06 0-.6-.486-1.06-1.086-1.06-.6 0-1.087.46-1.087 1.06Zm4.983 8.397v-4.026c.23-.32.806-.767 1.509-.767.383 0 .716.128.933.345.23.23.37.55.37 1.163v3.285h1.662v-3.157c0-1.06-.23-1.687-.639-2.172a2.793 2.793 0 0 0-2.147-.997c-.69 0-1.278.242-1.751.626v-.499h-1.598v6.199h1.662Zm10.097-9.087a3.759 3.759 0 0 0-.984-.115c-.843 0-1.495.307-1.93.729-.434.421-.664 1.022-.664 2.019v.255h-1.598v1.406h1.598v4.793h1.661v-4.793h1.917v-1.406H63.32v-.191c0-.575.09-.805.23-.984.205-.243.525-.358.933-.358.154 0 .358.025.499.064l.255-1.419Zm.128 5.994c0 1.79 1.419 3.22 3.298 3.22 1.878 0 3.297-1.43 3.297-3.22 0-1.79-1.419-3.233-3.297-3.233-1.88 0-3.298 1.444-3.298 3.233Zm1.662 0c0-.933.664-1.7 1.636-1.7.97 0 1.636.767 1.636 1.7 0 .933-.665 1.687-1.636 1.687-.972 0-1.636-.754-1.636-1.687Z" fill="#323232"></path><path d="M73.288 19.893c0 .627.498 1.125 1.124 1.125.627 0 1.125-.498 1.125-1.125 0-.626-.498-1.124-1.125-1.124-.626 0-1.124.498-1.124 1.124Zm0 4.205c0 .626.498 1.125 1.124 1.125.627 0 1.125-.499 1.125-1.125s-.498-1.125-1.125-1.125c-.626 0-1.124.499-1.124 1.125Z" fill="#fff"></path></svg>
+);
 
 const radios = [
-    { img: "https://www.radiofrance.fr/pikapi/images/894f4968-8833-4fbf-8fb9-cd6a7228e0ca/1200x680", title: "Radio Jazz Intense", desc: "Les classiques du jazz 24h/24 pour une ambiance tamisée." },
-    { img: "https://www.radiofrance.fr/pikapi/images/affeb063-b0b2-4507-b9d5-eca3acbbeaa2/1200x680", title: "Electro Beat Radio", desc: "Le meilleur de la scène underground berlinoise." },
-    { img: "https://www.radiofrance.fr/pikapi/images/e5729b6c-6f95-420b-afc3-c8166add9ce8/1200x680", title: "Classic Rock FM", desc: "Les plus grands hymnes du rock des années 70 à nos jours." }
+    {
+        title: "Mouv'",
+        desc: "Hip-Hop, Rap & Pop Culture : le son qui bouge avec toi.",
+        color: "bg-[#00FB8E]",
+        logo: <MouvLogo />,
+    },
+    {
+        title: "France Inter",
+        desc: "La première radio de France : culture, actu et humour.",
+        color: "bg-[#E2001A]",
+        logo: <InterLogo />,
+    },
+    {
+        title: "France Info",
+        desc: "L'information en continu : l'actu décryptée en temps réel.",
+        color: "bg-[#ffc300]",
+        logo: <InfoLogo />,
+    }
 ];
 
 const extendedRadios = [...radios, radios[0]];
 
 const LiveRadios = () => {
     const [current, setCurrent] = useState(0);
-    const [isPaused] = useState(false);
     const [isTransitioning, setIsTransitioning] = useState(true);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
     const navigate = useNavigate();
 
     const handleNext = useCallback(() => {
@@ -29,12 +64,9 @@ const LiveRadios = () => {
     };
 
     useEffect(() => {
-        if (isPaused) return;
-        const interval = setInterval(() => {
-            handleNext();
-        }, 5000);
+        const interval = setInterval(handleNext, 5000);
         return () => clearInterval(interval);
-    }, [isPaused, handleNext]);
+    }, [handleNext]);
 
     useEffect(() => {
         if (current === extendedRadios.length - 1) {
@@ -43,51 +75,47 @@ const LiveRadios = () => {
                 setCurrent(0);
             }, 1000);
         }
-
         return () => {
             if (timeoutRef.current) clearTimeout(timeoutRef.current);
         };
     }, [current]);
 
     return (
-        <section className="relative w-full h-[85vh] md:h-screen overflow-hidden bg-black">
+        <section className="relative w-full h-[85vh] md:h-screen overflow-hidden bg-black text-white font-sans">
             <div
                 className={`flex h-full w-full ${isTransitioning ? "transition-transform duration-1000 ease-in-out" : ""}`}
-                style={{
-                    transform: `translateX(-${current * 100}%)`,
-                    willChange: "transform"
-                }}
+                style={{ transform: `translateX(-${current * 100}%)`, willChange: "transform" }}
             >
                 {extendedRadios.map((radio, index) => (
                     <div key={index} className="relative flex-shrink-0 w-full h-full overflow-hidden">
-                        <div className="absolute inset-0 bg-black/40 z-10" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20 z-10" />
 
-                        <img
-                            src={radio.img}
-                            alt={radio.title}
-                            className="w-full h-full object-cover blur-sm scale-105"
-                        />
+                        <RadioBackground color={radio.color}>
+                            {radio.logo}
+                        </RadioBackground>
+
+                        <div className="absolute inset-0 bg-black/40 z-10" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/10 z-10" />
 
                         <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-32 md:pb-40 px-6 text-center">
-                            <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-600 rounded-full mb-6 shadow-lg shadow-rose-900/20">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                                </span>
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white">En direct</span>
+                            <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-600 rounded-full mb-6 shadow-lg">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">En direct</span>
                             </div>
 
-                            <h3 className="text-5xl md:text-8xl font-black mb-4 uppercase tracking-tighter drop-shadow-2xl">
+                            <h3 className="text-3xl md:text-6xl font-black mb-4 uppercase tracking-tighter drop-shadow-2xl">
                                 {radio.title}
                             </h3>
-                            <p className="text-neutral-200 max-w-2xl mb-10 text-lg md:text-xl font-medium drop-shadow-md">
+
+                            <p className="text-neutral-200 max-w-2xl mb-10 text-lg md:text-2xl font-medium drop-shadow-md">
                                 {radio.desc}
                             </p>
 
                             <button
                                 className="px-12 py-5 bg-white text-black font-black rounded-full hover:scale-105 hover:bg-neutral-100 transition-all active:scale-95 shadow-2xl cursor-pointer"
-                                onClick={() => navigate('/radio')}
+                                onClick={() => navigate("/radio")}
                             >
                                 ÉCOUTER LE DIRECT
                             </button>
@@ -96,17 +124,15 @@ const LiveRadios = () => {
                 ))}
             </div>
 
+            {/* Pagination Dots */}
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-30">
                 {radios.map((_, index) => (
                     <button
                         key={index}
                         onClick={() => handleDotClick(index)}
-                        className={`h-1 transition-all duration-500 cursor-pointer ${
-                            (current % radios.length) === index
-                                ? "w-16 bg-white"
-                                : "w-8 bg-white/30 hover:bg-white/60"
+                        className={`h-1.5 transition-all duration-500 cursor-pointer rounded-full ${
+                            (current % radios.length) === index ? "w-16 bg-white" : "w-8 bg-white/30"
                         }`}
-                        aria-label={`Radio ${index + 1}`}
                     />
                 ))}
             </div>
