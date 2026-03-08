@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React, { memo } from "react";
 import { ImageBackground, Text, useWindowDimensions, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants/theme";
 import { OnboardingSlideModel } from "../data/slides";
 
@@ -10,58 +11,64 @@ type Props = {
 
 /**
  * OnboardingItem : Rendu individuel d'une slide du carrousel.
- * Ce composant est optimisé avec React.memo pour éviter des re-renders inutiles lors du scroll.
- * Il utilise ImageBackground pour superposer un dégradé et du texte sur l'image de fond.
+ * Optimisé avec React.memo pour la performance lors du scroll.
+ * Utilise SafeAreaView et les tokens du thème pour une cohérence parfaite.
  */
 function OnboardingItem({ item }: Props) {
-  // Récupération dynamique des dimensions pour que chaque slide occupe 100% du viewport
+  // Récupération des dimensions pour assurer un affichage plein écran strict
   const { width, height } = useWindowDimensions();
 
   return (
-    <View style={{ width, height }} className="bg-background">
-      {/* Image de fond, on utilise ImageBackground pour superposer le contenu facilement */}
+    <View 
+      style={{ width, height, backgroundColor: theme.dark.colors.background }} 
+    >
+      {/* Image de fond couvrant l'intégralité du viewport */}
       <ImageBackground
         source={item.image}
-        style={{ flex: 1 }}
+        style={{ width, height, flex: 1 }}
         resizeMode="cover"
       >
-        {/* Dégradé vertical : 
-            1. 'transparent' en haut pour voir l'image
-            2. Opacité intermédiaire au milieu
-            3. Couleur de fond du thème en bas pour une transition douce
-        */}
+        {/* Dégradé vertical utilisant la couleur de fond du thème pour la transition */}
         <LinearGradient
-          colors={[
-            "transparent",
-            "rgba(0,0,0,0.4)",
-            theme.dark.colors.background 
-          ]}
-          locations={[0, 0.5, 0.9]} // Points d'arrêt du dégradé
-          style={{ flex: 1, justifyContent: "flex-end" }}
-          className="px-8 pb-40" // Espacement généreux en bas pour laisser de la place au Paginator/Boutons
-        > 
-          <View>
-            {/* Titre */}
-            <Text 
-              className="text-5xl font-bold tracking-tighter text-white uppercase"
-              style={{ lineHeight: 48 }}
-            >
-              {item.title}
-            </Text>
+          colors={["transparent", "rgba(0,0,0,0.5)", theme.dark.colors.background]}
+          locations={[0, 0.4, 0.9]}
+          style={{ flex: 1 }}
+        >
+          {/* SafeAreaView : Crucial sur iOS pour gérer les encoches et le home indicator.
+              On aligne le contenu en bas (flex-end) avec un padding important (pb-48) 
+              pour laisser l'espace nécessaire aux contrôles (Pagination & Bouton).
+          */}
+          <SafeAreaView 
+            edges={['top', 'bottom']} 
+            style={{ flex: 1, justifyContent: 'flex-end' }} 
+            className="px-8 pb-48"
+          >
+            <View>
+              {/* Titre de la slide - Couleur fixe blanche pour le contraste sur image */}
+              <Text 
+                className="text-5xl font-bold tracking-tighter text-white uppercase"
+                style={{ lineHeight: 48 }}
+              >
+                {item.title}
+              </Text>
 
-            {/* Séparateur visuel */}
-            <View className="h-1 w-12 bg-white my-6" />
+              {/* Séparateur visuel utilisant le texte du thème ou blanc */}
+              <View className="h-1 w-12 bg-white my-6" />
 
-            {/* Description */}
-            <Text className="text-lg text-gray-300 font-light leading-6">
-              {item.description}
-            </Text>
-          </View>
+              {/* Description textuelle utilisant la couleur de texte du thème dark */}
+              <Text 
+                style={{ color: theme.dark.colors.text }}
+                className="text-lg font-light leading-6 opacity-80"
+              >
+                {item.description}
+              </Text>
+            </View>
+          </SafeAreaView>
         </LinearGradient>
       </ImageBackground>
     </View>
   );
 }
 
-// Export avec mémoïsation pour les performances du carrousel
+// Export mémoïsé pour éviter les re-renders lors des animations de scroll
 export default memo(OnboardingItem);
