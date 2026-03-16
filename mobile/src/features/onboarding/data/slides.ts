@@ -1,4 +1,5 @@
 import { ImageSourcePropType } from "react-native";
+import { Asset } from "expo-asset";
 
 /**
  * Interface OnboardingSlideModel
@@ -11,6 +12,9 @@ export interface OnboardingSlideModel {
   description: string;
   image: ImageSourcePropType;
 }
+
+// On définit l'image du welcome ici pour pouvoir la précharger de façon centralisée
+export const WELCOME_IMAGE = require("@/assets/images/welcome.jpg");
 
 /**
  * Liste des diapositives de l'onboarding.
@@ -37,3 +41,17 @@ export const ONBOARDING_SLIDES: OnboardingSlideModel[] = [
     image: require("@/assets/images/onboarding/onboarding-radio-3.jpg"),
   },
 ];
+
+/**
+ * Prépare les assets en cache (Onboarding + Welcome) pour éviter le lag au premier affichage.
+ */
+export const preloadAppAssets = async () => {
+  const imagesToCache = [
+    ...ONBOARDING_SLIDES.map((slide) => slide.image),
+    WELCOME_IMAGE,
+  ];
+  const cacheImages = imagesToCache.map((image) => {
+    return Asset.fromModule(image).downloadAsync();
+  });
+  return Promise.all(cacheImages);
+};

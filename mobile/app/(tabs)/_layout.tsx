@@ -15,8 +15,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
  * Gère l'apparence de la TabBar et l'adaptation aux différentes tailles d'écran.
  */
 export default function TabsLayout() {
-  // Utilisation du thème clair par défaut pour la barre de navigation
-  const colors = theme.light.colors;
+  // Utilisation du thème dark par défaut pour la barre de navigation
+  const colors = theme.dark.colors;
   
   // Récupération des zones sécurisées pour éviter les conflits avec les éléments système (notch, barre de navigation)
   const insets = useSafeAreaInsets();
@@ -69,7 +69,7 @@ export default function TabsLayout() {
 
       {/* Onglet Recherche */}
       <Tabs.Screen
-        name="Search"
+        name="search"
         options={{
           title: "Recherche",
           tabBarIcon: ({ color }) => <Search size={22} color={color} />,
