@@ -22,11 +22,15 @@ function OnboardingItem({ item }: Props) {
     <View 
       style={{ width, height, backgroundColor: theme.dark.colors.background }} 
     >
-      {/* Image de fond couvrant l'intégralité du viewport */}
+      {/* Image de fond couvrant l'intégralité du viewport.
+          fadeDuration={0} : Supprime le fondu par défaut pour un affichage instantané 
+          car l'image est déjà préchargée en mémoire vive via le point d'entrée Index.
+      */}
       <ImageBackground
         source={item.image}
         style={{ width, height, flex: 1 }}
         resizeMode="cover"
+        fadeDuration={0}
       >
         {/* Dégradé vertical utilisant la couleur de fond du thème pour la transition */}
         <LinearGradient

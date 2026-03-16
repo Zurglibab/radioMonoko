@@ -3,11 +3,12 @@ import { Animated, Image, View } from "react-native";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { preloadAppAssets } from "@/features/onboarding/data/slides"; 
 
 /**
  * SplashScreen : Écran de transition au démarrage.
- * Gère l'apparition en fondu du logo et simule un temps de chargement
- * avant de rediriger l'utilisateur.
+ * Gère l'apparition en fondu du logo et précharge les assets lourds (images)
+ * avant de rediriger l'utilisateur vers l'onboarding.
  */
 export default function SplashScreen() {
   const router = useRouter();
@@ -23,14 +24,27 @@ export default function SplashScreen() {
       useNativeDriver: true, // Optimisation CPU, l'animation tourne du côté natif
     }).start();
 
-    // Redirection automatique après la fin de l'animation
-    // TODO: Plus tard, remplacer ce timer par une vérification réelle (fonts, assets, auth)
-    const timer = setTimeout(() => {
-      router.replace("/onboarding");
-    }, 1000);
+    /**
+     * Préparation des ressources :
+     * On précharge les images de l'onboarding pendant que l'animation tourne.
+     * Cela évite les écrans noirs au démarrage et les lags sur l'onboarding.
+     */
+    async function prepareAssets() {
+      try {
+        // J'attend à la fois le préchargement et un délai minimum pour l'expérience visuelle
+        await Promise.all([
+          preloadAppAssets(),
+          new Promise(resolve => setTimeout(resolve, 2500)), // Assure que le splash reste visible au moins 2.5 secondes
+        ]);
+      } catch (e) {
+        console.warn("Erreur chargement assets:", e);
+      } finally {
+        // Redirection une fois que tout est prêt
+        router.replace("/onboarding");
+      }
+    }
 
-    // Nettoyage du timer pour éviter les fuites de mémoire si le composant est démonté
-    return () => clearTimeout(timer);
+    prepareAssets();
   }, []);
 
   return (

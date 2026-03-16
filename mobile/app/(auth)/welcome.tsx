@@ -5,6 +5,7 @@ import { ChevronRight, UserCircle } from "lucide-react-native";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import { useAuthContext } from "@/context/AuthContext";
+import { WELCOME_IMAGE } from "@/features/onboarding/data/slides";
 
 /**
  * WelcomeScreen : Premier écran affiché aux utilisateurs non authentifiés.
@@ -35,11 +36,15 @@ export default function WelcomeScreen() {
     <View className="flex-1 bg-black">
       <StatusBar style="light" />
       
-      {/* Image de fond de l'écran d'accueil */}
+      {/* Image de fond de l'écran d'accueil.
+          fadeDuration={0}, comme l'image été mise en cache dans le Splash,
+          elle s'affiche instantanément sans clignotement.
+      */}
       <Image 
-        source={require("@/assets/images/welcome.jpg")}
+        source={WELCOME_IMAGE}
         className="absolute w-full h-full opacity-60"
         resizeMode="cover"
+        fadeDuration={0}
       />
 
       {/* Overlay dégradé pour améliorer la lisibilité du texte */}
