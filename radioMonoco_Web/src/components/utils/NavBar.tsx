@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom"; // Ajout de useLocation
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import logoSmall from "../../assets/images/icon_small.png";
 import { HiOutlineBell, HiOutlineUserCircle } from "react-icons/hi2";
 import { HiOutlineCog, HiOutlineLogout, HiOutlineHeart, HiOutlineUserAdd, HiOutlineMenu, HiOutlineX, HiOutlineSearch } from "react-icons/hi";
@@ -15,7 +15,7 @@ const NavBar = () => {
     const { user, logout } = useAuth();
     const isConnected = !!user;
     const navigate = useNavigate();
-    const location = useLocation(); // Récupérer la route actuelle
+    const location = useLocation();
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const notifRef = useRef<HTMLDivElement>(null);
