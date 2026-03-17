@@ -33,13 +33,13 @@ const radios = [
     {
         title: "France Inter",
         desc: "La première radio de France : culture, actu et humour.",
-        color: "bg-[#E2001A]",
+        color: "bg-[#e20134]",
         logo: <InterLogo />,
     },
     {
         title: "France Info",
         desc: "L'information en continu : l'actu décryptée en temps réel.",
-        color: "bg-[#ffc300]",
+        color: "bg-[#ffc203]",
         logo: <InfoLogo />,
     }
 ];
@@ -98,10 +98,10 @@ const LiveRadios = () => {
 
                         <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-32 md:pb-40 px-6 text-center">
                             <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-600 rounded-full mb-6 shadow-lg">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                </span>
+                                <span className="relative flex h-2 w-2">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                </span>
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">En direct</span>
                             </div>
 
