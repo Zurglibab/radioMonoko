@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { FaArrowUp } from "react-icons/fa";
-import Header from "./Header.tsx";
-import GlobalPlayer from "../GlobalPlayer";
+import Header from "../header/Header.tsx";
+import GlobalPlayer from "./GlobalPlayer.tsx";
 import { useRadio } from "../../context/RadioContext";
 
 const Layout = () => {

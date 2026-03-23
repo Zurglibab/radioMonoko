@@ -1,4 +1,4 @@
-import NavBar from "../header/NavBar.tsx";
+import NavBar from "./NavBar.tsx";
 const Header = () => {
     return (
         <header className="sticky top-0 z-50 w-full bg-neutral-950 border-b border-neutral-800">
