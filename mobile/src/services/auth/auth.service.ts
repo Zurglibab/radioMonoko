@@ -6,7 +6,7 @@ import { validateEmail, validatePassword } from "@/utils/validation/validation";
  */
 const MOCK_USER: User = {
   id: "1",
-  email: "test@radiomonoko.com",
+  email: "test@radiomonoco.com",
   username: "TestUser",
 };
 

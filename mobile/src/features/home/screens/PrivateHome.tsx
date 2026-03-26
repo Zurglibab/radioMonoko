@@ -5,26 +5,34 @@ import { Clock, Users, ChevronRight } from "lucide-react-native";
 
 import { theme } from "@/constants/theme";
 import { User } from "@/types/auth";
+import { useLibrary } from "@/hooks/home/useLibrary";
 import { StatCard } from "@/features/home/components/private/StatCard";
 import { ActivityCard } from "@/features/home/components/private/ActivityCard";
 import { MediaSuggestion } from "@/features/home/components/private/MediaSuggestion";
 import { PrivateHeader } from "@/features/home/components/private/PrivateHeader";
 import { LibraryQuickNav } from "@/features/home/components/private/LibraryQuickNav";
 
-/**
- * PrivateHome : Écran d'accueil principal après connexion.
- * Orchestre les différents sous-composants pour offrir une vue d'ensemble 
- * personnalisée de l'activité de l'utilisateur et des nouveautés.
- */
 export default function PrivateHome({ user }: { user: User }) {
-  // Configuration des statistiques rapides du tableau de bord
+  const { statusItems, favorites } = useLibrary();
+
+  const finishedCount = statusItems.find(s => s.slug === 'finished')?.count || 0;
+
   const stats = [
-    { id: "1", label: "Écoutés", value: "128", icon: <Clock size={18} color="white" /> },
-    { id: "2", label: "Abonnements", value: "42", icon: <Users size={18} color="white" /> },
+    { 
+      id: "1", 
+      label: "Écoutés", 
+      value: finishedCount.toString(), 
+      icon: <Clock size={18} color="white" /> 
+    },
+    { 
+      id: "2", 
+      label: "Abonnements", 
+      value: "42",
+      icon: <Users size={18} color="white" /> 
+    },
   ];
 
-  // Simulation de données pour le flux d'activité
-  const activities = Array(5).fill({
+  const activities = Array(3).fill({
     user: "Marc",
     media: "Jazz Night",
     rating: 4,
@@ -38,7 +46,6 @@ export default function PrivateHome({ user }: { user: User }) {
       className="flex-1" 
       style={{ backgroundColor: theme.dark.colors.background }}
     >
-      {/* En-tête personnalisé avec infos utilisateur */}
       <PrivateHeader user={user} />
 
       <ScrollView 
@@ -47,19 +54,19 @@ export default function PrivateHome({ user }: { user: User }) {
         contentContainerStyle={{ paddingBottom: 120 }}
       >
         
-        {/* Dashboard des statistiques de l'utilisateur */}
+        {/* Dashboard Statistique (Barème 2.2.2) */}
         <View className="flex-row gap-x-4 px-6 mb-10">
           {stats.map(s => <StatCard key={s.id} {...s} />)}
         </View>
 
-        {/* Filtres de la bibliothèque */}
+        {/* Navigation Rapide Bibliothèque */}
         <LibraryQuickNav />
 
-        {/* Suggestions du contenu et d'écoute */}
+        {/* Suggestions de contenu (Type Station) */}
         <View className="mb-10">
           <Text 
             style={{ color: theme.dark.colors.text }} 
-            className="text-lg font-bold px-6 mb-4 tracking-tight"
+            className="text-xl font-black px-6 mb-6 italic tracking-tighter"
           >
             Découvertes du jour
           </Text>
@@ -69,39 +76,43 @@ export default function PrivateHome({ user }: { user: User }) {
             className="px-6"
             contentContainerStyle={{ paddingRight: 40 }}
           >
-            <MediaSuggestion item={{ id: '1', title: 'Deep Focus', artist: 'Radio Zen', image: 'https://picsum.photos/400/400' }} />
-            <MediaSuggestion item={{ id: '2', title: 'Tech Talk', artist: 'Podcast FR', image: 'https://picsum.photos/401/401' }} />
-            <MediaSuggestion item={{ id: '3', title: 'Jazz Night', artist: 'Classic FM', image: 'https://picsum.photos/402/402' }} />
+            {/* On utilise nos vrais favoris ou des stations typées Station */}
+            {favorites.map((station) => (
+              <MediaSuggestion key={station.id} item={station} />
+            ))}
           </ScrollView>
         </View>
 
-        {/* Section du flux d'activités récentes */}
+        {/* Fil d'actualité (Barème 2.2.4) */}
         <View className="px-6 mb-4">
-          <Text 
-            style={{ color: theme.dark.colors.text }} 
-            className="text-lg font-bold mb-4 tracking-tight"
-          >
-            Activités récentes
-          </Text>
+          <View className="flex-row justify-between items-end mb-6">
+            <Text 
+              style={{ color: theme.dark.colors.text }} 
+              className="text-xl font-black italic tracking-tighter"
+            >
+              Activités du réseau
+            </Text>
+          </View>
           
-          {/* Liste verticale des activités des amis */}
           {activities.map((act, idx) => (
             <ActivityCard key={idx} activity={act} />
           ))}
           
-          {/* Bouton d'action secondaire pour étendre le flux */}
           <TouchableOpacity 
-            className="flex-row items-center justify-center p-5 rounded-3xl mt-2 border-2 border-dashed"
-            style={{ borderColor: theme.dark.colors.border }}
-            activeOpacity={0.6}
+            className="flex-row items-center justify-center p-6 rounded-[32px] mt-4 border-2 border-dashed"
+            style={{ 
+              borderColor: theme.dark.colors.surface,
+              backgroundColor: 'rgba(255,255,255,0.02)' 
+            }}
+            activeOpacity={0.7}
           >
             <Text 
               style={{ color: theme.dark.colors.muted }} 
-              className="font-bold mr-2 uppercase text-xs tracking-widest"
+              className="font-black mr-2 uppercase text-[10px] tracking-[2px]"
             >
-              Voir toutes les activités
+              Voir tout le flux
             </Text>
-            <ChevronRight size={16} color={theme.dark.colors.muted} />
+            <ChevronRight size={14} color={theme.dark.colors.muted} />
           </TouchableOpacity>
         </View>
 

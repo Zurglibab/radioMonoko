@@ -59,7 +59,7 @@ export default function WelcomeScreen() {
         <View className="mb-12">
             <View className="flex-row items-center mb-6">
                 <Text className="text-white font-bold text-sm tracking-[4px] uppercase opacity-70">
-                    RadioMonoko
+                    RadioMonoco
                 </Text>
             </View>
             
@@ -110,7 +110,7 @@ export default function WelcomeScreen() {
         {/* Footer discret pour la marque */}
         <View className="mt-12 items-center">
              <Text className="text-gray-600 text-[10px] tracking-widest uppercase font-bold">
-                Powered by RadioMonoko
+                Powered by RadioMonoco
              </Text>
         </View>
 

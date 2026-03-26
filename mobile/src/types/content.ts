@@ -1,25 +1,49 @@
 /**
- * Interface Station : Le modèle de données central pour le contenu audio.
- * Définit toutes les propriétés nécessaires pour afficher une station 
- * dans les listes, les cartes ou le lecteur.
+ * Types de médias
+ * Permet de distinguer le comportement de l'UI (ex: Badge "Direct" pour radio 
+ * vs "Durée" pour podcast).
+ */
+export type MediaType = 'radio' | 'podcast';
+
+/**
+ * Status de lecteur de la collection
+ * Définit l'état d'un média dans la bibliothèque de l'utilisateur.
+ */
+export type MediaStatus = 'to-listen' | 'in-progress' | 'finished' | 'dropped';
+
+/**
+ * Interface Station : Le modèle de données atomique.
+ * Il sert à la fois pour le catalogue public et pour les items de la bibliothèque.
  */
 export interface Station {
-    id: string;              // Identifiant unique (ex: UUID ou Slug)
-    title: string;           // Nom de la station ou du podcast
-    description: string;     // Résumé du contenu pour l'affichage détaillé
-    imageUrl: string;        // URL de la pochette ou du logo de la station
-    isLive: boolean;         // Flag pour l'indicateur visuel "Direct"
-    category: string;        // Genre musical ou thématique (Jazz, Rock, Tech...)
-    ListenersCount: number;  // Nombre d'auditeurs actuels pour la preuve sociale
+  id: string;
+  title: string;
+  artist: string;      // Nom du créateur, de la station ou du studio
+  description: string;
+  imageUrl: string;
+  isLive: boolean;     // Indicateur de flux temps réel
+  category: string;    // Genre ou thématique
+  type: MediaType;     // Radio ou Podcast
+  
+  // Champs optionnels selon le contexte
+  status?: MediaStatus; // Uniquement si présent dans la Library
+  duration?: string;    // Affiché uniquement pour les podcasts
+  listenersCount?: number;
 }
 
 /**
- * Interface ContentState : Représente l'état de la donnée dans le flux UI.
- * Utilisée principalement dans les hooks (useHome)
- * pour gérer le cycle de vie de la récupération des données.
+ * Interface Playlist : Conteneur de médias.
+ * Gère la structure des listes créées par l'utilisateur ou la communauté.
  */
-export interface ContentState {
-    stations: Station[];     // Liste des stations récupérées
-    isLoading: boolean;      // État de chargement pour afficher le loader
-    error: string | null;    // Message d'erreur en cas d'échec de l'API
+export interface Playlist {
+  id: string;
+  name: string;
+  description: string;
+  coverImage: string;
+  items: Station[];     // Une playlist est une collection d'objets Station
+  creator: string;      // Nom ou ID du créateur
+  isPublic: boolean;    // Visibilité dans le flux communautaire
+  isCollaborative: boolean;
+  collaborators?: string[]; // Liste des IDs des utilisateurs autorisés
+  createdAt: string;    // Date de création au format ISO
 }

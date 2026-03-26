@@ -39,7 +39,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
             style={{ color: theme.dark.colors.muted }} 
             className="text-[10px] font-bold uppercase tracking-[2px]"
           >
-            Radio Monoko
+            Radio Monoco
           </Text>
           {/* Message de bienvenue dynamique */}
           <Text 

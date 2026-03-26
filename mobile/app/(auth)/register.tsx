@@ -42,7 +42,7 @@ export default function RegisterScreen() {
       >
         <AuthHeader 
           title="Rejoindre l'onde." 
-          subtitle="Créez votre compte pour commencer à partager vos critiques audio sur RadioMonoko." 
+          subtitle="Créez votre compte pour commencer à partager vos critiques audio sur RadioMonoco." 
         />
 
         {/* Zone d'affichage des erreurs provenant du backend */}

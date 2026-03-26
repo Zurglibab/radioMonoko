@@ -43,7 +43,7 @@ export default function LoginScreen() {
         {/* En-tête de page */}
         <AuthHeader 
           title="Bon retour." 
-          subtitle="Entrez vos identifiants pour accéder à l'onde RadioMonoko." 
+          subtitle="Entrez vos identifiants pour accéder à l'onde RadioMonoco." 
         />
 
         {/* Feedback d'erreur*/}
@@ -114,7 +114,7 @@ export default function LoginScreen() {
 
         {/* Navigation vers l'inscription */}
         <View className="flex-row justify-center mt-12 mb-6">
-          <Text style={{ color: theme.dark.colors.muted }}>Nouveau sur RadioMonoko ? </Text>
+          <Text style={{ color: theme.dark.colors.muted }}>Nouveau sur RadioMonoco ? </Text>
           <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
             <Text 
                style={{ color: theme.dark.colors.text }} 

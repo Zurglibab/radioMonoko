@@ -1,27 +1,21 @@
 import React, { createContext, useContext, useState } from "react";
-
-/**
- * Interface Track : Modèle de métadonnées pour le lecteur.
- * Contient tout ce dont le MiniPlayer et le Plein Écran ont besoin pour l'affichage.
- */
-interface Track {
-  id: string;
-  title: string;
-  artist: string;
-  image: string;
-}
+import { Station } from "@/types/content";
 
 /**
  * Interface PlayerContextType : Le contrat de pilotage du flux audio.
  * Définit comment commander la lecture depuis n'importe quel point de l'app.
  */
 interface PlayerContextType {
-  currentTrack: Track | null; // Le média chargé (null si rien n'est sélectionné)
-  isPlaying: boolean;         // État de lecture (Lecture / Pause)
-  playTrack: (track: Track) => void; // Fonction pour charger un nouveau morceau
-  togglePlay: () => void;     // Fonction pour basculer l'état Play/Pause
+  currentTrack: Station | null;
+  isPlaying: boolean;
+  playTrack: (track: Station) => void;
+  togglePlay: () => void;
 }
 
+/**
+ * Interface PlayerContextType : Le contrat de pilotage du flux audio.
+ * Définit comment commander la lecture depuis n'importe quel point de l'app.
+ */
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 /**
@@ -30,7 +24,7 @@ const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
  */
 export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // État de la piste actuelle
-  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [currentTrack, setCurrentTrack] = useState<Station | null>(null);
   // État binaire de lecture
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -38,9 +32,9 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
    * playTrack : Action d'injection d'un média.
    * Remplace la piste actuelle et lance la lecture automatiquement.
    */
-  const playTrack = (track: Track) => {
+  const playTrack = (track: Station) => {
     setCurrentTrack(track);
-    setIsPlaying(true); 
+    setIsPlaying(true);
   };
 
   /**
@@ -49,14 +43,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const togglePlay = () => setIsPlaying(!isPlaying);
 
   return (
-    <PlayerContext.Provider 
-      value={{ 
-        currentTrack, 
-        isPlaying, 
-        playTrack, 
-        togglePlay 
-      }}
-    >
+    <PlayerContext.Provider value={{ currentTrack, isPlaying, playTrack, togglePlay }}>
       {children}
     </PlayerContext.Provider>
   );
