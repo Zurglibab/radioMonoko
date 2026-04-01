@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { HiOutlinePlay, HiOutlinePause } from "react-icons/hi2";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
-import { useRadio } from "../context/RadioContext";
+import { useRadio } from "../../context/RadioContext.tsx";
 import AudioVisualiser from "./AudioVisualiser.tsx";
 
 const GlobalPlayer: React.FC = () => {

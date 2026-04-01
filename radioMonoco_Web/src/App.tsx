@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./components/utils/Layout.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import ProtectedRoute from "./components/utils/ProtectedRoute.tsx";
 import Feed from "./pages/Feed.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import { RadioProvider } from "./context/RadioContext.tsx";
