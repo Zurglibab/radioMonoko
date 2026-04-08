@@ -1,5 +1,62 @@
 @import "tailwindcss";
 
-html, body {
-  height: 100%;
+@theme {
+    --color-app-bg: var(--background);
+    --color-app-text: var(--foreground);
+    --color-app-border: var(--border);
+    --color-app-card: var(--card);
+
+    --color-primary: #e11d48;
+    --color-primary-hover: #f43f5e;
+}
+
+@layer base {
+    :root {
+        --background: #fafafa;
+        --foreground: #09090b;
+        --border: rgba(0, 0, 0, 0.08);
+        --card: #f4f4f5;
+
+        --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+        --scrollbar-hover: rgba(0, 0, 0, 0.4);
+    }
+
+    .dark {
+        --background: #0f0f0f;
+        --foreground: #ffffff;
+        --border: rgba(255, 255, 255, 0.1);
+        --card: #050505;
+        --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+        --scrollbar-hover: rgba(255, 255, 255, 0.4);
+    }
+
+    html, body {
+        height: 100%;
+        @apply bg-app-bg text-app-text transition-colors duration-300;
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar-thumb);
+        border-radius: 10px;
+        border: 3px solid transparent;
+        background-clip: content-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--scrollbar-hover);
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-thumb) transparent;
+    }
 }

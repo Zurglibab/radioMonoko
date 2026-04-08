@@ -10,23 +10,19 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - internal-stack
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:7.0-alpine
     container_name: radio-monoko-redis
-    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    command: >
+      sh -c "redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes"
     restart: unless-stopped
     volumes:
       - redis-data:/data
     networks:
       - internal-stack
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -34,15 +30,14 @@ services:
   api:
     image: ghcr.io/${GITHUB_REPOSITORY}:latest
     restart: always
-    env_file: .env
     environment:
       - DB_HOST=db
       - REDIS_HOST=redis
+      - NODE_ENV=production
+    env_file: .env
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - db
+      - redis
     networks:
       - internal-stack
     ports:
@@ -54,4 +49,6 @@ networks:
 
 volumes:
   redis-data:
+    driver: local
   postgres_data:
+    driver: local
