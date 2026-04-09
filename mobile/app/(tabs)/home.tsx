@@ -11,7 +11,13 @@ import { theme } from "@/constants/theme";
  * et l'expérience "Communautaire/Perso" (Privé).
  */
 export default function HomeScreen() {
-  // Je consomme l'état global pour savoir qui est là et si on est encore en train de chercher
+
+  const { appearanceSettings } = useAuthContext();
+
+  const isDark = appearanceSettings.themeMode === 'dark';
+
+  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  // On consomme l'état global pour savoir qui est là et si on est encore en train de chercher
   const { isAuthenticated, user, isLoading } = useAuthContext();
 
   /**
@@ -24,9 +30,9 @@ export default function HomeScreen() {
     return (
       <View 
         className="flex-1 items-center justify-center" 
-        style={{ backgroundColor: theme.dark.colors.background }}
+        style={{ backgroundColor: colors.background }}
       >
-        <ActivityIndicator color={theme.dark.colors.primary} size="large" />
+        <ActivityIndicator color={colors.primary} size="large" />
       </View>
     );
   }

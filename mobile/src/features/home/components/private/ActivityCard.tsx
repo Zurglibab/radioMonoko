@@ -1,21 +1,35 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert, useColorScheme } from "react-native";
 import { Star, Heart, MessageSquare, MoreVertical } from "lucide-react-native";
 import { theme } from "@/constants/theme";
+import { useAuthContext } from "@/context/AuthContext";
 
 /**
  * ActivityCard : Affiche une action de la communauté (critique, note).
- * Ce composant gère ses propres états d'interaction (Like) pour une 
- * expérience utilisateur instantanée et fluide.
+ * Gère le feedback visuel immédiat pour les likes et s'adapte 
+ * dynamiquement au Design System (Apple Light / OLED Dark).
  */
 export const ActivityCard = ({ activity }: any) => {
-  // États locaux pour gérer le feedback visuel immédiat avant synchronisation API
+  const { appearanceSettings } = useAuthContext();
+  const systemTheme = useColorScheme();
+
+  /**
+   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
+   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
+   * Détection du thème (Priorité Dark)
+   */
+  const isDark = appearanceSettings.themeMode === 'system' 
+    ? systemTheme === 'dark' 
+    : appearanceSettings.themeMode === 'dark';
+        
+  const colors = isDark ? theme.dark.colors : theme.light.colors;
+
+  // États locaux pour un feedback UI instantané
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(activity.likes);
 
   /**
-   * Logique du bouton Like.
-   * J'inverse l'état et on ajuste le compteur localement.
+   * handleLike : Inverse l'état du coup de cœur et ajuste le compteur.
    */
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -24,87 +38,94 @@ export const ActivityCard = ({ activity }: any) => {
 
   return (
     <View 
-      className="p-4 rounded-3xl border mb-3"
+      className="p-5 rounded-[16px] border mb-4"
       style={{ 
-        backgroundColor: theme.dark.colors.surface, 
-        borderColor: theme.dark.colors.border 
+        backgroundColor: colors.surface, 
+        borderColor: colors.border 
       }}
     >
-      {/* Utilisateur et évaluation */}
-      <View className="flex-row items-start mb-3">
-        {/* Avatar */}
-        <View className="w-10 h-10 rounded-full bg-white/10 items-center justify-center mr-3 border border-white/5">
-          <Text style={{ color: theme.dark.colors.text }} className="font-bold uppercase">
+      {/* Utilisateur, Média et Évaluation */}
+      <View className="flex-row items-start mb-4">
+        {/* Initiales sur fond contrasté */}
+        <View 
+          style={{ backgroundColor: colors.background, borderColor: colors.border }}
+          className="w-10 h-10 rounded-full items-center justify-center mr-3 border"
+        >
+          <Text style={{ color: colors.text }} className="font-black uppercase text-xs">
             {activity.user[0]}
           </Text>
         </View>
 
         <View className="flex-1">
-          <View className="flex-row justify-between items-center">
-            {/* Texte de l'activité avec mise en emphase du nom et du média */}
-            <Text style={{ color: theme.dark.colors.muted }} className="text-sm">
-              <Text style={{ color: theme.dark.colors.text }} className="font-bold">{activity.user}</Text>
-              {" a noté "}
-              <Text className="italic font-medium text-white">Jazz Night</Text>
-            </Text>
+          <View className="flex-row justify-between items-start">
+            <View className="flex-1 pr-2">
+              <Text style={{ color: colors.muted }} className="text-[13px] leading-4">
+                <Text style={{ color: colors.text }} className="font-bold">{activity.user}</Text>
+                {" a noté "}
+                <Text style={{ color: colors.text }} className="italic font-bold">
+                  {activity.media || "Jazz Night"}
+                </Text>
+              </Text>
+            </View>
 
-            {/* Menu contextuel (Signalement/Options) */}
+            {/* Menu contextuel */}
             <TouchableOpacity 
-              onPress={() => Alert.alert("Signalement", "Voulez-vous signaler ce contenu ?")} 
-              hitSlop={20} // Augmente la zone de clic pour le confort du pouce
+              onPress={() => Alert.alert("Signalement", "Voulez-vous signaler cet avis ?")} 
+              hitSlop={20}
             >
-              <MoreVertical size={16} color={theme.dark.colors.muted} />
+              <MoreVertical size={16} color={colors.muted} />
             </TouchableOpacity>
           </View>
 
-          {/* Système de notation par étoiles */}
-          <View className="flex-row mt-1">
+          {/* Système d'étoiles */}
+          <View className="flex-row mt-1.5">
             {[1, 2, 3, 4, 5].map(i => (
               <Star 
                 key={i} 
                 size={12} 
-                color={i <= activity.rating ? theme.dark.colors.warning : theme.dark.colors.border} 
-                fill={i <= activity.rating ? theme.dark.colors.warning : "transparent"} 
+                color={i <= activity.rating ? colors.warning : colors.border} 
+                fill={i <= activity.rating ? colors.warning : "transparent"} 
+                className="mr-0.5"
               />
             ))}
           </View>
         </View>
       </View>
       
-      {/* Le commentaire de l'utilisateur */}
+      {/* Commentaire de l'utilisateur */}
       <Text 
-        style={{ color: theme.dark.colors.muted }} 
-        className="text-sm mb-4 leading-5"
+        style={{ color: colors.text }} 
+        className="text-[14px] mb-5 leading-5 opacity-90"
       >
         {activity.comment}
       </Text>
 
-      {/* Les interactions sociales (Likes & Commentaires) */}
+      {/* Interactions sociales */}
       <View 
-        className="flex-row gap-x-6 pt-3 border-t" 
-        style={{ borderColor: theme.dark.colors.border }}
+        className="flex-row gap-x-6 pt-4 border-t" 
+        style={{ borderColor: colors.border }}
       >
-        {/* Interaction Like */}
+        {/* Bouton like */}
         <TouchableOpacity onPress={handleLike} className="flex-row items-center">
           <Heart 
             size={16} 
-            color={isLiked ? theme.dark.colors.danger : theme.dark.colors.muted} 
-            fill={isLiked ? theme.dark.colors.danger : "transparent"} 
+            color={isLiked ? colors.danger : colors.muted} 
+            fill={isLiked ? colors.danger : "transparent"} 
           />
           <Text 
-            style={{ color: isLiked ? theme.dark.colors.danger : theme.dark.colors.muted }} 
-            className="text-xs ml-2 font-bold"
+            style={{ color: isLiked ? colors.danger : colors.muted }} 
+            className="text-xs ml-2 font-black uppercase tracking-tighter"
           >
             {likesCount}
           </Text>
         </TouchableOpacity>
 
-        {/* Lien vers les commentaires */}
+        {/* Bouton commentaires */}
         <TouchableOpacity className="flex-row items-center">
-          <MessageSquare size={16} color={theme.dark.colors.muted} />
+          <MessageSquare size={16} color={colors.muted} />
           <Text 
-            style={{ color: theme.dark.colors.muted }} 
-            className="text-xs ml-2"
+            style={{ color: colors.muted }} 
+            className="text-xs ml-2 font-black uppercase tracking-tighter"
           >
             {activity.commentsCount} avis
           </Text>

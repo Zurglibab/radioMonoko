@@ -7,6 +7,7 @@ export interface User {
   email: string;     // Adresse mail servant d'identifiant de connexion
   username: string;  // Nom d'affichage dans la communauté RadioMonoko
   avatar?: string;   // URL de l'image de profil optionnelle
+  lastUsernameChange?: string; // Dernier changement de pseudo
 }
 
 /**
