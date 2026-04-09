@@ -1,51 +1,55 @@
 import React from "react";
-import { View, Text, TextInput, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, useColorScheme, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Search as SearchIcon, X, Clock, Trash2 } from "lucide-react-native";
+import { Search as SearchIcon, X, Clock, Trash2, Users, Music2, Disc } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useSearch } from "@/hooks/home/useSearch";
 import { PublicStationCard } from "@/features/home/components/public/PublicStationCard";
+import { useAuthContext } from "@/context/AuthContext";
 
 /**
- * Liste statique des catégories pour la découverte rapide.
- * Ces genres servent de raccourcis de recherche pour l'utilisateur.
- */
-const CATEGORIES = [
-  { name: "Jazz" }, { name: "Rock" }, { name: "Tech" },
-  { name: "Culture" }, { name: "Infos" }, { name: "Histoire" },
-];
-
-/**
- * SearchScreen : Interface de recherche globale de l'application.
- * Offre une expérience fluide passant de l'historique/catégories 
- * aux résultats en temps réel grâce au hook useSearch.
+ * SearchScreen : Centre de découverte universel.
+ * Permet de naviguer entre l'historique, les genres populaires et les résultats 
+ * unifiés (Stations, Curateurs, Playlists).
  */
 export default function SearchScreen() {
-  // Extraction de la logique métier (recherche, historique, états)
   const { query, setQuery, results, isSearching, history, addToHistory, clearHistory } = useSearch();
+  const { appearanceSettings } = useAuthContext();
+  const systemTheme = useColorScheme();
+
+  // Détection du thème (Priorité Dark)
+  const isDark = appearanceSettings.themeMode === 'system' 
+    ? systemTheme === 'dark' 
+    : appearanceSettings.themeMode === 'dark';
+    
+  const colors = isDark ? theme.dark.colors : theme.light.colors;
+
+  // Calcul du volume total des résultats pour l'état vide
+  const totalResults = results.stations.length + results.users.length + results.playlists.length;
 
   return (
-    <SafeAreaView className="flex-1 bg-black">
+    <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
       
-      {/* Barre de recherche :
-        Design minimaliste avec gestion du bouton de nettoyage (X) 
-        affiché uniquement quand une saisie est présente.
-      */}
-      <View className="px-6 pt-4 mb-6">
-        <View className="flex-row items-center bg-[#111111] border border-[#222222] rounded-2xl px-4 py-1">
-          <SearchIcon size={20} color={theme.dark.colors.muted} />
+      {/* Barre de recherche : Focus sur l'ergonomie et le feedback visuel */}
+      <View className="px-6 pt-4 mb-4">
+        <View 
+          style={{ backgroundColor: colors.surface, borderColor: colors.border }} 
+          className="flex-row items-center border rounded-2xl px-4 py-1 h-14 shadow-sm"
+        >
+          <SearchIcon size={20} color={colors.muted} />
           <TextInput
-            className="flex-1 h-12 ml-3 text-white font-medium"
-            placeholder="Radios, podcasts, genres..."
-            placeholderTextColor={theme.dark.colors.muted}
+            style={{ color: colors.text }}
+            className="flex-1 h-full ml-3 font-bold"
+            placeholder="Œuvres, curateurs, playlists..."
+            placeholderTextColor={colors.muted}
+            selectionColor={colors.primary}
             value={query}
             onChangeText={setQuery}
           />
-          {query.length > 0 && (
-            <TouchableOpacity onPress={() => setQuery("")}>
-              <View className="bg-white/10 rounded-full p-1">
-                <X size={14} color="white" />
-              </View>
+          {isSearching && <ActivityIndicator size="small" color={colors.primary} className="mr-2" />}
+          {query.length > 0 && !isSearching && (
+            <TouchableOpacity onPress={() => setQuery("")} hitSlop={10}>
+               <X size={18} color={colors.text} />
             </TouchableOpacity>
           )}
         </View>
@@ -53,73 +57,141 @@ export default function SearchScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
         {query.length === 0 ? (
-          /* Vue par défaut : S'affiche quand l'utilisateur n'a rien saisi */
-          <View className="px-6">
+          /* Vue par défaut */
+          <View className="px-6 pt-2">
             
-            {/* Section historique :
-              Affiche les 5 dernières stations consultées. 
-              On ne rend le bloc que s'il y a des données pour éviter les espaces vides.
-            */}
+            {/* Historique : Dernières consultations */}
             {history.length > 0 && (
               <View className="mb-10">
                 <View className="flex-row justify-between items-center mb-5">
-                  <Text className="text-white text-lg font-bold italic tracking-tight">Recherches récentes</Text>
+                  <Text style={{ color: colors.text }} className="text-[10px] font-black uppercase tracking-[3px]">
+                    Récemment écouté
+                  </Text>
                   <TouchableOpacity onPress={clearHistory} className="flex-row items-center">
-                    <Trash2 size={14} color={theme.dark.colors.muted} />
-                    <Text className="text-gray-500 text-[10px] font-bold uppercase ml-1">Effacer</Text>
+                    <Trash2 size={12} color={colors.muted} />
+                    <Text style={{ color: colors.muted }} className="text-[9px] font-bold uppercase ml-1">Effacer</Text>
                   </TouchableOpacity>
                 </View>
-                
                 {history.map((item) => (
                   <TouchableOpacity 
                     key={item.id} 
-                    className="flex-row items-center mb-4"
-                    onPress={() => setQuery(item.title)} // Injecte le titre dans la recherche
+                    className="flex-row items-center py-3" 
+                    onPress={() => setQuery(item.title)}
                   >
-                    <Clock size={16} color={theme.dark.colors.muted} />
-                    <Text className="text-gray-300 ml-4 font-medium">{item.title}</Text>
+                    <Clock size={16} color={colors.muted} />
+                    <Text style={{ color: colors.text }} className="ml-4 font-medium opacity-80">{item.title}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             )}
 
-            {/* Section catégories : 
-              Grille de tuiles pour orienter l'utilisateur vers des genres populaires.
-            */}
-            <Text className="text-white text-lg font-bold mb-6 italic tracking-tight">Explorer par genre</Text>
+            {/* Genres : Accès rapide par thématique */}
+            <Text style={{ color: colors.text }} className="text-[10px] font-black uppercase tracking-[3px] mb-5">
+              Explorer les genres
+            </Text>
             <View className="flex-row flex-wrap justify-between">
-              {CATEGORIES.map((cat, i) => (
+              {["Jazz", "Rock", "Techno", "Vocal", "Ambiance", "Focus"].map((cat) => (
                 <TouchableOpacity 
-                  key={i} 
-                  className="w-[48%] h-24 rounded-3xl mb-4 p-5 border border-white/5 items-center justify-center"
-                  style={{ backgroundColor: theme.dark.colors.surface }}
-                  onPress={() => setQuery(cat.name)}
+                  key={cat} 
+                  style={{ backgroundColor: colors.surface, borderColor: colors.border }} 
+                  className="w-[48%] h-20 rounded-[24px] mb-4 border items-center justify-center shadow-sm" 
+                  onPress={() => setQuery(cat)}
                 >
-                  <Text className="text-white font-black uppercase text-[10px] tracking-[2px] text-center">
-                    {cat.name}
-                  </Text>
+                  <Text style={{ color: colors.text }} className="font-black text-[10px] uppercase tracking-widest">{cat}</Text>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
         ) : (
-          /* Vues des résultats : S'affiche dès que l'utilisateur commence à taper */
-          <View className="px-6">
-            <Text className="text-gray-500 text-[10px] font-bold uppercase mb-6 tracking-widest">
-              {isSearching ? "Analyse des ondes..." : `${results.length} résultats trouvés`}
-            </Text>
+          /* Vue des résultats unifiés */
+          <View className="px-6 pt-2">
             
-            <View className="flex-row flex-wrap justify-between">
-              {results.map((item) => (
-                <PublicStationCard 
-                  key={item.id} 
-                  item={item} 
-                  onPress={() => addToHistory(item)} // Sauvegarde dans l'historique au clic
-                />
-              ))}
-            </View>
+            {/* Stations & Ondes */}
+            {results.stations.length > 0 && (
+              <View className="mb-10">
+                <View className="flex-row items-center mb-6">
+                   <Disc size={18} color={colors.text} />
+                   <Text style={{ color: colors.text }} className="ml-3 text-lg font-black italic tracking-tighter">
+                     Stations & Ondes
+                   </Text>
+                </View>
+                <View className="flex-row flex-wrap justify-between">
+                  {results.stations.map((item) => (
+                    <PublicStationCard key={item.id} item={item} onPress={() => addToHistory(item)} />
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* Communauté et utilisateurs */}
+            {results.users.length > 0 && (
+              <View className="mb-10">
+                <View className="flex-row items-center mb-6">
+                   <Users size={18} color={colors.text} />
+                   <Text style={{ color: colors.text }} className="ml-3 text-lg font-black italic tracking-tighter">
+                     Communauté
+                   </Text>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
+                  {results.users.map((u) => (
+                    <TouchableOpacity key={u.id} className="items-center mr-8">
+                      <Image 
+                        source={{ uri: u.avatar || `https://ui-avatars.com/api/?name=${u.username}&background=222&color=fff` }} 
+                        className="w-16 h-16 rounded-full border"
+                        style={{ borderColor: colors.border, backgroundColor: colors.surface }}
+                      />
+                      <Text style={{ color: colors.text }} className="text-[10px] font-bold mt-3 uppercase tracking-tighter">
+                        {u.username}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            )}
+
+            {/* Playlists publiques */}
+            {results.playlists.length > 0 && (
+              <View className="mb-10">
+                <View className="flex-row items-center mb-6">
+                   <Music2 size={18} color={colors.text} />
+                   <Text style={{ color: colors.text }} className="ml-3 text-lg font-black italic tracking-tighter">
+                     Listes de lecture
+                   </Text>
+                </View>
+                {results.playlists.map((pl) => (
+                  <TouchableOpacity 
+                    key={pl.id} 
+                    style={{ backgroundColor: colors.surface, borderColor: colors.border }} 
+                    className="flex-row items-center p-4 rounded-[24px] border mb-4 shadow-sm"
+                  >
+                    <Image source={{ uri: pl.coverImage }} className="w-12 h-12 rounded-xl" />
+                    <View className="ml-4 flex-1">
+                      <Text style={{ color: colors.text }} className="font-bold text-sm tracking-tight">{pl.name}</Text>
+                      <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase mt-1 opacity-70">
+                        Par {pl.creator}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+
+            {/* État vide */}
+            {totalResults === 0 && !isSearching && (
+              <View className="items-center mt-20 px-10">
+                <View style={{ backgroundColor: colors.surface }} className="p-6 rounded-full mb-6">
+                  <X size={32} color={colors.muted} opacity={0.5} />
+                </View>
+                <Text style={{ color: colors.muted }} className="text-center font-bold italic opacity-60">
+                  Aucune onde captée sur cette fréquence...
+                </Text>
+              </View>
+            )}
           </View>
         )}
+        
+        {/* Padding final pour le scroll */}
+        <View className="h-20" />
       </ScrollView>
     </SafeAreaView>
   );

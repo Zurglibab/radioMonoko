@@ -1,4 +1,5 @@
-import { Station, MediaType } from "@/types/content";
+import { Station, MediaType, Review } from "@/types/content";
+import { User } from "@/types/auth";
 
 /**
  * MOCK_STATIONS_RAW : Données brutes.
@@ -24,37 +25,75 @@ const MOCK_STATIONS_RAW = [
 ];
 
 /**
- * ContentService : Couche de transformation de données.
- * Centralise la logique pour rendre les données compatibles avec l'UI de RadioMonoko.
+ * MOCK_REVIEWS : Base de données sociale simulée.
  */
+const MOCK_REVIEWS: Record<string, Review[]> = {
+  "1": [
+    { id: "rev1", userId: "u2", username: "Marie", rating: 5, comment: "Incroyable !", likes: 12, createdAt: "2026-04-01" },
+    { id: "rev2", userId: "u3", username: "Lucas", rating: 4, comment: "Top pour bosser.", likes: 5, createdAt: "2026-04-02" }
+  ],
+  "r1": [
+    { id: "rev3", userId: "u1", username: "Alex", rating: 5, comment: "La base du rock.", likes: 24, createdAt: "2026-04-05" }
+  ]
+};
+
+/**
+ * MOCK_FRIENDS : Simule les relations sociales (Barème Follow/Social)
+ */
+const MOCK_FRIENDS: User[] = [
+  { id: 'u1', username: 'Alex', email: 'alex@radio.fr', avatar: 'https://i.pravatar.cc/150?u=alex' },
+  { id: 'u2', username: 'Marie', email: 'marie@radio.fr', avatar: 'https://i.pravatar.cc/150?u=marie' },
+  { id: 'u3', username: 'Lucas', email: 'lucas@radio.fr', avatar: 'https://i.pravatar.cc/150?u=lucas' },
+];
+
 export const ContentService = {
-  /**
-   * getPublicStations : Récupère et enrichit les stations.
-   * @returns Promise<Station[]> : Liste des stations typées et formatées.
-   */
   getPublicStations: async (): Promise<Station[]> => {
     return new Promise((resolve) => {
-      // Simulation d'un temps de réponse serveur de 1 seconde
       setTimeout(() => {
-        
-        /**
-         * Automatisation et mapping :
-         * On parcourt les données brutes pour construire des objets Station complets.
-         */
         const fullStations: Station[] = MOCK_STATIONS_RAW.map(s => ({
           ...s,
-          // Logique métier : On déduit le type de média selon le titre
           type: s.title.toLowerCase().includes('podcast') ? 'podcast' : 'radio',
-          
-          // Valeur par défaut : On assure que la propriété 'artist' n'est jamais vide
           artist: "RadioMonoco", 
-          
-          // Déduction de l'état : Une station est considérée 'Live' si elle dépasse un seuil d'audience
           isLive: s.listenersCount ? s.listenersCount > 1000 : false,
         }));
-
         resolve(fullStations);
       }, 1000);
     });
+  },
+
+  /**
+   * getMediaMetrics : Calcule les stats sociales d'une fiche.
+   * Récupère aussi les avatars des amis pour l'aspect "Réseau Social".
+   */
+  getMediaMetrics: (mediaId: string) => {
+    const reviews = MOCK_REVIEWS[mediaId] || [];
+    const count = reviews.length;
+    const avg = count > 0 
+      ? reviews.reduce((acc, curr) => acc + curr.rating, 0) / count 
+      : 0;
+    
+    return {
+      averageRating: parseFloat(avg.toFixed(1)),
+      reviewsCount: count,
+      reviews: reviews,
+      friendsWhoListen: MOCK_FRIENDS.slice(0, 2) // Simule 2 amis sur ce média
+    };
+  },
+
+  /**
+   * getUserStats : Calcule les métriques globales du Dashboard (Barème 2.2.2).
+   */
+  getUserStats: (content: any[]) => {
+    const ratings = content.filter(item => item.myRating).map(item => item.myRating);
+    const avgRating = ratings.length > 0 
+      ? ratings.reduce((a, b) => a + b, 0) / ratings.length 
+      : 0;
+
+    return {
+      totalListened: content.filter(m => m.status === 'finished').length,
+      friendsCount: 42,
+      avgRatingGiven: parseFloat(avgRating.toFixed(1)) || 0,
+      totalHours: "124h"
+    };
   }
 };

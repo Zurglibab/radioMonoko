@@ -1,102 +1,118 @@
 import React, { useState } from "react";
-import { MediaActionSheet } from "@/features/library/components/MediaActionSheet";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, useColorScheme } from "react-native";
 import { PlayCircle, PauseCircle, Plus } from "lucide-react-native";
+import { MediaActionSheet } from "@/features/library/components/MediaActionSheet";
 import { theme } from "@/constants/theme";
 import { usePlayer } from "@/context/PlayerContext";
 import { Station } from "@/types/content";
+import { useAuthContext } from "@/context/AuthContext";
 
 /**
- * MediaSuggestion : Carte de contenu interactive.
- * Gère la lecture audio via le PlayerContext et l'ouverture des options 
- * de bibliothèque via une ActionSheet (BottomSheet).
- * * @param item - Données de la station (id, title, artist, imageUrl).
+ * MediaSuggestion : Carte de contenu interactive (Pochette carrée).
+ * Gère la lecture audio et l'accès aux options de bibliothèque.
+ * @param item - Données de la station ou du podcast.
  */
 export const MediaSuggestion = ({ item }: { item: Station }) => {
-  // Accès au contrôleur de lecture global
+  const { appearanceSettings } = useAuthContext();
+  const systemTheme = useColorScheme();
+
+  /**
+   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
+   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
+   * Détection du thème (Priorité Dark)
+   */
+  const isDark = appearanceSettings.themeMode === 'system' 
+    ? systemTheme === 'dark' 
+    : appearanceSettings.themeMode === 'dark';
+        
+  const colors = isDark ? theme.dark.colors : theme.light.colors;
+
   const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer();
-  
-  // État local pour le menu d'actions (Favoris, playlists, etc.)
   const [isSheetVisible, setIsSheetVisible] = useState(false);
 
-  // Vérifie si cette carte correspond au média en cours de lecture
+  // Déterminer si ce média précis est celui chargé dans le lecteur
   const isCurrentMedia = currentTrack?.id === item.id;
 
   /**
-   * handlePress : Logique de lecture intelligente.
-   * Bascule entre Play/Pause ou charge un nouveau flux.
+   * handlePress : Gère le flux audio.
+   * Si c'est le média actuel -> Pause/Play. Sinon -> Charge le nouveau média.
    */
   const handlePress = () => {
     if (isCurrentMedia) {
       togglePlay();
     } else {
-      // On injecte l'objet station complet dans le lecteur
       playTrack(item); 
     }
   };
 
   return (
-    <View className="mr-4 w-40">
-      {/* Contenuer visuel */}
+    <View className="mr-5 w-40">
+      {/* CONTENEUR VISUEL (POCHETTE) */}
       <View 
-        className="w-40 h-40 rounded-[32px] overflow-hidden relative border" 
+        className="w-40 h-40 rounded-[32px] overflow-hidden relative border shadow-sm" 
         style={{ 
-          // Feedback visuel : bordure colorée si le titre est actif
-          borderColor: isCurrentMedia ? theme.dark.colors.primary : "transparent", 
-          backgroundColor: theme.dark.colors.surface 
+          // Bordure d'accentuation si le média est en cours de lecture
+          borderColor: isCurrentMedia ? colors.primary : colors.border, 
+          backgroundColor: colors.surface 
         }}
       >
         <Image 
           source={{ uri: item.imageUrl }}
-          className={`w-full h-full ${isCurrentMedia ? 'opacity-40' : 'opacity-80'}`} 
+          className={`w-full h-full ${isCurrentMedia ? 'opacity-40' : 'opacity-90'}`} 
+          style={{ backgroundColor: colors.surface }}
         />
         
-        {/* Zone de lecture principale */}
+        {/* OVERLAY DE LECTURE (CENTRAL) */}
         <TouchableOpacity 
           className="absolute inset-0 items-center justify-center"
           onPress={handlePress}
           activeOpacity={0.7}
         >
           {isCurrentMedia && isPlaying ? (
-            <PauseCircle size={48} color={theme.dark.colors.primary} fill="rgba(0,0,0,0.5)" />
+            <PauseCircle size={52} color={colors.primary} fill={isDark ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.2)"} />
           ) : (
             <PlayCircle 
-              size={48} 
-              color={isCurrentMedia ? theme.dark.colors.primary : "white"} 
-              fill="rgba(0,0,0,0.3)" 
+              size={52} 
+              // En mode clair, on utilise une couleur sombre si non actif pour la visibilité
+              color={isCurrentMedia ? colors.primary : (isDark ? "white" : colors.text)} 
+              fill={isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.4)"} 
             />
           )}
         </TouchableOpacity>
 
-        {/* Action secondaire : Bouton "+" pour ouvrir les options */}
+        {/* BOUTON OPTIONS (+) : Positionné en haut à droite */}
         <TouchableOpacity 
-          className="absolute top-3 right-3 p-2 bg-black/40 rounded-full backdrop-blur-md border border-white/10"
+          className="absolute top-3 right-3 p-2 rounded-full border"
+          style={{ 
+            backgroundColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.8)",
+            borderColor: colors.border
+          }}
           onPress={() => setIsSheetVisible(true)}
           activeOpacity={0.8}
         >
-          <Plus size={16} color="white" />
+          <Plus size={16} color={colors.text} />
         </TouchableOpacity>
       </View>
 
-      {/* Les métadonnées : Titre et Artiste/Catégorie */}
-      <View>
+      {/* MÉTADONNÉES : Titre et Artiste */}
+      <View className="mt-3 px-1">
         <Text 
-          style={{ color: isCurrentMedia ? theme.dark.colors.primary : theme.dark.colors.text }} 
-          className="font-bold mt-3 text-sm tracking-tight" 
+          style={{ color: isCurrentMedia ? colors.primary : colors.text }} 
+          className="font-black text-[13px] tracking-tight" 
           numberOfLines={1}
         >
           {item.title}
         </Text>
         <Text 
-          style={{ color: theme.dark.colors.muted }} 
-          className="text-[11px] font-medium"
+          style={{ color: colors.muted }} 
+          className="text-[10px] font-black uppercase tracking-tighter"
           numberOfLines={1}
         >
           {item.artist}
         </Text>
       </View>
 
-      {/* Componsant modal : Menu d'actions contextuelles */}
+      {/* MENU CONTEXTUEL (ActionSheet) */}
       <MediaActionSheet 
         isVisible={isSheetVisible} 
         onClose={() => setIsSheetVisible(false)} 
