@@ -1,6 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { Alert } from "react-native";
 import { Station, Playlist, MediaStatus } from "@/types/content";
+import { useAuthContext } from "@/context/AuthContext";
+import { User } from "@/types/auth";
+import { ContentService } from "@/services/content/content.service";
 
 /**
  * Store global
@@ -81,6 +84,7 @@ const notify = () => listeners.forEach(listener => listener());
 
 export const useLibrary = () => {
   // États locaux synchronisés avec le store global
+  const { user: authUser, logout: authLogout, updateUser } = useAuthContext();
   const [activeTab, setActiveTab] = useState<'Tout' | 'Radios' | 'Podcasts' | 'Playlists'>('Tout');
   const [content, setContent] = useState(globalUserContent);
   const [playlistsState, setPlaylistsState] = useState(globalPlaylists);
@@ -106,6 +110,30 @@ export const useLibrary = () => {
     { name: 'Terminé', slug: 'finished', count: content.filter(m => m.status === 'finished').length },
     { name: 'Abandonné', slug: 'dropped', count: content.filter(m => m.status === 'dropped').length },
   ], [content]);
+
+  /**
+   * stats : Utilise le service pour calculer les data du Dashboard.
+   */
+  const stats = useMemo(() => ContentService.getUserStats(content), [content]);
+
+  /**
+   * getMediaSocialData : Récupère les avatars et metrics via le service.
+   */
+  const getMediaSocialData = (mediaId: string) => {
+    return ContentService.getMediaMetrics(mediaId);
+  };
+
+  /**
+   * getFriendsActivity : Simule la récupération des amis interagissant avec un média.
+   * Utilise des objets User complets pour garantir le bon affichage des avatars.
+   */
+  const getFriendsActivity = (mediaId: string): User[] => {
+    return [
+      { id: 'u1', username: 'Alex', email: '', avatar: 'https://i.pravatar.cc/150?u=alex' },
+      { id: 'u2', username: 'Marie', email: '', avatar: 'https://i.pravatar.cc/150?u=marie' },
+      { id: 'u3', username: 'Lucas', email: '', avatar: 'https://i.pravatar.cc/150?u=lucas' },
+    ];
+  };
 
   /**
    * Actions métiers (Favoris, Statuts, Playlists)
@@ -195,11 +223,70 @@ export const useLibrary = () => {
     notify();
   };
 
+  /**
+   * canChangeUsername : Vérifie si le délai de 14 jours est passé.
+   */
+  const checkUsernameCooldown = () => {
+    if (!authUser?.lastUsernameChange) return { allowed: true, remainingDays: 0 };
+
+    const lastChange = new Date(authUser.lastUsernameChange).getTime();
+    const now = new Date().getTime();
+    const diffDays = (now - lastChange) / (1000 * 60 * 60 * 24);
+
+    if (diffDays < 14) {
+      return { allowed: false, remainingDays: Math.ceil(14 - diffDays) };
+    }
+    return { allowed: true, remainingDays: 0 };
+  };
+
+  /**
+   * updateProfile : Met à jour l'utilisateur si les règles sont respectées.
+   */
+  const updateProfile = async (newUsername: string, newEmail: string, newAvatar?: string) => {
+    if (!authUser) return;
+
+    const cooldown = checkUsernameCooldown();
+    const isPseudoChanging = newUsername !== authUser.username;
+
+    if (isPseudoChanging && !cooldown.allowed) {
+      Alert.alert("Action impossible", `Attendez encore ${cooldown.remainingDays} jours.`);
+      return;
+    }
+
+    const updatedUser = {
+      ...authUser,
+      username: newUsername,
+      email: newEmail,
+      avatar: newAvatar || authUser.avatar, // On garde l'ancien si pas de nouveau
+      lastUsernameChange: isPseudoChanging ? new Date().toISOString() : authUser.lastUsernameChange
+    };
+
+    await updateUser(updatedUser);
+    Alert.alert("Succès", "Profil mis à jour !");
+  };
+
+  /**
+   * postReview : Enregistre une note et une critique (Barème 4)
+   */
+  const postReview = (mediaId: string, rating: number, comment: string) => {
+    // Plus tard : await ContentService.postReview(...)
+    console.log(`Review postée pour ${mediaId}`);
+    Alert.alert("Succès", "Votre critique a été publiée sur l'onde ! 🎙️");
+  };
+
   return { 
-    activeTab, 
+    user: authUser,
+    stats,
+    statusItems,
+    getMediaSocialData,
+    postReview,
+    activeTab,
     favorites: content, 
     playlists: playlistsState, 
-    statusItems,
+    logout: authLogout,
+    updateProfile,
+    checkUsernameCooldown, 
+    getFriendsActivity,
     setActiveTab, 
     removePlaylist, 
     toggleFavorite,

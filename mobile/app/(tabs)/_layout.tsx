@@ -7,19 +7,34 @@ import {
   User,
 } from "lucide-react-native";
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuthContext } from "@/context/AuthContext";
 
 /**
  * TabsLayout : Structure de navigation principale par onglets.
  * Gère l'apparence de la TabBar et l'adaptation aux différentes tailles d'écran.
  */
 export default function TabsLayout() {
-  // Utilisation du thème dark par défaut pour la barre de navigation
-  const colors = theme.dark.colors;
+  // Récupération des préférences d'apparence de l'utilisateur
+  const { appearanceSettings } = useAuthContext();
+
+  // Détection du thème système pour le mode "system"
+  const systemTheme = useColorScheme();
   
   // Récupération des zones sécurisées pour éviter les conflits avec les éléments système (notch, barre de navigation)
   const insets = useSafeAreaInsets();
+
+  // Détermination du thème sombre en fonction des préférences de l'utilisateur et du système
+  const isDark = appearanceSettings.themeMode === 'system' 
+    ? systemTheme === 'dark' 
+    : appearanceSettings.themeMode === 'dark';
+
+  // Utilisation du thème dark par défaut pour la barre de navigation
+  const colors = isDark ? theme.dark.colors : theme.light.colors;
+
+  // Couleur d'accent dynamique selon les préférences de l'utilisateur
+  const activeColor = appearanceSettings.accentColor;
   
   // Calcul dynamique de la hauteur pour garantir un rendu parfait sur tous les devices
   const baseHeight = 58;
@@ -31,7 +46,7 @@ export default function TabsLayout() {
         headerShown: false, // J'utilise nos propres headers personnalisés
 
         // Couleurs dynamiques selon l'état de l'onglet
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: colors.muted,
 
         // Style de la barre de navigation

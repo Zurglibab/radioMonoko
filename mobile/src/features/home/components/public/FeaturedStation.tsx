@@ -5,6 +5,7 @@ import { PlayCircle } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { usePlayer } from "@/context/PlayerContext";
 import { Station } from "@/types/content";
+import { useAuthContext } from "@/context/AuthContext";
 
 /**
  * FeaturedStation : Composant de mise en avant (Hero Card).
@@ -12,6 +13,9 @@ import { Station } from "@/types/content";
  * @param station : Objet Station complet issu du typage centralisé.
  */
 export const FeaturedStation = ({ station }: { station: Station }) => {
+  const { appearanceSettings } = useAuthContext();
+  const isDark = appearanceSettings.themeMode === 'dark';
+  const colors = isDark ? theme.dark.colors : theme.light.colors;
   // Accès direct au lecteur global pour lancer la station
   const { playTrack } = usePlayer();
   
@@ -39,14 +43,14 @@ export const FeaturedStation = ({ station }: { station: Station }) => {
           <View className="flex-row items-center mb-4">
             {station.isLive && (
               <View 
-                style={{ backgroundColor: theme.dark.colors.live }} 
+                style={{ backgroundColor: colors.live }} 
                 className="px-3 py-1 rounded-full shadow-lg"
               >
                 <Text className="text-white text-[10px] font-black italic">LIVE</Text>
               </View>
             )}
             <Text 
-              style={{ color: theme.dark.colors.muted }}
+              style={{ color: colors.muted }}
               className="text-[10px] ml-3 font-bold uppercase tracking-[2px]"
             >
               {station.category}
@@ -55,7 +59,7 @@ export const FeaturedStation = ({ station }: { station: Station }) => {
 
           {/* Titre : Grande typographie italique pour le dynamisme */}
           <Text 
-            style={{ color: theme.dark.colors.text }}
+            style={{ color: colors.text }}
             className="text-4xl font-black mb-4 leading-[38px] tracking-tighter italic"
           >
             {station.title}

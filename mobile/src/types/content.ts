@@ -1,3 +1,5 @@
+import { User } from "./auth";
+
 /**
  * Types de médias
  * Permet de distinguer le comportement de l'UI (ex: Badge "Direct" pour radio 
@@ -10,6 +12,21 @@ export type MediaType = 'radio' | 'podcast';
  * Définit l'état d'un média dans la bibliothèque de l'utilisateur.
  */
 export type MediaStatus = 'to-listen' | 'in-progress' | 'finished' | 'dropped';
+
+/**
+ * Interface Review : Représente une critique ou un avis laissé par un utilisateur sur une station ou une playlist.
+ * Utilisée pour afficher les retours de la communauté et favoriser l'engagement.
+ */
+export interface Review {
+  id: string;
+  userId: string;
+  username: string;
+  userAvatar?: string;
+  rating: number; // 1 à 5
+  comment: string;
+  likes: number;
+  createdAt: string;
+}
 
 /**
  * Interface Station : Le modèle de données atomique.
@@ -29,6 +46,9 @@ export interface Station {
   status?: MediaStatus; // Uniquement si présent dans la Library
   duration?: string;    // Affiché uniquement pour les podcasts
   listenersCount?: number;
+  averageRating?: number;    // Note globale du réseau
+  reviews?: Review[];        // Liste des critiques (Barème 2.2.3)
+  friendsWhoListen?: User[]; // Liste d'amis (objets User complets)
 }
 
 /**

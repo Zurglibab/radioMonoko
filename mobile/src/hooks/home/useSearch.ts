@@ -1,70 +1,76 @@
 import { useState, useEffect } from "react";
-import { Station } from "@/types/content";
-import { SearchService } from "@/services/content/search.service";
+import { SearchService, UnifiedSearchResults } from "@/services/content/search.service";
 import { useHome } from "./useHome";
+import { Station } from "@/types/content";
 
 /**
- * useSearch : Hook de gestion de la recherche et de l'historique.
- * Centralise la logique de filtrage asynchrone, le "debouncing" des entrées 
- * utilisateur et la persistance temporaire des recherches récentes.
+ * useSearch : Hook de gestion de la recherche globale et de l'historique.
+ * Pilote le filtrage asynchrone multi-entités (Stations, Users, Playlists),
+ * gère le "debouncing" et persiste l'historique des consultations récentes.
  */
 export const useSearch = () => {
-  // Récupération de la source de vérité depuis le hook Home pour filtrer en local/cache
+  // Récupération de la source de vérité pour le filtrage local des stations
   const { stations: allStations } = useHome();
   
-  // État de la saisie utilisateur
+  // État de la saisie textuelle
   const [query, setQuery] = useState("");
-  // Résultats filtrés à afficher
-  const [results, setResults] = useState<Station[]>([]);
-  // Indicateur d'activité pour l'UI (ex: afficher un petit loader dans la barre)
+  
+  // Résultats de recherche structurés par catégories (Unified)
+  const [results, setResults] = useState<UnifiedSearchResults>({
+    stations: [],
+    users: [],
+    playlists: []
+  });
+  
+  // Indicateur de chargement pour le feedback visuel (Skeleton ou Spinner)
   const [isSearching, setIsSearching] = useState(false);
   
   /**
    * État de l'historique :
-   * Permet de suggérer les dernières stations consultées. 
-   * Initialisé avec un tableau vide par défaut.
+   * Conserve les dernières stations sélectionnées pour un accès rapide.
    */
   const [history, setHistory] = useState<Station[]>([]);
 
   /**
-   * addToHistory : Ajoute une station aux recherches récentes.
-   * Gère l'unicité (remonte l'élément si déjà présent) et limite la taille 
-   * pour ne pas encombrer l'interface (Top 5).
+   * addToHistory : Enregistre un item dans les recherches récentes.
+   * Assure l'unicité (remonte l'élément) et limite la liste aux 5 entrées les plus fraîches.
    */
-  const addToHistory = (station: Station) => {
+  const addToHistory = (item: Station) => {
     setHistory((prev) => {
-      // On retire la station si elle était déjà présente pour la remettre en haut de pile
-      const newHistory = prev.filter((s) => s.id !== station.id);
-      // On garde les 5 éléments les plus récents uniquement
-      return [station, ...newHistory].slice(0, 5);
+      // Suppression des doublons pour placer le dernier consulté en haut de liste
+      const filtered = prev.filter((s) => s.id !== item.id);
+      return [item, ...filtered].slice(0, 5);
     });
   };
 
   /**
-   * clearHistory : Remise à zéro complète de la liste des recherches récentes.
+   * clearHistory : Purge complète de l'historique de recherche local.
    */
   const clearHistory = () => setHistory([]);
 
   /**
-   * Effet de recherche avec Debounce (300ms) :
-   * Évite de déclencher un filtrage à chaque touche pressée. 
-   * Améliore les performances et économise les ressources (CPU/Réseau).
+   * Effet de recherche unifiée avec Debounce (300ms) :
+   * Déclenche l'appel au SearchService uniquement après une pause dans la saisie.
+   * Optimise les cycles de rendu et simule un comportement de recherche serveur.
    */
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
-      if (query) {
+      // On ignore les espaces vides pour éviter les requêtes inutiles
+      if (query.trim()) {
         setIsSearching(true);
-        // Appel au service de recherche pour traiter la logique de matching
-        const filtered = await SearchService.searchStations(query, allStations);
-        setResults(filtered);
+        
+        // Exécution de la recherche unifiée (Stations, Users, Playlists)
+        const unifiedResults = await SearchService.searchUnified(query, allStations);
+        setResults(unifiedResults);
+        
         setIsSearching(false);
       } else {
-        // Si le champ est vide, on nettoie les résultats pour afficher l'historique ou rien
-        setResults([]);
+        // Reset des résultats pour laisser place à l'affichage de l'historique
+        setResults({ stations: [], users: [], playlists: [] });
       }
     }, 300);
 
-    // Nettoyage du timer si l'utilisateur tape une nouvelle lettre avant la fin du délai
+    // Nettoyage : annule le déclenchement si l'utilisateur continue de taper
     return () => clearTimeout(delayDebounceFn);
   }, [query, allStations]);
 
