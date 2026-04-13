@@ -11,12 +11,16 @@ import {
     HiOutlineMenu,
     HiOutlineX,
     HiOutlineSearch,
+    HiOutlineSun,
+    HiOutlineMoon,
 } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
+import { useAppearance } from "../../context/AppearanceContext";
 import { SettingsModal } from "./SettingsModal";
 
 const NavBar = () => {
     const { user, logout } = useAuth();
+    const { theme, setTheme } = useAppearance();
     const isConnected = !!user;
     const navigate = useNavigate();
     const location = useLocation();
@@ -43,6 +47,10 @@ const NavBar = () => {
         { path: "/feed", label: "Fil d'actualité", authRequired: true },
         { path : "/collections",label: "Collections", authRequired: true },
     ];
+
+    const toggleTheme = () => {
+        setTheme(theme === 'dark' ? 'light' : 'dark');
+    };
 
     useEffect(() => {
         if (isSearchOpen) {
@@ -127,10 +135,10 @@ const NavBar = () => {
                             <input
                                 ref={searchInputRef}
                                 type="text"
-                                placeholder="RECHERCHER..."
+                                placeholder="Rechercher..."
                                 className={`
                                     ml-10 bg-transparent border-none outline-none text-app-text text-[10px] md:text-xs font-black 
-                                    uppercase tracking-widest transition-all duration-500
+                                    tracking-widest transition-all duration-500
                                     ${isSearchOpen
                                     ? 'opacity-100 translate-x-0 w-full visible'
                                     : 'opacity-0 -translate-x-4 w-0 invisible'}
@@ -144,11 +152,27 @@ const NavBar = () => {
 
                 <div className={`absolute left-1/2 -translate-x-1/2 transition-all duration-400 md:duration-700 ease-in-out ${showLogo ? "opacity-100 scale-100" : "opacity-0 scale-50 pointer-events-none"}`}>
                     <Link to="/" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="cursor-pointer">
-                        <img src={logoSmall} alt="Logo" className="h-6 md:h-8 w-auto brightness-200" />
+                        <img
+                            src={logoSmall}
+                            alt="Logo"
+                            className={`h-6 md:h-8 w-auto transition-all duration-500 ${theme === 'dark' ? 'brightness-200' : 'brightness-0'}`}
+                        />
                     </Link>
                 </div>
 
                 <div className="flex items-center gap-2 md:gap-3">
+                    <button
+                        onClick={toggleTheme}
+                        className={`${IconCircleStyle}`}
+                        title={theme === 'dark' ? "Passer au mode clair" : "Passer au mode sombre"}
+                    >
+                        {theme === 'dark' ? (
+                            <HiOutlineSun className="text-lg md:text-xl text-white animate-in zoom-in spin-in-90 duration-500" />
+                        ) : (
+                            <HiOutlineMoon className="text-lg md:text-xl text-app-text animate-in zoom-in spin-in-90 duration-500" />
+                        )}
+                    </button>
+
                     {isConnected ? (
                         <>
                             <div className="relative" ref={notifRef}>
@@ -180,40 +204,46 @@ const NavBar = () => {
                                 <button
                                     onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
                                     className={`
-                                        flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full transition-all duration-300 ease-in-out cursor-pointer active:scale-95 group overflow-hidden border-2
-                                        bg-app-card p-0.5
-                                        ${isProfileOpen ? 'border-app-text/30' : 'border-app-border hover:border-app-text/30'}
+                                        flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full transition-all duration-300 ease-in-out cursor-pointer active:scale-95 group overflow-hidden border
+                                        bg-app-card
+                                        ${isProfileOpen ? 'border-primary shadow-lg shadow-primary/10' : 'border-app-border hover:border-app-text/30'}
                                     `}
                                 >
                                     {user?.avatar ? (
-                                        <img src={user.avatar} alt="Profil" className="w-full h-full object-cover rounded-full" />
+                                        <img src={user.avatar} alt="Profil" className="w-full h-full object-cover" />
                                     ) : (
-                                        <HiOutlineUser className={`text-lg md:text-xl transition-all duration-300 ease-in-out text-white`} />
+                                        <HiOutlineUser className="text-lg md:text-xl text-app-text opacity-50" />
                                     )}
                                 </button>
                                 {isProfileOpen && (
                                     <div className="absolute top-12 right-0 w-56 md:w-64 bg-app-card border border-app-border rounded-2xl shadow-2xl py-3 animate-in fade-in zoom-in-95 duration-150 z-[60]">
                                         <div className="px-4 py-3 border-b border-app-border mb-2 flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full border-2 border-app-border overflow-hidden bg-app-bg p-0.5 flex-shrink-0">
+                                            <div className="w-10 h-10 rounded-full border border-app-border overflow-hidden bg-app-bg flex-shrink-0">
                                                 {user?.avatar ? (
-                                                    <img src={user.avatar} alt="" className="w-full h-full object-cover rounded-full" />
+                                                    <img src={user.avatar} alt="" className="w-full h-full object-cover" />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center rounded-full">
-                                                        <HiOutlineUser className="text-white text-lg" />
+                                                    <div className="w-full h-full flex items-center justify-center">
+                                                        <HiOutlineUser className="text-app-text opacity-30 text-lg" />
                                                     </div>
                                                 )}
                                             </div>
                                             <div className="overflow-hidden">
-                                                <p className="text-[10px] uppercase tracking-widest opacity-50 font-bold leading-none mb-1">Connecté</p>
+                                                <p className="text-[10px] uppercase tracking-widest opacity-50 font-bold leading-none mb-1 text-app-text">Connecté</p>
                                                 <p className="text-xs md:text-sm text-app-text font-bold truncate">
                                                     {user?.display_name || user?.username || user?.email}
                                                 </p>
                                             </div>
                                         </div>
-                                        <button onClick={() => { setIsSettingsOpen(true); setIsProfileOpen(false); }} className="w-full flex items-center gap-3 px-4 py-2 text-sm opacity-70 hover:opacity-100 hover:bg-app-text/5 transition-colors text-left cursor-pointer outline-none">
+                                        <button
+                                            onClick={() => { setIsSettingsOpen(true); setIsProfileOpen(false); }}
+                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-app-text/70 hover:text-app-text hover:bg-app-text/5 transition-colors text-left cursor-pointer outline-none"
+                                        >
                                             <HiOutlineCog className="text-lg" /> Paramètres
                                         </button>
-                                        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-primary/10 transition-colors text-left cursor-pointer outline-none">
+                                        <button
+                                            onClick={handleLogout}
+                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-primary/10 transition-colors text-left cursor-pointer outline-none font-bold"
+                                        >
                                             <HiOutlineLogout className="text-lg" /> Déconnexion
                                         </button>
                                     </div>
