@@ -106,10 +106,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
 
                 <div className="flex items-center justify-between px-6 py-5 border-b border-app-border">
                     <div>
-                        <h2 className="text-xl font-black uppercase tracking-tighter">Paramètres</h2>
-                        <p className="text-[10px] opacity-50 uppercase tracking-widest font-bold">
-                            {displayName || email}
-                        </p>
+                        <h2 className="text-xl font-black tracking-tighter">Paramètres</h2>
                     </div>
                     <button onClick={onClose} className="w-10 h-10 flex items-center justify-center rounded-full transition-all hover:bg-app-text/10 cursor-pointer outline-none active:scale-90">
                         <HiOutlineX className="text-xl" />
@@ -117,7 +114,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                 </div>
 
                 <div className="flex flex-col md:flex-row h-[560px]">
-                    {/* Suppression du fond bg-app-text/[0.02] pour éviter les traits de démarcation */}
                     <div className="w-full md:w-52 border-b md:border-b-0 md:border-r border-app-border p-4 space-y-1">
                         {[
                             { id: 'profile', label: 'Profil', icon: <HiOutlineUser /> },
@@ -146,7 +142,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                                     <div className="flex flex-col items-center justify-center">
                                         <div onClick={() => !loading && fileInputRef.current?.click()} className="relative group cursor-pointer">
-                                            {/* Structure simplifiée : une seule bordure, pas de padding parasite */}
                                             <div className="w-28 h-28 rounded-full border-2 border-app-border bg-app-card transition-all duration-300 group-hover:scale-105 group-hover:border-primary/50 group-active:scale-95 overflow-hidden flex items-center justify-center relative">
                                                 {avatarPreview ? (
                                                     <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
@@ -154,7 +149,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                                     <HiOutlineUser className="text-4xl opacity-20" />
                                                 )}
 
-                                                {/* Overlay caméra intégré */}
                                                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                                     <HiOutlineCamera className="text-white text-3xl mb-1" />
                                                 </div>
@@ -165,22 +159,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-3">
-                                            <label className="text-[11px] font-bold opacity-50 uppercase ml-1 block">Nom d'affichage</label>
+                                            <label className="text-[11px] font-bold opacity-50 ml-1 block">Nom d'affichage</label>
                                             <input type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Ton pseudo..." className="w-full bg-app-text/5 border border-app-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
                                         </div>
                                         <div className="space-y-3">
-                                            <label className="text-[11px] font-bold opacity-50 uppercase ml-1 block">Site Web</label>
+                                            <label className="text-[11px] font-bold opacity-50 ml-1 block">Site Web</label>
                                             <input type="text" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://ton-site.com" className="w-full bg-app-text/5 border border-app-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/50 transition-colors" />
                                         </div>
                                     </div>
 
                                     <div className="space-y-3">
-                                        <label className="text-[11px] font-bold opacity-50 uppercase ml-1 block">Bio</label>
+                                        <label className="text-[11px] font-bold opacity-50 ml-1 block">Bio</label>
                                         <textarea rows={3} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Raconte-nous quelque chose..." className="w-full bg-app-text/5 border border-app-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/50 resize-none transition-colors" />
                                     </div>
 
                                     <div className="space-y-3">
-                                        <label className="text-[11px] font-bold opacity-50 uppercase ml-1 block">Visibilité</label>
+                                        <label className="text-[11px] font-bold opacity-50 ml-1 block">Visibilité</label>
                                         <div className="relative" ref={privacyRef}>
                                             <button onClick={() => setIsPrivacyOpen(!isPrivacyOpen)} className="w-full flex items-center justify-between bg-app-text/5 border border-app-border rounded-xl px-4 py-2.5 text-sm cursor-pointer outline-none transition-colors hover:border-primary/30">
                                                 <div className="flex items-center gap-2">
@@ -207,7 +201,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                             {activeTab === 'appearance' && (
                                 <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                                     <div className="space-y-3">
-                                        <label className="text-[11px] font-bold opacity-50 uppercase ml-1 block">Thème de l'application</label>
+                                        <label className="text-[11px] font-bold opacity-50 ml-1 block">Thème de l'application</label>
                                         <div className="relative" ref={selectRef}>
                                             <button onClick={() => setIsSelectOpen(!isSelectOpen)} className="w-full flex items-center justify-between bg-app-text/5 border border-app-border rounded-xl px-4 py-3 text-sm cursor-pointer outline-none transition-colors hover:border-primary/30">
                                                 <div className="flex items-center gap-3">

@@ -4,7 +4,7 @@ type Theme = 'dark' | 'light';
 
 interface AppearanceContextType {
     theme: Theme;
-    setTheme: (theme: string) => void;
+    setTheme: React.Dispatch<React.SetStateAction<Theme>>;
     toggleTheme: () => void;
 }
 
@@ -13,22 +13,21 @@ const AppearanceContext = createContext<AppearanceContextType | undefined>(undef
 export const AppearanceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [theme, setTheme] = useState<Theme>(() => {
         if (typeof window !== 'undefined') {
-            return (localStorage.getItem('app-theme') as Theme) || 'dark';
+            const saved = localStorage.getItem('app-theme');
+            return (saved === 'light' || saved === 'dark') ? saved : 'dark';
         }
         return 'dark';
     });
 
     useEffect(() => {
         const root = window.document.documentElement;
-
         root.classList.remove('light', 'dark');
         root.classList.add(theme);
-
         localStorage.setItem('app-theme', theme);
     }, [theme]);
 
     const toggleTheme = () => {
-        setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+        setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
     };
 
     return (
