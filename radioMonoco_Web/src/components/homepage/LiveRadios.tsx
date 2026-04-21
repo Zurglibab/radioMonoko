@@ -87,14 +87,15 @@ const LiveRadios = () => {
                 style={{ transform: `translateX(-${current * 100}%)`, willChange: "transform" }}
             >
                 {extendedRadios.map((radio, index) => (
-                    <div key={index} className="relative flex-shrink-0 w-full h-full overflow-hidden">
+                    <div key={index} className="relative shrink-0 w-full h-full overflow-hidden">
 
                         <RadioBackground color={radio.color}>
                             {radio.logo}
                         </RadioBackground>
 
-                        <div className="absolute inset-0 bg-black/40 z-10" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/10 z-10" />
+                        <div className="absolute inset-0 bg-black/20 z-10" />
+
+                        <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/40 via-25% to-transparent z-10" />
 
                         <div className="absolute inset-0 z-20 flex flex-col items-center justify-end pb-32 md:pb-40 px-6 text-center">
                             <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-600 rounded-full mb-6 shadow-lg">
@@ -124,7 +125,6 @@ const LiveRadios = () => {
                 ))}
             </div>
 
-            {/* Pagination Dots */}
             <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-30">
                 {radios.map((_, index) => (
                     <button

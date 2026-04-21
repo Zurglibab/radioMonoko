@@ -34,8 +34,8 @@ const Register = () => {
                      style={{ backgroundImage: `radial-gradient(#ffffff 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }}>
                 </div>
 
-                <div className="absolute top-[-10%] left-[-5%] w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px]"></div>
-                <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-white/[0.03] rounded-full blur-[100px]"></div>
+                <div className="absolute top-[-10%] left-[-5%] w-125 h-125 bg-white/5 rounded-full blur-[120px]"></div>
+                <div className="absolute bottom-[-10%] right-[-5%] w-100 h-100 bg-white/3 rounded-full blur-[100px]"></div>
 
                 <svg className="absolute inset-0 w-full h-full opacity-[0.03] contrast-150">
                     <filter id="noise">

@@ -8,7 +8,7 @@ interface VisualizerProps {
 
 const AudioVisualiser: React.FC<VisualizerProps> = ({ isPlaying, barCount = 5, color = "bg-rose-600" }) => {
     return (
-        <div className="flex items-end gap-[3px] h-6">
+        <div className="flex items-end gap-0.75 h-6">
             <style>{`
                 @keyframes equalizer {
                     0%, 100% { height: 30%; }
