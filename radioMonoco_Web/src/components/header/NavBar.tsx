@@ -123,7 +123,7 @@ const NavBar = () => {
                                     setIsSearchOpen(!isSearchOpen);
                                 }}
                                 className={`
-                                    ${IconCircleStyle} !w-9 !h-9 md:!w-10 md:!h-10 absolute left-0
+                                    ${IconCircleStyle} w-9! h-9! md:w-10! md:h-10! absolute left-0
                                     transition-all duration-500 z-10
                                     ${isSearchOpen ? 'text-primary rotate-90 scale-110 hover:bg-transparent' : 'text-app-text rotate-0 scale-100'}
                                 `}
@@ -181,13 +181,13 @@ const NavBar = () => {
                                     <span className="absolute top-2 right-2 md:top-2.5 md:right-2.5 w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full border-2 border-app-bg animate-pulse"></span>
                                 </button>
                                 {isNotifOpen && (
-                                    <div className="absolute top-12 right-0 w-72 md:w-80 bg-app-card border border-app-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 z-[60]">
-                                        <div className="px-4 py-3 border-b border-app-border bg-app-text/[0.02]">
+                                    <div className="absolute top-12 right-0 w-72 md:w-80 bg-app-card border border-app-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 z-60">
+                                        <div className="px-4 py-3 border-b border-app-border bg-app-text/2">
                                             <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 font-black">Notifications</p>
                                         </div>
                                         <div className="max-h-80 overflow-y-auto">
                                             {notifications.map((n) => (
-                                                <div key={n.id} className="px-4 py-4 border-b border-app-border hover:bg-app-text/[0.03] transition-colors cursor-pointer flex gap-3">
+                                                <div key={n.id} className="px-4 py-4 border-b border-app-border hover:bg-app-text/3 transition-colors cursor-pointer flex gap-3">
                                                     <div className="text-xl mt-0.5">{n.icon}</div>
                                                     <div>
                                                         <p className="text-xs text-app-text leading-tight">{n.text}</p>
@@ -216,9 +216,9 @@ const NavBar = () => {
                                     )}
                                 </button>
                                 {isProfileOpen && (
-                                    <div className="absolute top-12 right-0 w-56 md:w-64 bg-app-card border border-app-border rounded-2xl shadow-2xl py-3 animate-in fade-in zoom-in-95 duration-150 z-[60]">
+                                    <div className="absolute top-12 right-0 w-56 md:w-64 bg-app-card border border-app-border rounded-2xl shadow-2xl py-3 animate-in fade-in zoom-in-95 duration-150 z-60">
                                         <div className="px-4 py-3 border-b border-app-border mb-2 flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full border border-app-border overflow-hidden bg-app-bg flex-shrink-0">
+                                            <div className="w-10 h-10 rounded-full border border-app-border overflow-hidden bg-app-bg shrink-0">
                                                 {user?.avatar ? (
                                                     <img src={user.avatar} alt="" className="w-full h-full object-cover" />
                                                 ) : (
@@ -277,14 +277,14 @@ const NavBar = () => {
 
             <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
 
-            <div className={`fixed inset-0 z-[100] flex items-center transition-all duration-400 md:duration-700 ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0"}`}>
+            <div className={`fixed inset-0 z-100 flex items-center transition-all duration-400 md:duration-700 ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0"}`}>
                 <div className={`absolute inset-0 bg-app-bg/98 backdrop-blur-3xl transition-opacity duration-400 md:duration-700 cursor-pointer ${isMenuOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setIsMenuOpen(false)} />
-                <button onClick={() => setIsMenuOpen(false)} className="absolute top-6 left-6 md:top-12 md:left-12 group flex items-center gap-4 z-[120] cursor-pointer outline-none">
+                <button onClick={() => setIsMenuOpen(false)} className="absolute top-6 left-6 md:top-12 md:left-12 group flex items-center gap-4 z-120 cursor-pointer outline-none">
                     <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full border border-app-border group-hover:border-app-text transition-all duration-300 group-hover:rotate-90">
                         <HiOutlineX className="text-app-text text-lg md:text-xl" />
                     </div>
                 </button>
-                <div className="relative z-[110] w-full max-w-7xl px-8 md:px-24">
+                <div className="relative z-110 w-full max-w-7xl px-8 md:px-24">
                     <nav className="flex flex-col items-start space-y-4 md:space-y-6">
                         {menuLinks.map((link, index) => (
                             (!link.authRequired || isConnected) && (
