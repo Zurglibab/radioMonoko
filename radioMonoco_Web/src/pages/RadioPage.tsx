@@ -81,8 +81,8 @@ const RadioPage = () => {
                         backgroundSize: '32px 32px'
                     }}
                 />
-                <div className={`absolute top-[-5%] right-[-5%] w-[600px] h-[600px] rounded-full blur-[140px] transition-all duration-1000 ${
-                    theme === 'dark' ? 'bg-rose-600/5 opacity-50' : 'bg-rose-500/[0.08] opacity-100'
+                <div className={`absolute top-[-5%] right-[-5%] w-150 h-150 rounded-full blur-[140px] transition-all duration-1000 ${
+                    theme === 'dark' ? 'bg-rose-600/5 opacity-50' : 'bg-rose-500/8 opacity-100'
                 }`} />
                 <svg className={`absolute inset-0 w-full h-full contrast-150 transition-opacity duration-700 ${
                     theme === 'dark' ? 'opacity-[0.04]' : 'opacity-[0.02]'
@@ -96,7 +96,7 @@ const RadioPage = () => {
             <div className="relative z-10">
                 {/* Hero Section */}
                 <div className="relative h-[60vh] w-full flex items-center justify-center overflow-hidden">
-                    <div className={`absolute inset-0 z-10 bg-gradient-to-b from-transparent transition-colors duration-700
+                    <div className={`absolute inset-0 z-10 bg-linear-to-b from-transparent transition-colors duration-700
                         ${theme === 'dark' ? "via-app-bg/60 to-app-bg" : "via-app-bg/40 to-app-bg"}`} />
                     <img
                         src={radioInfo.img}
@@ -122,7 +122,7 @@ const RadioPage = () => {
                         <div className="lg:col-span-2 space-y-12">
                             <section className={`relative z-20 backdrop-blur-3xl border p-8 md:p-10 rounded-[2.5rem] flex items-center justify-between group transition-all duration-500
                                 ${theme === 'dark'
-                                ? "bg-white/[0.04] border-white/10 hover:bg-white/[0.06] hover:border-white/20"
+                                ? "bg-white/4 border-white/10 hover:bg-white/6 hover:border-white/20"
                                 : "bg-white border-black/5 shadow-2xl shadow-black/5 hover:bg-white"}`}>
                                 <div className="space-y-1">
                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 block mb-1">Émission actuelle</span>
@@ -144,7 +144,7 @@ const RadioPage = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {[1, 2, 3, 4].map(i => (
                                         <div key={i} className={`flex items-center gap-5 p-5 border rounded-[1.8rem] transition-all cursor-pointer group
-                                            ${theme === 'dark' ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]" : "bg-white border-black/5 hover:shadow-lg"}`}>
+                                            ${theme === 'dark' ? "bg-white/2 border-white/5 hover:bg-white/4" : "bg-white border-black/5 hover:shadow-lg"}`}>
                                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${theme === 'dark' ? 'bg-white/5' : 'bg-black/5'} group-hover:bg-rose-600 group-hover:text-white shadow-inner`}>
                                                 <HiOutlinePlay />
                                             </div>
@@ -171,7 +171,7 @@ const RadioPage = () => {
                             </div>
 
                             <div className={`backdrop-blur-md border rounded-[2.5rem] p-8 transition-all
-                                ${theme === 'dark' ? "bg-white/[0.02] border-white/10" : "bg-white border-black/5 shadow-xl shadow-black/5"}`}>
+                                ${theme === 'dark' ? "bg-white/2 border-white/10" : "bg-white border-black/5 shadow-xl shadow-black/5"}`}>
                                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] mb-8 text-center opacity-40">Programmation</h3>
                                 <div className="space-y-7">
                                     {[{ t: "19:00", s: "Mouv' 100% Rap" }, { t: "21:00", s: "Dirty Swift Show" }, { t: "23:00", s: "Mix Nocturne" }].map((item, idx) => (
@@ -188,12 +188,12 @@ const RadioPage = () => {
                     <div className={`grid grid-cols-1 lg:grid-cols-3 gap-12 mt-20 pt-16 border-t relative z-10 ${theme === 'dark' ? 'border-white/5' : 'border-black/5'}`}>
                         <div className="lg:col-span-1 space-y-6">
                             <h3 className="text-[11px] font-black uppercase tracking-[0.3em] opacity-40">Audience</h3>
-                            <div className={`border rounded-[2.5rem] p-8 shadow-inner transition-all ${theme === 'dark' ? "bg-gradient-to-br from-white/[0.03] to-transparent border-white/5" : "bg-white border-black/5 shadow-xl"}`}>
+                            <div className={`border rounded-[2.5rem] p-8 shadow-inner transition-all ${theme === 'dark' ? "bg-linear-to-br from-white/3 to-transparent border-white/5" : "bg-white border-black/5 shadow-xl"}`}>
                                 <div className="flex items-end gap-4 mb-8">
                                     <span className="text-6xl font-black tracking-tighter">4.8</span>
                                     <div className="pb-1 space-y-1">
                                         <div className="flex text-rose-500">{[...Array(5)].map((_, i) => <HiStar key={i} size={14} />)}</div>
-                                        <p className="text-[10px] font-bold uppercase tracking-[0.1em] opacity-40">1 240 votes</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">1 240 votes</p>
                                     </div>
                                 </div>
                                 <div className="space-y-3.5 mb-10">
@@ -223,7 +223,7 @@ const RadioPage = () => {
                                 <span className={`text-[10px] font-bold px-3 py-1 rounded-full border ${theme === 'dark' ? "bg-white/5 border-white/5" : "bg-black/5 border-black/5"}`}>{comments.length} Avis</span>
                             </div>
                             {!isLoggedIn ? (
-                                <div className={`border border-dashed p-10 rounded-[2.5rem] text-center transition-all ${theme === 'dark' ? "bg-white/[0.01] border-white/10" : "bg-black/[0.01] border-black/10"}`}>
+                                <div className={`border border-dashed p-10 rounded-[2.5rem] text-center transition-all ${theme === 'dark' ? "bg-white/1 border-white/10" : "bg-black/1 border-black/10"}`}>
                                     <HiLockClosed size={20} className="mx-auto mb-4 opacity-20" />
                                     <p className="text-sm font-bold tracking-tight mb-6">Identifiez-vous pour commenter et voter.</p>
                                     <button onClick={() => setIsLoggedIn(true)} className="px-8 py-3 bg-app-text text-app-bg text-[10px] font-black uppercase rounded-full transition-all hover:bg-rose-600 hover:text-white shadow-xl">Se Connecter</button>
@@ -233,7 +233,7 @@ const RadioPage = () => {
                                     <input
                                         type="text"
                                         placeholder="Partagez vos impressions..."
-                                        className={`w-full h-16 border rounded-2xl px-6 pr-16 focus:outline-none focus:border-rose-600/50 transition-all ${theme === 'dark' ? "bg-white/[0.02] border-white/10 text-white" : "bg-white border-black/10 text-black"}`}
+                                        className={`w-full h-16 border rounded-2xl px-6 pr-16 focus:outline-none focus:border-rose-600/50 transition-all ${theme === 'dark' ? "bg-white/2 border-white/10 text-white" : "bg-white border-black/10 text-black"}`}
                                     />
                                     <button className="absolute right-2.5 top-2.5 bottom-2.5 px-5 bg-rose-600 text-white rounded-xl shadow-lg shadow-rose-600/20 active:scale-95 transition-all">
                                         <HiPaperAirplane size={18} />
@@ -242,7 +242,7 @@ const RadioPage = () => {
                             )}
                             <div className="space-y-4">
                                 {comments.map((c) => (
-                                    <div key={c.id} className={`p-6 border rounded-[2rem] flex gap-5 transition-all ${theme === 'dark' ? "bg-white/[0.02] border-white/5 hover:bg-white/[0.04]" : "bg-white border-black/5 shadow-sm"}`}>
+                                    <div key={c.id} className={`p-6 border rounded-4xl flex gap-5 transition-all ${theme === 'dark' ? "bg-white/2 border-white/5 hover:bg-white/4" : "bg-white border-black/5 shadow-sm"}`}>
                                         <img src={c.avatar} className="w-11 h-11 rounded-full border border-black/5 grayscale opacity-80" alt="" />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-center mb-1.5">

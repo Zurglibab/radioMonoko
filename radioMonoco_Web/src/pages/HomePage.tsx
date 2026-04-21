@@ -3,9 +3,6 @@ import logo from "../assets/images/icon_large.png";
 import { useAppearance } from "../context/AppearanceContext";
 
 import LiveRadios from "../components/homepage/LiveRadios";
-import Categories from "../components/homepage/Categories";
-import TopMusics from "../components/homepage/TopMusics";
-import PodCasts from "../components/homepage/PodCasts";
 import Footer from "../components/utils/Footer";
 
 const HomePage = () => {
@@ -35,15 +32,13 @@ const HomePage = () => {
                     }}
                 />
 
-                {/* Halos lumineux dynamiques */}
-                <div className={`absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full blur-[140px] transition-all duration-1000 ${
-                    theme === 'dark' ? 'bg-white/5 opacity-50' : 'bg-black/[0.04] opacity-100'
+                <div className={`absolute top-[-10%] left-[-5%] w-150 h-150 rounded-full blur-[140px] transition-all duration-1000 ${
+                    theme === 'dark' ? 'bg-white/5 opacity-50' : 'bg-black/4 opacity-100'
                 }`} />
-                <div className={`absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full blur-[120px] transition-all duration-1000 ${
-                    theme === 'dark' ? 'bg-white/[0.03] opacity-40' : 'bg-black/[0.02] opacity-80'
+                <div className={`absolute bottom-[-10%] right-[-10%] w-125 h-125 rounded-full blur-[120px] transition-all duration-1000 ${
+                    theme === 'dark' ? 'bg-white/3 opacity-40' : 'bg-black/2 opacity-80'
                 }`} />
 
-                {/* Effet de grain de film */}
                 <svg className={`absolute inset-0 w-full h-full contrast-150 transition-opacity duration-700 ${
                     theme === 'dark' ? 'opacity-[0.04]' : 'opacity-[0.02]'
                 }`}>
@@ -64,7 +59,7 @@ const HomePage = () => {
                     <img
                         src={logo}
                         alt="RadioMonoco Logo"
-                        className={`w-[260px] md:w-[420px] h-auto object-contain transition-all duration-700 will-change-transform ${
+                        className={`w-65 md:w-105 h-auto object-contain transition-all duration-700 will-change-transform ${
                             theme === 'dark'
                                 ? 'drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)] brightness-200'
                                 : 'drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)] brightness-200'
@@ -73,23 +68,7 @@ const HomePage = () => {
                 </header>
 
                 <main>
-                    {/* Hero Section / Slider */}
                     <LiveRadios />
-
-                    {/* Content Sections */}
-                    <div className="container mx-auto px-6 space-y-32 md:space-y-48 py-24 md:py-32">
-                        <section className="animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                            <Categories />
-                        </section>
-
-                        <section className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
-                            <TopMusics />
-                        </section>
-
-                        <section className="animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-                            <PodCasts />
-                        </section>
-                    </div>
                 </main>
 
                 <Footer />

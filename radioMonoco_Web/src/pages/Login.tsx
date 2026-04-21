@@ -29,7 +29,6 @@ const Login = () => {
         <div className="relative min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
 
             <div className="fixed inset-0 z-0 pointer-events-none">
-                {/* Grille de points */}
                 <div className="absolute inset-0 opacity-[0.15]"
                      style={{ backgroundImage: `radial-gradient(#ffffff 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }}>
                 </div>
