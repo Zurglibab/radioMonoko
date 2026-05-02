@@ -7,6 +7,7 @@ import Feed from "./pages/Feed.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import { RadioProvider } from "./context/RadioContext.tsx";
 import RadioPage from "./pages/RadioPage.tsx";
+import Collections from "./pages/Collections.tsx";
 
 function App() {
     return (
@@ -26,7 +27,14 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
-
+                    <Route
+                        path="/collections"
+                        element={
+                            <ProtectedRoute>
+                                <Collections />
+                            </ProtectedRoute>
+                        }
+                    />
                     <Route path={"/radio"} element={<RadioPage />} />
                 </Route>
             </Routes>

@@ -20,7 +20,7 @@ const feedData = [
         id: 2,
         user: {
             id: 12,
-            username: "alex",
+            username: "michel",
             avatar: "https://i.pravatar.cc/40?img=2",
         },
         action: "added",

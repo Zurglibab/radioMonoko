@@ -41,6 +41,7 @@ const NavBar = () => {
     const menuLinks = [
         { path: "/", label: "Accueil", authRequired: false },
         { path: "/feed", label: "Fil d'actualité", authRequired: true },
+        { path : "/collections",label: "Collections", authRequired: true },
     ];
 
     useEffect(() => {
