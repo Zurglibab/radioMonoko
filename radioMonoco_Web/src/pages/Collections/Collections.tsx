@@ -1,15 +1,42 @@
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import CollectionsService from "../../services/CollectionsService.ts";
+import type { Collection } from "../../interfaces/Collections.types.ts";
+import {useAuth} from "../../context/AuthContext.tsx";
 import { FiPlus } from "react-icons/fi";
 
-const collections = [
-    { id: 1, title: "Daily Mix", image: "https://picsum.photos/300?1", path: "/collections/playlists" },
-    { id: 2, title: "Albums favoris", image: "https://picsum.photos/300?2", path: "/collections/albums" },
-    { id: 3, title: "Artistes suivis", image: "https://picsum.photos/300?3", path: "/collections/artists" },
-    { id: 4, title: "Chill vibes", image: "https://picsum.photos/300?4", path: "/collections/chill" },
-];
-
 const Collections = () => {
-    const navigate = useNavigate();
+
+    const { user } = useAuth();
+
+    const [collections, setCollections] = useState<Collection[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+
+        const fetchCollections = async () => {
+            try {
+                if (!user?.id) {
+                    setLoading(false);
+                    return;
+                }
+
+                const data = await CollectionsService.getUserCollections(user.id);
+
+                setCollections(data);
+            } catch (err) {
+
+                console.error(err);
+                setError("Impossible de charger les collections");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCollections();
+
+    }, [user]);
 
     return (
         <div className="flex min-h-screen bg-[#0a0a0a]">
@@ -47,24 +74,57 @@ const Collections = () => {
                         <h2 className="text-2xl font-bold text-white mb-6">Tes collections</h2>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+                            {loading && (
+                                <p className="text-neutral-400">
+                                    Chargement des collections...
+                                </p>
+                            )}
+
+                            {error && (
+                                <p className="text-red-500">
+                                    {error}
+                                </p>
+                            )}
+
+                            {!loading && collections.length === 0 && (
+                                <div className="col-span-full bg-neutral-900/40 border border-white/5 rounded-2xl p-8 text-center">
+                                    <p className="text-white font-semibold">
+                                        Aucune collection trouvée
+                                    </p>
+
+                                    <p className="text-neutral-500 text-sm mt-2">
+                                        Crée ta première collection
+                                    </p>
+                                </div>
+                            )}
+
                             {collections.map((item) => (
                                 <div
                                     key={item.id}
-                                    onClick={() => navigate(item.path)}
                                     className="group cursor-pointer"
                                 >
-                                    <div className="relative rounded-2xl overflow-hidden bg-neutral-900/40 backdrop-blur-xl border border-white/5 hover:border-rose-500/30 transition-all duration-300">
-                                        <img
-                                            src={item.image}
-                                            alt={item.title}
-                                            className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-80" />
+                                    <div className="relative rounded-2xl overflow-hidden bg-neutral-900/40 backdrop-blur-xl border border-white/5 hover:border-rose-500/30 transition-all duration-300 p-6">
 
-                                        <div className="absolute bottom-4 left-4 right-4">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                                        <div className="relative z-10">
                                             <h2 className="text-white font-bold text-lg group-hover:text-rose-400 transition-colors">
-                                                {item.title}
+                                                {item.name}
                                             </h2>
+
+                                            <p className="text-neutral-500 text-sm mt-2 line-clamp-2">
+                                                {item.description || "Aucune description"}
+                                            </p>
+
+                                            <div className="flex items-center justify-between mt-6">
+                                                <span className="text-xs text-neutral-600">
+                                                    {item.is_public ? "Public" : "Privé"}
+                                                </span>
+                                                <span className="text-xs text-rose-400 font-semibold">
+                                                    Voir →
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -79,7 +139,7 @@ const Collections = () => {
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                             {[1,2,3,4,5,6].map((i) => (
                                 <div key={i} className="bg-neutral-900/40 p-4 rounded-xl hover:bg-neutral-900/60 transition cursor-pointer">
-                                    <img src={`https://picsum.photos/200?random=${i}`} className="rounded-lg mb-3" />
+                                    <img src={`https://picsum.photos/200?random=${i}`} className="rounded-lg mb-3"  alt={"image"}/>
                                     <p className="text-white text-sm font-semibold">Track {i}</p>
                                     <p className="text-neutral-500 text-xs">Artiste</p>
                                 </div>
