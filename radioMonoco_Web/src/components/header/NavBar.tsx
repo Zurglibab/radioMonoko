@@ -99,7 +99,7 @@ const NavBar = () => {
                         <HiOutlineMenu className="text-lg md:text-xl text-white cursor-pointer" />
                     </button>
 
-                    {isConnected && (
+                    {(
                         <div
                             className={`
                                 relative flex items-center h-9 md:h-10 rounded-full transition-all 
@@ -111,7 +111,7 @@ const NavBar = () => {
                         >
                             <button
                                 onClick={() => {
-                                    if(isSearchOpen) setSearchQuery("");
+                                    if (isSearchOpen) setSearchQuery("");
                                     setIsSearchOpen(!isSearchOpen);
                                 }}
                                 className={`
@@ -120,7 +120,8 @@ const NavBar = () => {
                                     ${isSearchOpen ? 'text-rose-500 rotate-90 scale-110 hover:bg-transparent' : 'text-white rotate-0 scale-100'}
                                 `}
                             >
-                                {isSearchOpen ? <HiOutlineX className="text-lg" /> : <HiOutlineSearch className="text-lg md:text-xl" />}
+                                {isSearchOpen ? <HiOutlineX className="text-lg"/> :
+                                    <HiOutlineSearch className="text-lg md:text-xl"/>}
                             </button>
 
                             <input
