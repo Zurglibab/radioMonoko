@@ -8,6 +8,7 @@ import HomePage from "./pages/HomePage.tsx";
 import { RadioProvider } from "./context/RadioContext.tsx";
 import RadioPage from "./pages/RadioPage.tsx";
 import Collections from "./pages/Collections/Collections.tsx";
+import CollectionsDetails from "./pages/Collections/CollectionsDetails.tsx";
 
 function App() {
     return (
@@ -32,6 +33,15 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <Collections />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/collections/:id"
+                        element={
+                            <ProtectedRoute>
+                                <CollectionsDetails />
                             </ProtectedRoute>
                         }
                     />

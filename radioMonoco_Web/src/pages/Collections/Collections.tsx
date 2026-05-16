@@ -1,9 +1,10 @@
-//import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import CollectionsService from "../../services/CollectionsService.ts";
 import type { Collection } from "../../interfaces/Collections.types.ts";
 import {useAuth} from "../../context/AuthContext.tsx";
 import { FiPlus } from "react-icons/fi";
+import CreateCollection from "./CreateCollections.tsx";
 
 const Collections = () => {
 
@@ -12,6 +13,8 @@ const Collections = () => {
     const [collections, setCollections] = useState<Collection[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [isWindowOpen, setIsWindowOpen] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
 
@@ -38,6 +41,23 @@ const Collections = () => {
 
     }, [user]);
 
+    const handleCreateCollection = async (name:string, description:string, isPublic:boolean) => {
+        try{
+            if (!user?.id) return;
+
+            const newCollection = await CollectionsService.createCollection(
+                user.id,
+                name,
+                description,
+                isPublic
+            );
+            setCollections((prev) => [newCollection, ...prev]);
+        } catch (err) {
+            console.error(err);
+            setError("Erreur lors de la création de la collection");
+        }
+    };
+
     return (
         <div className="flex min-h-screen bg-[#0a0a0a]">
 
@@ -63,10 +83,12 @@ const Collections = () => {
                             </p>
                         </div>
 
-                        <button className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-full font-semibold transition-all shadow-lg shadow-rose-600/20">
+                        <button
+                            onClick= {() => setIsWindowOpen(true)}
+                            className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-full font-semibold transition-all shadow-lg shadow-rose-600/20">
                             <FiPlus />
                             Créer
-                        </button>
+                        </button >
                     </div>
 
                     {/* COLLECTIONS */}
@@ -102,6 +124,7 @@ const Collections = () => {
                             {collections.map((item) => (
                                 <div
                                     key={item.id}
+                                    onClick={() => navigate(`/collections/${item.id}`)}
                                     className="group cursor-pointer"
                                 >
                                     <div className="relative rounded-2xl overflow-hidden bg-neutral-900/40 backdrop-blur-xl border border-white/5 hover:border-rose-500/30 transition-all duration-300 p-6">
@@ -226,6 +249,7 @@ const Collections = () => {
 
                 </div>
             </div>
+            <CreateCollection isOpen={isWindowOpen} onClose={()=> setIsWindowOpen(false)} onSubmit={handleCreateCollection}></CreateCollection>
         </div>
     );
 };
