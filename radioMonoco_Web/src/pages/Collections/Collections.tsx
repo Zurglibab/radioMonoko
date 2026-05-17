@@ -5,6 +5,7 @@ import type { Collection } from "../../interfaces/Collections.types.ts";
 import {useAuth} from "../../context/AuthContext.tsx";
 import { FiPlus } from "react-icons/fi";
 import CreateCollection from "./CreateCollections.tsx";
+import ModifyCollections from "./ModifyCollections.tsx";
 
 const Collections = () => {
 
@@ -14,6 +15,8 @@ const Collections = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [isWindowOpen, setIsWindowOpen] = useState(false);
+    const [isModifyWindowOpen, setIsModifyWindowOpen] = useState(false);
+    const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -55,6 +58,23 @@ const Collections = () => {
         } catch (err) {
             console.error(err);
             setError("Erreur lors de la création de la collection");
+        }
+    };
+
+    const handleModifyCollection = async (collection: Collection) => {
+        try {
+            const updated = await CollectionsService.updateCollection(collection.id, {
+                name: collection.name,
+                description: collection.description,
+                is_public: collection.is_public
+            });
+
+            setCollections((prev) =>
+                prev.map((col) => (col.id === updated.id ? updated : col))
+            );
+        } catch (err) {
+            console.error(err);
+            setError("Erreur lors de la modification de la collection");
         }
     };
 
@@ -144,6 +164,22 @@ const Collections = () => {
                                                 <span className="text-xs text-neutral-600">
                                                     {item.is_public ? "Public" : "Privé"}
                                                 </span>
+
+                                                <div className="flex items-center gap-3">
+
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+
+                                                            setSelectedCollection(item);
+                                                            setIsModifyWindowOpen(true);
+                                                        }}
+                                                        className="text-xs text-blue-400 hover:text-blue-300 transition"
+                                                    >
+                                                        Modifier
+                                                    </button>
+                                                </div>
+
                                                 <span className="text-xs text-rose-400 font-semibold">
                                                     Voir →
                                                 </span>
@@ -249,7 +285,8 @@ const Collections = () => {
 
                 </div>
             </div>
-            <CreateCollection isOpen={isWindowOpen} onClose={()=> setIsWindowOpen(false)} onSubmit={handleCreateCollection}></CreateCollection>
+            <CreateCollection isOpen={isWindowOpen} onClose={()=> setIsWindowOpen(false)} onSubmit={handleCreateCollection}/>
+            <ModifyCollections isOpen={isModifyWindowOpen} onClose={() => setIsModifyWindowOpen(false)} onSubmit={handleModifyCollection} collection={selectedCollection}/>
         </div>
     );
 };
