@@ -1,38 +1,48 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
 import { Search, Bell } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { theme } from "@/constants/theme";
 import { User } from "@/types/auth";
 import { useAuthContext } from "@/context/AuthContext";
+import { NotificationService } from "@/services/notifications/notification.service";
 
 /**
  * PrivateHeader : En-tête personnalisé pour l'espace connecté.
- * Gère l'identité visuelle de l'utilisateur et l'accès rapide aux fonctions globales.
- * @param user - L'objet utilisateur issu de la session active.
+ * Gère l'identité visuelle de l'utilisateur et l'accès aux notifications réelles.
  */
 export const PrivateHeader = ({ user }: { user: User }) => {
   const router = useRouter();
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
+  
+  // État pour suivre les notifications non lues
+  const [hasUnread, setHasUnread] = useState(false);
 
-  /**
-   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
-   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
-   * Détection du thème (Priorité Dark)
-   */
+  // Détection du thème dynamique
   const isDark = appearanceSettings.themeMode === 'system' 
     ? systemTheme === 'dark' 
     : appearanceSettings.themeMode === 'dark';
         
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
+  /**
+   * Effet pour vérifier les notifications au montage
+   * Dans un projet réel, on utiliserait un Context ou un intervalle (polling)
+   */
+  useEffect(() => {
+    const checkNotifications = async () => {
+      const notifs = await NotificationService.getNotifications();
+      const unread = notifs.some(n => !n.isRead);
+      setHasUnread(unread);
+    };
+    checkNotifications();
+  }, []);
+
   return (
     <View className="flex-row justify-between items-center px-6 pt-4 mb-6">
       
-      {/* SECTION GAUCHE : IDENTITÉ
-          Affiche l'avatar (initiale) et le message de bienvenue personnalisé.
-      */}
+      {/* SECTION GAUCHE : IDENTITÉ */}
       <View className="flex-row items-center">
         <TouchableOpacity 
           activeOpacity={0.7}
@@ -41,7 +51,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
             backgroundColor: colors.surface, 
             borderColor: colors.border 
           }}
-          className="w-11 h-11 rounded-full items-center justify-center border mr-3" 
+          className="w-11 h-11 rounded-[16px] items-center justify-center border mr-3 shadow-sm" 
         >
           <Text style={{ color: colors.text }} className="font-black text-lg uppercase">
             {user.username[0]}
@@ -53,7 +63,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
             style={{ color: colors.muted }} 
             className="text-[9px] font-black uppercase tracking-[2px]"
           >
-            Radio Monoco
+            Radio Monoko
           </Text>
           <Text 
             style={{ color: colors.text }} 
@@ -64,9 +74,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
         </View>
       </View>
 
-      {/* SECTION DROITE : ACTIONS RAPIDES
-          Boutons circulaires stylisés utilisant les tokens de surface du thème.
-      */}
+      {/* SECTION DROITE : ACTIONS RAPIDES */}
       <View className="flex-row gap-x-3">
         {/* BOUTON RECHERCHE */}
         <TouchableOpacity 
@@ -83,7 +91,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
 
         {/* BOUTON NOTIFICATIONS */}
         <TouchableOpacity 
-          onPress={() => router.push("/notifications")}
+          onPress={() => router.push("/notifications/notifications")}
           style={{ 
             backgroundColor: colors.surface, 
             borderColor: colors.border 
@@ -93,14 +101,22 @@ export const PrivateHeader = ({ user }: { user: User }) => {
         >
           <Bell size={20} color={colors.text} />
           
-          {/* INDICATEUR LIVE : Utilise la couleur vibrante du Design System */}
-          <View 
-            style={{ 
-              backgroundColor: colors.live,
-              borderColor: colors.surface
-            }} 
-            className="absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full border-2" 
-          />
+          {/* BADGE DYNAMIQUE : S'affiche uniquement si non lu */}
+          {hasUnread && (
+            <View 
+              style={{ 
+                backgroundColor: colors.live, // Rouge vibrant du thème
+                borderColor: colors.surface,
+                position: 'absolute',
+                top: 2,
+                right: 2,
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                borderWidth: 2
+              }} 
+            />
+          )}
         </TouchableOpacity>
       </View>
     </View>

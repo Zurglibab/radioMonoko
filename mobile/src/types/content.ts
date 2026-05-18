@@ -67,3 +67,28 @@ export interface Playlist {
   collaborators?: string[]; // Liste des IDs des utilisateurs autorisés
   createdAt: string;    // Date de création au format ISO
 }
+
+/**
+ * Types de notifications
+ * Permet de catégoriser les différentes interactions sociales au sein de l'application.
+ * like : Un utilisateur a aimé une critique ou une station.
+ * comment : Un utilisateur a commenté une critique ou une station.
+ * follow : Un utilisateur a commencé à suivre un autre utilisateur.
+ * recommendation : Une station ou une playlist a été recommandée à l'utilisateur.
+ */
+export type NotificationType = 'like' | 'comment' | 'follow' | 'recommendation';
+
+/**
+ * Interface AppNotification : Modèle de données pour les notifications.
+ * Utilisé pour afficher les alertes et les mises à jour dans l'interface utilisateur.
+ */
+export interface AppNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  relatedUser?: string; // Nom de l'utilisateur qui a liké/suivi
+  targetId?: string;    // ID de la critique ou de l'œuvre associée
+}
