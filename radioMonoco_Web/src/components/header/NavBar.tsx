@@ -244,7 +244,7 @@ const NavBar = () => {
                                             onClick={handleLogout}
                                             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-primary/10 transition-colors text-left cursor-pointer outline-none font-bold"
                                         >
-                                            <HiOutlineLogout className="text-lg" /> Déconnexiona
+                                            <HiOutlineLogout className="text-lg" /> Déconnexion
                                         </button>
                                     </div>
                                 )}
