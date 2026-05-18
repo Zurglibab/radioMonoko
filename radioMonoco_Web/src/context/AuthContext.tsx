@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import authService from "../services/AuthService.ts";
 import api from "../services/Api.ts";
 
+<<<<<<< HEAD
 export interface User {
     id: string;
     email: string;
@@ -15,6 +16,13 @@ export interface User {
     is_banned: boolean;
     created_at: string;
     updated_at: string;
+=======
+interface User {
+    id: string;
+    email: string;
+    username?: string;
+    avatar?: string;
+>>>>>>> Collections
 }
 
 interface AuthContextType {
@@ -57,17 +65,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const register = async (email: string, password: string) => {
+<<<<<<< HEAD
         const response = await authService.register(email, password);
         await fetchAndSetUser(response.token);
+=======
+        const response = await authService.register(email, password,);
+        const token = response.token;
+
+        localStorage.setItem('token', token);
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        const userData = await authService.getMe();
+
+        localStorage.setItem('user', JSON.stringify(userData));
+
+        setUser(userData);
+>>>>>>> Collections
     };
 
     const login = async (email: string, password: string) => {
         const response = await authService.login(email, password);
+<<<<<<< HEAD
         await fetchAndSetUser(response.token);
     };
 
     const updateUser = (userData: User) => {
         localStorage.setItem('user', JSON.stringify(userData));
+=======
+        const token = response.token;
+
+        localStorage.setItem('token', token);
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        const userData = await authService.getMe();
+
+        localStorage.setItem('user', JSON.stringify(userData));
+
+>>>>>>> Collections
         setUser(userData);
     };
 
