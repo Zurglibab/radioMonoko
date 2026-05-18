@@ -4,10 +4,7 @@ import authService from "../services/AuthService.ts";
 import api from "../services/Api.ts";
 
 interface User {
-    id: string;
     email: string;
-    username?: string;
-    avatar?: string;
 }
 
 interface AuthContextType {
@@ -32,31 +29,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }, []);
 
     const register = async (email: string, password: string) => {
-        const response = await authService.register(email, password,);
-        const token = response.token;
-
+        const token = await authService.register(email, password);
         localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify({email}));
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-        const userData = await authService.getMe();
-
-        localStorage.setItem('user', JSON.stringify(userData));
-
-        setUser(userData);
+        setUser({ email });
     };
 
     const login = async (email: string, password: string) => {
-        const response = await authService.login(email, password);
-        const token = response.token;
-
+        const token = await authService.login(email, password);
         localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify({email}));
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-        const userData = await authService.getMe();
-
-        localStorage.setItem('user', JSON.stringify(userData));
-
-        setUser(userData);
+        setUser({ email });
     };
 
     const logout = () => {
