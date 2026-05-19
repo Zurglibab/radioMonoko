@@ -3,11 +3,18 @@ import type { ReactNode } from 'react';
 import authService from "../services/AuthService.ts";
 import api from "../services/Api.ts";
 
-interface User {
+export interface User {
     id: string;
     email: string;
-    username?: string;
-    avatar?: string;
+    username: string | null;
+    display_name: string | null;
+    avatar: string | null;
+    bio: string | null;
+    website: string | null;
+    privacy: "public" | "private";
+    is_banned: boolean;
+    created_at: string;
+    updated_at: string;
 }
 
 interface AuthContextType {
@@ -15,6 +22,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, password: string) => Promise<void>;
     logout: () => void;
+    updateUser: (user: User) => void; // <-- Corrigé : Déclaré dans le type
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,8 +74,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
     };
 
+    const updateUser = (updatedUser: User) => {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, login, register, logout }}>
+        <AuthContext.Provider value={{ user, login, register, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
