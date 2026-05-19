@@ -231,7 +231,6 @@ const Collections = () => {
                         </div>
                     </div>
 
-                    {/* CONTINUE */}
                     <div className="mt-16">
                         <h2 className="text-2xl font-bold text-white mb-6">Continue ton écoute</h2>
 
@@ -247,7 +246,6 @@ const Collections = () => {
                         </div>
                     </div>
 
-                    {/* STATUS */}
                     <div className="mt-16">
                         <h2 className="text-2xl font-bold text-white mb-6">Votre suivi</h2>
 
@@ -291,7 +289,6 @@ const Collections = () => {
                         </div>
                     </div>
 
-                    {/* ACTIVITÉ */}
                     <div className="mt-16">
                         <h2 className="text-2xl font-bold text-white mb-6">Activité récente</h2>
 
