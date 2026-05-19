@@ -4,6 +4,7 @@ import { Star, Heart, MessageSquare, MoreVertical, UserPlus, UserCheck } from "l
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { SocialActivity } from "@/types/community";
+import { useRouter } from "expo-router"; // 👈 NETTOYÉ : On ne garde QUE useRouter
 
 /**
  * ActivityCard : Composant central du fil d'actualité.
@@ -11,6 +12,7 @@ import { SocialActivity } from "@/types/community";
  * et suivre l'utilisateur directement depuis le flux.
  */
 export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
+  const router = useRouter();
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
@@ -54,7 +56,7 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
 
   return (
     <View 
-      className="p-5 rounded-[16px] border mb-4 shadow-sm"
+      className="p-5 rounded-[24px] border mb-4 shadow-sm"
       style={{ 
         backgroundColor: colors.surface, 
         borderColor: colors.border 
@@ -133,12 +135,14 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         )}
 
         {/* Texte de la critique (si type REVIEW) */}
-        <Text 
-          style={{ color: colors.text }} 
-          className="text-[14px] leading-5 opacity-90 italic"
-        >
-          "{activity.text || activity.text}"
-        </Text>
+        {activity.text && (
+          <Text 
+            style={{ color: colors.text }} 
+            className="text-[14px] leading-5 opacity-90 italic"
+          >
+            "{activity.text}"
+          </Text>
+        )}
       </View>
       
       {/* FOOTER : Interactions (Likes & Commentaires) */}
@@ -160,12 +164,12 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity className="flex-row items-center">
+        <TouchableOpacity 
+          onPress={() => router.push(`/community/comments/${activity.id}`)}
+          className="flex-row items-center"
+        >
           <MessageSquare size={16} color={colors.muted} />
-          <Text 
-            style={{ color: colors.muted }} 
-            className="text-xs ml-2 font-black uppercase tracking-tighter"
-          >
+          <Text style={{ color: colors.muted }} className="text-xs ml-2 font-black uppercase tracking-tighter">
             {activity.commentsCount} avis
           </Text>
         </TouchableOpacity>

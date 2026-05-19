@@ -8,15 +8,23 @@
 export type ActivityType = 'RATING' | 'REVIEW' | 'FOLLOW';
 
 /**
- * ReviewComment : Structure d'un commentaire sous une critique.
- * Permet d'animer les discussions autour des critiques.
- * Chaque commentaire est lié à une critique spécifique via l'ID de la critique.
+ * ReviewComment : Structure d'un commentaire sous une activité.
+ * Supporte deux niveaux : commentaires racine et réponses (parentId défini).
+ * Les réponses imbriquées pointent toujours vers un commentaire racine (pas de sous-sous-fils).
  */
 export interface ReviewComment {
   id: string;
+  userId: string;
   username: string;
+  avatar?: string;
   text: string;
   timestamp: string;
+  likes: number;
+  hasLiked?: boolean;
+  parentId?: string;
+  replyTo?: string;       // Nom d'affichage du destinataire (@mention)
+  replyToUserId?: string; // ID pour la navigation vers son profil
+  repliesCount?: number;  // Affiché sur les commentaires racine
 }
 
 /**
@@ -43,6 +51,7 @@ export interface Review {
  */
 export interface SocialActivity {
   id: string;
+  userId: string;
   user: string;       // Nom de l'acteur
   avatar?: string;    // Image de profil pour l'aspect réseau social
   type: ActivityType; // Type d'action (Badge visuel)

@@ -48,3 +48,4 @@ export const theme = {
 
 export type ThemeName = keyof typeof theme;
 export type ThemeColorName = keyof typeof theme.light.colors;
+export type AppColors = typeof theme.light.colors | typeof theme.dark.colors;
