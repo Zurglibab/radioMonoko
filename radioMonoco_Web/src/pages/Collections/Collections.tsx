@@ -6,6 +6,7 @@ import {useAuth} from "../../context/AuthContext.tsx";
 import { FiPlus } from "react-icons/fi";
 import CreateCollection from "./CreateCollections.tsx";
 import ModifyCollections from "./ModifyCollections.tsx";
+import DeleteCollection from "./DeleteCollections.tsx";
 
 const Collections = () => {
 
@@ -17,6 +18,8 @@ const Collections = () => {
     const [isWindowOpen, setIsWindowOpen] = useState(false);
     const [isModifyWindowOpen, setIsModifyWindowOpen] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
+    const [isDeleteWindowOpen, setIsDeleteWindowOpen] = useState(false);
+    const [collectionToDelete, setCollectionToDelete] = useState<Collection | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -75,6 +78,17 @@ const Collections = () => {
         } catch (err) {
             console.error(err);
             setError("Erreur lors de la modification de la collection");
+        }
+    };
+
+    const handleDeleteCollection = async (collectionId: string) => {
+        try {
+            setError("");
+            await CollectionsService.deleteCollection(collectionId);
+            setCollections((prev) => prev.filter((col) => col.id !== collectionId));
+        } catch (err) {
+            console.error(err);
+            setError("Erreur lors de la suppression de la collection");
         }
     };
 
@@ -170,6 +184,17 @@ const Collections = () => {
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            setCollectionToDelete(item);
+                                                            setIsDeleteWindowOpen(true);
+                                                        }}
+                                                        className="text-xs text-red-400 hover:text-red-300 transition"
+                                                    >
+                                                        Supprimer
+                                                    </button>
+
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
 
                                                             setSelectedCollection(item);
                                                             setIsModifyWindowOpen(true);
@@ -206,7 +231,6 @@ const Collections = () => {
                         </div>
                     </div>
 
-                    {/* CONTINUE */}
                     <div className="mt-16">
                         <h2 className="text-2xl font-bold text-white mb-6">Continue ton écoute</h2>
 
@@ -222,7 +246,6 @@ const Collections = () => {
                         </div>
                     </div>
 
-                    {/* STATUS */}
                     <div className="mt-16">
                         <h2 className="text-2xl font-bold text-white mb-6">Votre suivi</h2>
 
@@ -266,7 +289,6 @@ const Collections = () => {
                         </div>
                     </div>
 
-                    {/* ACTIVITÉ */}
                     <div className="mt-16">
                         <h2 className="text-2xl font-bold text-white mb-6">Activité récente</h2>
 
@@ -287,6 +309,7 @@ const Collections = () => {
             </div>
             <CreateCollection isOpen={isWindowOpen} onClose={()=> setIsWindowOpen(false)} onSubmit={handleCreateCollection}/>
             <ModifyCollections isOpen={isModifyWindowOpen} onClose={() => setIsModifyWindowOpen(false)} onSubmit={handleModifyCollection} collection={selectedCollection}/>
+            <DeleteCollection isOpen={isDeleteWindowOpen} onClose={() => {setIsDeleteWindowOpen(false); setCollectionToDelete(null);}} onSubmit={handleDeleteCollection} collection={collectionToDelete} />
         </div>
     );
 };
