@@ -6,6 +6,7 @@ import { Clock, Users, ChevronRight } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { User } from "@/types/auth";
 import { useLibrary } from "@/hooks/home/useLibrary";
+import { useCommunity } from "@/hooks/community/useCommunity";
 import { StatCard } from "@/features/home/components/private/StatCard";
 import { ActivityCard } from "@/features/home/components/private/ActivityCard";
 import { MediaSuggestion } from "@/features/home/components/private/MediaSuggestion";
@@ -33,6 +34,7 @@ export default function PrivateHome({ user }: { user: User }) {
         
   const colors = isDark ? theme.dark.colors : theme.light.colors;
   const { statusItems, favorites } = useLibrary();
+  const { feed, isLoading } = useCommunity();
 
   // Récupération dynamique du compteur de médias terminés
   const finishedCount = statusItems.find(s => s.slug === 'finished')?.count || 0;
@@ -55,16 +57,6 @@ export default function PrivateHome({ user }: { user: User }) {
       icon: <Users size={18} color={colors.text} /> 
     },
   ];
-
-  // Données simulées pour le fil d'actualité social
-  const activities = Array(3).fill({
-    user: "Marc",
-    media: "Jazz Night",
-    rating: 4,
-    comment: "La sélection Bebop était parfaite. Un vrai régal pour coder !",
-    likes: 24,
-    commentsCount: 8
-  });
 
   return (
     <SafeAreaView 
@@ -127,8 +119,8 @@ export default function PrivateHome({ user }: { user: User }) {
             </Text>
           </View>
           
-          {activities.map((act, idx) => (
-            <ActivityCard key={idx} activity={act} />
+          {feed.map((act) => (
+            <ActivityCard key={act.id} activity={act} />
           ))}
           
           {/* BOUTON D'EXPANSION DU FLUX
