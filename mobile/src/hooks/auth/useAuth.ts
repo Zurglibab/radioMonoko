@@ -4,45 +4,52 @@ import { useRouter } from "expo-router";
 import { useAuthContext } from "@/context/AuthContext";
 
 /**
- * useAuth : Hook personnalisé.
- * Il fait le pont entre l'appel API (AuthService) et le stockage persistant (AuthContext).
- * C'est ici que l'on gère les états éphémères (loading, erreurs locales).
+ * useAuth : Hook personnalisé orchestrant le flux de connexion.
+ * Fait le pont entre l'appel API brut (AuthService) et la gestion de session globale (AuthContext).
  */
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Je récupère la méthode du contexte global pour sauvegarder la session
-  // Renommage pour éviter la confusion avec la fonction login locale
+  // On récupère la méthode login du contexte (qui prend désormais uniquement le token en paramètre)
   const { login: updateGlobalState } = useAuthContext();
 
   /**
-   * login : Orchestre la procédure de connexion complète.
+   * Orchestre la procédure de connexion complète.
+   * @param email Adresse mail saisie par l'utilisateur
+   * @param password Mot de passe saisi par l'utilisateur
    */
   const login = async (email: string, password: string) => {
-    // Je reset les états locaux avant de commencer
     setIsLoading(true);
     setError(null);
 
+    // Normalisation de l'email : supprime les espaces et gère la casse (Majuscules/Minuscules)
+    const emailCleaned = email ? email.trim().toLowerCase() : "";
+
+    if (!emailCleaned || !password) {
+      setError("Veuillez remplir tous les champs.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      // J'appelle le service d'authentification pour obtenir l'user et le token
-      const response = await AuthService.login(email, password);
+      // 1. Appel HTTP vers l'API Swagger (POST /user/login) -> Renvoie { token: "string" }
+      const response = await AuthService.login(emailCleaned, password);
       
-      console.log("Succès API, mise à jour du contexte...");
+      console.log("[useAuth] Jeton reçu avec succès, initialisation de la session globale...");
 
-      // Je mets à jour le contexte global avec les données reçues de l'API
-      await updateGlobalState(response.user, response.token);
-
-      // Je navigue vers l'écran principal de l'application
-      // replace() empêche de revenir au formulaire de login via le bouton retour du téléphone
+      // 2. On transmet le token au contexte. L'AuthContext va automatiquement interroger 
+      // le endpoint GET /user/me pour hydrater l'application avec les vraies données de PostgreSQL.
+      await updateGlobalState(response.token);
+      
+      // 3. Redirection vers l'accueil de l'application RadioMonoko
       router.replace("/(tabs)/home");
       
     } catch (err: any) {
-      // En cas d'erreur, je capture le message et le stocke dans l'état local pour l'afficher à l'utilisateur
+      // Capture et centralisation des messages d'erreurs (Ex: 401 Identifiants invalides)
       setError(err.message || "Une erreur inconnue est survenue.");
     } finally {
-      // Toujours libérer l'UI à la fin du processus
       setIsLoading(false);
     }
   };

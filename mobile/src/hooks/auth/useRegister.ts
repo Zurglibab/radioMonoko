@@ -1,72 +1,56 @@
 import { useState } from "react";
 import { AuthService } from "@/services/auth/auth.service";
-import { validateEmail, validatePassword } from "@/utils/validation/validation";
+import { validateEmail } from "@/utils/validation/validation";
+import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
 
 /**
- * useRegister : Hook personnalisé pour gérer la création de compte.
- * Centralise les validations de formulaire et l'appel au service d'inscription.
+ * useRegister : Hook personnalisé orchestrant le flux d'inscription.
+ * Gère les validations de sécurité locales avant de soumettre les données à l'API.
  */
 export const useRegister = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  // On récupère la méthode globale du contexte pour connecter automatiquement l'utilisateur
+  const { login: updateGlobalState } = useAuthContext();
+
   /**
    * Méthode d'inscription.
-   * Effectue les vérifications de sécurité locales avant de solliciter l'API.
+   * @param email Adresse email saisie
+   * @param password Mot de passe choisi
+   * @param confirmPassword Confirmation du mot de passe
+   * @param agree Statut d'acceptation des CGU
    */
-  const register = async (
-    email: string, 
-    password: string, 
-    confirmPassword: string, 
-    agree: boolean
-  ) => {
+  const register = async (email: string, password: string, confirmPassword: string, agree: boolean) => {
     setError(null);
 
-    // Tous les champs sont obligatoires, validation basique pour éviter les appels inutiles à l'API
-    if (!email || !password || !confirmPassword) {
-      setError("Veuillez remplir tous les champs.");
-      return;
-    }
+    // Normalisation de l'email (nettoyage des espaces involontaires et de la casse)
+    const emailCleaned = email ? email.trim().toLowerCase() : "";
 
-    // Validation de l'email pour éviter les appels inutiles à l'API
-     if (!validateEmail(email)) {
-      setError("Veuillez entrer une adresse email valide.");
-      return;
-    }
+    // Validations locales d'intégrité du formulaire
+    if (!emailCleaned || !password || !confirmPassword) return setError("Veuillez remplir tous les champs.");
+    if (!validateEmail(emailCleaned)) return setError("Veuillez entrer une adresse email valide.");
+    if (password !== confirmPassword) return setError("Les mots de passe ne correspondent pas.");
+    if (!agree) return setError("Vous devez accepter les conditions d'utilisation.");
 
-    // Validation du mot de passe pour s'assurer qu'il respecte les critères de sécurité RGPD avant de tenter l'inscription
-    const passwordCheck = validatePassword(password);
-    if (!passwordCheck.isValid) {
-      setError(passwordCheck.message);
-      return;
-    }
-    
-    // Validation de correspondance des mots de passe pour éviter les erreurs côté serveur
-    if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
-      return;
-    }
-    
-    // Validation de l'acceptation des conditions d'utilisation, un prérequis pour s'inscrire
-    if (!agree) {
-      setError("Vous devez accepter les conditions d'utilisation.");
-      return;
-    }
-
-    // Début de la phase asynchrone
     setIsLoading(true);
 
     try {
-      // Tentative d'inscription via le service
-      await AuthService.register(email, password);
+      // Appel à l'API d'inscription. En cas de succès, un token JWT est retourné.
+      const response = await AuthService.register(emailCleaned, password);
       
-      // En cas de succès, on bascule direct sur l'app
-      // J'utilise replace pour ne pas pouvoir revenir au formulaire via le bouton "Back"
+      console.log("[useRegister] Compte créé en BDD avec succès, initialisation de la session...");
+
+      // Traitement post-inscription :
+      // Met à jour le state global d'authentification avec le token reçu pour connecter l'utilisateur immédiatement
+      await updateGlobalState(response.token);
+      
+      // Redirection vers l'écran d'accueil après une inscription réussie
       router.replace("/(tabs)/home");
     } catch (err: any) {
-      // Je remonte l'erreur pour l'UI
+      // Gestion des erreurs d'inscription (ex: email déjà utilisé, problèmes de réseau, etc.)
       setError(err.message || "Une erreur est survenue lors de l'inscription.");
     } finally {
       setIsLoading(false);
