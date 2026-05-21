@@ -41,9 +41,9 @@ const MOCK_REVIEWS: Record<string, Review[]> = {
  * MOCK_FRIENDS : Simule les relations sociales (Barème Follow/Social)
  */
 const MOCK_FRIENDS: User[] = [
-  { id: 'u1', username: 'Alex', email: 'alex@radio.fr', avatar: 'https://i.pravatar.cc/150?u=alex' },
-  { id: 'u2', username: 'Marie', email: 'marie@radio.fr', avatar: 'https://i.pravatar.cc/150?u=marie' },
-  { id: 'u3', username: 'Lucas', email: 'lucas@radio.fr', avatar: 'https://i.pravatar.cc/150?u=lucas' },
+  { id: 'u1', username: 'Alex', email: 'alex@radio.fr', avatar: 'https://i.pravatar.cc/150?u=alex', privacy: 'public' as const },
+  { id: 'u2', username: 'Marie', email: 'marie@radio.fr', avatar: 'https://i.pravatar.cc/150?u=marie', privacy: 'public' as const },
+  { id: 'u3', username: 'Lucas', email: 'lucas@radio.fr', avatar: 'https://i.pravatar.cc/150?u=lucas', privacy: 'public' as const },
 ];
 
 export const ContentService = {
