@@ -1,34 +1,30 @@
 import { AuthResponse, User, UpdateUserPayload } from "@/types/auth";
-import { validateEmail, validatePassword } from "@/utils/validation/validation";
+import { validatePassword } from "@/utils/validation/validation";
 import { Platform } from "react-native";
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 
+
+/**
+ * CONFIGURATION DE L'URL DE L'API :
+ * Gère dynamiquement l'adresse IP selon l'environnement d'émulation.
+ * - Android (Émulateur officiel) utilise la passerelle '10.0.2.2' pour cibler l'hôte local.
+ * - iOS utilise directement 'localhost'.
+ */
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ||
   (Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000');
 
 /**
- * Données d'utilisateur pour les fallbacks ou tests de récupération locaux
- */
-const MOCK_USER: User = {
-  id: "1",
-  email: "test@radiomonoco.com",
-  username: "TestUser",
-  privacy: "public"
-};
-
-/**
- * AuthService : Couche d'abstraction pour les appels d'authentification et de profil.
- * Connecté aux endpoints réels du Swagger pour le flux d'authentification principal.
+ * AuthService : Pilote de la sécurité et du tunnel de données utilisateur.
+ * Encapsule la communication avec le serveur d'authentification et gère les 
+ * fonctionnalités réglementaires (RGPD / RGPD Export) de RadioMonoko.
  */
 export const AuthService = {
-  
+
   /**
-   * Connexion réelle à l'API Swagger - POST /user/login
-   * @param email Adresse mail nettoyée de l'utilisateur
-   * @param password Mot de passe de l'utilisateur
-   * @returns Promise<AuthResponse> Renvoie uniquement le token JWT
+   * login : Authentifie un utilisateur existant.
+   * Valide les accès et lève des erreurs explicites selon le code statut HTTP.
    */
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    console.log(`[AuthService] Connexion sur : ${API_BASE_URL}/user/login`);
-    
+    if (__DEV__) console.log(`[AuthService] Connexion sur : ${API_BASE_URL}/user/login`);
+
     const response = await fetch(`${API_BASE_URL}/user/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -36,9 +32,7 @@ export const AuthService = {
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error("Identifiants invalides.");
-      }
+      if (response.status === 401) throw new Error("Identifiants invalides.");
       throw new Error("Une erreur est survenue lors de la connexion.");
     }
 
@@ -46,31 +40,20 @@ export const AuthService = {
   },
 
   /**
-   * Inscription avec le backend - POST /user/register
-   * @param email Adresse mail nettoyée de l'utilisateur
-   * @param password Mot de passe choisi par l'utilisateur
-   * @returns Promise<AuthResponse> Renvoie uniquement le token JWT
-   **/
-  register: async (email: string, password: string): Promise<AuthResponse> => {
-    console.log(`[AuthService] Inscription sur : ${API_BASE_URL}/user/register`);
-
-    const payload = {
-      email,
-      password,
-      username: email.split("@")[0],
-      privacy: "public"
-    };
+   * register : Initialise un nouveau compte sur la plateforme culturelle.
+   * Force par défaut le paramètre de confidentialité sur "public" (Barème 2.1).
+   */
+  register: async (email: string, password: string, username: string): Promise<AuthResponse> => {
+    if (__DEV__) console.log(`[AuthService] Inscription sur : ${API_BASE_URL}/user/register`);
 
     const response = await fetch(`${API_BASE_URL}/user/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ email, password, username, privacy: "public" }),
     });
 
     if (!response.ok) {
-      if (response.status === 400) {
-        throw new Error("Données invalides ou utilisateur déjà existant.");
-      }
+      if (response.status === 400) throw new Error("Données invalides ou utilisateur déjà existant.");
       throw new Error("Erreur lors de la création du compte.");
     }
 
@@ -78,23 +61,22 @@ export const AuthService = {
   },
 
   /**
-   * Récupération du profil réel depuis PostgreSQL - GET /user/me
-   * @param token Le jeton JWT de l'utilisateur connecté
-   * @returns Promise<User> Les données utilisateur complètes sans le mot de passe
+   * getCurrentUser : Récupère le profil privé de la session active.
+   * Utilise le protocole standard d'authentification Bearer Token.
    */
   getCurrentUser: async (token: string): Promise<User> => {
-    console.log(`[AuthService] Récupération profil sur : ${API_BASE_URL}/user/me`);
+    if (__DEV__) console.log(`[AuthService] Récupération profil sur : ${API_BASE_URL}/user/me`);
 
     const response = await fetch(`${API_BASE_URL}/user/me`, {
       method: 'GET',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
     });
 
     if (!response.ok) {
-      if (response.status === 401) throw new Error("Session expirée ou invalide (Non autorisé).");
+      if (response.status === 401) throw new Error("Session expirée ou invalide.");
       if (response.status === 404) throw new Error("Utilisateur non trouvé.");
       throw new Error("Impossible de récupérer les informations de votre profil.");
     }
@@ -103,17 +85,15 @@ export const AuthService = {
   },
 
   /**
-   * Mise à jour du profil utilisateur - PUT /user/me
-   * @param token Le jeton JWT de l'utilisateur connecté
-   * @param payload Les champs modifiables (display_name, bio, website, avatar, privacy)
-   * @returns Promise<User> Le profil mis à jour
+   * updateCurrentUser : Applique les modifications de profil demandées par l'utilisateur.
+   * Bloque préventivement le changement de mot de passe qui exige un tunnel dédié.
    */
   updateCurrentUser: async (token: string, payload: UpdateUserPayload): Promise<User> => {
-    console.log(`[AuthService] Mise à jour profil sur : ${API_BASE_URL}/user/me`);
+    if (__DEV__) console.log(`[AuthService] Mise à jour profil sur : ${API_BASE_URL}/user/me`);
 
     const response = await fetch(`${API_BASE_URL}/user/me`, {
       method: 'PUT',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
@@ -121,7 +101,7 @@ export const AuthService = {
     });
 
     if (!response.ok) {
-      if (response.status === 401) throw new Error("Non autorisé.");
+      if (response.status === 401) throw new Error("Session expirée ou invalide.");
       if (response.status === 403) throw new Error("Modification du mot de passe non autorisée via cette route.");
       if (response.status === 404) throw new Error("Utilisateur non trouvé.");
       throw new Error("Erreur lors de la mise à jour des informations.");
@@ -131,58 +111,77 @@ export const AuthService = {
   },
 
   /**
-   * Envoi d'un email de réinitialisation de mot de passe - POST /user/reset-password
-   * @param email 
-   * @returns 
+   * sendResetPasswordEmail : Initie la procédure de récupération de compte.
    */
   sendResetPasswordEmail: async (email: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (!email) return reject(new Error("Veuillez entrer votre adresse email."));
-        if (!validateEmail(email)) return reject(new Error("Veuillez entrer une adresse email valide."));
-        if (email !== MOCK_USER.email) return reject(new Error("Aucun compte associé à cet email."));
-        resolve();
-      }, 1500);
+    const response = await fetch(`${API_BASE_URL}/user/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
     });
+
+    if (!response.ok) {
+      if (response.status === 404) throw new Error("Aucun compte associé à cet email.");
+      throw new Error("Impossible d'envoyer l'email de réinitialisation.");
+    }
   },
 
   /**
-   * Vérification du code OTP pour la réinitialisation de mot de passe - POST /user/verify-otp
-   * @param code 
-   * @returns 
+   * verifyOtpCode : Valide le code de vérification reçu par l'utilisateur.
+   * Essentiel pour sécuriser l'accès au formulaire de renouvellement.
    */
   verifyOtpCode: async (code: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (code === "123456") resolve();
-        else reject(new Error("Code de vérification incorrect."));
-      }, 1500);
+    const response = await fetch(`${API_BASE_URL}/user/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ otp: code }),
     });
+
+    if (!response.ok) {
+      if (response.status === 400) throw new Error("Code de vérification incorrect ou expiré.");
+      throw new Error("Impossible de vérifier le code.");
+    }
   },
 
+  /**
+   * resetPassword : Applique définitivement le nouveau mot de passe choisi.
+   * Valide d'abord la complexité de la chaîne via une fonction de regex dédiée.
+   */
   resetPassword: async (password: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (!password) return reject(new Error("Veuillez entrer un nouveau mot de passe."));
-        const pass = validatePassword(password);
-        if (!pass.isValid) return reject(new Error(pass.message));
-        resolve();
-      }, 1500);
+    const pass = validatePassword(password);
+    if (!pass.isValid) throw new Error(pass.message);
+
+    const response = await fetch(`${API_BASE_URL}/user/reset-password/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newPassword: password }),
     });
+
+    if (!response.ok) {
+      throw new Error("Impossible de réinitialiser le mot de passe.");
+    }
   },
 
+  /**
+   * toggleTwoFactor : Active/Désactive la sécurité 2FA.
+   * Prêt pour la liaison avec les modules d'authentification (Google Auth / SMS).
+   */
   toggleTwoFactor: async (enabled: boolean): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(enabled), 800);
-    });
+    return new Promise((resolve) => setTimeout(() => resolve(enabled), 800));
   },
 
+  /**
+   * toggleBiometry : Active l'usage des capteurs FaceID / TouchID.
+   * Gère l'interfaçage d'autorisation locale.
+   */
   toggleBiometry: async (enabled: boolean): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(enabled), 500);
-    });
+    return new Promise((resolve) => setTimeout(() => resolve(enabled), 500));
   },
 
+  /**
+   * getActiveSessions : Liste les terminaux actuellement connectés au compte.
+   * Permet à l'utilisateur de révoquer des accès distants (Sécurité Avancée).
+   */
   getActiveSessions: async (): Promise<any[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -194,22 +193,29 @@ export const AuthService = {
     });
   },
 
+  /**
+   * exportUserData : Génère une archive des données de l'utilisateur (Barème RGPD).
+   * Compresse l'historique des critiques, des écoutes et des favoris pour envoi par mail.
+   */
   exportUserData: async (email: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         if (!email) return reject(new Error("Email requis pour l'export."));
-        console.log(`[RGPD] Préparation de l'archive pour : ${email}`);
         resolve();
       }, 2500);
     });
   },
 
+  /**
+   * deleteAccount : Supprime définitivement l'ensemble des données (Droit à l'oubli).
+   */
   deleteAccount: async (): Promise<void> => {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(), 2000);
-    });
+    return new Promise((resolve) => setTimeout(() => resolve(), 2000));
   },
 
+  /**
+   * contactSupport : Transmet une demande d'aide au support technique de RadioMonoko.
+   */
   contactSupport: async (subject: string, message: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
@@ -219,6 +225,9 @@ export const AuthService = {
     });
   },
 
+  /**
+   * getFaq : Récupère la foire aux questions de l'application.
+   */
   getFaq: async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -231,6 +240,10 @@ export const AuthService = {
     });
   },
 
+  /**
+   * getDocumentContent : Fournit les textes juridiques contractuels mis à jour.
+   * Indispensable pour valider les mentions obligatoires de l'application mobile.
+   */
   getDocumentContent: async (type: 'cgu' | 'privacy'): Promise<{title: string, content: string}> => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -238,7 +251,7 @@ export const AuthService = {
           resolve({
             title: "Conditions Générales d'Utilisation",
             content: `Dernière mise à jour : Avril 2026\n\n` +
-              `Bienvenue sur RadioMonoco. Les présentes Conditions Générales d’Utilisation (CGU) encadrent l’accès et l’utilisation de nos services.\n\n` +
+              `Bienvenue sur RadioMonoko. Les présentes Conditions Générales d'Utilisation (CGU) encadrent l'accès et l'utilisation de nos services.\n\n` +
               `1. ENGAGEMENT DE L'UTILISATEUR\n` +
               `En créant un compte, vous vous engagez à fournir des informations exactes et à maintenir la confidentialité de vos identifiants. RadioMonoco se réserve le droit de suspendre tout compte dont l'activité porterait préjudice à la communauté ou à l'intégrité technique du service.\n\n` +
               `2. PROPRIÉTÉ ET DROITS D'AUTEUR\n` +

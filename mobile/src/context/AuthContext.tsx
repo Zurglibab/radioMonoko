@@ -95,10 +95,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const storedAppearance = await SecureStore.getItemAsync('appearance_settings');
         if (storedAppearance) setAppearanceSettings(JSON.parse(storedAppearance));
 
-      } catch (error) {
+      } catch (error: any) {
         console.error("[AuthContext] Échec du chargement de la session initiale :", error);
-        // Si le token ou les données sont corrompus/expirés, nettoyage de sécurité
-        await SecureStore.deleteItemAsync('user_token');
+        // Supprime le token uniquement si la session est réellement invalide (401).
+        // Une erreur réseau (serveur down, wifi coupé) ne doit pas déconnecter l'utilisateur.
+        if (error?.message?.includes('Session expirée')) {
+          await SecureStore.deleteItemAsync('user_token');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -143,8 +146,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const freshUser = await AuthService.getCurrentUser(token);
       setUser(freshUser);
-    } catch (error) {
-      console.error("[AuthContext] Impossible de rafraîchir le profil :", error);
+    } catch (error: any) {
+      if (error?.message?.includes('Session expirée')) {
+        await logout();
+      }
     }
   };
 
@@ -156,8 +161,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const updatedUser = await AuthService.updateCurrentUser(token, payload);
       setUser(updatedUser);
-    } catch (error) {
-      console.error("[AuthContext] Erreur lors de la mise à jour du profil :", error);
+    } catch (error: any) {
+      if (error?.message?.includes('Session expirée')) {
+        await logout();
+      }
       throw error;
     }
   };
