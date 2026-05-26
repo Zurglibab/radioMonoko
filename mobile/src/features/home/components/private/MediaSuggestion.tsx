@@ -27,15 +27,17 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
         
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
-  const { currentTrack, isPlaying, playTrack, togglePlay } = usePlayer();
+  // Accès aux fonctions de contrôle du lecteur audio et aux états de lecture
+  const { currentTrack, isPlaying, liveSongTitle, playTrack, togglePlay } = usePlayer();
   const [isSheetVisible, setIsSheetVisible] = useState(false);
 
   // Déterminer si ce média précis est celui chargé dans le lecteur
   const isCurrentMedia = currentTrack?.id === item.id;
 
   /**
-   * handlePress : Gère le flux audio.
-   * Si c'est le média actuel -> Pause/Play. Sinon -> Charge le nouveau média.
+   * Gestion de la pression sur la carte : Si le média est déjà en cours de lecture, on bascule entre play/pause.
+   * Sinon, on lance la lecture de ce média. Cela permet une interaction intuitive : un tap rapide pour jouer/mettre en pause,
+   * et un changement de média fluide sans nécessiter d'étapes supplémentaires.
    */
   const handlePress = () => {
     if (isCurrentMedia) {
@@ -47,7 +49,7 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
 
   return (
     <View className="mr-5 w-40">
-      {/* CONTENEUR VISUEL (POCHETTE) */}
+      {/* Cover */}
       <View 
         className="w-40 h-40 rounded-[32px] overflow-hidden relative border shadow-sm" 
         style={{ 
@@ -62,7 +64,7 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
           style={{ backgroundColor: colors.surface }}
         />
         
-        {/* OVERLAY DE LECTURE (CENTRAL) */}
+        {/* Overlay de lecture (centrale) */}
         <TouchableOpacity 
           className="absolute inset-0 items-center justify-center"
           onPress={handlePress}
@@ -80,7 +82,7 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
           )}
         </TouchableOpacity>
 
-        {/* BOUTON OPTIONS (+) : Positionné en haut à droite */}
+        {/* Bouton options (+) */}
         <TouchableOpacity 
           className="absolute top-3 right-3 p-2 rounded-full border"
           style={{ 
@@ -94,7 +96,7 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
         </TouchableOpacity>
       </View>
 
-      {/* MÉTADONNÉES : Titre et Artiste */}
+      {/* Titre et Artiste */}
       <View className="mt-3 px-1">
         <Text 
           style={{ color: isCurrentMedia ? colors.primary : colors.text }} 
@@ -108,11 +110,11 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
           className="text-[10px] font-black uppercase tracking-tighter"
           numberOfLines={1}
         >
-          {item.artist}
+          {isCurrentMedia && liveSongTitle ? `Direct : ${liveSongTitle}` : item.artist}
         </Text>
       </View>
 
-      {/* MENU CONTEXTUEL (ActionSheet) */}
+      {/* Action Sheet */}
       <MediaActionSheet 
         isVisible={isSheetVisible} 
         onClose={() => setIsSheetVisible(false)} 
