@@ -1,15 +1,6 @@
 import { AuthResponse, User, UpdateUserPayload } from "@/types/auth";
 import { validatePassword } from "@/utils/validation/validation";
-import { Platform } from "react-native";
-
-/**
- * CONFIGURATION DE L'URL DE L'API :
- * Gère dynamiquement l'adresse IP selon l'environnement d'émulation.
- * - Android (Émulateur officiel) utilise la passerelle '10.0.2.2' pour cibler l'hôte local.
- * - iOS utilise directement 'localhost'.
- */
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ||
-  (Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000');
+import { apiFetch } from "@/utils/apiFetch";
 
 /**
  * AuthService : Pilote de la sécurité et du tunnel de données utilisateur.
@@ -20,23 +11,21 @@ export const AuthService = {
 
   /**
    * login : Authentifie un utilisateur existant.
-   * Valide les accès et lève des erreurs explicites selon le code statut HTTP.
+   * Lève une erreur explicite "Identifiants invalides." sur un 401 du serveur.
    */
   login: async (email: string, password: string): Promise<AuthResponse> => {
-    if (__DEV__) console.log(`[AuthService] Connexion sur : ${API_BASE_URL}/user/login`);
-
-    const response = await fetch(`${API_BASE_URL}/user/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error("Identifiants invalides.");
+    try {
+      return await apiFetch<AuthResponse>('/user/login', {
+        method: 'POST',
+        body: { email, password },
+      });
+    } catch (error: any) {
+      if (error?.message?.includes("Session d'authentification expirée")) {
+        // Sur /login, un 401 = mauvais identifiants, pas une session expirée
+        throw new Error("Identifiants invalides.");
+      }
       throw new Error("Une erreur est survenue lors de la connexion.");
     }
-
-    return response.json();
   },
 
   /**
@@ -44,20 +33,17 @@ export const AuthService = {
    * Force par défaut le paramètre de confidentialité sur "public" (Barème 2.1).
    */
   register: async (email: string, password: string, username: string): Promise<AuthResponse> => {
-    if (__DEV__) console.log(`[AuthService] Inscription sur : ${API_BASE_URL}/user/register`);
-
-    const response = await fetch(`${API_BASE_URL}/user/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, username, privacy: "public" }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 400) throw new Error("Données invalides ou utilisateur déjà existant.");
+    try {
+      return await apiFetch<AuthResponse>('/user/register', {
+        method: 'POST',
+        body: { email, password, username, privacy: "public" },
+      });
+    } catch (error: any) {
+      if (error?.message?.includes("HTTP 400")) {
+        throw new Error("Données invalides ou utilisateur déjà existant.");
+      }
       throw new Error("Erreur lors de la création du compte.");
     }
-
-    return response.json();
   },
 
   /**
@@ -65,23 +51,17 @@ export const AuthService = {
    * Utilise le protocole standard d'authentification Bearer Token.
    */
   getCurrentUser: async (token: string): Promise<User> => {
-    if (__DEV__) console.log(`[AuthService] Récupération profil sur : ${API_BASE_URL}/user/me`);
-
-    const response = await fetch(`${API_BASE_URL}/user/me`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error("Session expirée ou invalide.");
-      if (response.status === 404) throw new Error("Utilisateur non trouvé.");
+    try {
+      return await apiFetch<User>('/user/me', { token });
+    } catch (error: any) {
+      if (error?.message?.includes("Session d'authentification expirée")) {
+        throw new Error("Session expirée ou invalide.");
+      }
+      if (error?.message?.includes("HTTP 404")) {
+        throw new Error("Utilisateur non trouvé.");
+      }
       throw new Error("Impossible de récupérer les informations de votre profil.");
     }
-
-    return response.json();
   },
 
   /**
@@ -89,39 +69,39 @@ export const AuthService = {
    * Bloque préventivement le changement de mot de passe qui exige un tunnel dédié.
    */
   updateCurrentUser: async (token: string, payload: UpdateUserPayload): Promise<User> => {
-    if (__DEV__) console.log(`[AuthService] Mise à jour profil sur : ${API_BASE_URL}/user/me`);
-
-    const response = await fetch(`${API_BASE_URL}/user/me`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) throw new Error("Session expirée ou invalide.");
-      if (response.status === 403) throw new Error("Modification du mot de passe non autorisée via cette route.");
-      if (response.status === 404) throw new Error("Utilisateur non trouvé.");
+    try {
+      return await apiFetch<User>('/user/me', {
+        token,
+        method: 'PUT',
+        body: payload,
+      });
+    } catch (error: any) {
+      if (error?.message?.includes("Session d'authentification expirée")) {
+        throw new Error("Session expirée ou invalide.");
+      }
+      if (error?.message?.includes("HTTP 403")) {
+        throw new Error("Modification du mot de passe non autorisée via cette route.");
+      }
+      if (error?.message?.includes("HTTP 404")) {
+        throw new Error("Utilisateur non trouvé.");
+      }
       throw new Error("Erreur lors de la mise à jour des informations.");
     }
-
-    return response.json();
   },
 
   /**
    * sendResetPasswordEmail : Initie la procédure de récupération de compte.
    */
   sendResetPasswordEmail: async (email: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/user/reset-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) throw new Error("Aucun compte associé à cet email.");
+    try {
+      await apiFetch<void>('/user/reset-password', {
+        method: 'POST',
+        body: { email },
+      });
+    } catch (error: any) {
+      if (error?.message?.includes("HTTP 404")) {
+        throw new Error("Aucun compte associé à cet email.");
+      }
       throw new Error("Impossible d'envoyer l'email de réinitialisation.");
     }
   },
@@ -131,14 +111,15 @@ export const AuthService = {
    * Essentiel pour sécuriser l'accès au formulaire de renouvellement.
    */
   verifyOtpCode: async (code: string): Promise<void> => {
-    const response = await fetch(`${API_BASE_URL}/user/verify-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ otp: code }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 400) throw new Error("Code de vérification incorrect ou expiré.");
+    try {
+      await apiFetch<void>('/user/verify-otp', {
+        method: 'POST',
+        body: { otp: code },
+      });
+    } catch (error: any) {
+      if (error?.message?.includes("HTTP 400")) {
+        throw new Error("Code de vérification incorrect ou expiré.");
+      }
       throw new Error("Impossible de vérifier le code.");
     }
   },
@@ -151,13 +132,12 @@ export const AuthService = {
     const pass = validatePassword(password);
     if (!pass.isValid) throw new Error(pass.message);
 
-    const response = await fetch(`${API_BASE_URL}/user/reset-password/confirm`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ newPassword: password }),
-    });
-
-    if (!response.ok) {
+    try {
+      await apiFetch<void>('/user/reset-password/confirm', {
+        method: 'POST',
+        body: { newPassword: password },
+      });
+    } catch {
       throw new Error("Impossible de réinitialiser le mot de passe.");
     }
   },
@@ -244,7 +224,7 @@ export const AuthService = {
    * getDocumentContent : Fournit les textes juridiques contractuels mis à jour.
    * Indispensable pour valider les mentions obligatoires de l'application mobile.
    */
-  getDocumentContent: async (type: 'cgu' | 'privacy'): Promise<{title: string, content: string}> => {
+  getDocumentContent: async (type: 'cgu' | 'privacy'): Promise<{ title: string; content: string }> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (type === 'cgu') {

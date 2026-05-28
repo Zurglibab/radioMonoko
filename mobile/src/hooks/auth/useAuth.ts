@@ -4,6 +4,17 @@ import { useRouter } from "expo-router";
 import { useAuthContext } from "@/context/AuthContext";
 
 /**
+ * Pré-valide les champs du formulaire de connexion.
+ * Retourne un message d'erreur localisé, ou null si tout est valide.
+ */
+const validateLoginForm = (email: string, password: string): string | null => {
+  if (!email || !password) {
+    return "Veuillez remplir tous les champs.";
+  }
+  return null;
+};
+
+/**
  * useAuth : Hook personnalisé orchestrant le flux de connexion.
  * Fait le pont entre l'appel API brut (AuthService) et la gestion de session globale (AuthContext).
  */
@@ -12,43 +23,41 @@ export const useAuth = () => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // On récupère la méthode login du contexte (qui prend désormais uniquement le token en paramètre)
+  // Méthode login du contexte global (prend uniquement un token en paramètre).
   const { login: updateGlobalState } = useAuthContext();
 
   /**
-   * Orchestre la procédure de connexion complète.
-   * @param email Adresse mail saisie par l'utilisateur
-   * @param password Mot de passe saisi par l'utilisateur
+   * Orchestre la procédure de connexion complète :
+   * 1. Validation locale des champs
+   * 2. Appel à l'API d'authentification (POST /user/login)
+   * 3. Hydratation du contexte global (qui interroge GET /user/me)
+   * 4. Redirection vers l'accueil
    */
   const login = async (email: string, password: string) => {
-    setIsLoading(true);
     setError(null);
 
-    // Normalisation de l'email : supprime les espaces et gère la casse (Majuscules/Minuscules)
-    const emailCleaned = email ? email.trim().toLowerCase() : "";
+    // Normalisation de l'email : suppression des espaces et harmonisation de la casse
+    const emailCleaned = email?.trim().toLowerCase() || "";
 
-    if (!emailCleaned || !password) {
-      setError("Veuillez remplir tous les champs.");
-      setIsLoading(false);
+    // Validation locale avant tout appel réseau
+    const validationError = validateLoginForm(emailCleaned, password);
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
+    setIsLoading(true);
     try {
-      // 1. Appel HTTP vers l'API Swagger (POST /user/login) -> Renvoie { token: "string" }
       const response = await AuthService.login(emailCleaned, password);
-      
-      console.log("[useAuth] Jeton reçu avec succès, initialisation de la session globale...");
 
-      // 2. On transmet le token au contexte. L'AuthContext va automatiquement interroger 
-      // le endpoint GET /user/me pour hydrater l'application avec les vraies données de PostgreSQL.
+      if (__DEV__) {
+        console.log("[useAuth] Jeton reçu, initialisation de la session globale...");
+      }
+
       await updateGlobalState(response.token);
-      
-      // 3. Redirection vers l'accueil de l'application RadioMonoko
       router.replace("/(tabs)/home");
-      
     } catch (err: any) {
-      // Capture et centralisation des messages d'erreurs (Ex: 401 Identifiants invalides)
-      setError(err.message || "Une erreur inconnue est survenue.");
+      setError(err?.message || "Une erreur inconnue est survenue.");
     } finally {
       setIsLoading(false);
     }

@@ -1,11 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { User, UpdateUserPayload } from '@/types/auth';
 import { AuthService } from '@/services/auth/auth.service';
 
-/**
- * Interfaces pour les réglages additionnels de l'application
- */
 interface SecuritySettings {
   is2FAEnabled: boolean;
   isBiometricEnabled: boolean;
@@ -23,11 +20,8 @@ interface AppearanceSettings {
   isCompactMode: boolean;
 }
 
-/**
- * Interface contractuelle complète du state global d'authentification et de configuration
- */
 interface AuthContextType {
-  user: User | null;          
+  user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -45,12 +39,24 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Helper : détecte les erreurs liées à une session invalide/expirée
+ * pour déclencher un logout automatique de manière cohérente.
+ */
+const isSessionError = (error: any): boolean => {
+  const msg = error?.message || '';
+  return (
+    msg.includes('Session expirée') ||
+    msg.includes("Session d'authentification expirée") ||
+    msg.includes('Utilisateur non trouvé')
+  );
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Etats locaux pour les préférences utilisateur (sécurité, notifications, apparence)
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings>({
     is2FAEnabled: false,
     isBiometricEnabled: false,
@@ -69,38 +75,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   /**
-   * Initialisation de la session utilisateur au lancement de l'application
-   * - Récupère le token stocké et hydrate le profil utilisateur depuis le backend
-   * - Charge les préférences utilisateur locales (sécurité, notifications, apparence)
-   * - Gère les erreurs de récupération (token corrompu, données expirées) en nettoyant la session
+   * Récupère à la volée les préférences (apparence, sécurité, notifications) stockées sur l'appareil.
+   * Échec silencieux : on garde les valeurs par défaut si la lecture échoue.
+   */
+  const loadLocalSettings = useCallback(async () => {
+    try {
+      const [storedSecurity, storedNotifs, storedAppearance] = await Promise.all([
+        SecureStore.getItemAsync('security_settings'),
+        SecureStore.getItemAsync('notification_settings'),
+        SecureStore.getItemAsync('appearance_settings'),
+      ]);
+
+      if (storedSecurity) setSecuritySettings(JSON.parse(storedSecurity));
+      if (storedNotifs) setNotificationSettings(JSON.parse(storedNotifs));
+      if (storedAppearance) setAppearanceSettings(JSON.parse(storedAppearance));
+    } catch (e) {
+      if (__DEV__) console.warn("[AuthContext] Impossible de charger les préférences locales :", e);
+    }
+  }, []);
+
+  /**
+   * Déconnexion complète : purge l'état mémoire et le token persistant.
+   */
+  const logout = useCallback(async () => {
+    setUser(null);
+    setToken(null);
+    try {
+      await SecureStore.deleteItemAsync('user_token');
+    } catch (error) {
+      if (__DEV__) console.warn("[AuthContext] Erreur lors de la suppression du token :", error);
+    }
+  }, []);
+
+  /**
+   * Initialisation de la session au lancement de l'application.
+   * Hydrate les préférences immédiatement, puis tente de restaurer la session via le token persistant.
    */
   useEffect(() => {
     const initializeSession = async () => {
+      // Charger d'abord les préférences locales pour un affichage immédiat et fluide
+      await loadLocalSettings();
+
       try {
-        // Récupération du token et hydratation utilisateur
         const storedToken = await SecureStore.getItemAsync('user_token');
-        if (storedToken) {
-          const dbUser = await AuthService.getCurrentUser(storedToken);
-          setToken(storedToken);
-          setUser(dbUser);
-        }
+        if (!storedToken) return;
 
-        // Récupération des préférences utilisateur locales
-        const storedSecurity = await SecureStore.getItemAsync('security_settings');
-        if (storedSecurity) setSecuritySettings(JSON.parse(storedSecurity));
-
-        const storedNotifs = await SecureStore.getItemAsync('notification_settings');
-        if (storedNotifs) setNotificationSettings(JSON.parse(storedNotifs));
-
-        const storedAppearance = await SecureStore.getItemAsync('appearance_settings');
-        if (storedAppearance) setAppearanceSettings(JSON.parse(storedAppearance));
-
+        // Validation du token via /user/me (le serveur peut l'avoir invalidé entre-temps)
+        const dbUser = await AuthService.getCurrentUser(storedToken);
+        setToken(storedToken);
+        setUser(dbUser);
       } catch (error: any) {
-        console.error("[AuthContext] Échec du chargement de la session initiale :", error);
-        // Supprime le token uniquement si la session est réellement invalide (401).
-        // Une erreur réseau (serveur down, wifi coupé) ne doit pas déconnecter l'utilisateur.
-        if (error?.message?.includes('Session expirée')) {
-          await SecureStore.deleteItemAsync('user_token');
+        if (__DEV__) console.warn("[AuthContext] Session initiale non restaurée :", error?.message);
+        // Token corrompu ou expiré : on purge pour repartir d'un état propre
+        if (isSessionError(error)) {
+          await SecureStore.deleteItemAsync('user_token').catch(() => {});
         }
       } finally {
         setIsLoading(false);
@@ -108,110 +136,91 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initializeSession();
-  }, []);
+  }, [loadLocalSettings]);
 
   /**
-   * Procédure d'authentification globale (POST /user/login ou POST /user/register)
+   * Connexion globale : valide le token contre /user/me, persiste, puis hydrate les préférences.
    */
-  const login = async (userToken: string) => {
-    try {
-      const dbUser = await AuthService.getCurrentUser(userToken);
-      setToken(userToken);
-      setUser(dbUser);
-      await SecureStore.setItemAsync('user_token', userToken);
-    } catch (error) {
-      console.error("[AuthContext] Erreur lors de l'initialisation du login :", error);
-      throw error;
-    }
-  };
+  const login = useCallback(async (userToken: string) => {
+    const dbUser = await AuthService.getCurrentUser(userToken);
+    setToken(userToken);
+    setUser(dbUser);
+    await SecureStore.setItemAsync('user_token', userToken);
+    await loadLocalSettings();
+  }, [loadLocalSettings]);
 
   /**
-   * Déconnexion complète
+   * Force un rafraîchissement du profil utilisateur depuis la base de données (GET /user/me).
+   * En cas de session expirée, déconnecte automatiquement l'utilisateur.
    */
-  const logout = async () => {
-    try {
-      setUser(null);
-      setToken(null);
-      await SecureStore.deleteItemAsync('user_token');
-    } catch (error) {
-      console.error("[AuthContext] Erreur lors de la déconnexion :", error);
-    }
-  };
-
-  /**
-   * Forcer un rafraîchissement des infos (GET /user/me)
-   */
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (!token) return;
     try {
       const freshUser = await AuthService.getCurrentUser(token);
       setUser(freshUser);
     } catch (error: any) {
-      if (error?.message?.includes('Session expirée')) {
-        await logout();
-      }
+      if (isSessionError(error)) await logout();
     }
-  };
+  }, [token, logout]);
 
   /**
-   * Met à jour le profil de l'utilisateur sur le serveur (PUT /user/me)
+   * Met à jour le profil public et les métadonnées de l'utilisateur (PUT /user/me).
+   * Clés valides du Swagger : display_name, avatar, bio, website, privacy.
    */
-  const updateProfile = async (payload: UpdateUserPayload) => {
+  const updateProfile = useCallback(async (payload: UpdateUserPayload) => {
     if (!token) throw new Error("Aucun jeton d'authentification valide trouvé.");
     try {
       const updatedUser = await AuthService.updateCurrentUser(token, payload);
       setUser(updatedUser);
     } catch (error: any) {
-      if (error?.message?.includes('Session expirée')) {
-        await logout();
-      }
+      if (isSessionError(error)) await logout();
       throw error;
     }
-  };
+  }, [token, logout]);
 
   /**
-   * Persistance locale des réglages de sécurité
+   * Persistance locale des réglages de sécurité (2FA, Biométrie).
    */
-  const updateSecurity = async (key: keyof SecuritySettings, value: boolean) => {
+  const updateSecurity = useCallback(async (key: keyof SecuritySettings, value: boolean) => {
     const newSettings = { ...securitySettings, [key]: value };
     setSecuritySettings(newSettings);
     await SecureStore.setItemAsync('security_settings', JSON.stringify(newSettings));
-  };
+  }, [securitySettings]);
 
   /**
-   * Persistance locale des préférences de notifications
+   * Persistance locale des préférences de réception des notifications push.
    */
-  const updateNotifications = async (key: keyof NotificationSettings, value: boolean) => {
+  const updateNotifications = useCallback(async (key: keyof NotificationSettings, value: boolean) => {
     const newSettings = { ...notificationSettings, [key]: value };
     setNotificationSettings(newSettings);
     await SecureStore.setItemAsync('notification_settings', JSON.stringify(newSettings));
-  };
+  }, [notificationSettings]);
 
   /**
-   * Persistance locale des réglages d'apparence (Thème)
+   * Persistance locale instantanée des réglages graphiques (thèmes, couleurs).
    */
-  const updateAppearance = async (key: keyof AppearanceSettings, value: any) => {
+  const updateAppearance = useCallback(async (key: keyof AppearanceSettings, value: any) => {
     const newSettings = { ...appearanceSettings, [key]: value };
     setAppearanceSettings(newSettings);
     await SecureStore.setItemAsync('appearance_settings', JSON.stringify(newSettings));
-  };
+  }, [appearanceSettings]);
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      token, 
-      isAuthenticated: !!user, 
-      isLoading, 
+    <AuthContext.Provider value={{
+      user,
+      token,
+      isAuthenticated: !!user,
+      isLoading,
       securitySettings,
       notificationSettings,
       appearanceSettings,
-      login, 
+      login,
       logout,
       refreshProfile,
       updateProfile,
       updateSecurity,
       updateNotifications,
-      updateAppearance
+      updateAppearance,
     }}>
       {children}
     </AuthContext.Provider>
@@ -220,8 +229,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuthContext = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuthContext doit être utilisé à l'intérieur d'un AuthProvider");
-  }
+  if (!context) throw new Error("useAuthContext doit être utilisé à l'intérieur d'un AuthProvider");
   return context;
 };

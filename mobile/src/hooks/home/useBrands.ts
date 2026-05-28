@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Station } from "@/types/content";
 import { BrandService } from "@/services/brand/brand.service";
 import { mapBrandToStation } from "@/utils/mappers/brand.mapper";
+
+const HOME_CAROUSEL_LIMIT = 5;
 
 export const useBrands = () => {
   const [brands, setBrands] = useState<Station[]>([]);
@@ -9,45 +11,40 @@ export const useBrands = () => {
   const [error, setError] = useState<string | null>(null);
 
   /**
-   * loadBrands : Fonction de chargement des stations depuis l'API.
-   * Gère les états de chargement et d'erreur pour une expérience utilisateur fluide.
-   * Transforme les données brutes du back en objets Station adaptés à l'UI.
+   * loadBrands : Charge les stations depuis l'API et les mappe vers le modèle UI.
+   * Le service BrandService renvoie déjà un tableau de Brand[] déballé.
    */
-  const loadBrands = async () => {
+  const loadBrands = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // On récupère les données brutes de l'API
-      const responseData: any = await BrandService.fetchAllBrands();
-      
-      // Validation de la structure de la réponse avant de mapper les données
-      const rawBrands = responseData?.data;
+      const rawBrands = await BrandService.fetchAllBrands();
 
       if (!Array.isArray(rawBrands)) {
         throw new Error("Le serveur n'a pas renvoyé le tableau de données attendu.");
       }
-      
-      // Mapping des données brutes en objets Station pour l'UI
-      const mappedStations = rawBrands.map((item: any) => mapBrandToStation(item));
-      
-      // On limite à 5 stations pour le carrousel de la Home
-      setBrands(mappedStations.slice(0, 5));
+
+      const mappedStations = rawBrands
+        .map(mapBrandToStation)
+        .slice(0, HOME_CAROUSEL_LIMIT);
+
+      setBrands(mappedStations);
     } catch (err: any) {
-      console.error("[useBrands] Erreur de synchronisation API :", err);
-      setError(err.message || "Une erreur est survenue lors du chargement des stations.");
+      if (__DEV__) console.warn("[useBrands] Erreur de synchronisation API :", err?.message);
+      setError(err?.message || "Une erreur est survenue lors du chargement des stations.");
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadBrands();
-  }, []);
+  }, [loadBrands]);
 
   return {
     brands,
     isLoading,
     error,
-    refetch: loadBrands
+    refetch: loadBrands,
   };
 };

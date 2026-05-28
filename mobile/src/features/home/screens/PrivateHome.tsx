@@ -7,6 +7,7 @@ import { theme } from "@/constants/theme";
 import { User } from "@/types/auth";
 import { useLibrary } from "@/hooks/home/useLibrary";
 import { useBrands } from "@/hooks/home/useBrands";
+import { useSocialStats } from "@/hooks/social/useSocialStats";
 import { useCommunity } from "@/hooks/community/useCommunity";
 import { StatCard } from "@/features/home/components/private/StatCard";
 import { ActivityCard } from "@/features/home/components/private/ActivityCard";
@@ -46,6 +47,9 @@ export default function PrivateHome({ user }: { user: User }) {
    */
   const { brands, isLoading: isBrandsLoading, error: brandsError } = useBrands();
 
+  // Données sociales : Nombre d'amis/abonnements validés de l'utilisateur connecté.
+  const { friendsCount, isLoadingSocial } = useSocialStats();
+
   // Statistique clé : Nombre de médias "Écoutés" (status "finished") dans la bibliothèque de l'utilisateur
   const finishedCount = statusItems.find(s => s.slug === 'finished')?.count || 0;
 
@@ -62,7 +66,7 @@ export default function PrivateHome({ user }: { user: User }) {
     { 
       id: "2", 
       label: "Abonnements", 
-      value: "42",
+      value: isLoadingSocial ? "..." : friendsCount.toString(),
       icon: <Users size={18} color={colors.text} /> 
     },
   ];
