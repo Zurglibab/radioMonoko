@@ -1,49 +1,52 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Plus, MoreVertical, Play, Music2, Mic2, ScrollText, PlayCircle, CheckCircle2, XCircle } from "lucide-react-native";
+import { Plus, MoreVertical, Play, Music2, Mic2, ScrollText, PlayCircle, CheckCircle2, XCircle, Globe, Lock } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
 import { theme } from "@/constants/theme";
 import { useLibrary } from "@/hooks/home/useLibrary";
+import { useCollections } from "@/hooks/collections/useCollections";
 import { usePlayer } from "@/context/PlayerContext";
 import { PlaylistCover } from "@/features/home/components/private/PlaylistCover";
+import { CollectionFormModal, CollectionFormData } from "@/features/library/components/CollectionFormModal";
 import { Station } from "@/types/content";
 import { useAuthContext } from "@/context/AuthContext";
 
 /**
  * LibraryScreen : Gestionnaire de collection personnelle.
- * Permet de naviguer entre les favoris, les podcasts enregistrés 
- * et les playlists créées par l'utilisateur.
+ * - "Ma Collection" (statuts) : mock useLibrary (en attente du champ status backend)
+ * - "Vos Créations" (collections) : données réelles via useCollections
+ * - "Enregistrés" (favoris) : mock useLibrary (pas de route favoris backend)
  */
 export default function LibraryScreen() {
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
-  /**
-   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
-   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
-   * Détection du thème (Priorité Dark)
-   */
-  const isDark = appearanceSettings.themeMode === 'system' 
-    ? systemTheme === 'dark' 
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? systemTheme === 'dark'
     : appearanceSettings.themeMode === 'dark';
-        
   const colors = isDark ? theme.dark.colors : theme.light.colors;
-    
-  const { 
-    activeTab, 
-    setActiveTab, 
-    favorites, 
-    playlists, 
-    statusItems, 
-    removePlaylist,
-    createPlaylistWithMedia
-  } = useLibrary();
+
+  // Données mock (statuts + favoris) — en attente des routes backend correspondantes
+  const { activeTab, setActiveTab, favorites, statusItems } = useLibrary();
+
+  // Données réelles : les collections de l'utilisateur
+  const {
+    collections,
+    isLoading: isCollectionsLoading,
+    createCollection,
+    deleteCollection,
+    toggleVisibility,
+  } = useCollections();
+
   const { playTrack } = usePlayer();
   const router = useRouter();
 
-  // Filtrage local selon l'onglet sélectionné pour l'affichage des médias
+  // État de la modale de création
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  // Filtrage local selon l'onglet sélectionné
   const displayFavorites = favorites.filter((item) => {
     if (activeTab === "Tout") return true;
     if (activeTab === "Radios") return item.type === "radio";
@@ -52,38 +55,34 @@ export default function LibraryScreen() {
   });
 
   /**
-   * Création rapide d'une playlist via une invite système.
+   * Création d'une collection via la modale (nom + description + confidentialité).
    */
-  const handleCreatePlaylist = () => {
-    Alert.prompt(
-      "Nouvelle Playlist",
-      "Entrez le nom de votre playlist",
+  const handleCreateCollection = async (data: CollectionFormData) => {
+    await createCollection(data.name, data.description, data.isPublic);
+  };
+
+  /**
+   * Long press sur une collection : menu de gestion (visibilité, suppression).
+   */
+  const handleLongPress = (id: string, name: string, isPublic: boolean) => {
+    Alert.alert(
+      "Gérer la collection",
+      `"${name}"`,
       [
+        {
+          text: isPublic ? "Rendre privée 🔒" : "Rendre publique 🌍",
+          onPress: () => toggleVisibility(id),
+        },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => deleteCollection(id),
+        },
         { text: "Annuler", style: "cancel" },
-        { 
-          text: "Créer", 
-          onPress: (name?: string) => {
-            createPlaylistWithMedia(name || "Ma Playlist", {} as Station);
-          } 
-        }
-      ],
-      "plain-text"
+      ]
     );
   };
 
-  /**
-   * Action au long press : permet de supprimer une playlist avec confirmation.
-   */
-  const handleLongPress = (id: string, name: string) => {
-    Alert.alert("Gérer la playlist", `Voulez-vous supprimer "${name}" ?`, [
-      { text: "Annuler", style: "cancel" },
-      { text: "Supprimer", style: "destructive", onPress: () => removePlaylist(id) }
-    ]);
-  };
-
-  /**
-   * Helper visuel : associe une icône et une couleur sémantique à chaque statut.
-   */
   const getStatusIcon = (name: string) => {
     switch (name) {
       case 'À écouter': return <ScrollText size={18} color={colors.muted} />;
@@ -96,34 +95,34 @@ export default function LibraryScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-      {/* Header : Titre et bouton d'ajout (Contraste inversé pour le bouton) */}
+      {/* Header */}
       <View className="px-6 pt-4 mb-6 flex-row justify-between items-center">
         <Text style={{ color: colors.text }} className="text-3xl font-black italic tracking-tighter">
           Ma Radio
         </Text>
-        <TouchableOpacity 
-          onPress={handleCreatePlaylist}
-          style={{ backgroundColor: colors.primary }} 
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={{ backgroundColor: colors.primary }}
           className="w-10 h-10 items-center justify-center rounded-full shadow-sm"
         >
           <Plus size={20} color={colors.secondary} />
         </TouchableOpacity>
       </View>
 
-      {/* Filtrage : Navigation horizontale par type de contenu */}
+      {/* Filtrage horizontal */}
       <View className="max-h-12 mb-4">
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-6">
           {['Tout', 'Radios', 'Podcasts', 'Playlists'].map((tab) => (
-            <TouchableOpacity 
-              key={tab} 
+            <TouchableOpacity
+              key={tab}
               onPress={() => setActiveTab(tab as any)}
-              style={{ 
+              style={{
                 backgroundColor: activeTab === tab ? colors.primary : colors.surface,
                 borderColor: colors.border
               }}
               className="mr-3 px-6 py-2 rounded-full border"
             >
-              <Text 
+              <Text
                 style={{ color: activeTab === tab ? colors.secondary : colors.muted }}
                 className="text-xs font-bold"
               >
@@ -135,8 +134,8 @@ export default function LibraryScreen() {
       </View>
 
       <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        
-        {/* Ma Collection (Statuts d'écoute) */}
+
+        {/* Ma Collection (statuts — mock en attendant le backend) */}
         {(activeTab === 'Tout') && (
           <View className="mb-10">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">
@@ -144,8 +143,8 @@ export default function LibraryScreen() {
             </Text>
             <View className="flex-row flex-wrap justify-between">
               {statusItems.map((item, idx) => (
-                <TouchableOpacity 
-                  key={idx} 
+                <TouchableOpacity
+                  key={idx}
                   onPress={() => router.push(`/library/status/${item.slug}`)}
                   style={{ backgroundColor: colors.surface, borderColor: colors.border }}
                   className="w-[48%] p-4 mb-4 rounded-3xl flex-row items-center border"
@@ -161,15 +160,15 @@ export default function LibraryScreen() {
           </View>
         )}
 
-        {/* Vos Créations (Playlists personnelles) */}
+        {/* Vos Créations (collections réelles) */}
         {(activeTab === 'Tout' || activeTab === 'Playlists') && (
           <View className="mb-10">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">
               Vos Créations
             </Text>
-            
-            {/* Playlist automatique : Titres Likés */}
-            <TouchableOpacity 
+
+            {/* Playlist automatique : Titres Likés (mock favoris) */}
+            <TouchableOpacity
               onPress={() => router.push("/playlist/liked")}
               style={{ backgroundColor: colors.surface, borderColor: colors.border }}
               className="flex-row items-center mb-4 p-3 rounded-2xl border"
@@ -184,49 +183,69 @@ export default function LibraryScreen() {
               <MoreVertical size={18} color={colors.muted} />
             </TouchableOpacity>
 
-            {/* Liste des playlists utilisateur */}
-            {playlists.map(pl => (
-              <TouchableOpacity 
-                key={pl.id} 
-                onPress={() => router.push(`/playlist/${pl.id}`)}
-                onLongPress={() => handleLongPress(pl.id, pl.name)}
-                style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-                className="flex-row items-center mb-4 p-3 rounded-2xl border"
-              >
-                <View className="mr-4">
-                  <PlaylistCover items={pl.items} size={56} />
-                </View>
-                <View className="flex-1">
-                  <Text style={{ color: colors.text }} className="font-bold">{pl.name}</Text>
-                  <Text style={{ color: colors.muted }} className="text-xs">Par {pl.creator} • {pl.items.length} titres</Text>
-                </View>
-                <MoreVertical size={18} color={colors.muted} />
-              </TouchableOpacity>
-            ))}
+            {/* État de chargement des collections */}
+            {isCollectionsLoading ? (
+              <Text style={{ color: colors.muted }} className="text-xs italic py-4">
+                Chargement de vos collections...
+              </Text>
+            ) : collections.length === 0 ? (
+              <Text style={{ color: colors.muted }} className="text-xs italic py-4">
+                Aucune collection. Touchez + pour en créer une.
+              </Text>
+            ) : (
+              collections.map(col => (
+                <TouchableOpacity
+                  key={col.id}
+                  onPress={() => router.push(`/collection/${col.id}`)}
+                  onLongPress={() => handleLongPress(col.id, col.name, col.is_public)}
+                  style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+                  className="flex-row items-center mb-4 p-3 rounded-2xl border"
+                >
+                  {/* Pochette générique (pas d'images côté backend pour l'instant) */}
+                  <View className="mr-4">
+                    <PlaylistCover items={[]} size={56} />
+                  </View>
+                  <View className="flex-1">
+                    <View className="flex-row items-center">
+                      <Text style={{ color: colors.text }} className="font-bold mr-2">{col.name}</Text>
+                      {/* Indicateur de visibilité */}
+                      {col.is_public
+                        ? <Globe size={12} color={colors.muted} />
+                        : <Lock size={12} color={colors.muted} />
+                      }
+                    </View>
+                    <Text style={{ color: colors.muted }} className="text-xs" numberOfLines={1}>
+                      {col.description || "Sans description"}
+                    </Text>
+                  </View>
+                  <MoreVertical size={18} color={colors.muted} />
+                </TouchableOpacity>
+              ))
+            )}
           </View>
         )}
 
-        {/* Liste des médias (Favoris enregistrés) */}
+        {/* Liste des médias (favoris — mock) */}
         {(activeTab !== 'Playlists') && (
           <View>
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">
               {activeTab === 'Tout' ? 'Enregistrés' : activeTab}
             </Text>
             {displayFavorites.map((item: Station) => (
-              <TouchableOpacity 
-                key={item.id} 
+              <TouchableOpacity
+                key={item.id}
                 onPress={() => playTrack(item)}
                 className="flex-row items-center mb-6"
               >
-                <Image 
-                  source={{ uri: item.imageUrl }} 
+                <Image
+                  source={{ uri: item.imageUrl }}
                   style={{ backgroundColor: colors.surface }}
-                  className="w-16 h-16 rounded-2xl mr-4" 
+                  className="w-16 h-16 rounded-2xl mr-4"
                 />
                 <View className="flex-1">
                   <View className="flex-row items-center mb-1">
-                    {item.type === 'radio' 
-                      ? <Music2 size={12} color={colors.primary} /> 
+                    {item.type === 'radio'
+                      ? <Music2 size={12} color={colors.primary} />
                       : <Mic2 size={12} color={colors.muted} />
                     }
                     <Text style={{ color: colors.muted }} className="text-[10px] font-bold uppercase ml-2 tracking-tighter">
@@ -238,17 +257,25 @@ export default function LibraryScreen() {
                   </Text>
                   <Text style={{ color: colors.muted }} className="text-xs">{item.artist}</Text>
                 </View>
-                <View 
+                <View
                   style={{ backgroundColor: colors.surface, borderColor: colors.border }}
                   className="p-2.5 rounded-full border"
                 >
-                   <Play size={14} color={colors.text} fill={colors.text} />
+                  <Play size={14} color={colors.text} fill={colors.text} />
                 </View>
               </TouchableOpacity>
             ))}
           </View>
         )}
       </ScrollView>
+
+      {/* Modale de création de collection */}
+      <CollectionFormModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+        onSubmit={handleCreateCollection}
+        title="Nouvelle collection"
+      />
     </SafeAreaView>
   );
 }
