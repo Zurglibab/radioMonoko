@@ -20,7 +20,7 @@ export interface User {
 interface AuthContextType {
     user: User | null;
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string) => Promise<void>;
+    register: (email: string, username:string, password: string) => Promise<void>;
     logout: () => void;
     updateUser: (user: User) => void; // <-- Corrigé : Déclaré dans le type
 }
@@ -39,8 +39,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
-    const register = async (email: string, password: string) => {
-        const response = await authService.register(email, password,);
+    const register = async (email: string, username:string, password: string) => {
+        const response = await authService.register(email,username,password,);
         const token = response.token;
 
         localStorage.setItem('token', token);

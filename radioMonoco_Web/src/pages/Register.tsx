@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext.tsx";
 import { useNavigate, Link } from "react-router-dom";
-import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
+import {FiMail, FiLock, FiArrowRight, FiUser} from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
 
 const Register = () => {
     const [email, setEmail] = useState("");
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const { register } = useAuth();
@@ -19,7 +20,7 @@ const Register = () => {
         }
 
         try {
-            await register(email, password);
+            await register(email,username, password);
             navigate("/");
         } catch (error) {
             console.error("Registration failed", error);
@@ -71,6 +72,17 @@ const Register = () => {
                                     onChange={(e) => setEmail(e.target.value)}
                                     className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
                                     required
+                                />
+                            </div>
+
+                            <div className="relative group">
+                                <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-rose-500 transition-colors" />
+                                <input
+                                    type="text"
+                                    placeholder="Pseudo utilisateur"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
                                 />
                             </div>
 

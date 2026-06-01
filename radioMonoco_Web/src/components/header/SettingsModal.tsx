@@ -19,6 +19,7 @@ import {
 } from "react-icons/hi";
 import { useAppearance } from "../../context/AppearanceContext";
 import { useAuth, type User } from "../../context/AuthContext";
+
 import api from "../../services/Api";
 
 interface SettingsModalProps {

@@ -4,8 +4,8 @@ interface AuthResponse{
     token: string;
 }
 
-const register = async (email: string, password: string): Promise<AuthResponse> => {
-    const response = await api.post("/user/register", { email, password, username : email.split("@")[0] });
+const register = async (email: string, username:string, password: string): Promise<AuthResponse> => {
+    const response = await api.post("/user/register", { email, username, password});
     return response.data;
 };
 
