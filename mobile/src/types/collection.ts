@@ -1,21 +1,10 @@
 import { ContentDTO } from "./content-api";
+import { BackendCollectionStatus } from "@/constants/library-status";
 
 /**
- * CollectionItem : un élément de collection.
- * Construit côté client par le hook via le N+1 fetch sur /content/{id}.
- */
-export interface CollectionItem {
-  collectionId: string;
-  contentId: string;
-  position: number;
-  note: string;
-  createdAt: string;
-  content: ContentDTO | null; // null si le content a été supprimé entre-temps
-}
-
-/**
- * CollectionDTO : Structure brute d'une collection (liste personnalisée)
- * renvoyée par l'API /collections.
+ * DTOs et types liés aux collections d'utilisateurs, utilisées pour organiser les contenus dans la bibliothèque.
+ * Les collections peuvent être des catégories personnalisées créées par les utilisateurs, ou des collections système prédéfinies (ex: "À écouter", "En cours", etc.).
+ * Les collections système sont identifiées par un statut spécifique (BackendCollectionStatus) et ont des métadonnées associées pour faire le lien avec les statuts front (MediaStatus).
  */
 export interface CollectionDTO {
   id: string;
@@ -23,35 +12,31 @@ export interface CollectionDTO {
   name: string;
   description: string;
   is_public: boolean;
+  status: BackendCollectionStatus | null;
   created_at: string;
 }
 
-/**
- * CollectionItemDTO : Élément (œuvre) appartenant à une collection.
- * Renvoyé par l'API /collectionItems.
- */
-export interface CollectionItemDTO {
-  collection_id: string;
-  content_id: string;
-  position: number;
-  note: string;
-  created_at: string;
-}
-
-/**
- * Payloads de création/mise à jour.
- */
 export interface CreateCollectionPayload {
   user_id: string;
   name: string;
   description: string;
   is_public: boolean;
+  status?: BackendCollectionStatus | null;
 }
 
 export interface UpdateCollectionPayload {
   name?: string;
   description?: string;
   is_public?: boolean;
+  status?: BackendCollectionStatus | null;
+}
+
+export interface CollectionItemDTO {
+  collection_id: string;
+  content_id: string;
+  position: number;
+  note: string;
+  created_at: string;
 }
 
 export interface AddCollectionItemPayload {
@@ -64,4 +49,13 @@ export interface AddCollectionItemPayload {
 export interface UpdateCollectionItemPayload {
   position?: number;
   note?: string;
+}
+
+export interface CollectionItem {
+  collectionId: string;
+  contentId: string;
+  position: number;
+  note: string;
+  createdAt: string;
+  content: ContentDTO | null;
 }

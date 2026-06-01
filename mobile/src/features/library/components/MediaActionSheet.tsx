@@ -6,7 +6,7 @@ import {
 } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { theme } from "@/constants/theme";
-import { Station } from "@/types/content";
+import { MediaStatus, Station } from "@/types/content";
 import { useLibrary } from "@/hooks/home/useLibrary";
 import { useCollections } from "@/hooks/collections/useCollections";
 import { useAuthContext } from "@/context/AuthContext";
@@ -42,6 +42,7 @@ export const MediaActionSheet = ({ isVisible, onClose, station }: MediaActionShe
   const [view, setView] = useState<'main' | 'playlists'>('main');
   const [isCreateModalVisible, setCreateModalVisible] = useState(false);
   const [addingToId, setAddingToId] = useState<string | null>(null);
+  const { markStationAsStatus } = useCollections();
 
   const isDark = appearanceSettings.themeMode === 'system' ? true : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
@@ -57,15 +58,19 @@ export const MediaActionSheet = ({ isVisible, onClose, station }: MediaActionShe
     onClose();
   };
 
-  const handleStatus = (status: string) => {
-    updateStatus(station.id, status as any);
-    const STATUS_MESSAGES: Record<string, string> = {
-      'to-listen': "C'est noté ! On garde ça de côté.",
-      'in-progress': `Vous avez commencé "${station.title}"`,
-      'finished': "Bravo ! Une onde de plus à votre palmarès.",
-      'dropped': "L'onde a été mise de côté.",
-    };
-    Alert.alert("Collection", STATUS_MESSAGES[status], [{ text: "Génial", onPress: handleClose }]);
+  const handleStatus = async (status: MediaStatus) => {
+    try {
+      await markStationAsStatus(station, status);
+      const STATUS_MESSAGES: Record<MediaStatus, string> = {
+        'to-listen': "C'est noté ! On garde ça de côté.",
+        'in-progress': `Vous avez commencé "${station.title}"`,
+        'finished': "Bravo ! Une onde de plus à votre palmarès.",
+        'dropped': "L'onde a été mise de côté.",
+      };
+      Alert.alert("Collection", STATUS_MESSAGES[status], [{ text: "Génial", onPress: handleClose }]);
+    } catch (err: any) {
+      Alert.alert("Erreur", err?.message || "Impossible de mettre à jour le statut.");
+    }
   };
 
   /**

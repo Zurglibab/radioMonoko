@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, useColorScheme, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Globe, Lock, Trash2, Disc3, Music2, FolderOpen } from "lucide-react-native";
@@ -6,18 +6,20 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
-import { useCollectionDetail } from "@/hooks/collections/useCollectionDetail";
+import { useCollectionItems } from "@/hooks/collections/useCollectionItems";
+import { CollectionService } from "@/services/collections/collection.service";
+import { CollectionDTO } from "@/types/collection";
 
 /**
- * CollectionDetailScreen : Affiche le contenu d'une collection (liste personnalisée).
- * Permet de consulter les œuvres qu'elle contient et de les retirer.
- * Couvre l'item "Ajout et suppression d'œuvres dans ces listes" du barème.
+ * CollectionDetailScreen : Affiche le contenu d'une collection personnalisée.
+ * - En-tête : nom, description, badge visibilité, compteur
+ * - Liste des œuvres avec note utilisateur et bouton retrait
  */
 export default function CollectionDetailScreen() {
   const { id } = useLocalSearchParams();
   const collectionId = id as string;
   const router = useRouter();
-  const { appearanceSettings } = useAuthContext();
+  const { token, appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
   const isDark = appearanceSettings.themeMode === 'system'
@@ -25,11 +27,30 @@ export default function CollectionDetailScreen() {
     : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
-  const { collection, items, isLoading, error, removeItem } = useCollectionDetail(collectionId);
+  // Items enrichis via le helper réutilisable
+  const { items, isLoading: isItemsLoading, error: itemsError, removeItem } =
+    useCollectionItems(collectionId);
 
-  /**
-   * Confirmation avant retrait d'une œuvre.
-   */
+  // En-tête de la collection : récupéré séparément (titre, description, visibilité)
+  const [collection, setCollection] = useState<CollectionDTO | null>(null);
+  const [isHeaderLoading, setIsHeaderLoading] = useState(true);
+  const [headerError, setHeaderError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token || !collectionId) return;
+    setIsHeaderLoading(true);
+    CollectionService.getById(token, collectionId)
+      .then(col => { setCollection(col); setHeaderError(null); })
+      .catch(err => {
+        if (__DEV__) console.warn("[CollectionDetail] header", err?.message);
+        setHeaderError("Collection introuvable.");
+      })
+      .finally(() => setIsHeaderLoading(false));
+  }, [token, collectionId]);
+
+  const isLoading = isItemsLoading || isHeaderLoading;
+  const error = itemsError || headerError;
+
   const handleRemove = (contentId: string, title: string) => {
     Alert.alert(
       "Retirer de la collection",
@@ -69,7 +90,7 @@ export default function CollectionDetailScreen() {
           </View>
         ) : (
           <>
-            {/* En-tête de la collection : description + visibilité + compteur */}
+            {/* En-tête : description + visibilité + compteur */}
             {collection && (
               <View className="px-6 mb-8">
                 {collection.description ? (
@@ -133,7 +154,6 @@ export default function CollectionDetailScreen() {
                       style={{ backgroundColor: colors.surface, borderColor: colors.border }}
                       className="flex-row items-center mb-4 p-4 rounded-2xl border"
                     >
-                      {/* Pochette générique (pas d'image côté backend) */}
                       <View
                         style={{ backgroundColor: colors.background, borderColor: colors.border }}
                         className="w-12 h-12 rounded-xl items-center justify-center mr-4 border"
@@ -145,7 +165,6 @@ export default function CollectionDetailScreen() {
                         <Text style={{ color: colors.text }} className="font-bold text-base" numberOfLines={1}>
                           {title}
                         </Text>
-                        {/* Note personnelle si présente */}
                         {item.note ? (
                           <Text style={{ color: colors.muted }} className="text-xs italic mt-0.5" numberOfLines={2}>
                             « {item.note} »
@@ -157,7 +176,6 @@ export default function CollectionDetailScreen() {
                         )}
                       </View>
 
-                      {/* Bouton retrait */}
                       <TouchableOpacity
                         onPress={() => handleRemove(item.contentId, title)}
                         className="p-2.5 active:opacity-50"

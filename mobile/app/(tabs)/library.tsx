@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Plus, MoreVertical, Play, Music2, Mic2, ScrollText, PlayCircle, CheckCircle2, XCircle, Globe, Lock } from "lucide-react-native";
@@ -15,8 +15,8 @@ import { useAuthContext } from "@/context/AuthContext";
 
 /**
  * LibraryScreen : Gestionnaire de collection personnelle.
- * - "Ma Collection" (statuts) : mock useLibrary (en attente du champ status backend)
- * - "Vos Créations" (collections) : données réelles via useCollections
+ * - "Ma Collection" (statuts) : collections système réelles via useCollections
+ * - "Vos Créations" (collections personnalisées) : données réelles via useCollections
  * - "Enregistrés" (favoris) : mock useLibrary (pas de route favoris backend)
  */
 export default function LibraryScreen() {
@@ -28,16 +28,17 @@ export default function LibraryScreen() {
     : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
-  // Données mock (statuts + favoris) — en attente des routes backend correspondantes
-  const { activeTab, setActiveTab, favorites, statusItems } = useLibrary();
+  // Mock : favoris + onglet actif (en attente de la route favoris backend)
+  const { activeTab, setActiveTab, favorites } = useLibrary();
 
-  // Données réelles : les collections de l'utilisateur
+  // Données réelles : collections personnalisées + statuts + actions CRUD
   const {
-    collections,
+    customCollections,
     isLoading: isCollectionsLoading,
     createCollection,
     deleteCollection,
     toggleVisibility,
+    getStatusCountsAsync,
   } = useCollections();
 
   const { playTrack } = usePlayer();
@@ -45,6 +46,25 @@ export default function LibraryScreen() {
 
   // État de la modale de création
   const [isModalVisible, setModalVisible] = useState(false);
+
+  // Compteurs des collections système (À écouter / En cours / Terminé / Abandonné)
+  const [statusItems, setStatusItems] = useState<{
+    name: string;
+    slug: string;
+    count: number;
+    backendStatus: string;
+  }[]>([]);
+
+  useEffect(() => {
+    getStatusCountsAsync().then(metas => {
+      setStatusItems(metas.map(m => ({
+        name: m.displayName,
+        slug: m.frontStatus,
+        count: m.count,
+        backendStatus: m.backendStatus,
+      })));
+    });
+  }, [getStatusCountsAsync]);
 
   // Filtrage local selon l'onglet sélectionné
   const displayFavorites = favorites.filter((item) => {
@@ -135,16 +155,16 @@ export default function LibraryScreen() {
 
       <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
 
-        {/* Ma Collection (statuts — mock en attendant le backend) */}
+        {/* Ma Collection (statuts réels via collections système) */}
         {(activeTab === 'Tout') && (
           <View className="mb-10">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">
               Ma Collection
             </Text>
             <View className="flex-row flex-wrap justify-between">
-              {statusItems.map((item, idx) => (
+              {statusItems.map((item) => (
                 <TouchableOpacity
-                  key={idx}
+                  key={item.slug}
                   onPress={() => router.push(`/library/status/${item.slug}`)}
                   style={{ backgroundColor: colors.surface, borderColor: colors.border }}
                   className="w-[48%] p-4 mb-4 rounded-3xl flex-row items-center border"
@@ -160,7 +180,7 @@ export default function LibraryScreen() {
           </View>
         )}
 
-        {/* Vos Créations (collections réelles) */}
+        {/* Vos Créations (collections personnalisées réelles) */}
         {(activeTab === 'Tout' || activeTab === 'Playlists') && (
           <View className="mb-10">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">
@@ -183,17 +203,17 @@ export default function LibraryScreen() {
               <MoreVertical size={18} color={colors.muted} />
             </TouchableOpacity>
 
-            {/* État de chargement des collections */}
+            {/* État de chargement des collections personnalisées */}
             {isCollectionsLoading ? (
               <Text style={{ color: colors.muted }} className="text-xs italic py-4">
                 Chargement de vos collections...
               </Text>
-            ) : collections.length === 0 ? (
+            ) : customCollections.length === 0 ? (
               <Text style={{ color: colors.muted }} className="text-xs italic py-4">
                 Aucune collection. Touchez + pour en créer une.
               </Text>
             ) : (
-              collections.map(col => (
+              customCollections.map(col => (
                 <TouchableOpacity
                   key={col.id}
                   onPress={() => router.push(`/collection/${col.id}`)}
@@ -201,14 +221,12 @@ export default function LibraryScreen() {
                   style={{ backgroundColor: colors.surface, borderColor: colors.border }}
                   className="flex-row items-center mb-4 p-3 rounded-2xl border"
                 >
-                  {/* Pochette générique (pas d'images côté backend pour l'instant) */}
                   <View className="mr-4">
                     <PlaylistCover items={[]} size={56} />
                   </View>
                   <View className="flex-1">
                     <View className="flex-row items-center">
                       <Text style={{ color: colors.text }} className="font-bold mr-2">{col.name}</Text>
-                      {/* Indicateur de visibilité */}
                       {col.is_public
                         ? <Globe size={12} color={colors.muted} />
                         : <Lock size={12} color={colors.muted} />
