@@ -1,73 +1,86 @@
 import { useState } from "react";
 import { AuthService } from "@/services/auth/auth.service";
 import { validateEmail, validatePassword } from "@/utils/validation/validation";
+import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
 
+const USERNAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
+const MIN_USERNAME_LENGTH = 3;
+
 /**
- * useRegister : Hook personnalisé pour gérer la création de compte.
- * Centralise les validations de formulaire et l'appel au service d'inscription.
+ * Pré-valide tous les champs du formulaire d'inscription.
+ * Retourne un message d'erreur localisé, ou null si tout est valide.
+ */
+const validateRegisterForm = (
+  email: string,
+  password: string,
+  confirmPassword: string,
+  username: string,
+  agree: boolean
+): string | null => {
+  if (!email || !password || !confirmPassword || !username) {
+    return "Veuillez remplir tous les champs.";
+  }
+  if (!validateEmail(email)) {
+    return "Veuillez entrer une adresse email valide.";
+  }
+  if (username.length < MIN_USERNAME_LENGTH) {
+    return `Le pseudo doit contenir au moins ${MIN_USERNAME_LENGTH} caractères.`;
+  }
+  if (!USERNAME_REGEX.test(username)) {
+    return "Le pseudo ne peut contenir que des lettres, chiffres, points, tirets et underscores.";
+  }
+  const passCheck = validatePassword(password);
+  if (!passCheck.isValid) return passCheck.message;
+  if (password !== confirmPassword) {
+    return "Les mots de passe ne correspondent pas.";
+  }
+  if (!agree) {
+    return "Vous devez accepter les conditions d'utilisation.";
+  }
+  return null;
+};
+
+/**
+ * useRegister : Hook personnalisé orchestrant l'inscription sur RadioMonoko.
+ * Gère les états de chargement, les messages d'erreur et applique une série 
+ * de filtres de validation drastiques avant de solliciter le backend.
  */
 export const useRegister = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { login: updateGlobalState } = useAuthContext();
 
-  /**
-   * Méthode d'inscription.
-   * Effectue les vérifications de sécurité locales avant de solliciter l'API.
-   */
   const register = async (
-    email: string, 
-    password: string, 
-    confirmPassword: string, 
+    email: string,
+    password: string,
+    confirmPassword: string,
+    username: string,
     agree: boolean
   ) => {
     setError(null);
 
-    // Tous les champs sont obligatoires, validation basique pour éviter les appels inutiles à l'API
-    if (!email || !password || !confirmPassword) {
-      setError("Veuillez remplir tous les champs.");
+    // Normalisation des champs critiques
+    const emailCleaned = email?.trim().toLowerCase() || "";
+    const usernameCleaned = username?.trim() || "";
+
+    // Validation locale avant tout appel réseau
+    const validationError = validateRegisterForm(
+      emailCleaned, password, confirmPassword, usernameCleaned, agree
+    );
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    // Validation de l'email pour éviter les appels inutiles à l'API
-     if (!validateEmail(email)) {
-      setError("Veuillez entrer une adresse email valide.");
-      return;
-    }
-
-    // Validation du mot de passe pour s'assurer qu'il respecte les critères de sécurité RGPD avant de tenter l'inscription
-    const passwordCheck = validatePassword(password);
-    if (!passwordCheck.isValid) {
-      setError(passwordCheck.message);
-      return;
-    }
-    
-    // Validation de correspondance des mots de passe pour éviter les erreurs côté serveur
-    if (password !== confirmPassword) {
-      setError("Les mots de passe ne correspondent pas.");
-      return;
-    }
-    
-    // Validation de l'acceptation des conditions d'utilisation, un prérequis pour s'inscrire
-    if (!agree) {
-      setError("Vous devez accepter les conditions d'utilisation.");
-      return;
-    }
-
-    // Début de la phase asynchrone
     setIsLoading(true);
-
     try {
-      // Tentative d'inscription via le service
-      await AuthService.register(email, password);
-      
-      // En cas de succès, on bascule direct sur l'app
-      // J'utilise replace pour ne pas pouvoir revenir au formulaire via le bouton "Back"
+      const response = await AuthService.register(emailCleaned, password, usernameCleaned);
+      await updateGlobalState(response.token);
       router.replace("/(tabs)/home");
     } catch (err: any) {
-      // Je remonte l'erreur pour l'UI
-      setError(err.message || "Une erreur est survenue lors de l'inscription.");
+      setError(err?.message || "Une erreur est survenue lors de l'inscription.");
     } finally {
       setIsLoading(false);
     }

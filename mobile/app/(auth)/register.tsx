@@ -22,6 +22,7 @@ export default function RegisterScreen() {
   const { register, isLoading, error } = useRegister();
   
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
@@ -53,18 +54,24 @@ export default function RegisterScreen() {
         )}
 
         <View className="mb-2">
-          <AuthInput 
-            label="Email" 
-            placeholder="votre@email.com" 
-            value={email} 
+          <AuthInput
+            label="Email"
+            placeholder="votre@email.com"
+            value={email}
             onChangeText={setEmail}
           />
-          <AuthInput 
-            label="Mot de passe" 
-            placeholder="••••••••" 
-            isPassword 
-            value={password} 
-            onChangeText={setPassword} 
+          <AuthInput
+            label="Pseudo"
+            placeholder="votre_pseudo"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <AuthInput
+            label="Mot de passe"
+            placeholder="••••••••"
+            isPassword
+            value={password}
+            onChangeText={setPassword}
           />
           <AuthInput 
             label="Confirmer le mot de passe" 
@@ -84,7 +91,7 @@ export default function RegisterScreen() {
 
         {/* Bouton d'action avec changement de style dynamique */}
         <TouchableOpacity 
-          onPress={() => register(email, password, confirmPassword, agree)}
+          onPress={() => register(email, password, confirmPassword, username, agree)}
           disabled={isButtonDisabled}
           className="h-16 rounded-2xl items-center justify-center shadow-lg mt-6"
           style={{ 

@@ -84,7 +84,7 @@ const notify = () => listeners.forEach(listener => listener());
 
 export const useLibrary = () => {
   // États locaux synchronisés avec le store global
-  const { user: authUser, logout: authLogout, updateUser } = useAuthContext();
+  const { user: authUser, logout: authLogout, updateProfile: authUpdateProfile } = useAuthContext();
   const [activeTab, setActiveTab] = useState<'Tout' | 'Radios' | 'Podcasts' | 'Playlists'>('Tout');
   const [content, setContent] = useState(globalUserContent);
   const [playlistsState, setPlaylistsState] = useState(globalPlaylists);
@@ -129,9 +129,9 @@ export const useLibrary = () => {
    */
   const getFriendsActivity = (mediaId: string): User[] => {
     return [
-      { id: 'u1', username: 'Alex', email: '', avatar: 'https://i.pravatar.cc/150?u=alex' },
-      { id: 'u2', username: 'Marie', email: '', avatar: 'https://i.pravatar.cc/150?u=marie' },
-      { id: 'u3', username: 'Lucas', email: '', avatar: 'https://i.pravatar.cc/150?u=lucas' },
+      { id: 'u1', username: 'Alex', email: '', avatar: 'https://i.pravatar.cc/150?u=alex', privacy: 'public' as const },
+      { id: 'u2', username: 'Marie', email: '', avatar: 'https://i.pravatar.cc/150?u=marie', privacy: 'public' as const },
+      { id: 'u3', username: 'Lucas', email: '', avatar: 'https://i.pravatar.cc/150?u=lucas', privacy: 'public' as const },
     ];
   };
 
@@ -261,7 +261,7 @@ export const useLibrary = () => {
       lastUsernameChange: isPseudoChanging ? new Date().toISOString() : authUser.lastUsernameChange
     };
 
-    await updateUser(updatedUser);
+    await authUpdateProfile(updatedUser);
     Alert.alert("Succès", "Profil mis à jour !");
   };
 

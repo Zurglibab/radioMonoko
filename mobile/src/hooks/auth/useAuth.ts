@@ -4,45 +4,61 @@ import { useRouter } from "expo-router";
 import { useAuthContext } from "@/context/AuthContext";
 
 /**
- * useAuth : Hook personnalisé.
- * Il fait le pont entre l'appel API (AuthService) et le stockage persistant (AuthContext).
- * C'est ici que l'on gère les états éphémères (loading, erreurs locales).
+ * Pré-valide les champs du formulaire de connexion.
+ * Retourne un message d'erreur localisé, ou null si tout est valide.
+ */
+const validateLoginForm = (email: string, password: string): string | null => {
+  if (!email || !password) {
+    return "Veuillez remplir tous les champs.";
+  }
+  return null;
+};
+
+/**
+ * useAuth : Hook personnalisé orchestrant le flux de connexion.
+ * Fait le pont entre l'appel API brut (AuthService) et la gestion de session globale (AuthContext).
  */
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  // Je récupère la méthode du contexte global pour sauvegarder la session
-  // Renommage pour éviter la confusion avec la fonction login locale
+  // Méthode login du contexte global (prend uniquement un token en paramètre).
   const { login: updateGlobalState } = useAuthContext();
 
   /**
-   * login : Orchestre la procédure de connexion complète.
+   * Orchestre la procédure de connexion complète :
+   * 1. Validation locale des champs
+   * 2. Appel à l'API d'authentification (POST /user/login)
+   * 3. Hydratation du contexte global (qui interroge GET /user/me)
+   * 4. Redirection vers l'accueil
    */
   const login = async (email: string, password: string) => {
-    // Je reset les états locaux avant de commencer
-    setIsLoading(true);
     setError(null);
 
+    // Normalisation de l'email : suppression des espaces et harmonisation de la casse
+    const emailCleaned = email?.trim().toLowerCase() || "";
+
+    // Validation locale avant tout appel réseau
+    const validationError = validateLoginForm(emailCleaned, password);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setIsLoading(true);
     try {
-      // J'appelle le service d'authentification pour obtenir l'user et le token
-      const response = await AuthService.login(email, password);
-      
-      console.log("Succès API, mise à jour du contexte...");
+      const response = await AuthService.login(emailCleaned, password);
 
-      // Je mets à jour le contexte global avec les données reçues de l'API
-      await updateGlobalState(response.user, response.token);
+      if (__DEV__) {
+        console.log("[useAuth] Jeton reçu, initialisation de la session globale...");
+      }
 
-      // Je navigue vers l'écran principal de l'application
-      // replace() empêche de revenir au formulaire de login via le bouton retour du téléphone
+      await updateGlobalState(response.token);
       router.replace("/(tabs)/home");
-      
     } catch (err: any) {
-      // En cas d'erreur, je capture le message et le stocke dans l'état local pour l'afficher à l'utilisateur
-      setError(err.message || "Une erreur inconnue est survenue.");
+      setError(err?.message || "Une erreur inconnue est survenue.");
     } finally {
-      // Toujours libérer l'UI à la fin du processus
       setIsLoading(false);
     }
   };

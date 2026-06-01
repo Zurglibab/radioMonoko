@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
+import { NotificationProvider } from "@/context/NotificationContext";
 import { PlayerProvider } from "@/context/PlayerContext";
 import React from "react";
 import "../global.css";
@@ -11,60 +12,50 @@ import { useColorScheme } from "react-native";
 /**
  * AppContent : Le conteneur logique de l'application.
  * Séparé du RootLayout pour pouvoir consommer les Contextes (useAuthContext).
- * Gère l'apparence de la barre de statut et la structure de navigation.
  */
 function AppContent() {
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
-  /**
-   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
-   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
-   * Détection du thème (Priorité Dark)
-   */
-  const isDark = appearanceSettings.themeMode === 'system' 
-    ? systemTheme === 'dark' 
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? systemTheme === 'dark'
     : appearanceSettings.themeMode === 'dark';
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      {/* Adaptation de l'heure et des icônes système selon le thème */}
       <StatusBar style={isDark ? "light" : "dark"} />
 
-      {/* STACK NAVIGATION : Définition des routes principales */}
       <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
-        {/* Route d'entrée / Redirection */}    
         <Stack.Screen name="index" />
-        {/* Chargement initial / Logo */}      
-        <Stack.Screen name="splash" /> 
-        {/* Tutoriel premier démarrage */}     
+        <Stack.Screen name="splash" />
         <Stack.Screen name="onboarding" />
-        {/* Login / Register */} 
         <Stack.Screen name="(auth)" />
-        {/* Application principale (Home, Search, Library, Profile) */}      
-        <Stack.Screen name="(tabs)" />      
+        <Stack.Screen name="(tabs)" />
       </Stack>
 
-      {/* LE MINI PLAYER : 
-          Placé ici, il flotte au-dessus de TOUTE la navigation. 
-          L'utilisateur peut naviguer sans que la musique ne s'arrête. 
-      */}
-      <MiniPlayer /> 
+      <MiniPlayer />
     </GestureHandlerRootView>
   );
 }
 
 /**
  * RootLayout : Point d'entrée de l'application.
- * Enveloppe l'application dans les providers nécessaires à la gestion 
- * de l'état global (Auth, Audio, Gestures).
+ * Enveloppe l'application dans les providers nécessaires à la gestion
+ * de l'état global (Auth, Notifications, Audio, Gestures).
+ *
+ * Ordre des providers important :
+ * - AuthProvider en premier (source du token/user)
+ * - NotificationProvider ensuite (dépend du token pour son polling)
+ * - PlayerProvider (indépendant, peut être n'importe où sous Auth)
  */
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <PlayerProvider> 
-        <AppContent />
-      </PlayerProvider>
+      <NotificationProvider>
+        <PlayerProvider>
+          <AppContent />
+        </PlayerProvider>
+      </NotificationProvider>
     </AuthProvider>
   );
 }

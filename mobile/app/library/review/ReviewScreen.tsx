@@ -1,98 +1,141 @@
-import React, { useState, useMemo } from "react";
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  TextInput, 
-  Image, 
-  KeyboardAvoidingView, 
-  Platform, 
+import React, { useState, useMemo, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
-  Alert 
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Send, Star } from "lucide-react-native";
+import { ChevronLeft, Send, Star, Disc3 } from "lucide-react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+
 import { theme } from "@/constants/theme";
-import { useLibrary } from "@/hooks/home/useLibrary";
 import { useAuthContext } from "@/context/AuthContext";
+import { BrandService } from "@/services/brand/brand.service";
+import { useReviewForm } from "@/hooks/reviews/useReviewForm";
+import { Brand } from "@/types/brand";
+import { Station } from "@/types/content";
 
 /**
  * ReviewScreen : Écran de rédaction de critique et de notation.
- * Permet à l'utilisateur d'attribuer une note de 1 à 5 étoiles et de rédiger 
- * un avis textuel sur un média spécifique.
+ * Permet à l'utilisateur de noter une station (1 à 5 étoiles) et de rédiger un commentaire.
+ * Si l'utilisateur a déjà noté cette station, sa note précédente est pré-remplie
+ * et il peut la modifier.
  */
 export default function ReviewScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams(); // Récupération de l'ID du média via l'URL
-  const { favorites, postReview } = useLibrary();
+  const { id } = useLocalSearchParams();
   const { appearanceSettings } = useAuthContext();
 
-  /**
-   * RÉCUPÉRATION DU MÉDIA :
-   * On identifie l'objet Station pour afficher le contexte (Image, Titre) 
-   * en haut du formulaire de rédaction.
-   */
-  const station = useMemo(() => favorites.find(s => s.id === id), [id, favorites]);
+  // Chargement de la station via l'API
+  const [station, setStation] = useState<Brand | null>(null);
+  const [isStationLoading, setIsStationLoading] = useState(true);
+  const [stationError, setStationError] = useState<string | null>(null);
 
-  // États locaux pour gérer la note, le commentaire et l'état d'envoi
-  const [rating, setRating] = useState(0);    // Note sélectionnée (0 par défaut)
-  const [comment, setComment] = useState(""); // Contenu textuel de la critique
-  const [isSubmitting, setIsSubmitting] = useState(false); // Feedback visuel d'envoi
+  // États du formulaire
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState("");
 
-  /**
-   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
-   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
-   * Détection du thème (Priorité Dark)
-   */
-  const isDark = appearanceSettings.themeMode === 'system' ? true : appearanceSettings.themeMode === 'dark';
+  // Adaptation Brand → Station pour le hook (qui attend une Station)
+  const stationForHook = useMemo<Station | null>(() => {
+    if (!station) return null;
+    return {
+      id: station.id,                // api_id de la Brand
+      title: station.title,
+      artist: "",
+      description: station.description || "",
+      imageUrl: "",
+      isLive: true,
+      category: "Radio",
+      type: 'radio',
+    };
+  }, [station]);
+
+  // Hook qui orchestre rating + review en parallèle
+  const { initialRating, isLoadingExisting, isSubmitting, submit } = useReviewForm(stationForHook);
+
+  // Pré-remplit le rating si l'utilisateur a déjà noté cette œuvre
+  useEffect(() => {
+    if (initialRating > 0) setRating(initialRating);
+  }, [initialRating]);
+
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? true
+    : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   /**
-   * handlePublish : Validation et envoi de la critique.
-   * Vérifie la présence d'une note et une longueur minimale de texte.
+   * Charge les infos de la station depuis l'API au montage.
+   */
+  useEffect(() => {
+    if (!id) {
+      setStationError("Aucun média sélectionné.");
+      setIsStationLoading(false);
+      return;
+    }
+    setIsStationLoading(true);
+    BrandService.fetchBrandById(id as string)
+      .then(brand => {
+        setStation(brand);
+        setStationError(null);
+      })
+      .catch(err => {
+        if (__DEV__) console.warn("[ReviewScreen]", err?.message);
+        setStationError("Impossible de charger ce média.");
+      })
+      .finally(() => setIsStationLoading(false));
+  }, [id]);
+
+  /**
+   * handlePublish : Validation puis publication via le hook.
    */
   const handlePublish = async () => {
-    // Note obligatoire
     if (rating === 0) {
       Alert.alert("Note requise", "Veuillez attribuer au moins une étoile.");
       return;
     }
-    // Critique constructive avec 5 caractères minimum
     if (comment.trim().length < 5) {
       Alert.alert("Critique trop courte", "Dites-en un peu plus sur votre écoute.");
       return;
     }
-
-    setIsSubmitting(true);
-    await postReview(id as string, rating, comment);
-    setIsSubmitting(false);
-    router.back(); // Retour à la bibliothèque après succès
+    try {
+      await submit(rating, comment);
+      Alert.alert(
+        "Critique publiée",
+        "Votre critique a été diffusée sur l'onde ! 🎙️",
+        [{ text: "Génial", onPress: () => router.back() }]
+      );
+    } catch (err: any) {
+      Alert.alert("Erreur", err?.message || "Impossible de publier la critique.");
+    }
   };
 
   /**
-   * ratingLabel : Traduction sémantique de la note chiffrée.
-    * Permet d'afficher un message personnalisé selon la note choisie.
+   * ratingLabel : Traduction sémantique de la note.
    */
   const ratingLabel = useMemo(() => {
     const labels = ["", "Décevant", "Pas mal", "Très bon", "Excellent", "Chef-d'œuvre"];
     return labels[rating];
   }, [rating]);
 
-  // Sécurité si l'ID est invalide ou le média introuvable
-  if (!station) return null;
+  // Chargement combiné : station + note existante
+  const isInitializing = isStationLoading || isLoadingExisting;
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-      {/* KeyboardAvoidingView : Évite que le clavier mobile ne masque le champ de saisie */}
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        {/* Header : Navigation retour et Titre stylisé */}
+        {/* Header */}
         <View className="flex-row items-center justify-between px-6 py-4">
-          <TouchableOpacity 
-            onPress={() => router.back()} 
+          <TouchableOpacity
+            onPress={() => router.back()}
             style={{ backgroundColor: colors.surface, borderColor: colors.border }}
             className="p-2 rounded-full border active:opacity-60"
           >
@@ -104,94 +147,129 @@ export default function ReviewScreen() {
           <View className="w-10" />
         </View>
 
-        <ScrollView 
-          className="flex-1 px-6" 
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-        >
-          {/* Rappel du média concerné */}
-          <View 
-            className="flex-row items-center mt-6 mb-10 p-4 rounded-[16px] border border-dashed" 
-            style={{ borderColor: colors.border }}
+        {isInitializing ? (
+          <View className="flex-1 justify-center items-center">
+            <ActivityIndicator color={colors.primary} />
+          </View>
+        ) : stationError || !station ? (
+          <View className="flex-1 justify-center items-center px-10">
+            <Text style={{ color: colors.muted }} className="text-sm italic text-center">
+              {stationError || "Média introuvable."}
+            </Text>
+          </View>
+        ) : (
+          <ScrollView
+            className="flex-1 px-6"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
           >
-            <Image source={{ uri: station.imageUrl }} className="w-12 h-12 rounded-xl" />
-            <View className="ml-4 flex-1">
-              <Text style={{ color: colors.text }} className="font-bold text-sm" numberOfLines={1}>
-                {station.title}
+            {/* Rappel du média concerné */}
+            <View
+              className="flex-row items-center mt-6 mb-10 p-4 rounded-[16px] border border-dashed"
+              style={{ borderColor: colors.border }}
+            >
+              <View
+                style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+                className="w-12 h-12 rounded-xl items-center justify-center border"
+              >
+                <Disc3 size={20} color={colors.muted} />
+              </View>
+              <View className="ml-4 flex-1">
+                <Text style={{ color: colors.text }} className="font-bold text-sm" numberOfLines={1}>
+                  {station.title}
+                </Text>
+                <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest" numberOfLines={1}>
+                  {station.baseline || "Radio"}
+                </Text>
+              </View>
+            </View>
+
+            {/* Indicateur si l'utilisateur modifie sa note */}
+            {initialRating > 0 && (
+              <View
+                style={{ backgroundColor: colors.surface, borderColor: colors.border }}
+                className="px-4 py-3 rounded-2xl border mb-6 flex-row items-center"
+              >
+                <Star size={14} color={colors.primary} fill={colors.primary} />
+                <Text style={{ color: colors.muted }} className="text-xs ml-2 italic">
+                  Vous avez déjà noté cette œuvre {initialRating}/5. Votre note sera mise à jour.
+                </Text>
+              </View>
+            )}
+
+            {/* Système d'étoiles interactif */}
+            <View className="items-center mb-10">
+              <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[3px] mb-4">
+                Note l'onde
               </Text>
-              <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest">
-                {station.artist}
+              <View className="flex-row gap-x-3">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <TouchableOpacity
+                    key={star}
+                    onPress={() => setRating(star)}
+                    activeOpacity={0.7}
+                  >
+                    <Star
+                      size={36}
+                      color={star <= rating ? colors.primary : colors.muted}
+                      fill={star <= rating ? colors.primary : "transparent"}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={{ color: colors.text }} className="mt-4 font-bold italic opacity-60">
+                {rating === 0 ? "Choisis ton intensité" : `${rating}/5 - ${ratingLabel}`}
               </Text>
             </View>
-          </View>
 
-          {/* Système d'étoiles interactif */}
-          <View className="items-center mb-10">
-            <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[3px] mb-4">
-              Note l'onde
-            </Text>
-            <View className="flex-row gap-x-3">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <TouchableOpacity 
-                  key={star} 
-                  onPress={() => setRating(star)}
-                  activeOpacity={0.7}
-                >
-                  <Star 
-                    size={36} 
-                    color={star <= rating ? colors.primary : colors.muted} 
-                    fill={star <= rating ? colors.primary : "transparent"} 
-                  />
-                </TouchableOpacity>
-              ))}
+            {/* Saisie libre de l'avis */}
+            <View className="mb-8">
+              <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[3px] ml-1 mb-2">
+                Ton avis
+              </Text>
+              <TextInput
+                multiline
+                placeholder="Cette radio me rappelle..."
+                placeholderTextColor={colors.muted}
+                value={comment}
+                onChangeText={setComment}
+                style={{
+                  backgroundColor: colors.surface,
+                  color: colors.text,
+                  minHeight: 150,
+                  textAlignVertical: 'top'
+                }}
+                className="w-full p-6 rounded-[32px] border border-white/5 font-medium leading-6"
+              />
             </View>
-            <Text style={{ color: colors.text }} className="mt-4 font-bold italic opacity-60">
-              {rating === 0 ? "Choisis ton intensité" : `${rating}/5 - ${ratingLabel}`}
-            </Text>
-          </View>
 
-          {/* Saisie libre de l'avis */}
-          <View className="mb-8">
-            <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[3px] ml-1 mb-2">
-              Ton avis
-            </Text>
-            <TextInput
-              multiline
-              placeholder="Cette radio me rappelle..."
-              placeholderTextColor={colors.muted}
-              value={comment}
-              onChangeText={setComment}
-              style={{ 
-                backgroundColor: colors.surface, 
-                color: colors.text, 
-                minHeight: 150,
-                textAlignVertical: 'top' // Indispensable sur Android pour le texte multiligne
+            {/* Diffusion */}
+            <TouchableOpacity
+              onPress={handlePublish}
+              disabled={isSubmitting}
+              style={{
+                backgroundColor: colors.primary,
+                opacity: isSubmitting ? 0.6 : 1
               }}
-              className="w-full p-6 rounded-[32px] border border-white/5 font-medium leading-6"
-            />
-          </View>
+              className="w-full py-5 rounded-[24px] flex-row items-center justify-center shadow-lg active:scale-[0.98]"
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color={colors.secondary} />
+              ) : (
+                <>
+                  <Send size={18} color={colors.secondary} />
+                  <Text style={{ color: colors.secondary }} className="font-black uppercase tracking-[2px] text-xs ml-2">
+                    Diffuser ma critique
+                  </Text>
+                </>
+              )}
+            </TouchableOpacity>
 
-          {/* Diffusion sur le réseau */}
-          <TouchableOpacity 
-            onPress={handlePublish}
-            disabled={isSubmitting}
-            style={{ 
-              backgroundColor: colors.primary,
-              opacity: isSubmitting ? 0.6 : 1 
-            }}
-            className="w-full py-5 rounded-[24px] flex-row items-center justify-center shadow-lg active:scale-[0.98]"
-          >
-            <Send size={18} color={colors.secondary} className="mr-2" />
-            <Text style={{ color: colors.secondary }} className="font-black uppercase tracking-[2px] text-xs">
-              Diffuser ma critique
+            <Text style={{ color: colors.muted }} className="text-[10px] text-center mt-6 italic">
+              Ta critique sera visible par toute la communauté RadioMonoko.
             </Text>
-          </TouchableOpacity>
-
-          {/* Note de confidentialité */}
-          <Text style={{ color: colors.muted }} className="text-[10px] text-center mt-6 italic">
-            Ta critique sera visible par toute la communauté RadioMonoco.
-          </Text>
-        </ScrollView>
+          </ScrollView>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
