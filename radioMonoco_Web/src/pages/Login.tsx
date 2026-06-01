@@ -12,16 +12,18 @@ import {useNavigate} from "react-router-dom";
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
+            setError("");
             await login(email, password);
             navigate("/");
-        } catch (error) {
-            console.error("Login failed", error);
+        } catch (error:any) {
+            setError(error.response?.data?.message || "une erreur est survenue" );
         }
     };
 
@@ -85,6 +87,14 @@ const Login = () => {
                                 />
                             </div>
                         </div>
+
+                        {error && (
+                            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3">
+                                <p className="text-red-400 text-sm">
+                                    {error}
+                                </p>
+                            </div>
+                        )}
 
                         <button
                             type="submit"

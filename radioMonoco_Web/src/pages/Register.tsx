@@ -9,6 +9,7 @@ const Register = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
     const { register } = useAuth();
     const navigate = useNavigate();
 
@@ -20,10 +21,11 @@ const Register = () => {
         }
 
         try {
+            setError("");
             await register(email,username, password);
             navigate("/");
-        } catch (error) {
-            console.error("Registration failed", error);
+        } catch (error:any) {
+            setError(error.response?.data?.message || "une erreur est survenue" );
         }
     };
 
@@ -110,6 +112,14 @@ const Register = () => {
                                 />
                             </div>
                         </div>
+
+                        {error && (
+                            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3">
+                                <p className="text-red-400 text-sm">
+                                    {error}
+                                </p>
+                            </div>
+                        )}
 
                         <button
                             type="submit"
