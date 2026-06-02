@@ -84,7 +84,22 @@ export const useRegister = () => {
     } finally {
       setIsLoading(false);
     }
+  },
+
+  registerWithGoogle = async () => {
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const response = await AuthService.loginWithGoogle();
+      await updateGlobalState(response.token);
+      router.replace("/(tabs)/home");
+    } catch (err:any) {
+      setError(err.message || "Une erreur est survenue lors de l'inscription avec Google.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return { register, isLoading, error };
+  return { register, registerWithGoogle, isLoading, error };
 };

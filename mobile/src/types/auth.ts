@@ -3,14 +3,17 @@
  * Représente le profil utilisateur tel qu'il est stocké en base de données et utilisé au sein de l'application.
  */
 export interface User {
-  id: string;        // Identifiant unique uuid
-  email: string;     // Adresse mail servant d'identifiant de connexion
-  username: string;  // Nom d'affichage dans la communauté RadioMonoko
-  avatar?: string;   // URL de l'image de profil optionnelle
-  bio?: string;     // Brève description de l'utilisateur pour sa page de profil
-  website?: string; // URL du site personnel ou des réseaux sociaux de l'utilisateur
-  privacy: 'public' | 'private'; // Paramètre de confidentialité du profil
-  lastUsernameChange?: string; // Dernier changement de pseudo
+  id: string;
+  email: string;
+  username: string;
+  avatar?: string;
+  bio?: string;
+  website?: string;
+  privacy: 'public' | 'private';
+  lastUsernameChange?: string;
+  is_banned?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /**
@@ -21,7 +24,7 @@ export interface UpdateUserPayload {
   avatar?: string;
   bio?: string;
   website?: string;
-  privacy: 'public' | 'private';
+  privacy?: "public" | "private";
 }
 
 /**

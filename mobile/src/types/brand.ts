@@ -7,34 +7,28 @@ export interface WebRadio {
   id: string;
   title: string;
   description: string;
-  liveStream: string;     // URL du flux audio direct (mp3)
-  playerUrl: string;      // URL embarquée du player officiel
+  liveStream: string;
+  playerUrl: string;
 }
-
-/**
- * LocalRadio : Déclinaison régionale d'une Brand.
- * Même structure que WebRadio mais peut contenir des champs géographiques additionnels.
- */
-export type LocalRadio = WebRadio;
 
 /**
  * Brand : Station radio principale telle que renvoyée par l'API /api/brands.
- * Reflète la structure exacte du backend RadioMonoko.
+ * Reflète la structure exacte du backend RadioMonoco.
  */
 export interface Brand {
-  id: string;                  // ID lisible (ex: "FIP", "FRANCEINTER")
-  title: string;               // Nom officiel de la station
-  baseline: string;            // Slogan / tagline marketing
-  description: string;         // Description longue
-  websiteUrl: string;          // Site web officiel
-  liveStream: string;          // URL du flux audio direct principal
-  playerUrl: string;           // URL embarquée du player officiel
-  webRadios: WebRadio[];       // Déclinaisons thématiques (peut être vide)
-  localRadios: LocalRadio[];   // Déclinaisons régionales (peut être vide)
+  id: string;
+  title: string;
+  baseline: string;
+  description: string;
+  websiteUrl: string;
+  liveStream: string;
+  playerUrl: string;
+  webRadios: WebRadio[];
+  localRadios: WebRadio[] | null;
 }
 
 /**
- * ApiEnvelope : Format générique des réponses backend RadioMonoko.
+ * ApiEnvelope : Format générique des réponses backend RadioMonoco.
  * Toutes les routes /api/brands enveloppent leur payload dans { success, data }.
  */
 export interface ApiEnvelope<T> {
@@ -49,8 +43,20 @@ export interface BrandStatsCount {
   count: number;
 }
 
+/**
+ * Résultat de l'opération de rafraîchissement des données d'une Brand (POST /api/brands/{brandId}/refresh).
+ */
 export interface BrandRefreshResult {
   message: string;
   updatedAt?: string;
   count?: number;
+}
+
+/**
+ * Enveloppe de la réponse /api/brands (le backend utilise { success, data })
+ */
+export interface BrandsResponse {
+  data: {
+    brands: Brand[];
+  };
 }
