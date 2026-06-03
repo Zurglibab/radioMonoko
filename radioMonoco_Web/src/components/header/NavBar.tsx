@@ -46,6 +46,7 @@ const NavBar = () => {
         { path: "/", label: "Accueil", authRequired: false },
         { path: "/feed", label: "Fil d'actualité", authRequired: true },
         { path : "/collections",label: "Collections", authRequired: true },
+        { path : "/admin", label: "Administration", authRequired: true  },
     ];
 
     const toggleTheme = () => {

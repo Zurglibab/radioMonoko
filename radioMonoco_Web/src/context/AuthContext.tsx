@@ -8,11 +8,12 @@ export interface User {
     email: string;
     username: string | null;
     display_name: string | null;
-    avatar: string | null;
+    avatar?: string | null;
+    role: string;
     bio: string | null;
     website: string | null;
     privacy: "public" | "private";
-    is_banned: boolean;
+    is_banned?: boolean;
     created_at: string;
     updated_at: string;
 }
@@ -22,7 +23,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, username:string, password: string) => Promise<void>;
     logout: () => void;
-    updateUser: (user: User) => void; // <-- Corrigé : Déclaré dans le type
+    updateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

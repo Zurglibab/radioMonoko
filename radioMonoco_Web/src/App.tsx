@@ -9,11 +9,21 @@ import { RadioProvider } from "./context/RadioContext.tsx";
 import RadioPage from "./pages/RadioPage.tsx";
 import Collections from "./pages/Collections/Collections.tsx";
 import CollectionsDetails from "./pages/Collections/CollectionsDetails.tsx";
+import AdminDashboard from "./pages/Admin/AdminDashboard.tsx";
+import AdminReviews from "./pages/Admin/AdminReviews.tsx";
+import AdminUsers from "./pages/Admin/AdminUsers.tsx";
+import AdminReports from "./pages/Admin/AdminReports.tsx";
+//import AdminRecommendations from "./pages/Admin/AdminRecommendations.tsx";
 
 function App() {
     return (
         <RadioProvider>
             <Routes>
+                <Route path= "/admin" element={ <ProtectedRoute><AdminDashboard /></ProtectedRoute> } />
+                <Route path= "/admin/users" element={<AdminUsers />} />
+                <Route path= "/admin/reports" element={<AdminReports />} />
+                <Route path= "/admin/reviews" element={<AdminReviews />} />
+                {/*<Route path= "/admin/recommendations" element={<AdminRecommendations />} />*/}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
@@ -45,34 +55,6 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
-
-                    {/*<Route*/}
-                    {/*    path="/collections/playlists"*/}
-                    {/*    element={*/}
-                    {/*        <ProtectedRoute>*/}
-                    {/*            <CollectionsPlaylists />*/}
-                    {/*        </ProtectedRoute>*/}
-                    {/*    }*/}
-                    {/*/>*/}
-
-                    {/*<Route*/}
-                    {/*    path="/collections/albums"*/}
-                    {/*    element={*/}
-                    {/*        <ProtectedRoute>*/}
-                    {/*            <CollectionsAlbums />*/}
-                    {/*        </ProtectedRoute>*/}
-                    {/*    }*/}
-                    {/*/>*/}
-
-                    {/*<Route*/}
-                    {/*    path="/collections/artists"*/}
-                    {/*    element={*/}
-                    {/*        <ProtectedRoute>*/}
-                    {/*            <CollectionsArtists />*/}
-                    {/*        </ProtectedRoute>*/}
-                    {/*    }*/}
-                    {/*/>*/}
-
 
                     <Route path={"/radio"} element={<RadioPage />} />
                 </Route>
