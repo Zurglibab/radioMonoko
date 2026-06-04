@@ -1,57 +1,52 @@
 import React from "react";
 import { View, Image } from "react-native";
-import { ListMusic } from "lucide-react-native";
 import { MediaItem } from "@/types/library";
 
-/**
- * PlaylistCover : Générateur visuel de pochette de playlist.
- * Adapte son rendu selon le contenu :
- * 0 item : Placeholder avec icône.
- * 1-3 items : Affiche la pochette du premier élément.
- * 4+ items : Crée un quadrillage (grid) des 4 premières pochettes.
- * * @param items : Liste des médias contenus dans la playlist.
- * @param size : Dimension du composant.
- */
-export const PlaylistCover = ({ items, size = 64 }: { items: MediaItem[], size?: number }) => {
-  
-  // Cas 1 : Playlist vide
-  if (items.length === 0) {
-    return (
-      <View 
-        style={{ width: size, height: size }} 
-        className="bg-zinc-800 rounded-xl items-center justify-center"
-      >
-        {/* L'icône s'adapte proportionnellement à la taille demandée */}
-        <ListMusic size={size / 2} color="#444" />
-      </View>
-    );
-  }
+export const PlaylistCover = ({
+  items,
+  size = 64,
+  name,
+}: {
+  items: MediaItem[];
+  size?: number;
+  name?: string;
+}) => {
+  const validItems = items.filter(i => !!i.imageUrl);
 
-  // Cas 2 : Playlist partielle (moins de 4 images)
-  // On affiche la première image en plein format pour éviter les vides dans la grille.
-  if (items.length < 4) {
+  // Fallback initiales via ui-avatars (même style que le carousel)
+  if (validItems.length === 0) {
+    const label = name ?? "♪";
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(label)}&background=1A1A1A&color=FFFFFF&length=2&bold=true&uppercase=true&font-size=0.4`;
     return (
-      <Image 
-        source={{ uri: items[0].imageUrl }} 
-        style={{ width: size, height: size }} 
-        className="rounded-xl bg-zinc-800" 
+      <Image
+        source={{ uri: avatarUrl }}
+        style={{ width: size, height: size }}
+        className="rounded-xl"
       />
     );
   }
 
-  // Cas 3 : Quadrillage pour une playliste complète de plus de 4 track
+  if (validItems.length < 4) {
+    return (
+      <Image
+        source={{ uri: validItems[0].imageUrl }}
+        style={{ width: size, height: size }}
+        className="rounded-xl bg-zinc-800"
+      />
+    );
+  }
+
   return (
-    <View 
-      style={{ width: size, height: size }} 
+    <View
+      style={{ width: size, height: size }}
       className="flex-row flex-wrap rounded-xl overflow-hidden bg-zinc-900"
     >
-      {items.slice(0, 4).map((item, index) => (
-        <Image 
+      {validItems.slice(0, 4).map((item, index) => (
+        <Image
           key={index}
-          source={{ uri: item.imageUrl }} 
-          // Chaque image occupe exactement un quart de la surface
+          source={{ uri: item.imageUrl }}
           style={{ width: size / 2, height: size / 2 }}
-          className="border-[0.5px] border-black/10" // Légère séparation interne
+          className="border-[0.5px] border-black/10"
         />
       ))}
     </View>

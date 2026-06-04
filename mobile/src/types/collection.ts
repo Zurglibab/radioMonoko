@@ -1,10 +1,8 @@
 import { ContentDTO } from "./content-api";
-import { BackendCollectionStatus } from "@/constants/library-status";
 
 /**
- * DTOs et types liés aux collections d'utilisateurs, utilisées pour organiser les contenus dans la bibliothèque.
- * Les collections peuvent être des catégories personnalisées créées par les utilisateurs, ou des collections système prédéfinies (ex: "À écouter", "En cours", etc.).
- * Les collections système sont identifiées par un statut spécifique (BackendCollectionStatus) et ont des métadonnées associées pour faire le lien avec les statuts front (MediaStatus).
+ * CollectionDTO : Représente une collection de contenus créée par un utilisateur.
+ * Renvoyé par GET /collections/{collectionId} et GET /user/{userId}/collections
  */
 export interface CollectionDTO {
   id: string;
@@ -12,7 +10,7 @@ export interface CollectionDTO {
   name: string;
   description: string;
   is_public: boolean;
-  status: BackendCollectionStatus | null;
+  status: string | null;
   created_at: string;
 }
 
@@ -21,14 +19,14 @@ export interface CreateCollectionPayload {
   name: string;
   description: string;
   is_public: boolean;
-  status?: BackendCollectionStatus | null;
+  status?: string | null;
 }
 
 export interface UpdateCollectionPayload {
   name?: string;
   description?: string;
   is_public?: boolean;
-  status?: BackendCollectionStatus | null;
+  status?: string | null;
 }
 
 export interface CollectionItemDTO {
@@ -51,6 +49,10 @@ export interface UpdateCollectionItemPayload {
   note?: string;
 }
 
+/**
+ * CollectionItem : version "enrichie" client-side (avec le ContentDTO résolu).
+ * Construite par useEnrichedCollectionItems.
+ */
 export interface CollectionItem {
   collectionId: string;
   contentId: string;

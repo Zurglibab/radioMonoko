@@ -1,22 +1,41 @@
 import { apiFetch } from "@/utils/apiFetch";
 import { ContentDTO, CreateContentPayload } from "@/types/content-api";
 
+let _contentCache: ContentDTO[] | null = null;
+let _contentCacheTs = 0;
+let _pendingGetAll: Promise<ContentDTO[]> | null = null;
+const CONTENT_CACHE_TTL = 60_000;
+
 /**
  * ContentApiService : service d'accès au cache local de contenus.
- * Le cache local est une couche d'abstraction qui stocke les contenus importés depuis les différentes API tierces.
- * Cela permet de gérer de manière unifiée les contenus, même si les APIs tierces changent ou suppriment des éléments,
- * et de simplifier les interactions avec les contenus dans le reste de l'application (collections, critiques, etc.) en utilisant des UUID locaux stables.
- * Les méthodes du ContentApiService permettent de créer, récupérer et rechercher des contenus dans ce cache local,
- * ainsi que de résoudre les api_id externes en UUID locaux pour une intégration transparente avec les autres fonctionnalités de l'application qui manipulent des contenus
  */
 export const ContentApiService = {
   /**
    * getAll : GET /content
-   * Récupère tout le cache de contenus. Utilisé pour la recherche par api_id
-   * en attendant une route dédiée côté backend (voir findByApiId).
+   * Récupère tout le cache de contenus avec déduplication des requêtes concurrentes
+   * et mise en cache locale toutes les 60 secondes pour éviter les conflits.
    */
-  getAll: (token: string): Promise<ContentDTO[]> =>
-    apiFetch<ContentDTO[]>('/content', { token }),
+  getAll: async (token: string): Promise<ContentDTO[]> => {
+    const now = Date.now();
+    if (_contentCache && now - _contentCacheTs < CONTENT_CACHE_TTL) {
+      return _contentCache;
+    }
+    if (_pendingGetAll) return _pendingGetAll;
+
+    _pendingGetAll = apiFetch<ContentDTO[]>('/content', { token })
+      .then(data => {
+        _contentCache = data;
+        _contentCacheTs = Date.now();
+        _pendingGetAll = null;
+        return data;
+      })
+      .catch(err => {
+        _pendingGetAll = null;
+        throw err;
+      });
+
+    return _pendingGetAll;
+  },
 
   /**
    * getById : GET /content/{id}
@@ -28,9 +47,14 @@ export const ContentApiService = {
   /**
    * create : POST /content
    * Importe une œuvre de l'API tierce dans le cache local.
+   * Invalide le cache getAll pour que findByApiId retourne le nouveau contenu immédiatement.
    */
-  create: (token: string, payload: CreateContentPayload): Promise<ContentDTO> =>
-    apiFetch<ContentDTO>('/content', { token, method: 'POST', body: payload }),
+  create: async (token: string, payload: CreateContentPayload): Promise<ContentDTO> => {
+    const created = await apiFetch<ContentDTO>('/content', { token, method: 'POST', body: payload });
+    // Invalider le cache local pour inclure le nouveau contenu
+    if (_contentCache) _contentCache = [..._contentCache, created];
+    return created;
+  },
 
   /**
     * findByApiId : recherche dans le cache local une œuvre par son api_id (ID de l'API tierce).

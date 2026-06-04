@@ -1,25 +1,38 @@
 import { Station } from "@/types/content";
+import { Brand, WebRadio } from "@/types/brand";
+
+const avatarUrl = (title: string) => {
+  const clean = encodeURIComponent(title || "Radio");
+  return `https://ui-avatars.com/api/?name=${clean}&background=1A1A1A&color=FFFFFF&length=3&bold=true&uppercase=true&font-size=0.4`;
+};
 
 /**
- * mapBrandToStation : Fonction de transformation des données de l'API en format Station.
- * Prend un objet brut de l'API et le convertit en un objet Station adapté à l'affichage dans l'UI.
- * Gère les champs manquants avec des valeurs par défaut et génère une image dynamique si nécessaire.
- * @param brand - L'objet brut de l'API représentant une marque ou une station.
- * @returns Un objet Station formaté pour l'UI.
+ * mapBrandToStation : Brand principale → Station avec streamUrl réelle.
  */
-export const mapBrandToStation = (brand: any): Station => {
-  const cleanTitle = brand.title ? encodeURIComponent(brand.title) : "Radio";
-  const ImageUrl = `https://ui-avatars.com/api/?name=${cleanTitle}&background=1A1A1A&color=FFFFFF&length=3&bold=true&uppercase=true&font-size=0.4`;
+export const mapBrandToStation = (brand: Brand): Station => ({
+  id: brand.id,
+  title: brand.title || "Station inconnue",
+  artist: brand.baseline || "Radio France",
+  description: brand.description || "Aucune description.",
+  imageUrl: avatarUrl(brand.title),
+  isLive: !!brand.liveStream,
+  category: "Radio France",
+  type: 'radio',
+  streamUrl: brand.liveStream || undefined,
+});
 
-  // Construction de l'objet Station avec des valeurs par défaut pour les champs manquants
-  return {
-    id: brand.id,
-    title: brand.title || "Station inconnue",
-    artist: brand.baseline || "Radio Monoco", 
-    description: brand.description || "Aucune description.",
-    imageUrl: ImageUrl, 
-    isLive: !!brand.liveStream,
-    category: "Radio France",
-    type: 'radio'
-  };
-};
+/**
+ * mapWebRadioToStation : WebRadio/LocalRadio → Station avec streamUrl réelle.
+ * Utilise le titre de la brand parente comme artist et category.
+ */
+export const mapWebRadioToStation = (webRadio: WebRadio, parent: Brand): Station => ({
+  id: webRadio.id,
+  title: webRadio.title || "Station inconnue",
+  artist: parent.title || "Radio France",
+  description: webRadio.description || "Aucune description.",
+  imageUrl: avatarUrl(webRadio.title),
+  isLive: !!webRadio.liveStream,
+  category: parent.title,
+  type: 'radio',
+  streamUrl: webRadio.liveStream || undefined,
+});

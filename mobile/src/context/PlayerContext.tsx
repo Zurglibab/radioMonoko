@@ -101,7 +101,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         soundInstance.current = null;
       }
 
-      // Nettoyage de l'ancien intervalle de polling pour éviter les conflits de données live entre les stations
       if (livePollingInterval.current) {
         clearInterval(livePollingInterval.current);
         livePollingInterval.current = null;
@@ -123,7 +122,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setCurrentTrack(track);
 
       // Détermination de l'URL de streaming : Priorité à l'URL fournie par le back, sinon construction d'une URL générique basée sur l'ID de la station
-      const finalStreamUrl = (track as any).streamUrl || `https://icecast.radiofrance.fr/${track.id.toLowerCase()}-midfi.mp3?id=openapi`;
+      const finalStreamUrl = track.streamUrl || `https://icecast.radiofrance.fr/${track.id.toLowerCase().replace(/_/g, '')}-midfi.mp3?id=openapi`;
 
       if (__DEV__) console.log(`[PlayerContext] Lancement du flux natif : ${finalStreamUrl}`);
 
@@ -139,7 +138,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
            */
           if (status.isLoaded) {
             setIsPlaying(status.isPlaying);
-            setIsLoadingAudio(status.isBuffering); // Capte si le réseau ralentit (Buffering actif)
+            setIsLoadingAudio(status.isBuffering);
           } else if (status.error) {
             console.error(`[PlayerContext] Erreur décodeur natif : ${status.error}`);
           }

@@ -1,53 +1,92 @@
 import { User } from "@/types/auth";
 import { ReviewComment, SocialActivity } from "@/types/community";
+import { ReviewService } from "@/services/reviews/review.service";
+import { ContentApiService } from "@/services/content/content-api.service";
+import { UserService } from "@/services/users/user.service";
+import { LikeReviewService } from "@/services/reviews/likeReview.service";
+
+const FEED_LIMIT = 15;
 
 /**
  * SocialService : Moteur du flux d'activité communautaire.
- * Ce service centralise la récupération des interactions sociales du réseau (Follows).
- * Il respecte le principe de tri chronologique inverse pour le fil d'actualité.
  */
 export const SocialService = {
   /**
-   * getFeed : Récupère les dernières activités des abonnements de l'utilisateur.
-   * Agrège différents types d'actions (Critiques détaillées, Notes simples).
-   * * @returns Promise<SocialActivity[]> - Liste des activités formatées pour le feed.
+   * getFeed : GET /social/feed
+   *
+   * Récupère le flux d'activité communautaire pour l'utilisateur connecté.
    */
-  getFeed: async (): Promise<SocialActivity[]> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            id: "act_1",
-            userId: "u1",
-            user: "Marc",
-            type: "REVIEW",
-            targetMedia: "Jazz Night",
-            text: "La sélection Bebop était parfaite. Un vrai régal pour mes oreilles !",
-            value: 4, 
-            timestamp: "Il y a 10m",
-            likes: 24,
-            commentsCount: 8
-          },
-          {
-            id: "act_2",
-            userId: "u2",
-            user: "Sophie",
-            type: "RATING",
-            targetMedia: "FIP Metal",
-            value: 5,
-            timestamp: "Il y a 1h",
-            likes: 12,
-            commentsCount: 2
-          }
-        ]);
-      }, 800);
-    });
+  getFeed: async (token: string): Promise<SocialActivity[]> => {
+    const allReviews = await ReviewService.getAll(token);
+
+    const topLevel = allReviews
+      .filter(r => r.parent_review_id === null)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, FEED_LIMIT);
+
+    if (topLevel.length === 0) return [];
+
+    const commentCountMap: Record<string, number> = {};
+    for (const r of allReviews) {
+      if (r.parent_review_id) {
+        commentCountMap[r.parent_review_id] = (commentCountMap[r.parent_review_id] ?? 0) + 1;
+      }
+    }
+
+    const uniqueContentIds = [...new Set(topLevel.map(r => r.content_id))];
+    const contentMap: Record<string, string> = {};
+    await Promise.all(
+      uniqueContentIds.map(async id => {
+        try {
+          const content = await ContentApiService.getById(token, id);
+          contentMap[id] = content.title;
+        } catch {
+          contentMap[id] = "Contenu inconnu";
+        }
+      })
+    );
+
+    const uniqueUserIds = [...new Set(topLevel.map(r => r.user_id))];
+    const userMap: Record<string, { username: string; avatar?: string }> = {};
+    const likeMap: Record<string, number> = {};
+
+    await Promise.all([
+      ...uniqueUserIds.map(async id => {
+        try {
+          const profile = await UserService.getById(token, id);
+          userMap[id] = { username: profile.display_name ?? profile.username, avatar: profile.avatar };
+        } catch {
+          userMap[id] = { username: "Utilisateur" };
+        }
+      }),
+      ...topLevel.map(async review => {
+        try {
+          const counts = await LikeReviewService.getCount(token, review.id);
+          likeMap[review.id] = counts.likes;
+        } catch {
+          likeMap[review.id] = 0;
+        }
+      }),
+    ]);
+
+    return topLevel.map(review => ({
+      id: review.id,
+      userId: review.user_id,
+      user: userMap[review.user_id]?.username ?? "Utilisateur",
+      avatar: userMap[review.user_id]?.avatar,
+      type: 'REVIEW' as const,
+      targetMedia: contentMap[review.content_id] ?? "Contenu inconnu",
+      text: review.comment || undefined,
+      timestamp: new Date(review.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
+      likes: likeMap[review.id] ?? 0,
+      commentsCount: commentCountMap[review.id] ?? 0,
+    }));
   },
 
   /**
-   * toggleLike : Permet d'aimer ou de retirer son j'aime sur une activité.
-   * * @param activityId - L'ID de l'activité à liker.
-   * @returns Promise<boolean> - Confirmation du succès de l'action.
+   * toggleLike : Permet de liker ou unliker une activité (ex: une critique).
+   * Implémentation fictive pour démonstration, à remplacer par un appel API réel.
+   * @returns le nouvel état "liké" (true) ou "non liké" (false).
    */
   toggleLike: async (activityId: string): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -84,10 +123,11 @@ export const SocialService = {
           username: userId === "u1" ? "Marc" : userId === "u2" ? "Alice" : "Bob",
           email: `${userId}@radiomonoko.community`,
           avatar: `https://ui-avatars.com/api/?name=${userId === "u1" ? "Marc" : userId === "u2" ? "Alice" : "Bob"}&background=random&color=fff`,
+          privacy: 'public' as const,
           bio: "Amoureuse de Jazz avant-gardiste et curatrice de sons nocturnes. Monoko addict. 🎧",
           followersCount: 142,
           followingCount: 89,
-          isFollowing: false
+          isFollowing: false,
         });
       }, 500);
     });

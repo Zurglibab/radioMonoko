@@ -5,7 +5,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, UserPlus, UserCheck } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
-import { SocialService } from "@/services/community/social.service";
+import { SocialService as CommunitySocialService } from "@/services/community/social.service";
+import { SocialService } from "@/services/social/social.service";
 
 /**
  * UserProfileScreen : Écran d'affichage d'un profil tiers de la communauté.
@@ -13,9 +14,9 @@ import { SocialService } from "@/services/community/social.service";
  * relationnels et de gérer dynamiquement l'action d'abonnement.
  */
 export default function UserProfileScreen() {
-  const { id } = useLocalSearchParams(); // ID du profil utilisateur ciblé
+  const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { appearanceSettings } = useAuthContext();
+  const { token, appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
   const isDark = appearanceSettings.themeMode === 'system' ? systemTheme === 'dark' : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
@@ -28,7 +29,7 @@ export default function UserProfileScreen() {
    */
   useEffect(() => {
     const loadProfile = async () => {
-      const data = await SocialService.getUserProfile(id as string);
+      const data = await CommunitySocialService.getUserProfile(id as string);
       setProfile(data);
       setLoading(false);
     };
@@ -48,12 +49,27 @@ export default function UserProfileScreen() {
    * Réalise une mise à jour optimiste (Optimistic UI) du state local pour offrir 
    * une réactivité instantanée à l'utilisateur, tout en incrémentant/décrémentant le compteur.
    */
-  const handleFollowToggle = () => {
-    setProfile({ 
-      ...profile, 
-      isFollowing: !profile.isFollowing, 
-      followersCount: profile.isFollowing ? profile.followersCount - 1 : profile.followersCount + 1 
+  const handleFollowToggle = async () => {
+    if (!token) return;
+    const wasFollowing = profile.isFollowing;
+    setProfile({
+      ...profile,
+      isFollowing: !wasFollowing,
+      followersCount: wasFollowing ? profile.followersCount - 1 : profile.followersCount + 1,
     });
+    try {
+      if (wasFollowing) {
+        await SocialService.unfollowUser(token, id as string);
+      } else {
+        await SocialService.followUser(token, id as string);
+      }
+    } catch {
+      setProfile((prev: typeof profile) => ({
+        ...prev,
+        isFollowing: wasFollowing,
+        followersCount: wasFollowing ? prev.followersCount + 1 : prev.followersCount - 1,
+      }));
+    }
   };
 
   return (

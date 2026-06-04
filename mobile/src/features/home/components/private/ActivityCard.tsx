@@ -4,7 +4,9 @@ import { Star, Heart, MessageSquare, MoreVertical, UserPlus, UserCheck } from "l
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { SocialActivity } from "@/types/community";
-import { useRouter } from "expo-router"; // 👈 NETTOYÉ : On ne garde QUE useRouter
+import { useRouter } from "expo-router";
+import { SocialService } from "@/services/social/social.service";
+import { LikeReviewService } from "@/services/reviews/likeReview.service";
 
 /**
  * ActivityCard : Composant central du fil d'actualité.
@@ -13,26 +15,49 @@ import { useRouter } from "expo-router"; // 👈 NETTOYÉ : On ne garde QUE useR
  */
 export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
   const router = useRouter();
-  const { appearanceSettings } = useAuthContext();
+  const { token, user, appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
-  const isDark = appearanceSettings.themeMode === 'system' 
-    ? systemTheme === 'dark' 
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? systemTheme === 'dark'
     : appearanceSettings.themeMode === 'dark';
-        
+
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(activity.likes);
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikesCount((prev: number) => (isLiked ? prev - 1 : prev + 1));
+  const handleLike = async () => {
+    if (!token || !user?.id) return;
+    const wasLiked = isLiked;
+    setIsLiked(!wasLiked);
+    setLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
+    try {
+      if (wasLiked) {
+        await LikeReviewService.remove(token, activity.id, user.id);
+      } else {
+        await LikeReviewService.upsert(token, activity.id, user.id, true);
+      }
+    } catch {
+      setIsLiked(wasLiked);
+      setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
+    }
   };
 
-  const handleFollow = () => {
-    setIsFollowing(!isFollowing);
+  const handleFollow = async () => {
+    if (!token) return;
+    const wasFollowing = isFollowing;
+    setIsFollowing(!wasFollowing);
+    try {
+      if (wasFollowing) {
+        await SocialService.unfollowUser(token, activity.userId);
+      } else {
+        await SocialService.followUser(token, activity.userId);
+      }
+    } catch {
+      setIsFollowing(wasFollowing);
+    }
   };
 
   /**
@@ -62,7 +87,7 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         borderColor: colors.border 
       }}
     >
-      {/* HEADER : Infos Utilisateur & Action Follow */}
+      {/* Infos Utilisateur & Action Follow */}
       <View className="flex-row items-center justify-between mb-4">
         <View className="flex-row items-center flex-1">
           {/* Avatar ou Initiale */}
@@ -145,7 +170,7 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         )}
       </View>
       
-      {/* FOOTER : Interactions (Likes & Commentaires) */}
+      {/* Interactions (Likes & Commentaires) */}
       <View 
         className="flex-row gap-x-6 pt-4 border-t" 
         style={{ borderColor: colors.border }}

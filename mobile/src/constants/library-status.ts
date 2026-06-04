@@ -1,24 +1,32 @@
 import { MediaStatus } from "@/types/content";
 
 /**
- * Statuts de collection côté backend, correspondant aux catégories de collections système.
- * Ces statuts sont utilisés pour stocker les collections dans la base de données et faire le lien avec les statuts front.
+ * CollectionStatus : Statut d'une œuvre dans la bibliothèque d'un utilisateur.
+ * Correspond aux 4 statuts principaux gérés par l'app : "À écouter", "En cours",
+ * "Terminé", "Abandonné". Valeurs exactes envoyées par le backend (en français).
  */
-export type BackendCollectionStatus = 'à voir' | 'en cours' | 'terminé' | 'abandonné';
+export type ContentStatus = 'à voir' | 'commencer' | 'fini' | 'abandonné';
 
 /**
- * Métadonnées des collections système, utilisées pour faire le lien entre les statuts front et backend, 
- * et pour afficher les titres et descriptions dans l'UI.
- * Les collections système sont des catégories prédéfinies que les utilisateurs peuvent utiliser pour organiser leurs contenus.
+ * StatusMeta : Métadonnées d'un statut (display + mapping front/backend).
+ *
+ * - frontStatus : slug interne (cohérent avec MediaStatus dans content.ts)
+ * - backendStatus : valeur exacte envoyée à l'API
+ * - displayName : libellé affiché à l'utilisateur (en français)
+ * - description : utilisé pour les tooltips ou sous-titres UI
  */
-export interface SystemCollectionMeta {
+export interface StatusMeta {
   frontStatus: MediaStatus;
-  backendStatus: BackendCollectionStatus;
+  backendStatus: ContentStatus;
   displayName: string;
   description: string;
 }
 
-export const SYSTEM_COLLECTIONS: SystemCollectionMeta[] = [
+/**
+ * STATUS_METADATA : Liste des 4 statuts gérés par l'application.
+ * L'ordre est celui de l'affichage UI (À écouter → En cours → Terminé → Abandonné).
+ */
+export const STATUS_METADATA: StatusMeta[] = [
   {
     frontStatus: 'to-listen',
     backendStatus: 'à voir',
@@ -27,13 +35,13 @@ export const SYSTEM_COLLECTIONS: SystemCollectionMeta[] = [
   },
   {
     frontStatus: 'in-progress',
-    backendStatus: 'en cours',
+    backendStatus: 'commencer',
     displayName: 'En cours',
     description: 'Ce que vous écoutez actuellement.',
   },
   {
     frontStatus: 'finished',
-    backendStatus: 'terminé',
+    backendStatus: 'fini',
     displayName: 'Terminé',
     description: 'Vos écoutes accomplies.',
   },
@@ -46,16 +54,18 @@ export const SYSTEM_COLLECTIONS: SystemCollectionMeta[] = [
 ];
 
 /**
- * Helpers de lookup bidirectionnel entre front et backend.
+ * findStatusMeta : Lookup par frontStatus (MediaStatus).
  */
-export const findSystemMeta = (frontStatus: MediaStatus): SystemCollectionMeta | undefined =>
-  SYSTEM_COLLECTIONS.find(s => s.frontStatus === frontStatus);
-
-export const findSystemMetaByBackend = (backendStatus: string | null): SystemCollectionMeta | undefined =>
-  SYSTEM_COLLECTIONS.find(s => s.backendStatus === backendStatus);
+export const findStatusMeta = (frontStatus: MediaStatus): StatusMeta | undefined =>
+  STATUS_METADATA.find(s => s.frontStatus === frontStatus);
 
 /**
- * Détecte si une collection est une collection système (vs personnalisée).
+ * findStatusMetaByBackend : Lookup par valeur backend (string).
+ * Retourne undefined si la valeur n'est pas reconnue (cas dégradé).
  */
-export const isSystemCollection = (status: string | null): boolean =>
-  status !== null && SYSTEM_COLLECTIONS.some(s => s.backendStatus === status);
+export const findStatusMetaByModel = (
+  backendStatus: string | null | undefined
+): StatusMeta | undefined =>
+  backendStatus
+    ? STATUS_METADATA.find(s => s.backendStatus === backendStatus)
+    : undefined;
