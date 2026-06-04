@@ -19,7 +19,7 @@ export default function RegisterScreen() {
   const router = useRouter();
   
   // Utilisation d'un hook dédié pour isoler la logique d'inscription
-  const { register, isLoading, error } = useRegister();
+  const { register, registerWithGoogle, isLoading, error } = useRegister();
   
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -119,7 +119,10 @@ export default function RegisterScreen() {
 
         {/* Séparateur et options d'inscription sociale */}
         <AuthDivider />
-        <SocialButtons />
+        <SocialButtons
+         onGooglePress={registerWithGoogle}
+         disabled={isLoading} 
+        />
 
         {/* Redirection vers le login pour les utilisateurs déjà inscrits */}
         <View className="flex-row justify-center mt-12 mb-6">

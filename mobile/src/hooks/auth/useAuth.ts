@@ -63,5 +63,20 @@ export const useAuth = () => {
     }
   };
 
-  return { login, isLoading, error };
+  const loginWithGoogle = async () => {
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const response = await AuthService.loginWithGoogle();
+      await updateGlobalState(response.token);
+      router.replace("/(tabs)/home");
+    } catch (err: any) {
+      setError(err?.message || "Connexion Google impossible.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { login, loginWithGoogle, isLoading, error };
 };

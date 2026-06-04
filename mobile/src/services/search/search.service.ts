@@ -6,12 +6,8 @@ import { UnifiedSearchResults, WebRadioWithBrand } from "@/types/search";
 
 /**
  * SearchService : Orchestrateur de recherche multi-sources.
- *
- * Combine en parallèle :
- * - Recherche de Brands via /api/brands/search/{title}
- * - Recherche d'utilisateurs publics via /user/search?q=...
- * - Filtrage côté client des WebRadios (sous-stations) à partir de TOUTES les brands
- *   chargées une fois et mises en cache
+ * Centralise les appels aux différents services de recherche (BrandService, UserService)
+ * et gère le filtrage local des webRadios à partir du cache de brands.
  */
 export const SearchService = {
   /**
@@ -48,7 +44,6 @@ export const SearchService = {
    */
   searchBrands: async (token: string, title: string): Promise<Brand[]> => {
     try {
-      // À adapter selon ta signature actuelle de BrandService
       return await BrandService.searchByTitle(token, title);
     } catch {
       return [];
@@ -68,10 +63,6 @@ export const SearchService = {
 
   /**
    * filterWebRadios : Filtre côté client toutes les webRadios disponibles.
-   *
-   * Le backend n'expose pas de route de recherche pour les webRadios, donc on
-   * itère sur le cache local des brands (chargé une fois). Performant car les
-   * webRadios sont en quantité raisonnable (~50 au total Radio France).
    */
   filterWebRadios: (allBrands: Brand[], query: string): WebRadioWithBrand[] => {
     const lower = query.toLowerCase();

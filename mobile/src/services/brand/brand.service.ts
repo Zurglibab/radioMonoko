@@ -34,16 +34,14 @@ export const BrandService = {
 
   /**
    * searchByTitle : GET /api/brands/search/{title}
+   * Recherche les radios principales dont le titre matche.
    */
-  searchByTitle: async (title: string): Promise<Brand[]> => {
-    try {
-      const response = await apiFetch<ApiEnvelope<Brand[]>>(
-        `/api/brands/search/${encodeURIComponent(title)}`
-      );
-      return response.data;
-    } catch {
-      throw new Error(`Aucune marque trouvée pour la recherche : ${title}`);
-    }
+  searchByTitle: async (token: string, title: string): Promise<Brand[]> => {
+    const resp = await apiFetch<{ success: boolean; data: Brand[] }>(
+      `/api/brands/search/${encodeURIComponent(title)}`,
+      { token }
+    );
+    return resp.data || [];
   },
 
   /**

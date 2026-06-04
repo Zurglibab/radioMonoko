@@ -1,6 +1,9 @@
 import { AuthResponse, User, UpdateUserPayload } from "@/types/auth";
 import { validatePassword } from "@/utils/validation/validation";
 import { apiFetch } from "@/utils/apiFetch";
+import * as WebBrowser from "expo-web-browser";
+import * as ExpoLinking from "expo-linking";
+import { API_BASE_URL } from "@/utils/apiConfig";
 
 /**
  * AuthService : Pilote de la sécurité et du tunnel de données utilisateur.
@@ -26,6 +29,32 @@ export const AuthService = {
       }
       throw new Error("Une erreur est survenue lors de la connexion.");
     }
+  },
+
+  /**
+   * loginWithGoogle : Orchestration du flux d'authentification via Google OAuth.
+   * Gère la redirection sécurisée, la récupération du token et les erreurs spécifiques à ce processus.
+   * 
+   * @returns 
+   */
+  loginWithGoogle: async (): Promise<AuthResponse> => {
+    const redirectUrl = ExpoLinking.createURL("oauth-success");
+    const authUrl = `${API_BASE_URL}/auth/google?mobile_redirect=${encodeURIComponent(redirectUrl)}`;
+
+    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
+
+    if (result.type !== "success" || !result.url) {
+      throw new Error("Connexion Google annulée ou échouée.");
+    }
+
+    const parsed = ExpoLinking.parse(result.url);
+    const token = parsed.queryParams?.token;
+
+    if (!token || typeof token !== "string") {
+      throw new Error("Token Google introuvable.");
+    }
+
+    return { token };
   },
 
   /**

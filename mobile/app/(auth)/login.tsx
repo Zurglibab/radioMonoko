@@ -18,7 +18,7 @@ export default function LoginScreen() {
   const router = useRouter();
   
   // J'extrait les états et méthodes nécessaires depuis notre hook d'authentification
-  const { login, isLoading, error } = useAuth();
+  const { login, loginWithGoogle, isLoading, error } = useAuth();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -110,7 +110,10 @@ export default function LoginScreen() {
 
         {/* Connexion via réseaux sociaux */}
         <AuthDivider />
-        <SocialButtons />
+        <SocialButtons 
+          onGooglePress={loginWithGoogle}
+          disabled={isLoading}
+        />
 
         {/* Navigation vers l'inscription */}
         <View className="flex-row justify-center mt-12 mb-6">
