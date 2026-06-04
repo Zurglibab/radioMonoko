@@ -14,11 +14,16 @@ const getReports = async (): Promise<Report[]> => {
 
 const getReviews = async () => {
     const response = await api.get("/review");
-    return response.data;
+    console.log("REVIEWS RESPONSE");
+    console.log(response.data);
+
+    return Array.isArray(response.data)
+        ? response.data
+        : response.data.data || [];
 }
 
-const banUser = async (id:string, banned:boolean) => {
-    const response = await api.patch(`/admin/users/${id}/ban`, {banned});
+const banUser = async (id:string, ban:boolean) => {
+    const response = await api.patch(`/admin/users/${id}/ban`, {ban});
     return response.data;
 }
 
@@ -33,3 +38,4 @@ const deleteReview = async (id:string) => {
 };
 
 export default {getUsers, getReports, getReviews, banUser, featureReview, deleteReview}
+

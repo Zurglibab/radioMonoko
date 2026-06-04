@@ -96,15 +96,15 @@ const AdminDashboard = () => {
                     </p>
                 </div>
                 <div
-                    onClick={() => navigate("/admin/recommendations")}
+                    onClick={() => navigate("/admin/reviews")}
                     className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
                 >
                     <h2 className="text-white font-bold text-xl">
-                        Recommandations
+                        Gestion des critiques
                     </h2>
 
                     <p className="text-neutral-500 mt-2">
-                        Recommander des œuvres
+                        Mettre des critiques en avant ou les supprimer
                     </p>
                 </div>
 

@@ -18,13 +18,6 @@ const AdminUsers = () => {
             setLoading(true);
             setError(null);
             const data = await AdminService.getUsers();
-            console.log("📊 USERS récupérés:", data);
-            console.log("📊 Nombre d'utilisateurs:", data.length);
-            if (!Array.isArray(data)) {
-                console.error("Les données retournées ne sont pas un tableau:", data);
-                setError("Format de données invalide");
-                return;
-            }
             setUsers(data);
         } catch (error) {
             console.error("Erreur lors de la récupération des utilisateurs:", error);
@@ -36,11 +29,12 @@ const AdminUsers = () => {
 
     const handleBan = async (id: string, banned:boolean) => {
         try {
+            setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ban: !banned } : u)));
             await AdminService.banUser(id, !banned);
-            await fetchUsers();
         }catch(err) {
             console.error("❌ Erreur ban/débannir:", err);
             setError(err instanceof Error ? err.message : "Erreur lors du ban");
+            setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ban: banned } : u)));
         }
     };
 
@@ -120,16 +114,16 @@ const AdminUsers = () => {
                                 onClick={() =>
                                     handleBan(
                                         u.id,
-                                        u.is_banned ?? false
+                                        u.ban ?? false
                                     )
                                 }
                                 className={`px-4 py-2 rounded-xl font-semibold transition ${
-                                    u.is_banned
+                                    u.ban
                                         ? "bg-green-600 hover:bg-green-500"
                                         : "bg-red-600 hover:bg-red-500"
                                 }`}
                             >
-                                {u.is_banned
+                                {u.ban
                                     ? "Débannir"
                                     : "Bannir"}
 
