@@ -6,6 +6,7 @@ import {useNavigate} from "react-router-dom";
 const AdminDashboard = () => {
     const {user} = useAuth();
     const [reportCount, setReportCount] = useState(0);
+    const [userCount, setUserCount] = useState(0);
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -13,22 +14,15 @@ const AdminDashboard = () => {
             try {
                 const reports = await AdminService.getReports();
                 setReportCount(reports.length);
-                // const users = await AdminService.getUsers();
-                // setUserCount(users.length);
+
+                const users = await AdminService.getUsers();
+                setUserCount(users.length);
             } catch (error) {
-                console.log(error);
+                console.error(error);
             }
         };
         fetchData();
     }, []);
-
-    // if (!user || user.role !== "admin") {
-    //     return (
-    //         <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-    //             <p className="text-white">Accès refusé</p>
-    //         </div>
-    //     );
-    // }
 
     return (
         <div className="p-8">
@@ -45,48 +39,73 @@ const AdminDashboard = () => {
             <h1 className="text-5xl font-black text-white mb-10">
                 Dashboard Admin
             </h1>
-
             <div className="grid md:grid-cols-3 gap-6">
 
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-
                     <p className="text-neutral-400">
-                        Signalements
+                        Signalements :
                     </p>
-
                     <p className="text-4xl font-bold text-white mt-2">
                         {reportCount}
                     </p>
-
                 </div>
-
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-
                     <p className="text-neutral-400">
-                        Utilisateurs
+                        Utilisateurs inscrits :
                     </p>
 
                     <p className="text-4xl font-bold text-white mt-2">
-                        67
-                        {/*{userCount}*/}
+                        {userCount}
                     </p>
-
-                    <p className="text-xs text-neutral-500 mt-2">
-                        Temporaire
-                    </p>
-
                 </div>
-
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-
                     <p className="text-neutral-400">
-                        Administrateur connecté
+                        Administrateur connecté :
                     </p>
 
                     <p className="text-xl text-white mt-2">
                         {user?.username}
                     </p>
+                </div>
 
+            </div>
+            <div className="grid md:grid-cols-3 gap-6 mt-12">
+                <div
+                    onClick={() => navigate("/admin/users")}
+                    className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
+                >
+                    <h2 className="text-white font-bold text-xl">
+                        Utilisateurs
+                    </h2>
+
+                    <p className="text-neutral-500 mt-2">
+                        Gérer les comptes et bannissements
+                    </p>
+                </div>
+
+                <div
+                    onClick={() => navigate("/admin/reports")}
+                    className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
+                >
+                    <h2 className="text-white font-bold text-xl">
+                        Signalements
+                    </h2>
+
+                    <p className="text-neutral-500 mt-2">
+                        Consulter les reports utilisateurs
+                    </p>
+                </div>
+                <div
+                    onClick={() => navigate("/admin/recommendations")}
+                    className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
+                >
+                    <h2 className="text-white font-bold text-xl">
+                        Recommandations
+                    </h2>
+
+                    <p className="text-neutral-500 mt-2">
+                        Recommander des œuvres
+                    </p>
                 </div>
 
             </div>

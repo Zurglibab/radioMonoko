@@ -19,7 +19,6 @@ const Register = () => {
             alert("Les mots de passe ne correspondent pas");
             return;
         }
-
         try {
             setError("");
             await register(email,username, password);

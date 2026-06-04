@@ -6,7 +6,7 @@ import api from "../services/Api.ts";
 export interface User {
     id: string;
     email: string;
-    username: string | null;
+    username: string;
     display_name: string | null;
     avatar?: string | null;
     role: string;

@@ -5,10 +5,6 @@ import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
 import {useNavigate} from "react-router-dom";
 
-
-
-
-
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

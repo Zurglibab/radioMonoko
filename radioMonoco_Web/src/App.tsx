@@ -3,6 +3,7 @@ import Layout from "./components/utils/Layout.tsx";
 import Login from "./pages/Login.tsx";
 import Register from "./pages/Register.tsx";
 import ProtectedRoute from "./components/utils/ProtectedRoute.tsx";
+import AdminRoute from "./components/utils/AdminRoute.tsx";
 import Feed from "./pages/Feed.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import { RadioProvider } from "./context/RadioContext.tsx";
@@ -19,10 +20,10 @@ function App() {
     return (
         <RadioProvider>
             <Routes>
-                <Route path= "/admin" element={ <ProtectedRoute><AdminDashboard /></ProtectedRoute> } />
-                <Route path= "/admin/users" element={<AdminUsers />} />
-                <Route path= "/admin/reports" element={<AdminReports />} />
-                <Route path= "/admin/reviews" element={<AdminReviews />} />
+                <Route path= "/admin" element={ <AdminRoute><AdminDashboard /></AdminRoute> } />
+                <Route path= "/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+                <Route path= "/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+                <Route path= "/admin/reviews" element={<AdminRoute><AdminReviews /></AdminRoute>} />
                 {/*<Route path= "/admin/recommendations" element={<AdminRecommendations />} />*/}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
