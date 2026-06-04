@@ -96,7 +96,6 @@ export const RadioProvider = ({ children }: { children: ReactNode }) => {
                 <audio
                     ref={audioRef}
                     preload="auto"
-                    crossOrigin="anonymous"
                 />
             )}
         </RadioContext.Provider>

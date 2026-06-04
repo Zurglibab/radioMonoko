@@ -8,6 +8,9 @@ export interface Brand {
     liveStream: string | null;
     createdAt?: string;
     updatedAt?: string;
+    webRadios?: Brand[];
+    localRadios?: Brand[];
 }
-export type CreateBrandInput = Omit<Brand, 'id' | 'createdAt' | 'updatedAt'>;
+
+export type CreateBrandInput = Omit<Brand, 'id' | 'createdAt' | 'updatedAt' | 'webRadios' | 'localRadios'>;
 export type UpdateBrandInput = Partial<CreateBrandInput>;

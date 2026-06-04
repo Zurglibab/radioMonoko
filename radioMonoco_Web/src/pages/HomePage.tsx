@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import logo from "../assets/images/icon_large.png";
 import { useAppearance } from "../context/AppearanceContext";
 
-import {RadioDashboard} from "../components/homepage/LiveRadios";
+import LiveRadios from "../components/homepage/LiveRadios";
 import Footer from "../components/utils/Footer";
 
 const HomePage = () => {
@@ -68,7 +68,7 @@ const HomePage = () => {
                 </header>
 
                 <main>
-                    <RadioDashboard />
+                    <LiveRadios />
                 </main>
 
                 <Footer />

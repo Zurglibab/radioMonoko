@@ -1,9 +1,9 @@
 import api from "./Api";
-import type { Brand, CreateBrandInput, UpdateBrandInput } from "../interfaces/Brands.types";
+import type { Brand } from "../interfaces/Brands.types";
 
 const getAllBrands = async (): Promise<Brand[]> => {
     try {
-        const response = await api.get("/brands");
+        const response = await api.get("/api/brands");
         const data = response.data?.data;
         return Array.isArray(data) ? data : [];
     } catch (error) {
@@ -13,29 +13,11 @@ const getAllBrands = async (): Promise<Brand[]> => {
 };
 
 const getBrandById = async (id: string): Promise<Brand> => {
-    const response = await api.get(`/brands/${id}`);
+    const response = await api.get(`/api/brands/${id}`);
     return response.data?.data || response.data;
-};
-
-const createBrand = async (data: CreateBrandInput): Promise<Brand> => {
-    const response = await api.post("/brands", data);
-    return response.data;
-};
-
-const updateBrand = async (id: string, data: UpdateBrandInput): Promise<Brand> => {
-    const response = await api.put(`/brands/${id}`, data);
-    return response.data;
-};
-
-const deleteBrand = async (id: string): Promise<any> => {
-    const response = await api.delete(`/brands/${id}`);
-    return response.data;
 };
 
 export default {
     getAllBrands,
-    getBrandById,
-    createBrand,
-    updateBrand,
-    deleteBrand
+    getBrandById
 };
