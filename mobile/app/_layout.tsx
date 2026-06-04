@@ -2,12 +2,38 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
-import { NotificationProvider } from "@/context/NotificationContext";
+import { NotificationProvider, useNotificationContext } from "@/context/NotificationContext";
 import { PlayerProvider } from "@/context/PlayerContext";
-import React from "react";
+import React, { useEffect } from "react";
 import "../global.css";
 import { MiniPlayer } from "@/features/player/components/MiniPlayer";
-import { useColorScheme } from "react-native";
+import { useColorScheme, Alert } from "react-native";
+
+/**
+ * NotificationWatcher : Composant invisible qui écoute les notifications globales
+ * et déclenche des alertes à l'écran en temps réel lors du polling.
+ */
+function NotificationWatcher() {
+  const { notifications } = useNotificationContext();
+  const { user, token } = useAuthContext();
+
+  useEffect(() => {
+    if (!token || !user?.id || notifications.length === 0) return;
+
+    const latestNotif = notifications[0];
+    const isFresh = (Date.now() - new Date(latestNotif.timestamp).getTime()) < 45000;
+
+    if (!latestNotif.isRead && isFresh) {
+      Alert.alert(
+        "Nouvelle notification 🔔",
+        latestNotif.message,
+        [{ text: "Fermer", style: "cancel" }]
+      );
+    }
+  }, [notifications, token, user?.id]);
+
+  return null;
+}
 
 /**
  * AppContent : Le conteneur logique de l'application.
@@ -25,6 +51,7 @@ function AppContent() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style={isDark ? "light" : "dark"} />
 
+      <NotificationWatcher />
       <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="splash" />

@@ -53,7 +53,6 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
       <View 
         className="w-40 h-40 rounded-[32px] overflow-hidden relative border shadow-sm" 
         style={{ 
-          // Bordure d'accentuation si le média est en cours de lecture
           borderColor: isCurrentMedia ? colors.primary : colors.border, 
           backgroundColor: colors.surface 
         }}
@@ -75,7 +74,6 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
           ) : (
             <PlayCircle 
               size={52} 
-              // En mode clair, on utilise une couleur sombre si non actif pour la visibilité
               color={isCurrentMedia ? colors.primary : (isDark ? "white" : colors.text)} 
               fill={isDark ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.4)"} 
             />
@@ -114,12 +112,13 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
         </Text>
       </View>
 
-      {/* Action Sheet */}
-      <MediaActionSheet 
-        isVisible={isSheetVisible} 
-        onClose={() => setIsSheetVisible(false)} 
-        station={item}
-      />
+      {isSheetVisible && (
+        <MediaActionSheet
+          isVisible={isSheetVisible}
+          onClose={() => setIsSheetVisible(false)}
+          station={item}
+        />
+      )}
     </View>
   );
 };

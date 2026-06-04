@@ -5,34 +5,29 @@ import { NotificationService } from "@/services/notifications/notification.servi
 import { mapNotificationDtoToApp } from "@/utils/mappers/notification.mapper";
 import { AppNotification } from "@/types/content";
 
-// Intervalle de mise à jour des notifications (30 secondes)
 const POLL_INTERVAL = 30_000;
 
 /**
- * useNotifications : Pilote le centre de notifications de l'utilisateur connecté.
+ * useNotifications : Hook de gestion des notifications utilisateur.
  * 
- * - Charge les notifications via l'API et les mappe vers le modèle UI
- * - Implémente le "temps réel" via polling régulier (pausé en arrière-plan)
- * - Expose les actions markAsRead / markAllAsRead avec mise à jour optimiste
+ * Ce hook centralise la logique de récupération, mise à jour et marquage des notifications
+ * pour l'utilisateur connecté. Il gère également le polling en arrière-plan lorsque l'app est active,
+ * et suspend le polling lorsque l'app est en arrière-plan pour économiser les ressources.
+ * @returns 
  */
 export const useNotifications = () => {
   const { token, user, isLoading: isAuthLoading } = useAuthContext();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Réf pour éviter de relancer le polling à chaque changement de notifications
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loadedForSession = useRef(false);
 
-  /**
-   * Récupère les notifications depuis l'API. `silent` évite le spinner sur le polling.
-   */
   const loadNotifications = useCallback(async (silent = false) => {
     if (!token || !user?.id) return;
     if (!silent) setIsLoading(true);
     try {
       const dtos = await NotificationService.getUserNotifications(token, user.id);
-      // Tri chronologique inverse (plus récent en premier)
       const mapped = dtos
         .map(mapNotificationDtoToApp)
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -46,20 +41,26 @@ export const useNotifications = () => {
     }
   }, [token, user?.id]);
 
-  // Chargement initial une fois l'auth prête
   useEffect(() => {
-    if (isAuthLoading) return;
+    if (isAuthLoading || !token || !user?.id) {
+      if (!token) loadedForSession.current = false;
+      return;
+    }
+    if (loadedForSession.current) return;
+    loadedForSession.current = true;
     loadNotifications();
-  }, [isAuthLoading, loadNotifications]);
+  }, [isAuthLoading, token, user?.id]);
 
-  // Polling, démarre un intervalle, le met en pause quand l'app passe en arrière-plan
   useEffect(() => {
     if (isAuthLoading || !token || !user?.id) return;
 
     const startPolling = () => {
       if (intervalRef.current) return;
-      intervalRef.current = setInterval(() => loadNotifications(true), POLL_INTERVAL);
+      intervalRef.current = setInterval(() => {
+        loadNotifications(true);
+      }, POLL_INTERVAL);
     };
+
     const stopPolling = () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -67,13 +68,12 @@ export const useNotifications = () => {
       }
     };
 
-    // Réagit aux changements d'état de l'app (foreground/background)
     const handleAppStateChange = (state: AppStateStatus) => {
       if (state === 'active') {
-        loadNotifications(true); // refresh immédiat au retour
+        loadNotifications(true);
         startPolling();
       } else {
-        stopPolling(); // économise batterie et requêtes en arrière-plan
+        stopPolling();
       }
     };
 
@@ -84,11 +84,8 @@ export const useNotifications = () => {
       stopPolling();
       subscription.remove();
     };
-  }, [isAuthLoading, token, user?.id, loadNotifications]);
+  }, [isAuthLoading, token, user?.id]);
 
-  /**
-   * markAsRead : marque une notif comme lue (optimiste : UI d'abord, API ensuite).
-   */
   const markAsRead = useCallback(async (id: string) => {
     if (!token) return;
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
@@ -96,14 +93,10 @@ export const useNotifications = () => {
       await NotificationService.markAsRead(token, id);
     } catch (err: any) {
       if (__DEV__) console.warn("[useNotifications] markAsRead échoué, rollback", err?.message);
-      // Rollback si l'API échoue
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: false } : n));
     }
   }, [token]);
 
-  /**
-   * markAllAsRead : pas de route backend dédiée → on boucle sur les non-lues.
-   */
   const markAllAsRead = useCallback(async () => {
     if (!token) return;
     const unread = notifications.filter(n => !n.isRead);
@@ -113,7 +106,6 @@ export const useNotifications = () => {
       await Promise.all(unread.map(n => NotificationService.markAsRead(token, n.id)));
     } catch (err: any) {
       if (__DEV__) console.warn("[useNotifications] markAllAsRead partiel", err?.message);
-      // En cas d'échec, on resynchronise avec le serveur
       loadNotifications(true);
     }
   }, [token, notifications, loadNotifications]);
