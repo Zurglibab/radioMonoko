@@ -1,0 +1,8 @@
+export interface Content {
+    id: string;
+    api_id: string;
+    title: string;
+    description: string;
+    content_type: "other" | "podcast" | "video" | string;
+    created_at: string;
+}

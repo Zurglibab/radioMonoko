@@ -1,5 +1,5 @@
 import api from "./Api";
-import type { LiveInfo } from "../interfaces/Live.types";
+import type { LiveInfo } from "../interfaces/Lives.types.ts";
 
 const getLiveByStation = async (station: string): Promise<LiveInfo | null> => {
     try {

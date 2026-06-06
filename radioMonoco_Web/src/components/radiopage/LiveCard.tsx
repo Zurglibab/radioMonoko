@@ -1,27 +1,23 @@
 import { useEffect, useState } from "react";
 import { HiOutlineRadio, HiOutlinePlay, HiOutlinePause } from "react-icons/hi2";
 import { useRadio, type Radio } from "../../context/RadioContext";
-import liveService from "../../services/LiveService";
+import liveService from "../../services/LivesService.ts";
 import type { Brand } from "../../interfaces/Brands.types";
-// 💡 Optionnel mais recommandé : importer le vrai type si disponible, exemple :
-// import type { LiveInfo } from "../../interfaces/Live.types";
 
 interface LiveCardProps {
     brandData: Brand;
     theme: "dark" | "light";
 }
 
-// 🛠️ Correction de l'interface pour correspondre au type LiveInfo du service
 interface LiveDataStructure {
     title?: string | null;
     baseline?: string | null;
-    program?: { name?: string } | null; // 👈 Rendu optionnel ou typé selon LiveProgram
+    program?: { name?: string } | null;
     diffusion?: { title: string; standFirst?: string } | null;
 }
 
 const LiveCard = ({ brandData, theme }: LiveCardProps) => {
     const { playRadio, isPlaying, currentRadio } = useRadio();
-    // 💡 Si tu as importé LiveInfo, tu peux faire : useState<LiveInfo | null>(null);
     const [liveData, setLiveData] = useState<LiveDataStructure | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -42,7 +38,7 @@ const LiveCard = ({ brandData, theme }: LiveCardProps) => {
         };
 
         fetchLive();
-        const interval = setInterval(fetchLive, 60000);
+        const interval = setInterval(fetchLive, 3600000);
 
         return () => clearInterval(interval);
     }, [brandData.id]);
