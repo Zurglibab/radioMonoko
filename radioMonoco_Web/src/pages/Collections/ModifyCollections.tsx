@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import type {Collection} from "../../interfaces/Collections.types.ts";
+import {FiGlobe, FiLock} from "react-icons/fi";
 
 interface ModifyCollectionsProps {
     isOpen: boolean;
@@ -73,15 +74,27 @@ const ModifyCollections = ({isOpen, onClose, onSubmit, collection}: ModifyCollec
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <input
-                            type="checkbox"
-                            checked={isPublic}
-                            onChange={(e) => setIsPublic(e.target.checked)}
-                        />
+                        <button
+                            type="button"
+                            onClick={() => setIsPublic(!isPublic)}
+                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition ${
+                                isPublic
+                                    ? "border-emerald-500 bg-emerald-500/10"
+                                    : "border-white/5 bg-neutral-900"
+                            }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                {isPublic ? (
+                                    <FiGlobe className="text-emerald-400" />
+                                ) : (
+                                    <FiLock className="text-neutral-400" />
+                                )}
 
-                        <span className="text-white text-sm">
-                            Collection publique
+                                <span className="text-white text-sm">
+                            {isPublic ? "Collection publique" : "Collection privée"}
                         </span>
+                            </div>
+                        </button>
                     </div>
 
                     <div className="flex justify-end gap-3 pt-4">

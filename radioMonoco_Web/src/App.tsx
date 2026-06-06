@@ -14,6 +14,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard.tsx";
 import AdminReviews from "./pages/Admin/AdminReviews.tsx";
 import AdminUsers from "./pages/Admin/AdminUsers.tsx";
 import AdminReports from "./pages/Admin/AdminReports.tsx";
+import SearchResults from "./pages/SearchResults.tsx";
 
 function App() {
     return (
@@ -23,6 +24,7 @@ function App() {
                 <Route path= "/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
                 <Route path= "/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
                 <Route path= "/admin/reviews" element={<AdminRoute><AdminReviews /></AdminRoute>} />
+                <Route path= "/search" element={<SearchResults/>} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
