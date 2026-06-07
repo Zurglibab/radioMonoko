@@ -187,7 +187,7 @@ export const RadioCommunityZone = ({
 
             try {
                 let existing = null;
-                try { existing = await ratingContentService.getRatingByIds(contentId, currentUserId); } catch (err) { console.log(err); }
+                try { existing = await ratingContentService.getRatingByIds(contentId, currentUserId); } catch (err) { console.error(err); }
 
                 if (existing) {
                     await ratingContentService.updateRating(contentId, currentUserId, { average_rating: nextRating });

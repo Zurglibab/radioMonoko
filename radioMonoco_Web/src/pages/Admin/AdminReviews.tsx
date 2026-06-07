@@ -17,7 +17,6 @@ const AdminReviews = () => {
         try {
             setLoading(true);
             const data = await AdminService.getReviews();
-            console.log("reviews raw:", data);
             setReviews(data);
         } catch (err) {
             console.error(err);

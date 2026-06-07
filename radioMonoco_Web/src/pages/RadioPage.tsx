@@ -1,26 +1,26 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams } from "react-router-dom";
+import {useCallback, useEffect, useRef, useState} from "react";
+import {useParams} from "react-router-dom";
 import LiveCard from "../components/radiopage/LiveCard";
-import { HiBookmark, HiCheck } from "react-icons/hi2";
-import { useAppearance } from "../context/AppearanceContext";
+import {HiBookmark, HiCheck} from "react-icons/hi2";
+import {useAppearance} from "../context/AppearanceContext";
 import brandsService from "../services/BrandsService";
 import showsService from "../services/ShowsService.ts";
 import contentService from "../services/ContentsService";
 import ratingContentService from "../services/RatingContentsService";
 import reviewService from "../services/ReviewsService";
-import { cached } from "../services/ApiCacheService";
+import {cached} from "../services/ApiCacheService";
 import usersService from "../services/UsersService";
 import likeReviewsService from "../services/LikeReviewsService";
 import collectionItemsService from "../services/CollectionItemsService.ts";
 import collectionsService from "../services/CollectionsService.ts";
-import type { Brand } from "../interfaces/Brands.types";
-import type { ApiShow, ApiDiffusion } from "../interfaces/Shows.types";
-import type { User } from "../interfaces/Users.types";
-import type { Collection } from "../interfaces/Collections.types.ts";
-import { BRAND_THEMES } from "../assets/themes/BrandThemes";
-import { DEFAULT_THEME } from "../assets/themes/DefaultTheme";
-import { RadioCommunityZone } from "../components/radiopage/RadioCommunityZone";
-import { RadioListsSection } from "../components/radiopage/RadioListsSection.tsx";
+import type {Brand} from "../interfaces/Brands.types";
+import type {ApiDiffusion, ApiShow} from "../interfaces/Shows.types";
+import type {User} from "../interfaces/Users.types";
+import type {Collection} from "../interfaces/Collections.types.ts";
+import {BRAND_THEMES} from "../assets/themes/BrandThemes";
+import {DEFAULT_THEME} from "../assets/themes/DefaultTheme";
+import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
+import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
 
 const RadioPage = () => {
     const { station } = useParams<{ station: string }>();
@@ -144,9 +144,7 @@ const RadioPage = () => {
              for (const col of collections) {
                  try {
                      const items = await collectionItemsService.getItemsByCollection(col.id);
-                     const isInCollection = items.some((item: any) => item.content_id === dbContentId);
-                     states[col.id] = isInCollection;
-                     console.log(`[checkCollectionItems] Collection ${col.id} - content ${dbContentId}: ${isInCollection}`);
+                     states[col.id] = items.some((item: any) => item.content_id === dbContentId);
                  } catch (error) {
                      console.error(`[checkCollectionItems] Error checking collection ${col.id}:`, error);
                      states[col.id] = false;
@@ -211,12 +209,6 @@ const RadioPage = () => {
                                 dislikesCount,
                                 userChoice
                             };
-
-                            console.log("[RadioPage] Review enriched:", {
-                                reviewId: review.id,
-                                enriched: { likesCount, dislikesCount, userChoice }
-                            });
-
                             return enriched;
                         })
                     );
@@ -228,13 +220,6 @@ const RadioPage = () => {
                         ...parent,
                         replies: childReplies.filter((reply) => reply.parent_review_id === parent.id)
                     }));
-
-                    console.log("[RadioPage] Structured comments ready (initial load):", {
-                        parentCount: parentComments.length,
-                        totalReplies: childReplies.length,
-                        sample: structuredComments.slice(0, 2)
-                    });
-
                     setComments(structuredComments);
                 }
 
@@ -381,29 +366,11 @@ const RadioPage = () => {
 
      const handleLikeInteraction = async (reviewId: string, actionType: "like" | "dislike" | "remove") => {
          if (!isLoggedIn || !currentUserId) return;
-
-         console.log("[handleLikeInteraction] START", {
-             reviewId,
-             actionType,
-             currentUserId,
-             isLoggedIn,
-             timestamp: new Date().toISOString()
-         });
-
-         // keep a snapshot so we can revert on failure
          const previousCommentsSnapshot = JSON.parse(JSON.stringify(comments));
-         console.log("[handleLikeInteraction] Snapshotted previous state");
 
          setComments((prevComments) => {
              const updateCommentCounters = (c: any) => {
                  if (c.id !== reviewId) return c;
-                 console.log("[handleLikeInteraction] Found comment to update:", {
-                     id: c.id,
-                     previousUserChoice: c.userChoice,
-                     previousLikes: c.likesCount,
-                     previousDislikes: c.dislikesCount
-                 });
-
                  const previousChoice = c.userChoice;
                  let newLikes = c.likesCount ?? 0;
                  let newDislikes = c.dislikesCount ?? 0;
@@ -413,12 +380,6 @@ const RadioPage = () => {
 
                  if (actionType === "like") newLikes += 1;
                  if (actionType === "dislike") newDislikes += 1;
-
-                 console.log("[handleLikeInteraction] Optimistic update calculated:", {
-                     newLikes,
-                     newDislikes,
-                     newUserChoice: actionType === "remove" ? null : actionType
-                 });
 
                  return {
                      ...c,
@@ -437,32 +398,16 @@ const RadioPage = () => {
              });
          });
 
-         console.log("[handleLikeInteraction] Optimistic state update done");
-
          try {
              if (actionType === "remove") {
-                 console.log("[handleLikeInteraction] Calling removeLikeReview", { reviewId, currentUserId });
-                 const removed = await likeReviewsService.removeLikeReview(reviewId, currentUserId);
-                 console.log("[handleLikeInteraction] removeLikeReview response:", removed);
+                 await likeReviewsService.removeLikeReview(reviewId, currentUserId);
              } else {
                  const isLikeBool = actionType === "like";
-                 console.log("[handleLikeInteraction] Calling toggleLikeReview", { reviewId, currentUserId, isLikeBool });
-                 const toggleResp = await likeReviewsService.toggleLikeReview(reviewId, currentUserId, isLikeBool);
-                 console.log("[handleLikeInteraction] toggleLikeReview response:", toggleResp);
+                 await likeReviewsService.toggleLikeReview(reviewId, currentUserId, isLikeBool);
              }
-
-             // Fetch fresh like data directly from the API to avoid returning a cached value
-             // (cached wrapper may return stale data immediately after a toggle)
-             console.log("[handleLikeInteraction] Fetching fresh like data from API");
              let freshData = null;
              try {
                  freshData = await likeReviewsService.getReviewLikes(reviewId, currentUserId);
-                 console.log("[handleLikeInteraction] getReviewLikes fresh response:", {
-                     reviewId,
-                     currentUserId,
-                     response: freshData,
-                     timestamp: new Date().toISOString()
-                 });
              } catch (err) {
                  console.error("[handleLikeInteraction] Error fetching fresh likes:", {
                      error: err,
@@ -474,28 +419,10 @@ const RadioPage = () => {
              }
 
              if (freshData) {
-                 console.log("[handleLikeInteraction] Aligning state with fresh DB data");
-
-                 // Use helper function to transform API response
                  const { likesCount: finalLikes, dislikesCount: finalDislikes, userChoice: finalUserChoice } = likeReviewsService.transformLikesData(freshData, currentUserId);
-
-                 console.log("[handleLikeInteraction] Transformed fresh data:", {
-                     finalLikes,
-                     finalDislikes,
-                     finalUserChoice
-                 });
-
                  setComments((prevComments) => {
                      const alignWithDb = (c: any) => {
                          if (c.id !== reviewId) return c;
-
-                         console.log("[handleLikeInteraction] Aligning comment:", {
-                             commentId: c.id,
-                             finalLikes,
-                             finalDislikes,
-                             finalUserChoice
-                         });
-
                          return {
                              ...c,
                              likesCount: finalLikes,
@@ -511,7 +438,6 @@ const RadioPage = () => {
                          return comment;
                      });
                  });
-                 console.log("[handleLikeInteraction] State alignment complete");
              } else {
                  console.warn("[handleLikeInteraction] No fresh data from API, keeping optimistic state");
              }
@@ -522,16 +448,12 @@ const RadioPage = () => {
                  currentUserId,
                  timestamp: new Date().toISOString()
              });
-             // revert optimistic update on failure
              try {
                  setComments(previousCommentsSnapshot);
-                 console.log("[handleLikeInteraction] Reverted to previous state due to error");
              } catch (e) {
                  console.error("[handleLikeInteraction] CRITICAL ERROR: Failed to revert state:", e);
              }
          }
-
-         console.log("[handleLikeInteraction] END", { timestamp: new Date().toISOString() });
      };
 
     useEffect(() => {
@@ -547,20 +469,14 @@ const RadioPage = () => {
      const toggleCollectionItem = async (collectionId: string) => {
          if (!dbContentId) return;
          try {
-             console.log("[toggleCollectionItem] START", { collectionId, dbContentId });
-
              const isCurrentlyInCollection = collectionItemStates[collectionId];
-
-             // Remove from collection (or do nothing if it doesn't exist)
              if (isCurrentlyInCollection) {
                  try {
                      await collectionItemsService.deleteItemFromCollection(collectionId, dbContentId);
-                     console.log("[toggleCollectionItem] Deleted item from collection");
                  } catch (err) {
-                     console.log("[toggleCollectionItem] Error deleting item");
+                     console.error(err);
                  }
              } else {
-                 // Add to collection
                  const newItem: any = {
                      collection_id: collectionId,
                      content_id: dbContentId,
@@ -569,10 +485,7 @@ const RadioPage = () => {
                  };
 
                  await collectionItemsService.addItemToCollection(newItem);
-                 console.log("[toggleCollectionItem] Added item to collection", newItem);
              }
-
-             // Update local state
              setCollectionItemStates((prev) => ({
                  ...prev,
                  [collectionId]: !isCurrentlyInCollection
@@ -631,7 +544,7 @@ const RadioPage = () => {
             ${theme === 'dark' ? 'bg-neutral-900 border-white/10' : 'bg-white border-neutral-200'}`}>
                                     {/* Header */}
                                     <div className={`px-5 py-3 font-bold text-xs uppercase tracking-wider opacity-70 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>
-                                        📚 Mes Collections
+                                        Mes Collections
                                     </div>
 
                                     {/* Collections List */}
@@ -711,8 +624,8 @@ const RadioPage = () => {
                             )}
                         </div>
                     </div>
-                    <div className="lg:col-span-7 w-full lg:mt-8">
-                        <div className={`rounded-[2.5rem] overflow-hidden transition-all duration-500 ${theme === "dark" ? "shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]" : "shadow-[0_30px_60px_-20px_rgba(0,0,0,0.08)] border border-neutral-200/50"}`}>
+                    <div className="lg:col-span-7 w-full lg:mt-8 pb-4">
+                        <div className={`rounded-[2.5rem] overflow-hidden transition-all duration-500  ${theme === "dark" ? "shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]" : "shadow-[0_30px_60px_-20px_rgba(0,0,0,0.08)] border border-neutral-200/50"}`}>
                             <LiveCard brandData={brand} theme={theme} />
                         </div>
                     </div>
