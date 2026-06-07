@@ -1,14 +1,17 @@
-import { useParams } from "react-router-dom"
+import {useParams} from "react-router-dom"
 import { useEffect, useState } from "react"
 import CollectionsService from "../../services/CollectionsService.ts";
 import type { Collection } from "../../interfaces/Collections.types.ts";
 import { useNavigate } from "react-router-dom";
+import CollectionItemsService from "../../services/CollectionItemsService.ts";
+import type {CollectionItem} from "../../interfaces/CollectionItem.types.ts";
 
 const CollectionsDetails = () => {
     const { id } = useParams()
     const [collection, setCollection] = useState<Collection | null>(null)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
+    const [items, setItems] = useState<CollectionItem[]>([])
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -18,6 +21,10 @@ const CollectionsDetails = () => {
 
                 const data = await CollectionsService.getCollectionById(id);
                 setCollection(data);
+
+                const itemsData = await CollectionItemsService.getItemsByCollection(id);
+                setItems(itemsData);
+
             } catch (err) {
                 console.error("Erreur lors de la récupération de la collection :", err);
                 setError("Impossible de charger la collection");
@@ -26,8 +33,18 @@ const CollectionsDetails = () => {
             }
         };
         fetchCollection()
-
     }, [id]);
+
+    const handleDeleteItem = async (contentId: string) => {
+        if (!id) return;
+        try {
+            await CollectionItemsService.deleteItemFromCollection(id, contentId);
+            setItems((prev) => prev.filter((item) => item.content_id !== contentId));
+        } catch (err) {
+            console.error("Erreur lors de la suppression de l'élément :", err);
+            setError("Impossible de supprimer l'élément");
+        }
+    };
 
     if (loading) {
         return (
@@ -88,21 +105,56 @@ const CollectionsDetails = () => {
                             </span>
 
                         </div>
+
                     </div>
+
                 </div>
 
-                {/* EMPTY STATE */}
-                <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-10 text-center">
+            </div>
+            <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-8">
+                <h2 className="text-2xl font-bold text-white mb-6">
+                    Contenu
+                </h2>
 
-                    <h2 className="text-2xl font-bold text-white mb-3">
-                        Cette collection est vide
-                    </h2>
-
+                {items.length === 0 ? (
                     <p className="text-neutral-500">
-                        Tu pourras bientôt ajouter des albums, playlists ou artistes.
+                        Aucun élément dans cette collection
                     </p>
+                ) : (
+                    <div className="space-y-4">
+                        {items.map((item) => (
+                            <div
+                                key={item.content_id}
+                                className="bg-neutral-800 rounded-xl p-4 flex justify-between items-center"
+                            >
+                                <div>
+                                    <p className="text-white font-semibold">
+                                        {item.content_id}
+                                    </p>
 
-                </div>
+                                    <p className="text-neutral-500 text-sm">
+                                        Position : {item.position}
+                                    </p>
+
+                                    {item.note && (
+                                        <p className="text-neutral-400 mt-2">
+                                            {item.note}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={() =>
+                                        handleDeleteItem(item.content_id)
+                                    }
+                                    className="text-red-400 hover:text-red-300"
+                                >
+                                    Supprimer
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
