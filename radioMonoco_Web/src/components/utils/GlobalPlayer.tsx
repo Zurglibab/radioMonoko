@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { HiOutlinePlay, HiOutlinePause } from "react-icons/hi2";
 import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import { useRadio } from "../../context/RadioContext.tsx";
@@ -8,9 +8,16 @@ import { useAppearance } from "../../context/AppearanceContext.tsx";
 const GlobalPlayer: React.FC = () => {
     const { isPlaying, setIsPlaying, currentRadio, setCurrentRadio, volume, setVolume, toggleMute } = useRadio();
     const [isHoveringSlider, setIsHoveringSlider] = useState(false);
+    const [isOverflowing, setIsOverflowing] = useState(false);
     const { theme } = useAppearance();
 
+    const containerRef = useRef<HTMLDivElement>(null);
+    const textRef = useRef<HTMLParagraphElement>(null);
+
     const isDark = theme === 'dark';
+
+    // Détecte si le flux actuel est un podcast externe (Sujet aux blocages CORS)
+    const isPodcastStream = currentRadio?.streamUrl?.includes("proxycast.radiofrance.fr") || currentRadio?.desc === "Podcast";
 
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout> | undefined;
@@ -26,6 +33,24 @@ const GlobalPlayer: React.FC = () => {
         };
     }, [isPlaying, currentRadio, setCurrentRadio]);
 
+    useEffect(() => {
+        if (!currentRadio?.currentShow) return;
+
+        const checkOverflow = () => {
+            if (containerRef.current && textRef.current) {
+                const hasOverflow = textRef.current.scrollWidth > containerRef.current.clientWidth;
+                setIsOverflowing(hasOverflow);
+            }
+        };
+
+        checkOverflow();
+
+        const observer = new ResizeObserver(checkOverflow);
+        if (containerRef.current) observer.observe(containerRef.current);
+
+        return () => observer.disconnect();
+    }, [currentRadio?.currentShow]);
+
     if (!currentRadio) return null;
 
     return (
@@ -38,25 +63,47 @@ const GlobalPlayer: React.FC = () => {
             : "bg-white/80 border-black/5 shadow-black/10"}
         `}>
             <div className="w-full flex items-center justify-between">
-                <div className="flex items-center gap-4 w-1/3">
+
+                {/* BLOC GAUCHE */}
+                <div className="flex items-center gap-4 w-1/3 min-w-0">
                     <div className={`w-12 h-12 rounded-2xl overflow-hidden shadow-lg shrink-0 relative border ${isDark ? "border-white/5" : "border-black/5"}`}>
-                        <img src={currentRadio.img} className="w-full h-full object-cover" alt={currentRadio.name} />
                         {isPlaying && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                <AudioVisualiser isPlaying={isPlaying} barCount={3} color="bg-white" />
+                            <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] bg-gradient-to-t from-black/50 to-transparent flex items-center justify-center">
+                                {/* On force le visualiseur à utiliser une animation CSS (simulée) si c'est un podcast,
+                                  pour éviter que l'API Web Audio ne tente d'analyser le stream et ne déclenche le CORS.
+                                */}
+                                <AudioVisualiser
+                                    isPlaying={isPlaying}
+                                    barCount={3}
+                                    color="bg-white"
+                                />
                             </div>
                         )}
                     </div>
-                    <div className="hidden sm:block truncate">
-                        <p className={`text-sm font-semibold truncate ${isDark ? "text-white" : "text-neutral-900"}`}>
-                            {currentRadio.currentShow}
-                        </p>
+
+                    <div className="hidden sm:block min-w-0 flex-1 select-none">
+                        <div ref={containerRef} className="w-full overflow-hidden relative">
+                            <div className={`inline-block whitespace-nowrap ${isOverflowing ? "animate-marquee" : ""}`}>
+                                <p
+                                    ref={textRef}
+                                    className={`text-sm font-semibold ${isOverflowing ? "pr-12 inline-block" : "truncate"} ${isDark ? "text-white" : "text-neutral-900"}`}
+                                >
+                                    {currentRadio.currentShow}
+                                </p>
+                                {isOverflowing && (
+                                    <p className={`text-sm font-semibold pr-12 inline-block ${isDark ? "text-white" : "text-neutral-900"}`}>
+                                        {currentRadio.currentShow}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
                         <p className="text-[10px] text-rose-600 font-bold uppercase tracking-widest mt-0.5">
-                            {isPlaying ? "En Direct" : "Pause"}
+                            {isPlaying ? (isPodcastStream ? "Lecture Épisode" : "En Direct") : "Pause"}
                         </p>
                     </div>
                 </div>
 
+                {/* BLOC CENTRAL */}
                 <div className="flex items-center">
                     <button
                         onClick={() => setIsPlaying(!isPlaying)}
@@ -69,6 +116,7 @@ const GlobalPlayer: React.FC = () => {
                     </button>
                 </div>
 
+                {/* BLOC DROIT */}
                 <div className="hidden md:flex items-center justify-end w-1/3 gap-4">
                     <div className="flex items-center py-2">
                         <button onClick={toggleMute} className="focus:outline-none cursor-pointer mr-2">
@@ -96,6 +144,16 @@ const GlobalPlayer: React.FC = () => {
             </div>
 
             <style>{`
+                @keyframes marquee {
+                    0% { transform: translate3d(0, 0, 0); }
+                    100% { transform: translate3d(-50%, 0, 0); }
+                }
+                .animate-marquee {
+                    animation: marquee 14s linear infinite;
+                }
+                .animate-marquee:hover {
+                    animation-play-state: paused;
+                }
                 input[type=range]::-webkit-slider-thumb {
                     appearance: none;
                     height: 12px;
