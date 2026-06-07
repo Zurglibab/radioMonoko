@@ -70,7 +70,6 @@ export const CommentItem = memo(({
                             </button>
                         )}
 
-                        {/* --- BLOC VOTES PRINCIPAL AVEC INTEGRATION VISUELLE FORCEE --- */}
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => clickLike(comment.id, "like")}

@@ -5,36 +5,74 @@ import ratingContentService from "../../services/RatingContentsService";
 import reviewService from "../../services/ReviewsService";
 import usersService from "../../services/UsersService";
 import likeReviewsService from "../../services/LikeReviewsService";
+import { cached } from "../../services/ApiCacheService";
 import type { User } from "../../interfaces/Users.types";
 import { CommentForm } from "./CommentForm.tsx";
 import { CommentItem } from "./CommentItem.tsx";
 import type { RadioCommunityZoneProps } from "../../interfaces/Props.types.ts";
 
-export const RadioCommunityZone = ({ contentId, theme }: RadioCommunityZoneProps) => {
-    const [currentUserId] = useState<string | null>(() => {
-        const savedUser = localStorage.getItem("user");
-        if (savedUser) {
-            try {
-                const parsed = JSON.parse(savedUser);
-                return parsed.id || parsed._id || parsed.user_id || null;
-            } catch (e) {
-                console.error(e);
-                return null;
-            }
-        }
-        return null;
-    });
+export const RadioCommunityZone = ({
+    contentId,
+    theme,
+    currentUserId,
+    loadingReviews: externalLoadingReviews,
+    ratingSummary: externalRatingSummary,
+    userRating: externalUserRating,
+    totalVotes: externalTotalVotes,
+    comments: externalComments,
+    usersCache: externalUsersCache,
+    handleRateStation: externalHandleRateStation,
+    handleDeleteRating: externalHandleDeleteRating,
+    onPostReview: externalOnPostReview,
+    onPostReply: externalOnPostReply,
+    handleDeleteReview: externalHandleDeleteReview,
+    onLikeInteraction: externalOnLikeInteraction
+}: RadioCommunityZoneProps) => {
 
     const isLoggedIn = !!currentUserId;
-
-    const [loadingReviews, setLoadingReviews] = useState<boolean>(true);
-    const [ratingSummary, setRatingSummary] = useState<any | null>(null);
-    const [userRating, setUserRating] = useState<number>(0);
+    const [loadingReviews, setLoadingReviews] = useState<boolean>(externalLoadingReviews ?? true);
+    const [ratingSummary, setRatingSummary] = useState<any | null>(externalRatingSummary ?? null);
+    const [userRating, setUserRating] = useState<number>(externalUserRating ?? 0);
     const [hoverRating, setHoverRating] = useState<number>(0);
+    const [comments, setComments] = useState<any[]>(externalComments ?? []);
+    const [usersCache, setUsersCache] = useState<Record<string, User>>(externalUsersCache ?? {});
+    const [totalVotes, setTotalVotes] = useState<number>(externalTotalVotes ?? 0);
 
-    const [comments, setComments] = useState<any[]>([]);
-    const [usersCache, setUsersCache] = useState<Record<string, User>>({});
-    const [totalVotes, setTotalVotes] = useState<number>(0);
+    useEffect(() => {
+        if (externalLoadingReviews !== undefined) {
+            setLoadingReviews(externalLoadingReviews);
+        }
+    }, [externalLoadingReviews]);
+
+    useEffect(() => {
+        if (externalRatingSummary !== undefined) {
+            setRatingSummary(externalRatingSummary);
+        }
+    }, [externalRatingSummary]);
+
+    useEffect(() => {
+        if (externalUserRating !== undefined) {
+            setUserRating(externalUserRating);
+        }
+    }, [externalUserRating]);
+
+    useEffect(() => {
+        if (externalTotalVotes !== undefined) {
+            setTotalVotes(externalTotalVotes);
+        }
+    }, [externalTotalVotes]);
+
+    useEffect(() => {
+        if (externalComments !== undefined) {
+            setComments(externalComments);
+        }
+    }, [externalComments]);
+
+    useEffect(() => {
+        if (externalUsersCache !== undefined) {
+            setUsersCache(externalUsersCache);
+        }
+    }, [externalUsersCache]);
 
     const fetchMissingUsers = async (userIds: string[]) => {
         const uniqueIds = Array.from(new Set(userIds)).filter(id => id && !usersCache[id]);
@@ -44,7 +82,8 @@ export const RadioCommunityZone = ({ contentId, theme }: RadioCommunityZoneProps
             const fetchedUsers = await Promise.all(
                 uniqueIds.map(async (id) => {
                     try {
-                        const profile = await usersService.getUserById(id);
+                        // use cached wrapper to dedupe user profile requests across the app
+                        const profile = await cached(`user_${id}`, () => usersService.getUserById(id), 60_000);
                         return { id, profile };
                     } catch {
                         return { id, profile: null };
@@ -64,91 +103,9 @@ export const RadioCommunityZone = ({ contentId, theme }: RadioCommunityZoneProps
         }
     };
 
-    useEffect(() => {
-        let isMounted = true;
 
-        const loadData = async () => {
-            try {
-                setLoadingReviews(true);
-
-                const [summary, allRatings, reviewsList] = await Promise.all([
-                    ratingContentService.getRatingSummary(contentId).catch(() => null),
-                    ratingContentService.getAllRatings().catch(() => []),
-                    reviewService.getReviewsByContent(contentId).catch(() => [])
-                ]);
-
-                if (!isMounted) return;
-                setRatingSummary(summary);
-
-                if (Array.isArray(allRatings)) {
-                    const targetId = String(contentId).trim().toLowerCase();
-                    const pageRatings = allRatings.filter((r: any) => {
-                        if (!r) return false;
-                        const cId = r.contentId ?? r.content_id ?? r.content_Id;
-                        return cId ? String(cId).trim().toLowerCase() === targetId : false;
-                    });
-                    setTotalVotes(pageRatings.length);
-                } else {
-                    setTotalVotes(0);
-                }
-
-                if (Array.isArray(reviewsList)) {
-                    const allUserIds = reviewsList.map((r: any) => r.user_id);
-                    await fetchMissingUsers(allUserIds);
-
-                    const enrichedReviews = await Promise.all(
-                        reviewsList.map(async (review: any) => {
-                            // 1. On récupère les compteurs (/review/{id}/likes/count)
-                            const countData = await likeReviewsService.getReviewLikesCount(review.id).catch(() => null);
-
-                            // 2. On récupère le choix de l'utilisateur actuel (/review/{id}/likes)
-                            const userDataRaw = await likeReviewsService.getReviewLikes(review.id, currentUserId).catch(() => null);
-                            const userData = Array.isArray(userDataRaw) ? userDataRaw[0] : userDataRaw;
-
-                            return {
-                                ...review,
-                                likesCount: countData?.likes ?? countData?.likesCount ?? countData?.likes_count ?? 0,
-                                dislikesCount: countData?.dislikes ?? countData?.dislikesCount ?? countData?.dislikes_count ?? 0,
-                                userChoice: userData?.userChoice ?? userData?.user_choice ?? null
-                            };
-                        })
-                    );
-
-                    const parentComments = enrichedReviews.filter((r: any) => !r.parent_review_id);
-                    const childReplies = enrichedReviews.filter((r: any) => !!r.parent_review_id);
-
-                    const structuredComments = parentComments.map((parent) => ({
-                        ...parent,
-                        replies: childReplies.filter((reply) => reply.parent_review_id === parent.id)
-                    }));
-                    setComments(structuredComments);
-                }
-
-                if (isLoggedIn && currentUserId) {
-                    try {
-                        const existingRating = await ratingContentService.getRatingByIds(contentId, currentUserId);
-                        if (existingRating && isMounted) {
-                            setUserRating(existingRating.average_rating || 0);
-                        }
-                    } catch {
-                        if (isMounted) setUserRating(0);
-                    }
-                }
-            } catch (err) {
-                console.error("Échec récupération avis :", err);
-            } finally {
-                if (isMounted) setLoadingReviews(false);
-            }
-        };
-
-        loadData();
-        return () => { isMounted = false; };
-    }, [contentId, isLoggedIn, currentUserId]);
-
-    const handleLikeInteraction = async (reviewId: string, actionType: "like" | "dislike" | "remove") => {
+    const internalHandleLikeInteraction = async (reviewId: string, actionType: "like" | "dislike" | "remove") => {
         if (!isLoggedIn || !currentUserId) return;
-
-        // 1. Étape Optimistic UI : Modification immédiate à l'écran
         setComments((prevComments) => {
             const updateCommentCounters = (c: any) => {
                 if (c.id !== reviewId) return c;
@@ -179,7 +136,6 @@ export const RadioCommunityZone = ({ contentId, theme }: RadioCommunityZoneProps
             });
         });
 
-        // 2. Envoi réseau
         try {
             if (actionType === "remove") {
                 await likeReviewsService.removeLikeReview(reviewId, currentUserId);
@@ -188,8 +144,7 @@ export const RadioCommunityZone = ({ contentId, theme }: RadioCommunityZoneProps
                 await likeReviewsService.toggleLikeReview(reviewId, currentUserId, isLikeBool);
             }
 
-            // 3. Resynchronisation de sécurité via la route des compteurs
-            const countData = await likeReviewsService.getReviewLikesCount(reviewId).catch(() => null);
+            const countData = await cached(`review_count_${reviewId}`, () => likeReviewsService.getReviewLikesCount(reviewId).catch(() => null), 15_000);
 
             if (countData) {
                 setComments((prevComments) => {
@@ -216,125 +171,152 @@ export const RadioCommunityZone = ({ contentId, theme }: RadioCommunityZoneProps
         }
     };
 
+    // If parent provided a handler, use it; otherwise use the internal handler
+    const handleLikeInteraction = externalOnLikeInteraction ?? internalHandleLikeInteraction;
+
     const handleRateStation = async (nextRating: number) => {
-        if (!isLoggedIn || !currentUserId) return;
-        const previousRating = userRating;
-        setUserRating(nextRating);
-        const isFirstVote = previousRating === 0;
-        if (isFirstVote) setTotalVotes((prev) => prev + 1);
+        if (externalHandleRateStation) {
+            await externalHandleRateStation(nextRating);
+        } else if (!isLoggedIn || !currentUserId) {
+            return;
+        } else {
+            const previousRating = userRating;
+            setUserRating(nextRating);
+            const isFirstVote = previousRating === 0;
+            if (isFirstVote) setTotalVotes((prev) => prev + 1);
 
-        try {
-            let existing = null;
-            try { existing = await ratingContentService.getRatingByIds(contentId, currentUserId); } catch (err) { console.log(err); }
+            try {
+                let existing = null;
+                try { existing = await ratingContentService.getRatingByIds(contentId, currentUserId); } catch (err) { console.log(err); }
 
-            if (existing) {
-                await ratingContentService.updateRating(contentId, currentUserId, { average_rating: nextRating });
-            } else {
-                await ratingContentService.createRating({ contentId, userId: currentUserId, average_rating: nextRating });
+                if (existing) {
+                    await ratingContentService.updateRating(contentId, currentUserId, { average_rating: nextRating });
+                } else {
+                    await ratingContentService.createRating({ contentId, userId: currentUserId, average_rating: nextRating });
+                }
+
+                const updatedSummary = await ratingContentService.getRatingSummary(contentId);
+                setRatingSummary(updatedSummary);
+            } catch (err) {
+                console.error(err);
+                setUserRating(previousRating);
+                if (isFirstVote) setTotalVotes((prev) => Math.max(0, prev - 1));
             }
-
-            const updatedSummary = await ratingContentService.getRatingSummary(contentId);
-            setRatingSummary(updatedSummary);
-        } catch (err) {
-            console.error(err);
-            setUserRating(previousRating);
-            if (isFirstVote) setTotalVotes((prev) => Math.max(0, prev - 1));
         }
     };
 
     const handleDeleteRating = async () => {
-        if (!isLoggedIn || !currentUserId || userRating === 0) return;
-        const previousRating = userRating;
-        setUserRating(0);
-        setTotalVotes((prev) => Math.max(0, prev - 1));
+        if (externalHandleDeleteRating) {
+            await externalHandleDeleteRating();
+        } else if (!isLoggedIn || !currentUserId || userRating === 0) {
+            return;
+        } else {
+            const previousRating = userRating;
+            setUserRating(0);
+            setTotalVotes((prev) => Math.max(0, prev - 1));
 
-        try {
-            if (typeof ratingContentService.deleteRating === "function") {
-                await ratingContentService.deleteRating(contentId, currentUserId);
+            try {
+                if (typeof ratingContentService.deleteRating === "function") {
+                    await ratingContentService.deleteRating(contentId, currentUserId);
+                }
+                const updatedSummary = await ratingContentService.getRatingSummary(contentId);
+                setRatingSummary(updatedSummary);
+            } catch (err) {
+                console.error(err);
+                setUserRating(previousRating);
+                setTotalVotes((prev) => prev + 1);
             }
-            const updatedSummary = await ratingContentService.getRatingSummary(contentId);
-            setRatingSummary(updatedSummary);
-        } catch (err) {
-            console.error(err);
-            setUserRating(previousRating);
-            setTotalVotes((prev) => prev + 1);
         }
     };
 
     const onPostReview = async (commentText: string) => {
-        if (!isLoggedIn || !currentUserId) return;
-        try {
-            const createdReview = await reviewService.createReview({
-                contentId: contentId,
-                userId: currentUserId,
-                comment: commentText
-            });
-            if (createdReview) {
-                await fetchMissingUsers([currentUserId]);
-                setComments((prev) => [{
-                    ...createdReview,
-                    replies: [],
-                    likesCount: 0,
-                    dislikesCount: 0,
-                    userChoice: null
-                }, ...prev]);
+        if (externalOnPostReview) {
+            await externalOnPostReview(commentText);
+        } else if (!isLoggedIn || !currentUserId) {
+            return;
+        } else {
+            try {
+                const createdReview = await reviewService.createReview({
+                    contentId: contentId,
+                    userId: currentUserId,
+                    comment: commentText
+                });
+                if (createdReview) {
+                    await fetchMissingUsers([currentUserId]);
+                    setComments((prev) => [{
+                        ...createdReview,
+                        replies: [],
+                        likesCount: 0,
+                        dislikesCount: 0,
+                        userChoice: null
+                    }, ...prev]);
+                }
+            } catch (err) {
+                console.error("Erreur création avis :", err);
             }
-        } catch (err) {
-            console.error("Erreur création avis :", err);
         }
     };
 
     const onPostReply = async (replyText: string, parentId: string) => {
-        if (!isLoggedIn || !currentUserId) return;
-        try {
-            const createdReply = await reviewService.createReview({
-                contentId: contentId,
-                userId: currentUserId,
-                comment: replyText,
-                parent_review_id: parentId
-            });
+        if (externalOnPostReply) {
+            await externalOnPostReply(replyText, parentId);
+        } else if (!isLoggedIn || !currentUserId) {
+            return;
+        } else {
+            try {
+                const createdReply = await reviewService.createReview({
+                    contentId: contentId,
+                    userId: currentUserId,
+                    comment: replyText,
+                    parent_review_id: parentId
+                });
 
-            if (createdReply) {
-                await fetchMissingUsers([currentUserId]);
-                setComments((prev) =>
-                    prev.map((comment) => {
-                        if (comment.id === parentId) {
-                            return {
-                                ...comment,
-                                replies: [...(comment.replies ?? []), {
-                                    ...createdReply,
-                                    likesCount: 0,
-                                    dislikesCount: 0,
-                                    userChoice: null
-                                }]
-                            };
-                        }
-                        return comment;
-                    })
-                );
+                if (createdReply) {
+                    await fetchMissingUsers([currentUserId]);
+                    setComments((prev) =>
+                        prev.map((comment) => {
+                            if (comment.id === parentId) {
+                                return {
+                                    ...comment,
+                                    replies: [...(comment.replies ?? []), {
+                                        ...createdReply,
+                                        likesCount: 0,
+                                        dislikesCount: 0,
+                                        userChoice: null
+                                    }]
+                                };
+                            }
+                            return comment;
+                        })
+                    );
+                }
+            } catch (err) {
+                console.error("Erreur réponse :", err);
             }
-        } catch (err) {
-            console.error("Erreur réponse :", err);
         }
     };
 
     const handleDeleteReview = async (reviewId: string, parentId?: string) => {
-        try {
-            if (typeof reviewService.deleteReview === "function") {
-                await reviewService.deleteReview(reviewId);
+        if (externalHandleDeleteReview) {
+            await externalHandleDeleteReview(reviewId, parentId);
+        } else {
+            try {
+                if (typeof reviewService.deleteReview === "function") {
+                    await reviewService.deleteReview(reviewId);
+                }
+                if (parentId) {
+                    setComments((prev) =>
+                        prev.map((c) => {
+                            if (c.id !== parentId) return c;
+                            return { ...c, replies: (c.replies ?? []).filter((r: any) => r.id !== reviewId) };
+                        })
+                    );
+                } else {
+                    setComments((prev) => prev.filter((c) => c.id !== reviewId));
+                }
+            } catch (err) {
+                console.error("Erreur suppression :", err);
             }
-            if (parentId) {
-                setComments((prev) =>
-                    prev.map((c) => {
-                        if (c.id !== parentId) return c;
-                        return { ...c, replies: (c.replies ?? []).filter((r: any) => r.id !== reviewId) };
-                    })
-                );
-            } else {
-                setComments((prev) => prev.filter((c) => c.id !== reviewId));
-            }
-        } catch (err) {
-            console.error("Erreur suppression :", err);
         }
     };
 

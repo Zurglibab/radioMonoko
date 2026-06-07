@@ -43,19 +43,19 @@ export interface CommentItemProps {
 export interface RadioCommunityZoneProps {
     contentId: string;
     theme: "dark" | "light";
-    isLoggedIn: boolean;
     currentUserId: string | null;
-    loadingReviews: boolean;
-    ratingSummary: any;
-    userRating: number;
-    totalVotes: number;
-    comments: any[];
-    usersCache: Record<string, any>;
-    handleRateStation: (rating: number) => Promise<void>;
-    handleDeleteRating: () => Promise<void>;
-    onPostReview: (text: string) => Promise<void>;
-    onPostReply: (text: string, parentId: string) => Promise<void>;
-    handleDeleteReview: (reviewId: string, parentId?: string) => Promise<void>;
+    loadingReviews?: boolean;
+    ratingSummary?: any;
+    userRating?: number;
+    totalVotes?: number;
+    comments?: any[];
+    usersCache?: Record<string, any>;
+    handleRateStation?: (rating: number) => Promise<void>;
+    handleDeleteRating?: () => Promise<void>;
+    onPostReview?: (text: string) => Promise<void>;
+    onPostReply?: (text: string, parentId: string) => Promise<void>;
+    handleDeleteReview?: (reviewId: string, parentId?: string) => Promise<void>;
+    onLikeInteraction?: (reviewId: string, actionType: "like" | "dislike" | "remove") => Promise<void>;
 }
 
 export interface RadioListsSectionProps {
