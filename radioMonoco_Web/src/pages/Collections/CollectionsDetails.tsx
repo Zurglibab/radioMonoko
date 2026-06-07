@@ -9,7 +9,7 @@ import type {CollectionItem} from "../../interfaces/CollectionItem.types.ts";
 const CollectionsDetails = () => {
     const { id } = useParams()
     const [collection, setCollection] = useState<Collection | null>(null)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [items, setItems] = useState<CollectionItem[]>([])
     const navigate = useNavigate()

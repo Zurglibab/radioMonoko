@@ -20,6 +20,8 @@ const Collections = () => {
     const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
     const [isDeleteWindowOpen, setIsDeleteWindowOpen] = useState(false);
     const [collectionToDelete, setCollectionToDelete] = useState<Collection | null>(null);
+    const [publicCollection, setPublicCollection] = useState<Collection[]>([]);
+    const [recentCollection, setRecentCollection] = useState<Collection[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
