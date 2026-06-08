@@ -32,11 +32,10 @@ const Collections = () => {
                     setLoading(false);
                     return;
                 }
-                const data = await CollectionsService.getUserCollections(user.id);
-                setCollections(data);
+                const userCollectionsData = await CollectionsService.getUserCollections(user.id);
+                setCollections(userCollectionsData);
 
                 const allCollections = await CollectionsService.getAllCollections();
-                setCollections(allCollections);
 
                 const publicOnly = allCollections.filter((collection) => collection.is_public);
                 setPublicCollection(publicOnly);
