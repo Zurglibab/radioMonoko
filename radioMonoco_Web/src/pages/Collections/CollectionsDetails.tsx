@@ -5,6 +5,8 @@ import type { Collection } from "../../interfaces/Collections.types.ts";
 import { useNavigate } from "react-router-dom";
 import CollectionItemsService from "../../services/CollectionItemsService.ts";
 import type {CollectionItem} from "../../interfaces/CollectionItem.types.ts";
+import contentsService from "../../services/ContentsService.ts";
+import type {CollectionContent} from "../../interfaces/CollectionContent.types.ts";
 
 const CollectionsDetails = () => {
     const { id } = useParams()
@@ -12,19 +14,32 @@ const CollectionsDetails = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [items, setItems] = useState<CollectionItem[]>([])
+    const [contentDetails, setContentDetails] = useState<Record<string, CollectionContent>>({})
     const navigate = useNavigate()
 
     useEffect(() => {
         const fetchCollection = async () => {
             try {
                 if (!id) return;
-
                 const data = await CollectionsService.getCollectionById(id);
                 setCollection(data);
-
                 const itemsData = await CollectionItemsService.getItemsByCollection(id);
                 setItems(itemsData);
-
+                console.log("ITEMS :", itemsData);
+                const details: Record<string, CollectionContent> = {};
+                for (const item of itemsData) {
+                    const content = await contentsService.getContentById(
+                        item.content_id
+                    );
+                    console.log("CONTENT :", content);
+                    if (!content) continue;
+                    details[item.content_id] = {
+                        item,
+                        title: content.title,
+                        description: content.description || ""
+                    };
+                }
+                setContentDetails(details);
             } catch (err) {
                 console.error("Erreur lors de la récupération de la collection :", err);
                 setError("Impossible de charger la collection");
@@ -74,18 +89,12 @@ const CollectionsDetails = () => {
             </div>
 
             <div className="max-w-6xl mx-auto">
-
-                {/* cover playlist */}
                 <div className="flex flex-col md:flex-row gap-8 items-start mb-12">
-
                     <div className="w-48 h-48 rounded-3xl bg-gradient-to-br from-rose-500/30 to-blue-500/20 border border-white/10" />
-
                     <div>
-
                         <p className="uppercase tracking-[0.2em] text-neutral-500 text-xs font-bold mb-3">
                             Collection
                         </p>
-
                         <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight">
                             {collection.name}
                         </h1>
@@ -95,21 +104,15 @@ const CollectionsDetails = () => {
                         </p>
 
                         <div className="flex items-center gap-4 mt-6">
-
                             <span className="text-sm text-neutral-500">
                                 {collection.is_public ? "🌍 Publique" : "🔒 Privée"}
                             </span>
-
                             <span className="text-sm text-neutral-600">
                                 {new Date(collection.created_at).toLocaleDateString()}
                             </span>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
             <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-8">
                 <h2 className="text-2xl font-bold text-white mb-6">
@@ -124,21 +127,19 @@ const CollectionsDetails = () => {
                     <div className="space-y-4">
                         {items.map((item) => (
                             <div
-                                key={item.content_id}
+                                key={contentDetails[item.content_id]?.title || item.content_id}
                                 className="bg-neutral-800 rounded-xl p-4 flex justify-between items-center"
                             >
                                 <div>
                                     <p className="text-white font-semibold">
-                                        {item.content_id}
+                                        {contentDetails[item.content_id]?.title || item.content_id}
                                     </p>
-
                                     <p className="text-neutral-500 text-sm">
                                         Position : {item.position}
                                     </p>
-
-                                    {item.note && (
+                                    {contentDetails[item.content_id]?.description && (
                                         <p className="text-neutral-400 mt-2">
-                                            {item.note}
+                                            {contentDetails[item.content_id].description}
                                         </p>
                                     )}
                                 </div>
