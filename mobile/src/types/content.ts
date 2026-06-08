@@ -1,21 +1,25 @@
 import { User } from "./auth";
-
-/**
- * Types de médias
- * Permet de distinguer le comportement de l'UI (ex: Badge "Direct" pour radio 
- * vs "Durée" pour podcast).
- */
 export type MediaType = 'radio' | 'podcast';
 
-/**
- * Status de lecteur de la collection
- * Définit l'état d'un média dans la bibliothèque de l'utilisateur.
- */
 export type MediaStatus = 'to-listen' | 'in-progress' | 'finished' | 'dropped';
 
 /**
- * Interface Review : Représente une critique ou un avis laissé par un utilisateur sur une station ou une playlist.
- * Utilisée pour afficher les retours de la communauté et favoriser l'engagement.
+ * Interface BackendContent : Représente les contenus importés depuis le backend, tels que les shows, diffusions, lives, podcasts, articles ou autres.
+ * Ces contenus sont référencés par la communauté et peuvent être ajoutés aux stations ou playlists.
+ * Ils contiennent des informations de base comme le titre, la description, le type de contenu et les dates de création.
+ */
+export interface BackendContent {
+  id: string;
+  api_id: string;
+  title: string;
+  description: string | null;
+  content_type: 'show' | 'diffusion' | 'live' | 'podcast' | 'article' | 'other';
+  created_at: string;
+}
+
+/**
+ * Interface ContentDTO : Modèle de données utilisé dans l'application pour représenter les contenus, enrichi avec des informations supplémentaires comme l'image, les avis, les amis qui écoutent, etc.
+ * Il est dérivé de BackendContent mais adapté pour les besoins de l'interface utilisateur.
  */
 export interface Review {
   id: string;
@@ -35,20 +39,21 @@ export interface Review {
 export interface Station {
   id: string;
   title: string;
-  artist: string;      // Nom du créateur, de la station ou du studio
+  artist: string;
   description: string;
   imageUrl: string;
-  isLive: boolean;     // Indicateur de flux temps réel
-  category: string;    // Genre ou thématique
-  type: MediaType;     // Radio ou Podcast
-  
-  // Champs optionnels selon le contexte
-  status?: MediaStatus; // Uniquement si présent dans la Library
-  duration?: string;    // Affiché uniquement pour les podcasts
+  isLive: boolean;
+  category: string;
+  type: MediaType;
+  streamUrl?: string;
+  brandId?: string;
+
+  status?: MediaStatus;
+  duration?: string;
   listenersCount?: number;
-  averageRating?: number;    // Note globale du réseau
-  reviews?: Review[];        // Liste des critiques (Barème 2.2.3)
-  friendsWhoListen?: User[]; // Liste d'amis (objets User complets)
+  averageRating?: number;
+  reviews?: Review[];
+  friendsWhoListen?: User[];
 }
 
 /**
@@ -59,28 +64,22 @@ export interface Playlist {
   id: string;
   name: string;
   description: string;
-  coverImage: string;
-  items: Station[];     // Une playlist est une collection d'objets Station
-  creator: string;      // Nom ou ID du créateur
-  isPublic: boolean;    // Visibilité dans le flux communautaire
+  coverImage?: string;
+  items: Station[];
+  creator: string;
+  isPublic: boolean;
   isCollaborative: boolean;
-  collaborators?: string[]; // Liste des IDs des utilisateurs autorisés
-  createdAt: string;    // Date de création au format ISO
+  collaborators?: string[];
+  createdAt: string;
 }
 
 /**
  * Types de notifications
- * Permet de catégoriser les différentes interactions sociales au sein de l'application.
- * like : Un utilisateur a aimé une critique ou une station.
- * comment : Un utilisateur a commenté une critique ou une station.
- * follow : Un utilisateur a commencé à suivre un autre utilisateur.
- * recommendation : Une station ou une playlist a été recommandée à l'utilisateur.
  */
 export type NotificationType = 'like' | 'comment' | 'follow' | 'recommendation';
 
 /**
  * Interface AppNotification : Modèle de données pour les notifications.
- * Utilisé pour afficher les alertes et les mises à jour dans l'interface utilisateur.
  */
 export interface AppNotification {
   id: string;
@@ -89,6 +88,6 @@ export interface AppNotification {
   message: string;
   timestamp: string;
   isRead: boolean;
-  relatedUser?: string; // Nom de l'utilisateur qui a liké/suivi
-  targetId?: string;    // ID de la critique ou de l'œuvre associée
+  relatedUser?: string;
+  targetId?: string;
 }

@@ -1,18 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
 import { Station } from "@/types/content";
 import { BrandService } from "@/services/brand/brand.service";
-import { mapBrandToStation } from "@/utils/mappers/brand.mapper";
+import { mapBrandToStation, mapWebRadioToStation } from "@/utils/mappers/brand.mapper";
 
-const HOME_CAROUSEL_LIMIT = 5;
+const HOME_CAROUSEL_LIMIT = 8;
 
-export const useBrands = () => {
+/**
+ * useBrands : Pilote la récupération des marques et stations de radio.
+ * @param skipInitialFetch Si true, désactive le fetch automatique au montage pour éviter les conflits.
+ */
+export const useBrands = (skipInitialFetch = false) => {
   const [brands, setBrands] = useState<Station[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   /**
    * loadBrands : Charge les stations depuis l'API et les mappe vers le modèle UI.
-   * Le service BrandService renvoie déjà un tableau de Brand[] déballé.
    */
   const loadBrands = useCallback(async () => {
     setIsLoading(true);
@@ -24,9 +27,15 @@ export const useBrands = () => {
         throw new Error("Le serveur n'a pas renvoyé le tableau de données attendu.");
       }
 
-      const mappedStations = rawBrands
-        .map(mapBrandToStation)
-        .slice(0, HOME_CAROUSEL_LIMIT);
+      // Aplatir brands principales + webRadios pour le carousel
+      const allStations: Station[] = [];
+      for (const brand of rawBrands) {
+        if (brand.liveStream) allStations.push(mapBrandToStation(brand));
+        for (const wr of brand.webRadios ?? []) {
+          allStations.push(mapWebRadioToStation(wr, brand));
+        }
+      }
+      const mappedStations = allStations.slice(0, HOME_CAROUSEL_LIMIT);
 
       setBrands(mappedStations);
     } catch (err: any) {
@@ -38,8 +47,12 @@ export const useBrands = () => {
   }, []);
 
   useEffect(() => {
+    if (skipInitialFetch) {
+      setIsLoading(false);
+      return;
+    }
     loadBrands();
-  }, [loadBrands]);
+  }, [skipInitialFetch, loadBrands]);
 
   return {
     brands,

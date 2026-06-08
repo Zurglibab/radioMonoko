@@ -1,45 +1,41 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useAuthContext } from "@/context/AuthContext";
 import { SocialService } from "@/services/community/social.service";
 import { SocialActivity } from "@/types/community";
 
 /**
  * useCommunity : Hook de gestion du flux social.
- * Centralise la logique de récupération et de rafraîchissement du fil d'actualité
+ * @param skipInitialFetch Si true, désactive le fetch automatique au montage
  */
-export const useCommunity = () => {
-  // ÉTAT : Liste des activités (Critiques, Likes, Follows du réseau)
+export const useCommunity = (skipInitialFetch = false) => {
+  const { token } = useAuthContext();
   const [feed, setFeed] = useState<SocialActivity[]>([]);
-  
-  // ÉTAT : Indicateur de chargement pour le feedback utilisateur
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!skipInitialFetch);
 
-  /**
-   * refreshFeed : Récupère les données les plus récentes auprès du service.
-   * Cette fonction peut être appelée au montage ou via une action manuelle (Pull-to-refresh).
-   */
-  const refreshFeed = async () => {
+  const loadFeed = useCallback(async () => {
+    if (!token) return;
     setIsLoading(true);
     try {
-      // Appel asynchrone au service pour récupérer le flux social
-      const data = await SocialService.getFeed();
-      setFeed(data);
+      const data = await SocialService.getFeed(token);
+      setFeed(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error("Erreur lors de la récupération du flux social :", error);
+      if (__DEV__) console.warn("[useCommunity]", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [token]);
 
-  /**
-   * Déclenche le chargement initial du flux dès que le composant est monté.
-   */
   useEffect(() => {
-    refreshFeed();
-  }, []);
+    if (skipInitialFetch) {
+      setIsLoading(false);
+      return;
+    }
+    loadFeed();
+  }, [skipInitialFetch, loadFeed]);
 
-  return { 
-    feed,          // Les activités à afficher
-    isLoading,     // État de chargement
-    refreshFeed    // Fonction de rafraîchissement
+  return {
+    feed,
+    isLoading,
+    refetch: loadFeed
   };
 };
