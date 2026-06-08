@@ -15,6 +15,7 @@ import AdminReviews from "./pages/Admin/AdminReviews.tsx";
 import AdminUsers from "./pages/Admin/AdminUsers.tsx";
 import AdminReports from "./pages/Admin/AdminReports.tsx";
 import SearchResults from "./pages/SearchResults.tsx";
+import ShowPage from "./pages/ShowPage.tsx";
 
 function App() {
     return (
@@ -58,6 +59,7 @@ function App() {
                     />
 
                     <Route path={"/radio/:station"} element={<RadioPage />} />
+                    <Route path={"/show/:id"} element={<ShowPage />} />
                 </Route>
             </Routes>
         </RadioProvider>

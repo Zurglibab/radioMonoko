@@ -60,8 +60,8 @@ export interface RadioCommunityZoneProps {
 
 export interface RadioListsSectionProps {
     filteredDiffusions: ApiDiffusion[];
-    webRadios: Brand["webRadios"];
-    localRadios: Brand["localRadios"];
+    webRadios?: Brand["webRadios"];
+    localRadios?: Brand["localRadios"];
     theme: string;
     matchedTheme: any;
 }

@@ -17,6 +17,19 @@ const getShowsByStation = async (station: string): Promise<any[] | null> => {
     }
 };
 
+const getShowByUrl = async (url: string): Promise<any | null> => {
+    try {
+        const response = await api.get<any>(`/api/shows/show-by-url`, {
+            params: { url }
+        });
+        return response.data?.data || null;
+    } catch (error: any) {
+        console.error(`Erreur dans getShowByUrl pour l'URL ${url}:`, error);
+        return null;
+    }
+};
+
 export default {
-    getShowsByStation
+    getShowsByStation,
+    getShowByUrl
 };

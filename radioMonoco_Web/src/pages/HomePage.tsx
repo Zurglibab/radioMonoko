@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import logo from "../assets/images/icon_large.png";
 import { useAppearance } from "../context/AppearanceContext";
-
 import LiveRadios from "../components/homepage/LiveRadios";
 import Footer from "../components/utils/Footer";
 
@@ -51,9 +50,9 @@ const HomePage = () => {
 
             <div className="relative z-10">
 
-                <header className={`absolute top-32 md:top-40 left-0 right-0 z-50 flex flex-col items-center transition-all duration-1000 pointer-events-none ${
+                <header className={`absolute top-32 md:top-40 left-0 right-0 z-50 flex flex-col items-center transition-all duration-1000 ${
                     isScrolled
-                        ? "opacity-0 -translate-y-16 blur-xl"
+                        ? "opacity-0 -translate-y-16 blur-xl pointer-events-none"
                         : "opacity-100 translate-y-0 blur-0"
                 }`}>
                     <img
