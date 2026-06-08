@@ -1,24 +1,9 @@
-export interface SearchUser{
-    id: string;
-    username: string;
-    email: string;
-    avatar?: string;
-}
-
-export interface SearchCollection{
-    id: string;
-    name: string;
-    description?: string;
-}
-
-export interface SearchShow{
-    id: string;
-    title: string;
-    description?: string;
-}
+import type {ApiShow} from "./Shows.types.ts";
+import type {User} from "../context/AuthContext.tsx";
+import type {Collection} from "./Collections.types.ts";
 
 export interface SearchResult {
-    users: SearchUser[];
-    collections: SearchCollection[];
-    shows: SearchShow[];
+    users: User[];
+    collections: Collection[];
+    shows: ApiShow[];
 }

@@ -1,4 +1,5 @@
-import SearchService, {type SearchResult} from "../services/SearchService.ts";
+import SearchService from "../services/SearchService.ts";
+import type { SearchResult } from "../interfaces/Search.types";
 import {useEffect, useState} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import CollectionsService from "../services/CollectionsService.ts";
@@ -17,7 +18,7 @@ const SearchResults = () => {
     useEffect(() => {
         const loadSearch = async () => {
             setLoading(true);
-            setSelectedUserId(null); // Reset user selection on new search
+            setSelectedUserId(null);
             setUserCollections([]);
 
             try {
@@ -33,13 +34,11 @@ const SearchResults = () => {
         loadSearch();
     }, [query]);
 
-    // Afficher les collections du user sélectionné
     const handleUserClick = async (selectedUser: any) => {
         setSelectedUserId(selectedUser.id);
 
         try {
             const allCollections = await CollectionsService.getAllCollections();
-            // Filtrer les collections: publiques OU appartenant à l'user courant
             const filtered = allCollections.filter(
                 (c: any) =>
                     (c.user_id === selectedUser.id && (c.is_public || (user && user.id === selectedUser.id)))
@@ -155,20 +154,16 @@ const SearchResults = () => {
                             )}
                         </div>
                     )}
-
                     <div>
-
                         <h2 className="text-2xl font-bold text-white mb-4">
                             Collections
                         </h2>
-
                         {results.collections.length === 0 ? (
                             <p className="text-neutral-500">
                                 Aucune collection trouvée
                             </p>
                         ) : (
                             <div className="grid md:grid-cols-3 gap-4">
-
                                 {results.collections.map((collection) => (
                                     <div
                                         key={collection.id}
@@ -184,13 +179,49 @@ const SearchResults = () => {
                                         <h3 className="text-white font-bold">
                                             {collection.name}
                                         </h3>
-
                                         <p className="text-neutral-500 text-sm">
                                             {collection.description}
                                         </p>
-
                                         <span className="text-xs text-rose-400">
                                             {collection.is_public ? "Public" : "Privé"}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <div className="mt-12">
+                        <h2 className="text-2xl font-bold text-white mb-4">
+                            Émissions
+                        </h2>
+                        {results.shows.length === 0 ? (
+                            <p className="text-neutral-500">
+                                Aucune émission trouvée
+                            </p>
+                        ) : (
+                            <div className="grid md:grid-cols-3 gap-4">
+                                {results.shows.map((show) => (
+                                    <div
+                                        key={show.id ?? show.url}
+                                        onClick={() =>
+                                        {
+                                            if (!show?.url) {console.warn("Show sans URL :", show);
+                                                return;
+                                            }
+                                            navigate(`/show/${encodeURIComponent(show.url)}`, {state: { show }});
+                                        }}
+                                        className="bg-neutral-900 p-4 rounded-xl cursor-pointer hover:bg-neutral-800 transition"
+                                    >
+                                        <h3 className="text-white font-bold">
+                                            {show.title}
+                                        </h3>
+
+                                        <p className="text-neutral-500 text-sm mt-2 line-clamp-3">
+                                            {show.standFirst || "Aucune description disponible"}
+                                        </p>
+
+                                        <span className="text-xs text-rose-400 mt-3 inline-block">
+                                            Voir l'émission →
                                         </span>
                                     </div>
                                 ))}

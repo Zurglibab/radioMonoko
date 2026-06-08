@@ -17,7 +17,8 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { useAppearance } from "../../context/AppearanceContext";
 import { SettingsModal } from "./SettingsModal";
-import SearchService, {type SearchResult} from "../../services/SearchService.ts";
+import SearchService from "../../services/SearchService.ts";
+import type { SearchResult } from "../../interfaces/Search.types.ts";
 import CollectionsService from "../../services/CollectionsService.ts";
 
 const NavBar = () => {

@@ -25,39 +25,16 @@ function App() {
                 <Route path= "/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
                 <Route path= "/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
                 <Route path= "/admin/reviews" element={<AdminRoute><AdminReviews /></AdminRoute>} />
-                <Route path= "/search" element={<SearchResults/>} />
+
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
                 <Route path="/" element={<Layout />}>
                     <Route index element={<HomePage/>} />
-
-                    <Route
-                        path="/feed"
-                        element={
-                            <ProtectedRoute>
-                                <Feed />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/collections"
-                        element={
-                            <ProtectedRoute>
-                                <Collections />
-                            </ProtectedRoute>
-                        }
-                    />
-
-                    <Route
-                        path="/collections/:id"
-                        element={
-                            <ProtectedRoute>
-                                <CollectionsDetails />
-                            </ProtectedRoute>
-                        }
-                    />
-
+                    <Route path= "/search" element={<SearchResults/>} />
+                    <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>}/>
+                    <Route path="/collections" element={<ProtectedRoute><Collections /></ProtectedRoute>}/>
+                    <Route path="/collections/:id" element={<ProtectedRoute><CollectionsDetails /></ProtectedRoute>}/>
                     <Route path={"/radio/:station"} element={<RadioPage />} />
                     <Route path={"/show/:id"} element={<ShowPage />} />
                 </Route>

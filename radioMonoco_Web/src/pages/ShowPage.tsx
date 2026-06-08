@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from "react";
-import {useParams} from "react-router-dom";
+import {useParams, useLocation} from "react-router-dom";
 import {HiBookmark, HiCheck} from "react-icons/hi2";
 import {useAppearance} from "../context/AppearanceContext";
 import showsService from "../services/ShowsService.ts";
@@ -48,12 +48,13 @@ const ShowPage = () => {
     const [totalVotes, setTotalVotes] = useState<number>(0);
     const [comments, setComments] = useState<any[]>([]);
     const [usersCache, setUsersCache] = useState<Record<string, User>>({});
-
     const [loading, setLoading] = useState<boolean>(true);
     const [collections, setCollections] = useState<Collection[]>([]);
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [collectionItemStates, setCollectionItemStates] = useState<Record<string, boolean>>({});
     const menuRef = useRef<HTMLDivElement>(null);
+    const location = useLocation();
+    const fallbackShow = location.state?.show as ApiShow | undefined;
 
     const fetchMissingUsers = useCallback(async (userIds: string[], currentCache: Record<string, User>) => {
         const uniqueIds = Array.from(new Set(userIds)).filter(id => id && !currentCache[id]);
@@ -90,19 +91,22 @@ const ShowPage = () => {
 
                 const decoded = decodeURIComponent(id);
 
-                const data = await cached(
-                    `show_${decoded}`,
-                    () => showsService.getShowByUrl(decoded),
-                    30000
-                );
+                const data = await cached(`show_${decoded}`, () => showsService.getShowByUrl(decoded), 30000);
 
-                if (!isMounted) return;
-
-                setShow(data);
-
-                if (data.diffusions) {
-                    setDiffusions(data.diffusions);
+                if (!data) {
+                    console.warn("Show introuvable via URL, utilisation du fallback :", decoded);
+                    if (fallbackShow) {
+                        setShow(fallbackShow);
+                        setDiffusions(fallbackShow.diffusions ?? []);
+                        return;
+                    }
+                    setShow(null);
+                    setDiffusions([]);
+                    return;
                 }
+                setShow(data);
+                setDiffusions(data.diffusions ?? []);
+
             } catch (error) {
                 console.error(error);
             } finally {
@@ -112,7 +116,7 @@ const ShowPage = () => {
 
         fetchShowData();
         return () => { isMounted = false; };
-    }, [id]);
+    }, [id, fallbackShow]);
 
     useEffect(() => {
         if (isLoggedIn && currentUserId) {
@@ -482,12 +486,30 @@ const ShowPage = () => {
         );
     }
 
-    if (!show) return null;
+    if (!show) {
+        return (
+            <div className={`flex items-center justify-center min-h-screen ${
+                theme === "dark"
+                    ? "bg-app-bg text-app-text"
+                    : "bg-neutral-50 text-neutral-800"
+            }`}>
+                <div className="max-w-lg text-center px-6">
+                    <h2 className="text-2xl font-bold mb-3">
+                        Émission introuvable
+                    </h2>
+
+                    <p className="text-sm opacity-60">
+                        Cette émission n'est pas disponible pour le moment ou une erreur serveur est survenue.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     const normalizedId = show.id.toUpperCase();
     const foundKey = Object.keys(BRAND_THEMES).find((k) => normalizedId.startsWith(k));
     const matchedTheme = foundKey ? BRAND_THEMES[foundKey] : DEFAULT_THEME;
-    const cleanMainTitle = show.title.replace(/^ICI\s+/, "").replace(/["'«»]|<<|>>/g, "").trim();
+    const cleanMainTitle = (show.title ?? "").replace(/^ICI\s+/, "").replace(/["'«»]|<<|>>/g, "").trim();
     const filteredDiffusions = diffusions.filter(e => e.podcastEpisode?.url);
 
     return (
@@ -585,7 +607,7 @@ const ShowPage = () => {
                             <div className="bg-neutral-100 dark:bg-white/[0.03] rounded-[2.5rem] p-12 border border-neutral-200 dark:border-white/5 flex flex-col justify-center min-h-[300px]">
                                 <h2 className="text-xl font-bold mb-4 opacity-80">À propos de l'émission</h2>
                                 <p className="text-base leading-relaxed opacity-60">
-                                    {show.standFirst || "Aucune description disponible."}
+                                    {show?.standFirst ?? "Aucune description disponible."}
                                 </p>
                             </div>
                         </div>

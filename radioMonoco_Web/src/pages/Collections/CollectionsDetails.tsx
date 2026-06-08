@@ -7,15 +7,27 @@ import CollectionItemsService from "../../services/CollectionItemsService.ts";
 import type {CollectionItem} from "../../interfaces/CollectionItem.types.ts";
 import contentsService from "../../services/ContentsService.ts";
 import type {CollectionContent} from "../../interfaces/CollectionContent.types.ts";
+import {useAuth} from "../../context/AuthContext.tsx";
+import SearchService from "../../services/SearchService.ts";
 
 const CollectionsDetails = () => {
     const { id } = useParams()
+    const {user} = useAuth()
     const [collection, setCollection] = useState<Collection | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState("")
     const [items, setItems] = useState<CollectionItem[]>([])
     const [contentDetails, setContentDetails] = useState<Record<string, CollectionContent>>({})
     const navigate = useNavigate()
+    const isOwner = user?.id === collection?.user_id
+
+    const resolveShowUrlFromContent = async (content: any): Promise<string | undefined> => {
+        if (content.url) return content.url;
+        if (content.external_url) return content.external_url;
+        if (!content.title) return undefined;
+        const shows = await SearchService.searchShows(content.title);
+        return shows.find((show: any) => show.url)?.url;
+    };
 
     useEffect(() => {
         const fetchCollection = async () => {
@@ -26,19 +38,24 @@ const CollectionsDetails = () => {
                 const itemsData = await CollectionItemsService.getItemsByCollection(id);
                 setItems(itemsData);
                 console.log("ITEMS :", itemsData);
-                const details: Record<string, CollectionContent> = {};
-                for (const item of itemsData) {
-                    const content = await contentsService.getContentById(
-                        item.content_id
-                    );
-                    console.log("CONTENT :", content);
-                    if (!content) continue;
-                    details[item.content_id] = {
-                        item,
-                        title: content.title,
-                        description: content.description || ""
-                    };
-                }
+
+                const detailsEntries = await Promise.all(
+                    itemsData.map(async (item) => {
+                        const content = await contentsService.getContentById(item.content_id);
+                        if (!content) return null;
+                        const resolvedUrl = await resolveShowUrlFromContent(content);
+                        return [
+                            item.content_id,
+                            {
+                                item,
+                                title: content.title,
+                                description: content.description || "",
+                                url: resolvedUrl
+                            }
+                        ] as const;
+                    })
+                );
+                const details = Object.fromEntries(detailsEntries.filter(Boolean) as [string, CollectionContent][]);
                 setContentDetails(details);
             } catch (err) {
                 console.error("Erreur lors de la récupération de la collection :", err);
@@ -55,6 +72,11 @@ const CollectionsDetails = () => {
         try {
             await CollectionItemsService.deleteItemFromCollection(id, contentId);
             setItems((prev) => prev.filter((item) => item.content_id !== contentId));
+            setContentDetails((prev) => {
+                const copy = {...prev};
+                delete copy[contentId];
+                return copy;
+            });
         } catch (err) {
             console.error("Erreur lors de la suppression de l'élément :", err);
             setError("Impossible de supprimer l'élément");
@@ -104,11 +126,14 @@ const CollectionsDetails = () => {
                         </p>
 
                         <div className="flex items-center gap-4 mt-6">
+                            <span className="text-sm text-neutral-600">
+                                {new Date(collection.created_at).toLocaleDateString()}
+                            </span>
                             <span className="text-sm text-neutral-500">
                                 {collection.is_public ? "🌍 Publique" : "🔒 Privée"}
                             </span>
-                            <span className="text-sm text-neutral-600">
-                                {new Date(collection.created_at).toLocaleDateString()}
+                            <span className="text-sm text-rose-400">
+                                {items.length} élément{items.length > 1 ? "s" : ""}
                             </span>
                         </div>
                     </div>
@@ -120,15 +145,35 @@ const CollectionsDetails = () => {
                 </h2>
 
                 {items.length === 0 ? (
-                    <p className="text-neutral-500">
-                        Aucun élément dans cette collection
-                    </p>
+                    <div className="text-center py-12">
+                        <p className="text-white font-semibold text-lg">
+                            Aucun élément dans cette collection
+                        </p>
+
+                        <p className="text-neutral-500 mt-2">
+                            Va sur une page émission puis clique sur “Enregistrer” pour l’ajouter à cette collection.
+                        </p>
+
+                        <button
+                            onClick={() => navigate("/")}
+                            className="mt-6 px-5 py-2 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-semibold transition"
+                        >
+                            Rechercher une émission
+                        </button>
+                    </div>
                 ) : (
                     <div className="space-y-4">
                         {items.map((item) => (
                             <div
                                 key={contentDetails[item.content_id]?.title || item.content_id}
-                                className="bg-neutral-800 rounded-xl p-4 flex justify-between items-center"
+                                onClick={() => {
+                                    const content = contentDetails[item.content_id];
+
+                                    if (content?.url) {
+                                        navigate(`/show/${encodeURIComponent(content.url)}`);
+                                    }
+                                }}
+                                className="bg-neutral-800 rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-neutral-700 transition"
                             >
                                 <div>
                                     <p className="text-white font-semibold">
@@ -142,16 +187,23 @@ const CollectionsDetails = () => {
                                             {contentDetails[item.content_id].description}
                                         </p>
                                     )}
+                                    {contentDetails[item.content_id]?.url && (
+                                        <p className="text-rose-400 text-xs mt-2">
+                                            Voir la page émission →
+                                        </p>
+                                    )}
                                 </div>
-
-                                <button
-                                    onClick={() =>
-                                        handleDeleteItem(item.content_id)
-                                    }
-                                    className="text-red-400 hover:text-red-300"
-                                >
+                                {isOwner && (
+                                    <button
+                                        onClick={(e) =>{
+                                            e.stopPropagation();
+                                            handleDeleteItem(item.content_id)
+                                        }}
+                                        className="text-red-400 hover:text-red-300"
+                                    >
                                     Supprimer
                                 </button>
+                                )}
                             </div>
                         ))}
                     </div>
