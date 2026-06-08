@@ -86,9 +86,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         SecureStore.getItemAsync('appearance_settings'),
       ]);
 
-      if (storedSecurity) setSecuritySettings(JSON.parse(storedSecurity));
-      if (storedNotifs) setNotificationSettings(JSON.parse(storedNotifs));
-      if (storedAppearance) setAppearanceSettings(JSON.parse(storedAppearance));
+      const parseSafe = <T,>(raw: string | null): T | null => {
+        try { const v = JSON.parse(raw!); return v && typeof v === 'object' ? v : null; }
+        catch { return null; }
+      };
+      const sec = parseSafe<SecuritySettings>(storedSecurity);
+      const notifs = parseSafe<NotificationSettings>(storedNotifs);
+      const appearance = parseSafe<AppearanceSettings>(storedAppearance);
+      if (sec) setSecuritySettings(sec);
+      if (notifs) setNotificationSettings(notifs);
+      if (appearance) setAppearanceSettings(appearance);
     } catch (e) {
       if (__DEV__) console.warn("[AuthContext] Impossible de charger les préférences locales :", e);
     }

@@ -6,16 +6,24 @@ import {
 } from "@/types/social";
 
 /**
- * SocialService : Service de gestion des fonctionnalités sociales (amis, abonnements, blocages).
- * Toutes les routes nécessitent un token d'authentification valide.
+ * SocialService : Service centralisé pour gérer les interactions sociales entre utilisateurs.
+ * Il fournit des méthodes pour récupérer les amis, les demandes d'amis en attente, et pour suivre, unfollow, accepter, refuser ou bloquer des utilisateurs.
+ * Chaque méthode correspond à un endpoint de l'API backend et gère les différentes actions sociales de manière cohérente.
  */
 export const SocialService = {
   /**
    * fetchMyFriends : GET /userRelation/friends
-   * Récupère la liste des amis/abonnements validés de l'utilisateur connecté.
+   * Récupère la liste des amis mutuellement acceptés de l'utilisateur connecté.
    */
   fetchMyFriends: (token: string): Promise<Friend[]> =>
     apiFetch<Friend[]>('/userRelation/friends', { token }),
+
+  /**
+   * fetchMyFollowing : GET /userRelation/following
+   * Récupère la liste des utilisateurs que je suis (acceptés + en attente).
+   */
+  fetchMyFollowing: (token: string): Promise<Friend[]> =>
+    apiFetch<Friend[]>('/userRelation/following', { token }),
 
   /**
    * fetchUserFriends : GET /userRelation/friends/{id}
@@ -78,7 +86,7 @@ export const SocialService = {
 
   /**
    * blockUser : POST /userRelation/block/{id}
-   * Bloque définitivement un utilisateur (rompt toute relation existante).
+   * Bloque définitivement un utilisateur, rompt toute relation existante.
    * @param userId UUID de l'utilisateur à bloquer
    */
   blockUser: (token: string, userId: string): Promise<RelationActionResponse> =>

@@ -7,7 +7,11 @@ const avatarUrl = (title: string) => {
 };
 
 /**
- * mapBrandToStation : Brand principale → Station avec streamUrl réelle.
+ * mapBrandToStation : Mappe une marque (Brand) en une station (Station) pour l'affichage dans l'application.
+ * Les champs de la marque sont utilisés pour remplir les informations de la station, avec des valeurs par défaut si nécessaire.
+ * Le streamUrl est défini uniquement si la marque a un liveStream actif, sinon il est omis pour éviter les erreurs de lecture.
+ * @param brand 
+ * @returns 
  */
 export const mapBrandToStation = (brand: Brand): Station => ({
   id: brand.id,
@@ -22,8 +26,12 @@ export const mapBrandToStation = (brand: Brand): Station => ({
 });
 
 /**
- * mapWebRadioToStation : WebRadio/LocalRadio → Station avec streamUrl réelle.
- * Utilise le titre de la brand parente comme artist et category.
+ * mapWebRadioToStation : WebRadio secondaire, Station sans streamUrl (car souvent non fonctionnel), mais avec les infos de la marque parente pour l'affichage.
+ * Le streamUrl est volontairement omis pour éviter les erreurs de lecture, mais la catégorie est enrichie avec le titre de la marque parente.
+ * Les autres champs sont mappés de manière similaire à la marque principale, avec des valeurs par défaut si nécessaire.
+ * @param webRadio 
+ * @param parent 
+ * @returns 
  */
 export const mapWebRadioToStation = (webRadio: WebRadio, parent: Brand): Station => ({
   id: webRadio.id,
@@ -35,4 +43,5 @@ export const mapWebRadioToStation = (webRadio: WebRadio, parent: Brand): Station
   category: parent.title,
   type: 'radio',
   streamUrl: webRadio.liveStream || undefined,
+  brandId: parent.id,
 });

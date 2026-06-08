@@ -3,9 +3,10 @@ import { useAuthContext } from "@/context/AuthContext";
 import { SocialService } from "@/services/social/social.service";
 
 /**
- * useSocialStats : Hook pilotant les métriques relationnelles de l'utilisateur.
- * Interroge PostgreSQL pour récupérer le volume réel d'amis / abonnements.
- * @param skipInitialFetch Si true, désactive le fetch automatique au montage pour éviter les conflits.
+ * useSocialStats : Hook personnalisé pour récupérer les statistiques sociales de l'utilisateur connecté, comme le nombre d'amis.
+ * Il gère le chargement des données, les erreurs d'authentification (en forçant la déconnexion si la session est expirée), et fournit une fonction de rafraîchissement des données.
+ * @param skipInitialFetch 
+ * @returns 
  */
 export const useSocialStats = (skipInitialFetch = false) => {
   const { token, isAuthenticated, isLoading: isAuthLoading, logout } = useAuthContext();
@@ -21,7 +22,7 @@ export const useSocialStats = (skipInitialFetch = false) => {
 
     setIsLoadingSocial(true);
     try {
-      const friends = await SocialService.fetchMyFriends(token);
+      const friends = await SocialService.fetchMyFollowing(token);
       setFriendsCount(Array.isArray(friends) ? friends.length : 0);
     } catch (error: any) {
       if (error?.message?.includes("Session d'authentification expirée")) {

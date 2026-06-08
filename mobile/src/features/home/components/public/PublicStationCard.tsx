@@ -1,25 +1,23 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
-import { Play } from "lucide-react-native";
+import { Play, Pause } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { Station } from "@/types/content";
 import { useAuthContext } from "@/context/AuthContext";
 
-/**
- * Interface StationCardProps
- * On passe maintenant l'objet Station complet et on typage le callback
- * pour renvoyer l'item au parent (pratique pour le PlayerContext).
- */
 interface StationCardProps {
   item: Station;
-  onPress: (item: Station) => void; 
+  onPress: (item: Station) => void;
+  onLongPress?: (item: Station) => void;
+  onPlayPress?: (item: Station) => void;
+  isPlaying?: boolean;
 }
 
 /**
  * PublicStationCard : Carte format grille (2 colonnes).
  * Affiche la pochette, le badge de live conditionnel et les métadonnées.
  */
-export const PublicStationCard = ({ item, onPress }: StationCardProps) => {
+export const PublicStationCard = ({ item, onPress, onLongPress, onPlayPress, isPlaying = false }: StationCardProps) => {
   const { appearanceSettings } = useAuthContext();
   const isDark = appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
@@ -27,6 +25,7 @@ export const PublicStationCard = ({ item, onPress }: StationCardProps) => {
   return (
     <TouchableOpacity
       onPress={() => onPress(item)}
+      onLongPress={onLongPress ? () => onLongPress(item) : undefined}
       activeOpacity={0.8}
       className="w-[47%] mb-8"
     >
@@ -38,7 +37,7 @@ export const PublicStationCard = ({ item, onPress }: StationCardProps) => {
           style={{ backgroundColor: colors.surface }}
         />
 
-        {/* Baddge de live */}
+        {/* Badge de live */}
         {item.isLive && (
           <View
             className="absolute top-3 left-3 px-2 py-1 rounded-full border border-white/10"
@@ -53,10 +52,25 @@ export const PublicStationCard = ({ item, onPress }: StationCardProps) => {
           </View>
         )}
 
-        {/* Bouton play décoratif */}
-        <View className="absolute bottom-5 right-5 bg-white/20 p-2 rounded-full backdrop-blur-md">
-          <Play size={14} color="white" fill="white" />
-        </View>
+        {/* Bouton play */}
+        {onPlayPress ? (
+          <TouchableOpacity
+            onPress={(e) => { e.stopPropagation(); onPlayPress(item); }}
+            className="absolute bottom-5 right-5 p-2 rounded-full"
+            style={{ backgroundColor: isPlaying ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.20)' }}
+            hitSlop={8}
+          >
+            {isPlaying ? (
+              <Pause size={14} color="#000" fill="#000" />
+            ) : (
+              <Play size={14} color="white" fill="white" />
+            )}
+          </TouchableOpacity>
+        ) : (
+          <View className="absolute bottom-5 right-5 bg-white/20 p-2 rounded-full">
+            <Play size={14} color="white" fill="white" />
+          </View>
+        )}
       </View>
 
       {/* Catégorie */}
@@ -76,7 +90,7 @@ export const PublicStationCard = ({ item, onPress }: StationCardProps) => {
         {item.title}
       </Text>
 
-      {/* Description*/}
+      {/* Description */}
       <Text
         style={{ color: colors.muted }}
         className="text-[11px] mt-1 leading-4"

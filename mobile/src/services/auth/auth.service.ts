@@ -1,20 +1,21 @@
 import { AuthResponse, User, UpdateUserPayload } from "@/types/auth";
 import { validatePassword } from "@/utils/validation/validation";
 import { apiFetch } from "@/utils/apiFetch";
-import * as WebBrowser from "expo-web-browser";
-import * as ExpoLinking from "expo-linking";
-import { API_BASE_URL } from "@/utils/apiConfig";
 
 /**
- * AuthService : Pilote de la sécurité et du tunnel de données utilisateur.
- * Encapsule la communication avec le serveur d'authentification et gère les 
- * fonctionnalités réglementaires (RGPD / RGPD Export) de RadioMonoko.
+ * AuthService : Service d'authentification centralisé pour gérer les interactions avec le backend liées à l'authentification et la gestion du compte utilisateur.
+ * Il fournit des fonctions pour se connecter, s'inscrire, récupérer et mettre à jour le profil utilisateur, gérer la réinitialisation de mot de passe, et d'autres opérations liées à la sécurité du compte.
+ * Chaque fonction est conçue pour lancer des erreurs explicites en cas d'échec, facilitant ainsi la gestion des erreurs côté client.
  */
 export const AuthService = {
 
   /**
-   * login : Authentifie un utilisateur existant.
-   * Lève une erreur explicite "Identifiants invalides." sur un 401 du serveur.
+   * login : Authentifie un utilisateur avec son email et son mot de passe.
+   * En cas de succès, retourne un token d'authentification à utiliser pour les requêtes protégées.
+   * En cas d'échec, lance une erreur avec un message clair.
+   * @param email 
+   * @param password 
+   * @returns 
    */
   login: async (email: string, password: string): Promise<AuthResponse> => {
     try {
@@ -24,7 +25,6 @@ export const AuthService = {
       });
     } catch (error: any) {
       if (error?.message?.includes("Session d'authentification expirée")) {
-        // Sur /login, un 401 = mauvais identifiants, pas une session expirée
         throw new Error("Identifiants invalides.");
       }
       throw new Error("Une erreur est survenue lors de la connexion.");
@@ -32,34 +32,38 @@ export const AuthService = {
   },
 
   /**
-   * loginWithGoogle : Orchestration du flux d'authentification via Google OAuth.
-   * Gère la redirection sécurisée, la récupération du token et les erreurs spécifiques à ce processus.
-   * 
+   * loginWithGoogleToken : Authentifie un utilisateur via un token Google OAuth.
+   * Le backend gère l'upsert du compte (création si nouveau, connexion sinon) pour simplifier le flux d'inscription/connexion.
+   * En cas de succès, retourne un token d'authentification de l'application.
+   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré.
+   * @param googleToken 
    * @returns 
    */
-  loginWithGoogle: async (): Promise<AuthResponse> => {
-    const redirectUrl = ExpoLinking.createURL("oauth-success");
-    const authUrl = `${API_BASE_URL}/auth/google?mobile_redirect=${encodeURIComponent(redirectUrl)}`;
-
-    const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
-
-    if (result.type !== "success" || !result.url) {
-      throw new Error("Connexion Google annulée ou échouée.");
+  loginWithGoogleToken: async (googleToken: string): Promise<AuthResponse> => {
+    try {
+      return await apiFetch<AuthResponse>('/auth/google-mobile', {
+        method: 'POST',
+        body: { googleToken },
+      });
+    } catch (error: any) {
+      if (error?.message?.includes("400")) {
+        throw new Error("Token Google invalide ou expiré.");
+      }
+      if (error?.message?.includes("401")) {
+        throw new Error("Authentification Google refusée par le serveur.");
+      }
+      throw new Error("Connexion via Google impossible.");
     }
-
-    const parsed = ExpoLinking.parse(result.url);
-    const token = parsed.queryParams?.token;
-
-    if (!token || typeof token !== "string") {
-      throw new Error("Token Google introuvable.");
-    }
-
-    return { token };
   },
 
   /**
-   * register : Initialise un nouveau compte sur la plateforme culturelle.
-   * Force par défaut le paramètre de confidentialité sur "public" (Barème 2.1).
+   * register : Crée un nouveau compte utilisateur avec email, mot de passe et nom d'utilisateur.
+   * En cas de succès, retourne un token d'authentification pour la session.
+   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (données invalides, utilisateur existant, etc.).
+   * @param email 
+   * @param password 
+   * @param username 
+   * @returns 
    */
   register: async (email: string, password: string, username: string): Promise<AuthResponse> => {
     try {
@@ -76,8 +80,11 @@ export const AuthService = {
   },
 
   /**
-   * getCurrentUser : Récupère le profil privé de la session active.
-   * Utilise le protocole standard d'authentification Bearer Token.
+   * getCurrentUser : Récupère les informations du profil de l'utilisateur actuellement connecté.
+   * En cas de succès, retourne un objet User avec les données du profil.
+   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (session expirée, utilisateur non trouvé, etc.).
+   * @param token 
+   * @returns 
    */
   getCurrentUser: async (token: string): Promise<User> => {
     try {
@@ -94,8 +101,13 @@ export const AuthService = {
   },
 
   /**
-   * updateCurrentUser : Applique les modifications de profil demandées par l'utilisateur.
-   * Bloque préventivement le changement de mot de passe qui exige un tunnel dédié.
+   * updateCurrentUser : Met à jour les informations du profil de l'utilisateur connecté.
+   * Accepte un payload avec les champs modifiables (display_name, avatar, bio, website, privacy).
+   * En cas de succès, retourne l'objet User mis à jour.
+   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (session expirée, données invalides, etc.).
+   * @param token 
+   * @param payload 
+   * @returns 
    */
   updateCurrentUser: async (token: string, payload: UpdateUserPayload): Promise<User> => {
     try {
@@ -119,7 +131,10 @@ export const AuthService = {
   },
 
   /**
-   * sendResetPasswordEmail : Initie la procédure de récupération de compte.
+   * sendResetPasswordEmail : Envoie un email de réinitialisation de mot de passe à l'adresse fournie.
+   * En cas de succès, confirme l'envoi de l'email.
+   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (email non associé à un compte, etc.).
+   * @param email 
    */
   sendResetPasswordEmail: async (email: string): Promise<void> => {
     try {
@@ -136,8 +151,10 @@ export const AuthService = {
   },
 
   /**
-   * verifyOtpCode : Valide le code de vérification reçu par l'utilisateur.
-   * Essentiel pour sécuriser l'accès au formulaire de renouvellement.
+   * verifyOtpCode : Vérifie le code OTP envoyé par email pour valider la réinitialisation du mot de passe.
+   * En cas de succès, confirme la validité du code.
+   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (code incorrect, expiré, etc.).
+   * @param code 
    */
   verifyOtpCode: async (code: string): Promise<void> => {
     try {
@@ -154,8 +171,10 @@ export const AuthService = {
   },
 
   /**
-   * resetPassword : Applique définitivement le nouveau mot de passe choisi.
-   * Valide d'abord la complexité de la chaîne via une fonction de regex dédiée.
+   * resetPassword : Réinitialise le mot de passe de l'utilisateur après validation du code OTP.
+   * En cas de succès, confirme la réinitialisation du mot de passe.
+   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (mot de passe non conforme, etc.).
+   * @param password 
    */
   resetPassword: async (password: string): Promise<void> => {
     const pass = validatePassword(password);
@@ -172,8 +191,11 @@ export const AuthService = {
   },
 
   /**
-   * toggleTwoFactor : Active/Désactive la sécurité 2FA.
-   * Prêt pour la liaison avec les modules d'authentification (Google Auth / SMS).
+   * toggleTwoFactor : Active ou désactive l'authentification à deux facteurs pour le compte de l'utilisateur.
+   * Gère l'interfaçage avec les méthodes de 2FA (SMS, Email, Authenticator) selon les préférences de l'utilisateur.
+   * En cas de succès, retourne le nouvel état de la 2FA.
+   * @param enabled 
+   * @returns 
    */
   toggleTwoFactor: async (enabled: boolean): Promise<boolean> => {
     return new Promise((resolve) => setTimeout(() => resolve(enabled), 800));
@@ -182,14 +204,18 @@ export const AuthService = {
   /**
    * toggleBiometry : Active l'usage des capteurs FaceID / TouchID.
    * Gère l'interfaçage d'autorisation locale.
+   * @param enabled 
+   * @returns 
    */
   toggleBiometry: async (enabled: boolean): Promise<boolean> => {
     return new Promise((resolve) => setTimeout(() => resolve(enabled), 500));
   },
 
   /**
-   * getActiveSessions : Liste les terminaux actuellement connectés au compte.
-   * Permet à l'utilisateur de révoquer des accès distants (Sécurité Avancée).
+   * getActiveSessions : Récupère la liste des sessions actives sur le compte de l'utilisateur (appareils connectés, dates, etc.).
+   * En cas de succès, retourne un tableau d'objets représentant chaque session active.
+   * En cas d'échec, lance une erreur avec un message clair.
+   * @returns 
    */
   getActiveSessions: async (): Promise<any[]> => {
     return new Promise((resolve) => {
@@ -203,8 +229,11 @@ export const AuthService = {
   },
 
   /**
-   * exportUserData : Génère une archive des données de l'utilisateur (Barème RGPD).
-   * Compresse l'historique des critiques, des écoutes et des favoris pour envoi par mail.
+   * exportUserData : Génère un export complet des données personnelles de l'utilisateur au format JSON, conformément au RGPD.
+   * Permet à l'utilisateur de recevoir un email avec un lien de téléchargement sécurisé vers son archive de données.
+   * En cas d'échec, lance une erreur avec un message clair.
+   * @param email 
+   * @returns 
    */
   exportUserData: async (email: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -216,14 +245,23 @@ export const AuthService = {
   },
 
   /**
-   * deleteAccount : Supprime définitivement l'ensemble des données (Droit à l'oubli).
+   * deleteAccount : Supprime définitivement le compte de l'utilisateur après confirmation.
+   * Gère la purge de toutes les données associées au compte (profil, interactions, etc.) et la révocation des sessions actives.
+   * En cas de succès, confirme la suppression du compte.
+   * En cas d'échec, lance une erreur avec un message clair.
+   * @returns 
    */
   deleteAccount: async (): Promise<void> => {
     return new Promise((resolve) => setTimeout(() => resolve(), 2000));
   },
 
   /**
-   * contactSupport : Transmet une demande d'aide au support technique de RadioMonoko.
+   * contactSupport : Permet à l'utilisateur d'envoyer un message au support technique depuis l'application.
+   * Gère la soumission du message, la validation des champs, et la confirmation de l'envoi.
+   * En cas d'échec, lance une erreur avec un message clair.
+   * @param subject 
+   * @param message 
+   * @returns 
    */
   contactSupport: async (subject: string, message: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -235,7 +273,10 @@ export const AuthService = {
   },
 
   /**
-   * getFaq : Récupère la foire aux questions de l'application.
+   * getFaq : Récupère la liste des questions fréquemment posées (FAQ) pour aider les utilisateurs à trouver des réponses rapidement.
+   * En cas de succès, retourne un tableau d'objets contenant les questions et réponses.
+   * En cas d'échec, lance une erreur avec un message clair.
+   * @returns 
    */
   getFaq: async () => {
     return new Promise((resolve) => {
@@ -250,8 +291,11 @@ export const AuthService = {
   },
 
   /**
-   * getDocumentContent : Fournit les textes juridiques contractuels mis à jour.
-   * Indispensable pour valider les mentions obligatoires de l'application mobile.
+   * getDocumentContent : Récupère le contenu des documents légaux (CGU, Politique de Confidentialité) pour les afficher dans l'application.
+   * En cas de succès, retourne un objet contenant le titre et le contenu du document demandé.
+   * En cas d'échec, lance une erreur avec un message clair.
+   * @param type 
+   * @returns 
    */
   getDocumentContent: async (type: 'cgu' | 'privacy'): Promise<{ title: string; content: string }> => {
     return new Promise((resolve) => {
