@@ -1,9 +1,7 @@
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useParams} from "react-router-dom";
-import LiveCard from "../components/radiopage/LiveCard";
 import {HiBookmark, HiCheck} from "react-icons/hi2";
 import {useAppearance} from "../context/AppearanceContext";
-import brandsService from "../services/BrandsService";
 import showsService from "../services/ShowsService.ts";
 import contentService from "../services/ContentsService";
 import ratingContentService from "../services/RatingContentsService";
@@ -13,7 +11,6 @@ import usersService from "../services/UsersService";
 import likeReviewsService from "../services/LikeReviewsService";
 import collectionItemsService from "../services/CollectionItemsService.ts";
 import collectionsService from "../services/CollectionsService.ts";
-import type {Brand} from "../interfaces/Brands.types";
 import type {ApiDiffusion, ApiShow} from "../interfaces/Shows.types";
 import type {User} from "../interfaces/Users.types";
 import type {Collection} from "../interfaces/Collections.types.ts";
@@ -22,8 +19,8 @@ import {DEFAULT_THEME} from "../assets/themes/DefaultTheme";
 import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
 import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
 
-const RadioPage = () => {
-    const { station } = useParams<{ station: string }>();
+const ShowPage = () => {
+    const { id } = useParams<{ id:string }>();
     const { theme } = useAppearance();
 
     const [currentUserId] = useState<string | null>(() => {
@@ -41,9 +38,7 @@ const RadioPage = () => {
     });
     const isLoggedIn = !!currentUserId;
 
-    const [brand, setBrand] = useState<Brand | null>(null);
-    const [localRadios, setLocalRadios] = useState<Brand["localRadios"]>([]);
-    const [webRadios, setWebRadios] = useState<Brand["webRadios"]>([]);
+    const [show, setShow] = useState<ApiShow | null>(null);
     const [diffusions, setDiffusions] = useState<ApiDiffusion[]>([]);
     const [dbContentId, setDbContentId] = useState<string | null>(null);
 
@@ -54,11 +49,11 @@ const RadioPage = () => {
     const [comments, setComments] = useState<any[]>([]);
     const [usersCache, setUsersCache] = useState<Record<string, User>>({});
 
-     const [loading, setLoading] = useState<boolean>(true);
-     const [collections, setCollections] = useState<Collection[]>([]);
-     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-     const [collectionItemStates, setCollectionItemStates] = useState<Record<string, boolean>>({});
-     const menuRef = useRef<HTMLDivElement>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [collections, setCollections] = useState<Collection[]>([]);
+    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+    const [collectionItemStates, setCollectionItemStates] = useState<Record<string, boolean>>({});
+    const menuRef = useRef<HTMLDivElement>(null);
 
     const fetchMissingUsers = useCallback(async (userIds: string[], currentCache: Record<string, User>) => {
         const uniqueIds = Array.from(new Set(userIds)).filter(id => id && !currentCache[id]);
@@ -86,83 +81,75 @@ const RadioPage = () => {
     }, []);
 
     useEffect(() => {
-        if (!station) return;
+        if (!id) return;
         let isMounted = true;
-        const fetchAllRadioData = async () => {
+
+        const fetchShowData = async () => {
             try {
                 setLoading(true);
-                const [brandsData, showsData] = await Promise.all([
-                    cached('brands_all', () => brandsService.getAllBrands(), 60_000),
-                    cached(`shows_${station}`, () => showsService.getShowsByStation(station).catch(() => []), 30_000)
-                ]);
+
+                const decoded = decodeURIComponent(id);
+
+                const data = await cached(
+                    `show_${decoded}`,
+                    () => showsService.getShowByUrl(decoded),
+                    30000
+                );
+
                 if (!isMounted) return;
-                const currentBrand = brandsData.find((b) => b.id.toLowerCase() === station.toLowerCase());
-                if (currentBrand) {
-                    const extractedWeb = currentBrand.webRadios ?? [];
-                    const extractedLocal = currentBrand.localRadios ?? [];
-                    if (!currentBrand.liveStream) {
-                        const fallbackRadio = extractedWeb[0] || extractedLocal[0];
-                        if (fallbackRadio) currentBrand.liveStream = fallbackRadio.liveStream;
-                    }
-                    setBrand(currentBrand);
-                    setLocalRadios(extractedLocal);
-                    setWebRadios(extractedWeb);
-                }
-                if (Array.isArray(showsData) && showsData.length > 0) {
-                    const allDiffusions = showsData.reduce((acc: ApiDiffusion[], currentShow: ApiShow) => {
-                        if (currentShow.diffusions && Array.isArray(currentShow.diffusions)) {
-                            return [...acc, ...currentShow.diffusions.map(d => ({ ...d, parentTitle: currentShow.title }))];
-                        }
-                        return acc;
-                    }, []);
-                    setDiffusions(allDiffusions);
+
+                setShow(data);
+
+                if (data.diffusions) {
+                    setDiffusions(data.diffusions);
                 }
             } catch (error) {
-                console.error("Erreur chargement:", error);
+                console.error(error);
             } finally {
                 if (isMounted) setLoading(false);
             }
         };
-        fetchAllRadioData();
+
+        fetchShowData();
         return () => { isMounted = false; };
-    }, [station]);
-
-     useEffect(() => {
-         if (isLoggedIn && currentUserId) {
-             collectionsService.getUserCollections(currentUserId)
-                 .then(setCollections)
-                 .catch(console.error);
-         }
-     }, [isLoggedIn, currentUserId]);
-
-     useEffect(() => {
-         if (!dbContentId || collections.length === 0) return;
-
-         const checkCollectionItems = async () => {
-             const states: Record<string, boolean> = {};
-             for (const col of collections) {
-                 try {
-                     const items = await collectionItemsService.getItemsByCollection(col.id);
-                     states[col.id] = items.some((item: any) => item.content_id === dbContentId);
-                 } catch (error) {
-                     console.error(`[checkCollectionItems] Error checking collection ${col.id}:`, error);
-                     states[col.id] = false;
-                 }
-             }
-             setCollectionItemStates(states);
-         };
-
-         checkCollectionItems();
-     }, [dbContentId, collections]);
+    }, [id]);
 
     useEffect(() => {
-        if (!brand) return;
+        if (isLoggedIn && currentUserId) {
+            collectionsService.getUserCollections(currentUserId)
+                .then(setCollections)
+                .catch(console.error);
+        }
+    }, [isLoggedIn, currentUserId]);
+
+    useEffect(() => {
+        if (!dbContentId || collections.length === 0) return;
+
+        const checkCollectionItems = async () => {
+            const states: Record<string, boolean> = {};
+            for (const col of collections) {
+                try {
+                    const items = await collectionItemsService.getItemsByCollection(col.id);
+                    states[col.id] = items.some((item: any) => item.content_id === dbContentId);
+                } catch (error) {
+                    console.error(`[checkCollectionItems] Error checking collection ${col.id}:`, error);
+                    states[col.id] = false;
+                }
+            }
+            setCollectionItemStates(states);
+        };
+
+        checkCollectionItems();
+    }, [dbContentId, collections]);
+
+    useEffect(() => {
+        if (!show) return;
         let isMounted = true;
 
         const loadCommunityData = async () => {
             try {
                 setLoadingReviews(true);
-                const dbContent = await cached(`content_${brand.id}`, () => contentService.resolveExternalApiId(brand.id), 60_000);
+                const dbContent = await cached(`content_${show.id}`, () => contentService.resolveExternalApiId(show.id), 60_000);
                 if (!dbContent || !dbContent.id || !isMounted) return;
 
                 const targetContentId = dbContent.id;
@@ -196,13 +183,12 @@ const RadioPage = () => {
                         reviewsList.map(async (review: any) => {
                             const likesData = await cached(`review_choice_${review.id}_${currentUserId}`, () => likeReviewsService.getReviewLikes(review.id, currentUserId).catch(() => null), 15_000);
                             const { likesCount, dislikesCount, userChoice } = likeReviewsService.transformLikesData(likesData, currentUserId);
-                            const enriched = {
+                            return {
                                 ...review,
                                 likesCount,
                                 dislikesCount,
                                 userChoice
                             };
-                            return enriched;
                         })
                     );
 
@@ -235,7 +221,7 @@ const RadioPage = () => {
 
         loadCommunityData();
         return () => { isMounted = false; };
-    }, [brand, isLoggedIn, currentUserId, fetchMissingUsers]);
+    }, [show, isLoggedIn, currentUserId, fetchMissingUsers]);
 
     const handleRateStation = async (nextRating: number) => {
         if (!isLoggedIn || !currentUserId || !dbContentId) return;
@@ -357,97 +343,97 @@ const RadioPage = () => {
         }
     };
 
-     const handleLikeInteraction = async (reviewId: string, actionType: "like" | "dislike" | "remove") => {
-         if (!isLoggedIn || !currentUserId) return;
-         const previousCommentsSnapshot = JSON.parse(JSON.stringify(comments));
+    const handleLikeInteraction = async (reviewId: string, actionType: "like" | "dislike" | "remove") => {
+        if (!isLoggedIn || !currentUserId) return;
+        const previousCommentsSnapshot = JSON.parse(JSON.stringify(comments));
 
-         setComments((prevComments) => {
-             const updateCommentCounters = (c: any) => {
-                 if (c.id !== reviewId) return c;
-                 const previousChoice = c.userChoice;
-                 let newLikes = c.likesCount ?? 0;
-                 let newDislikes = c.dislikesCount ?? 0;
+        setComments((prevComments) => {
+            const updateCommentCounters = (c: any) => {
+                if (c.id !== reviewId) return c;
+                const previousChoice = c.userChoice;
+                let newLikes = c.likesCount ?? 0;
+                let newDislikes = c.dislikesCount ?? 0;
 
-                 if (previousChoice === "like") newLikes = Math.max(0, newLikes - 1);
-                 if (previousChoice === "dislike") newDislikes = Math.max(0, newDislikes - 1);
+                if (previousChoice === "like") newLikes = Math.max(0, newLikes - 1);
+                if (previousChoice === "dislike") newDislikes = Math.max(0, newDislikes - 1);
 
-                 if (actionType === "like") newLikes += 1;
-                 if (actionType === "dislike") newDislikes += 1;
+                if (actionType === "like") newLikes += 1;
+                if (actionType === "dislike") newDislikes += 1;
 
-                 return {
-                     ...c,
-                     likesCount: newLikes,
-                     dislikesCount: newDislikes,
-                     userChoice: actionType === "remove" ? null : actionType
-                 };
-             };
+                return {
+                    ...c,
+                    likesCount: newLikes,
+                    dislikesCount: newDislikes,
+                    userChoice: actionType === "remove" ? null : actionType
+                };
+            };
 
-             return prevComments.map((comment) => {
-                 if (comment.id === reviewId) return updateCommentCounters(comment);
-                 if (comment.replies && comment.replies.length > 0) {
-                     return { ...comment, replies: comment.replies.map(updateCommentCounters) };
-                 }
-                 return comment;
-             });
-         });
+            return prevComments.map((comment) => {
+                if (comment.id === reviewId) return updateCommentCounters(comment);
+                if (comment.replies && comment.replies.length > 0) {
+                    return { ...comment, replies: comment.replies.map(updateCommentCounters) };
+                }
+                return comment;
+            });
+        });
 
-         try {
-             if (actionType === "remove") {
-                 await likeReviewsService.removeLikeReview(reviewId, currentUserId);
-             } else {
-                 const isLikeBool = actionType === "like";
-                 await likeReviewsService.toggleLikeReview(reviewId, currentUserId, isLikeBool);
-             }
-             let freshData = null;
-             try {
-                 freshData = await likeReviewsService.getReviewLikes(reviewId, currentUserId);
-             } catch (err) {
-                 console.error("[handleLikeInteraction] Error fetching fresh likes:", {
-                     error: err,
-                     reviewId,
-                     currentUserId,
-                     timestamp: new Date().toISOString()
-                 });
-                 freshData = null;
-             }
+        try {
+            if (actionType === "remove") {
+                await likeReviewsService.removeLikeReview(reviewId, currentUserId);
+            } else {
+                const isLikeBool = actionType === "like";
+                await likeReviewsService.toggleLikeReview(reviewId, currentUserId, isLikeBool);
+            }
+            let freshData = null;
+            try {
+                freshData = await likeReviewsService.getReviewLikes(reviewId, currentUserId);
+            } catch (err) {
+                console.error("[handleLikeInteraction] Error fetching fresh likes:", {
+                    error: err,
+                    reviewId,
+                    currentUserId,
+                    timestamp: new Date().toISOString()
+                });
+                freshData = null;
+            }
 
-             if (freshData) {
-                 const { likesCount: finalLikes, dislikesCount: finalDislikes, userChoice: finalUserChoice } = likeReviewsService.transformLikesData(freshData, currentUserId);
-                 setComments((prevComments) => {
-                     const alignWithDb = (c: any) => {
-                         if (c.id !== reviewId) return c;
-                         return {
-                             ...c,
-                             likesCount: finalLikes,
-                             dislikesCount: finalDislikes,
-                             userChoice: finalUserChoice
-                         };
-                     };
-                     return prevComments.map((comment) => {
-                         if (comment.id === reviewId) return alignWithDb(comment);
-                         if (comment.replies && comment.replies.length > 0) {
-                             return { ...comment, replies: comment.replies.map(alignWithDb) };
-                         }
-                         return comment;
-                     });
-                 });
-             } else {
-                 console.warn("[handleLikeInteraction] No fresh data from API, keeping optimistic state");
-             }
-         } catch (err) {
-             console.error("[handleLikeInteraction] CRITICAL ERROR during like interaction:", {
-                 error: err,
-                 reviewId,
-                 currentUserId,
-                 timestamp: new Date().toISOString()
-             });
-             try {
-                 setComments(previousCommentsSnapshot);
-             } catch (e) {
-                 console.error("[handleLikeInteraction] CRITICAL ERROR: Failed to revert state:", e);
-             }
-         }
-     };
+            if (freshData) {
+                const { likesCount: finalLikes, dislikesCount: finalDislikes, userChoice: finalUserChoice } = likeReviewsService.transformLikesData(freshData, currentUserId);
+                setComments((prevComments) => {
+                    const alignWithDb = (c: any) => {
+                        if (c.id !== reviewId) return c;
+                        return {
+                            ...c,
+                            likesCount: finalLikes,
+                            dislikesCount: finalDislikes,
+                            userChoice: finalUserChoice
+                        };
+                    };
+                    return prevComments.map((comment) => {
+                        if (comment.id === reviewId) return alignWithDb(comment);
+                        if (comment.replies && comment.replies.length > 0) {
+                            return { ...comment, replies: comment.replies.map(alignWithDb) };
+                        }
+                        return comment;
+                    });
+                });
+            } else {
+                console.warn("[handleLikeInteraction] No fresh data from API, keeping optimistic state");
+            }
+        } catch (err) {
+            console.error("[handleLikeInteraction] CRITICAL ERROR during like interaction:", {
+                error: err,
+                reviewId,
+                currentUserId,
+                timestamp: new Date().toISOString()
+            });
+            try {
+                setComments(previousCommentsSnapshot);
+            } catch (e) {
+                console.error("[handleLikeInteraction] CRITICAL ERROR: Failed to revert state:", e);
+            }
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -459,34 +445,34 @@ const RadioPage = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-     const toggleCollectionItem = async (collectionId: string) => {
-         if (!dbContentId) return;
-         try {
-             const isCurrentlyInCollection = collectionItemStates[collectionId];
-             if (isCurrentlyInCollection) {
-                 try {
-                     await collectionItemsService.deleteItemFromCollection(collectionId, dbContentId);
-                 } catch (err) {
-                     console.error(err);
-                 }
-             } else {
-                 const newItem: any = {
-                     collection_id: collectionId,
-                     content_id: dbContentId,
-                     position: 0,
-                     note: null
-                 };
+    const toggleCollectionItem = async (collectionId: string) => {
+        if (!dbContentId) return;
+        try {
+            const isCurrentlyInCollection = collectionItemStates[collectionId];
+            if (isCurrentlyInCollection) {
+                try {
+                    await collectionItemsService.deleteItemFromCollection(collectionId, dbContentId);
+                } catch (err) {
+                    console.error(err);
+                }
+            } else {
+                const newItem: any = {
+                    collection_id: collectionId,
+                    content_id: dbContentId,
+                    position: 0,
+                    note: null
+                };
 
-                 await collectionItemsService.addItemToCollection(newItem);
-             }
-             setCollectionItemStates((prev) => ({
-                 ...prev,
-                 [collectionId]: !isCurrentlyInCollection
-             }));
-         } catch (error) {
-             console.error("[toggleCollectionItem] Error:", error);
-         }
-     };
+                await collectionItemsService.addItemToCollection(newItem);
+            }
+            setCollectionItemStates((prev) => ({
+                ...prev,
+                [collectionId]: !isCurrentlyInCollection
+            }));
+        } catch (error) {
+            console.error("[toggleCollectionItem] Error:", error);
+        }
+    };
 
     if (loading) {
         return (
@@ -496,12 +482,12 @@ const RadioPage = () => {
         );
     }
 
-    if (!brand) return null;
+    if (!show) return null;
 
-    const normalizedId = brand.id.toUpperCase();
+    const normalizedId = show.id.toUpperCase();
     const foundKey = Object.keys(BRAND_THEMES).find((k) => normalizedId.startsWith(k));
     const matchedTheme = foundKey ? BRAND_THEMES[foundKey] : DEFAULT_THEME;
-    const cleanMainTitle = brand.title.replace(/^ICI\s+/, "").replace(/["'«»]|<<|>>/g, "").trim();
+    const cleanMainTitle = show.title.replace(/^ICI\s+/, "").replace(/["'«»]|<<|>>/g, "").trim();
     const filteredDiffusions = diffusions.filter(e => e.podcastEpisode?.url);
 
     return (
@@ -512,11 +498,10 @@ const RadioPage = () => {
                         <h1 className="text-4xl md:text-6xl font-black uppercase">{cleanMainTitle}</h1>
 
                         <div className="relative" ref={menuRef}>
-                            {/* Save Button */}
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                                 className={`h-12 px-6 rounded-2xl font-bold text-xs flex items-center gap-2.5 border transition-all duration-300 group
-        ${collections.length > 0 && Object.values(collectionItemStates).some(v => v)
+                                            ${collections.length > 0 && Object.values(collectionItemStates).some(v => v)
                                     ? theme === 'dark'
                                         ? 'bg-rose-500/10 border-rose-500/50 text-rose-400 hover:bg-rose-500/20 hover:border-rose-400'
                                         : 'bg-rose-50 border-rose-300 text-rose-600 hover:bg-rose-100 hover:border-rose-400 shadow-sm'
@@ -531,16 +516,12 @@ const RadioPage = () => {
                                 )}
                             </button>
 
-                            {/* Collections Menu */}
                             {isMenuOpen && (
                                 <div className={`absolute top-14 left-0 w-80 py-3 rounded-2xl border shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200
-            ${theme === 'dark' ? 'bg-neutral-900 border-white/10' : 'bg-white border-neutral-200'}`}>
-                                    {/* Header */}
+                                                ${theme === 'dark' ? 'bg-neutral-900 border-white/10' : 'bg-white border-neutral-200'}`}>
                                     <div className={`px-5 py-3 font-bold text-xs uppercase tracking-wider opacity-70 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>
                                         Mes Collections
                                     </div>
-
-                                    {/* Collections List */}
                                     <div className="max-h-72 overflow-y-auto">
                                         {collections.length === 0 ? (
                                             <div className={`px-5 py-4 text-xs text-center ${theme === 'dark' ? 'text-neutral-500' : 'text-neutral-500'}`}>
@@ -561,73 +542,58 @@ const RadioPage = () => {
                                                             : theme === 'dark'
                                                                 ? 'hover:bg-white/5'
                                                                 : 'hover:bg-neutral-50'
-                                        }`}
-                                    >
-                                        {/* Checkbox */}
-                                        <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200
-                                        ${isInCollection
-                                                ? theme === 'dark'
-                                                    ? 'bg-rose-500 border-rose-400'
-                                                    : 'bg-rose-500 border-rose-600'
-                                                : theme === 'dark'
-                                                    ? 'border-white/20 group-hover:border-white/40'
-                                                    : 'border-neutral-300 group-hover:border-neutral-400'
-                                        }`}>
-                                            {isInCollection && (
-                                                <HiCheck size={14} className="text-white animate-in scale-in duration-200" />
-                                            )}
-                                        </div>
-
-                                        {/* Collection Name */}
-                                        <span className={`flex-1 text-left font-medium transition-colors duration-200
-                                        ${isInCollection
-                                                ? theme === 'dark'
-                                                    ? 'text-rose-300'
-                                                    : 'text-rose-700'
-                                                : theme === 'dark'
-                                                    ? 'text-white'
-                                                    : 'text-neutral-800'
-                                        }`}>
+                                                        }`}
+                                                    >
+                                                        <div className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200
+                                                                        ${isInCollection
+                                                            ? theme === 'dark'
+                                                                ? 'bg-rose-500 border-rose-400'
+                                                                : 'bg-rose-500 border-rose-600'
+                                                            : theme === 'dark'
+                                                                ? 'border-white/20 group-hover:border-white/40'
+                                                                : 'border-neutral-300 group-hover:border-neutral-400'
+                                                        }`}>
+                                                            {isInCollection && (
+                                                                <HiCheck size={14} className="text-white animate-in scale-in duration-200" />
+                                                            )}
+                                                        </div>
+                                                        <span className={`flex-1 text-left font-medium transition-colors duration-200
+                                                                            ${isInCollection
+                                                            ? theme === 'dark'
+                                                                ? 'text-rose-300'
+                                                                : 'text-rose-700'
+                                                            : theme === 'dark'
+                                                                ? 'text-white'
+                                                                : 'text-neutral-800'
+                                                        }`}>
                                             {col.name}
                                         </span>
-
-                                        {/* Indicator dot */}
-                                        {isInCollection && (
-                                            <div className="w-2 h-2 rounded-full bg-rose-500/80"></div>
-                                        )}
-                                    </button>
-                                );
+                                                        {isInCollection && (
+                                                            <div className="w-2 h-2 rounded-full bg-rose-500/80"></div>
+                                                        )}
+                                                    </button>
+                                                );
                                             })
                                         )}
-                                    </div>
-
-                                    {/* New Collection Button */}
-                                    <div className={`border-t mt-2 pt-3 px-5 ${theme === 'dark' ? 'border-white/10' : 'border-neutral-200'}`}>
-                                        <button className={`text-xs font-bold transition-all duration-200 group
-                                        ${theme === 'dark'
-                                                ? 'text-rose-400 hover:text-rose-300'
-                                                : 'text-rose-600 hover:text-rose-700'
-                                        }`}>
-                                            <span className="group-hover:translate-x-0.5 transition-transform inline-block">
-                                                + Nouvelle collection
-                                            </span>
-                                        </button>
                                     </div>
                                 </div>
                             )}
                         </div>
                     </div>
                     <div className="lg:col-span-7 w-full lg:mt-8 pb-4">
-                        <div className={`rounded-[2.5rem] overflow-hidden transition-all duration-500  ${theme === "dark" ? "shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)]" : "shadow-[0_30px_60px_-20px_rgba(0,0,0,0.08)] border border-neutral-200/50"}`}>
-                            <LiveCard brandData={brand} theme={theme} />
+                        <div className="lg:col-span-7 w-full lg:mt-8 pb-4">
+                            <div className="bg-neutral-100 dark:bg-white/[0.03] rounded-[2.5rem] p-12 border border-neutral-200 dark:border-white/5 flex flex-col justify-center min-h-[300px]">
+                                <h2 className="text-xl font-bold mb-4 opacity-80">À propos de l'émission</h2>
+                                <p className="text-base leading-relaxed opacity-60">
+                                    {show.standFirst || "Aucune description disponible."}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </section>
 
                 <RadioListsSection
                     filteredDiffusions={filteredDiffusions}
-                    webRadios={webRadios}
-                    localRadios={localRadios}
                     theme={theme}
                     matchedTheme={matchedTheme}
                 />
@@ -660,4 +626,4 @@ const RadioPage = () => {
     );
 };
 
-export default RadioPage;
+export default ShowPage;

@@ -14,9 +14,6 @@ const getReports = async (): Promise<Report[]> => {
 
 const getReviews = async () => {
     const response = await api.get("/review");
-    console.log("REVIEWS RESPONSE");
-    console.log(response.data);
-
     return Array.isArray(response.data)
         ? response.data
         : response.data.data || [];

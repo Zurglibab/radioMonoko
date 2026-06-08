@@ -2,9 +2,13 @@ import api from "./Api.ts";
 import type {Collection} from "../interfaces/Collections.types.ts";
 
 
-
 const getUserCollections = async (userId: string): Promise<Collection[]> => {
     const response = await api.get(`/collections/collection/user/${userId}`);
+    return response.data;
+};
+
+const getAllCollections = async (): Promise<Collection[]> => {
+    const response = await api.get("/collections");
     return response.data;
 };
 
@@ -38,4 +42,4 @@ const updateCollection = async (id: string, data: Partial<Collection>): Promise<
     return response.data;
 }
 
-export default {getUserCollections, createCollection, deleteCollection, updateCollection, getCollectionById};
+export default {getUserCollections, getAllCollections, createCollection, deleteCollection, updateCollection, getCollectionById};

@@ -17,6 +17,8 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { useAppearance } from "../../context/AppearanceContext";
 import { SettingsModal } from "./SettingsModal";
+import SearchService, {type SearchResult} from "../../services/SearchService.ts";
+import CollectionsService from "../../services/CollectionsService.ts";
 
 const NavBar = () => {
     const { user, logout } = useAuth();
@@ -35,6 +37,11 @@ const NavBar = () => {
 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [previewResults, setPreviewResults] = useState<SearchResult>({
+        users: [],
+        collections: [],
+        shows: []
+    });
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const notifRef = useRef<HTMLDivElement>(null);
@@ -85,6 +92,36 @@ const NavBar = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [isSearchOpen, searchQuery]);
 
+    const handleSearch = (value: string) => {
+        setSearchQuery(value);
+    };
+
+    useEffect(() => {
+        const timeout = setTimeout(async () => {
+            if (searchQuery.trim().length < 2) {
+                setPreviewResults({
+                    users: [],
+                    collections: [],
+                    shows: []
+                });
+                return;
+            }
+            try {
+                const allCollections =
+                    await CollectionsService.getAllCollections();
+                const results =
+                    await SearchService.searchUnified(
+                        searchQuery,
+                        allCollections
+                    );
+                setPreviewResults(results);
+            } catch (error) {
+                console.error(error);
+            }
+        }, 300);
+        return () => clearTimeout(timeout);
+    }, [searchQuery]);
+
     const handleLogout = async () => {
         logout();
         setIsProfileOpen(false);
@@ -107,7 +144,6 @@ const NavBar = () => {
                     <button onClick={() => setIsMenuOpen(true)} className={`${IconCircleStyle}`}>
                         <HiOutlineMenu className="text-lg md:text-xl text-app-text cursor-pointer" />
                     </button>
-
                     {(
                         <div
                             className={`
@@ -133,20 +169,57 @@ const NavBar = () => {
                                     <HiOutlineSearch className="text-lg md:text-xl"/>}
                             </button>
 
-                            <input
-                                ref={searchInputRef}
-                                type="text"
-                                placeholder="Rechercher..."
-                                className={`
-                                    ml-10 bg-transparent border-none outline-none text-app-text text-[10px] md:text-xs font-black 
-                                    tracking-widest transition-all duration-500
-                                    ${isSearchOpen
-                                    ? 'opacity-100 translate-x-0 w-full visible'
-                                    : 'opacity-0 -translate-x-4 w-0 invisible'}
-                                `}
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
+                            {isSearchOpen && (
+                                <input
+                                    ref={searchInputRef}
+                                    type="text"
+                                    aria-label="Recherche"
+                                    placeholder="Rechercher..."
+                                    value={searchQuery}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                                        }
+                                    }}
+                                    className="ml-8 w-full bg-transparent outline-none text-app-text placeholder-app-text-secondary"
+                                />
+                            )}
+                            {
+                                searchQuery.length >=2 && (previewResults.users.length > 0 || previewResults.collections.length > 0)&&
+                                (
+                                    <div className="absolute top-full left-0 mt-2 w-full bg-app-bg border border-app-border rounded-x1 shadow-x1 overflow-hidden z-50">
+                                        {previewResults.users.slice(0, 3).map(user => (
+
+                                            <div
+                                                key={user.id}
+                                                className="px-4 py-3 hover:bg-app-bg-secondary cursor-pointer"
+                                                onClick={() =>
+                                                    navigate(`/search?q=${user.username}`)
+                                                }
+                                            >
+                                                <p className="font-medium">
+                                                    {user.username}
+                                                </p>
+                                            </div>
+                                        ))}
+                                        {previewResults.collections.slice(0, 3).map(collection => (
+                                            <div
+                                                key={collection.id}
+                                                className="px-4 py-3 hover:bg-app-bg-secondarycursor-pointer"
+                                                onClick={() =>
+                                                    navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
+                                                }
+                                            >
+                                                <p>
+                                                    {collection.name}
+                                                </p>
+                                            </div>
+
+                                        ))}
+                                    </div>
+                                )
+                            }
                         </div>
                     )}
                 </div>
