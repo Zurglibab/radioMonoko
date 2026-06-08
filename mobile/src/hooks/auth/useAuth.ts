@@ -2,81 +2,52 @@ import { useState } from "react";
 import { AuthService } from "@/services/auth/auth.service";
 import { useRouter } from "expo-router";
 import { useAuthContext } from "@/context/AuthContext";
+import { useGoogleAuth } from "@/hooks/auth/useGoogleAuth";
 
-/**
- * Pré-valide les champs du formulaire de connexion.
- * Retourne un message d'erreur localisé, ou null si tout est valide.
- */
 const validateLoginForm = (email: string, password: string): string | null => {
-  if (!email || !password) {
-    return "Veuillez remplir tous les champs.";
-  }
+  if (!email || !password) return "Veuillez remplir tous les champs.";
   return null;
 };
 
 /**
- * useAuth : Hook personnalisé orchestrant le flux de connexion.
- * Fait le pont entre l'appel API brut (AuthService) et la gestion de session globale (AuthContext).
+ * 
+ * useAuth : Hook personnalisé pour gérer l'authentification des utilisateurs.
+ * Il gère la validation du formulaire de connexion, l'appel au service d'authentification pour obtenir un token,
+ * la mise à jour du contexte global d'authentification, et la navigation vers l'écran d'accueil après une connexion réussie.
+ * Il intègre également l'option de connexion via Google OAuth en utilisant le hook useGoogleAuth.
+ * @returns Un objet contenant les fonctions de connexion (email/mot de passe et Google), les états de chargement et d'erreur.
  */
 export const useAuth = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isFormLoading, setIsFormLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
-
-  // Méthode login du contexte global (prend uniquement un token en paramètre).
   const { login: updateGlobalState } = useAuthContext();
 
-  /**
-   * Orchestre la procédure de connexion complète :
-   * 1. Validation locale des champs
-   * 2. Appel à l'API d'authentification (POST /user/login)
-   * 3. Hydratation du contexte global (qui interroge GET /user/me)
-   * 4. Redirection vers l'accueil
-   */
+  const { triggerGoogleAuth, isLoading: isGoogleLoading, error: googleError } = useGoogleAuth();
+
   const login = async (email: string, password: string) => {
-    setError(null);
-
-    // Normalisation de l'email : suppression des espaces et harmonisation de la casse
+    setFormError(null);
     const emailCleaned = email?.trim().toLowerCase() || "";
-
-    // Validation locale avant tout appel réseau
     const validationError = validateLoginForm(emailCleaned, password);
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    if (validationError) { setFormError(validationError); return; }
 
-    setIsLoading(true);
+    setIsFormLoading(true);
     try {
-      const response = await AuthService.login(emailCleaned, password);
-
-      if (__DEV__) {
-        console.log("[useAuth] Jeton reçu, initialisation de la session globale...");
-      }
-
-      await updateGlobalState(response.token);
+      const res = await AuthService.login(emailCleaned, password);
+      if (__DEV__) console.log("[useAuth] Jeton reçu, initialisation de la session globale...");
+      await updateGlobalState(res.token);
       router.replace("/(tabs)/home");
     } catch (err: any) {
-      setError(err?.message || "Une erreur inconnue est survenue.");
+      setFormError(err?.message || "Une erreur inconnue est survenue.");
     } finally {
-      setIsLoading(false);
+      setIsFormLoading(false);
     }
   };
 
-  const loginWithGoogle = async () => {
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      const response = await AuthService.loginWithGoogle();
-      await updateGlobalState(response.token);
-      router.replace("/(tabs)/home");
-    } catch (err: any) {
-      setError(err?.message || "Connexion Google impossible.");
-    } finally {
-      setIsLoading(false);
-    }
+  return {
+    login,
+    loginWithGoogle: triggerGoogleAuth,
+    isLoading: isFormLoading || isGoogleLoading,
+    error: formError || googleError,
   };
-
-  return { login, loginWithGoogle, isLoading, error };
 };

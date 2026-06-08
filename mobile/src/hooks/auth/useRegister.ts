@@ -3,14 +3,11 @@ import { AuthService } from "@/services/auth/auth.service";
 import { validateEmail, validatePassword } from "@/utils/validation/validation";
 import { useAuthContext } from "@/context/AuthContext";
 import { useRouter } from "expo-router";
+import { useGoogleAuth } from "@/hooks/auth/useGoogleAuth";
 
 const USERNAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
 const MIN_USERNAME_LENGTH = 3;
 
-/**
- * Pré-valide tous les champs du formulaire d'inscription.
- * Retourne un message d'erreur localisé, ou null si tout est valide.
- */
 const validateRegisterForm = (
   email: string,
   password: string,
@@ -42,15 +39,19 @@ const validateRegisterForm = (
 };
 
 /**
- * useRegister : Hook personnalisé orchestrant l'inscription sur RadioMonoko.
- * Gère les états de chargement, les messages d'erreur et applique une série 
- * de filtres de validation drastiques avant de solliciter le backend.
+ * useRegister : Hook personnalisé pour gérer l'inscription des utilisateurs.
+ * Il gère la validation du formulaire d'inscription, l'appel au service d'authentification pour créer un compte,
+ * la mise à jour du contexte global d'authentification, et la navigation vers l'écran d'accueil après une inscription réussie.
+ * Il intègre également l'option d'inscription via Google OAuth en utilisant le hook useGoogleAuth.
+ * @returns 
  */
 export const useRegister = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isFormLoading, setIsFormLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const router = useRouter();
   const { login: updateGlobalState } = useAuthContext();
+
+  const { triggerGoogleAuth, isLoading: isGoogleLoading, error: googleError } = useGoogleAuth();
 
   const register = async (
     email: string,
@@ -59,47 +60,31 @@ export const useRegister = () => {
     username: string,
     agree: boolean
   ) => {
-    setError(null);
-
-    // Normalisation des champs critiques
+    setFormError(null);
     const emailCleaned = email?.trim().toLowerCase() || "";
     const usernameCleaned = username?.trim() || "";
 
-    // Validation locale avant tout appel réseau
     const validationError = validateRegisterForm(
       emailCleaned, password, confirmPassword, usernameCleaned, agree
     );
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
+    if (validationError) { setFormError(validationError); return; }
 
-    setIsLoading(true);
+    setIsFormLoading(true);
     try {
       const response = await AuthService.register(emailCleaned, password, usernameCleaned);
       await updateGlobalState(response.token);
       router.replace("/(tabs)/home");
     } catch (err: any) {
-      setError(err?.message || "Une erreur est survenue lors de l'inscription.");
+      setFormError(err?.message || "Une erreur est survenue lors de l'inscription.");
     } finally {
-      setIsLoading(false);
-    }
-  },
-
-  registerWithGoogle = async () => {
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      const response = await AuthService.loginWithGoogle();
-      await updateGlobalState(response.token);
-      router.replace("/(tabs)/home");
-    } catch (err:any) {
-      setError(err.message || "Une erreur est survenue lors de l'inscription avec Google.");
-    } finally {
-      setIsLoading(false);
+      setIsFormLoading(false);
     }
   };
 
-  return { register, registerWithGoogle, isLoading, error };
+  return {
+    register,
+    registerWithGoogle: triggerGoogleAuth,
+    isLoading: isFormLoading || isGoogleLoading,
+    error: formError || googleError,
+  };
 };

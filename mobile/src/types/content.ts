@@ -1,20 +1,12 @@
 import { User } from "./auth";
-
-/**
- * MediaType : Type de média pour différencier les flux radio des podcasts.
- * Utilisé pour adapter l'UI et les fonctionnalités (ex : affichage de la durée pour les podcasts).
- */
 export type MediaType = 'radio' | 'podcast';
 
-/**
- * Status de lecteur de la collection
- * Définit l'état d'un média dans la bibliothèque de l'utilisateur.
- */
 export type MediaStatus = 'to-listen' | 'in-progress' | 'finished' | 'dropped';
 
 /**
- * BackendContent : Représente la structure d'un contenu tel que renvoyé par le backend.
- * Utilisé pour enrichir les favoris et les items de la bibliothèque avec les métadonnées complètes.
+ * Interface BackendContent : Représente les contenus importés depuis le backend, tels que les shows, diffusions, lives, podcasts, articles ou autres.
+ * Ces contenus sont référencés par la communauté et peuvent être ajoutés aux stations ou playlists.
+ * Ils contiennent des informations de base comme le titre, la description, le type de contenu et les dates de création.
  */
 export interface BackendContent {
   id: string;
@@ -26,8 +18,8 @@ export interface BackendContent {
 }
 
 /**
- * Interface Review : Représente une critique ou un avis laissé par un utilisateur sur une station ou une playlist.
- * Utilisée pour afficher les retours de la communauté et favoriser l'engagement.
+ * Interface ContentDTO : Modèle de données utilisé dans l'application pour représenter les contenus, enrichi avec des informations supplémentaires comme l'image, les avis, les amis qui écoutent, etc.
+ * Il est dérivé de BackendContent mais adapté pour les besoins de l'interface utilisateur.
  */
 export interface Review {
   id: string;
@@ -54,6 +46,7 @@ export interface Station {
   category: string;
   type: MediaType;
   streamUrl?: string;
+  brandId?: string;
 
   status?: MediaStatus;
   duration?: string;

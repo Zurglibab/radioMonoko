@@ -1,39 +1,32 @@
 import { Brand, WebRadio } from "./brand";
 import { Friend } from "./social";
+import { ContentDTO } from "./content-api";
+import { CollectionDTO } from "./collection";
 
-/**
- * Types de filtres applicables à la recherche d'œuvres.
- */
-export type SearchType = 'all' | 'brands' | 'webradios' | 'users';
+export type SearchType = 'all' | 'brands' | 'webradios' | 'users' | 'contents' | 'collections';
 
-/**
- * UserSearchResult : Utilisateur retourné par /user/search.
- * Type minimal pour l'affichage en liste (réutilise Friend qui a déjà bio+avatar).
- */
 export type UserSearchResult = Friend;
 
 /**
- * UnifiedSearchResults : Résultat combiné de la recherche unifiée.
- * Contient les résultats de tous les types (brands, webradios, users) pour une même requête.
+ * UnifiedSearchResults : Modèle de données pour les résultats d'une recherche unifiée.
+ * Il regroupe les résultats de différentes catégories (marques, web radios, utilisateurs, contenus, collections publiques) pour une expérience de recherche fluide.
+ * Chaque catégorie est représentée par un tableau d'objets correspondant à son type spécifique.
+ * Les web radios sont enrichies avec les informations de la marque associée pour faciliter l'affichage et la navigation.
+ * En cas d'erreur dans une catégorie, elle est simplement ignorée pour ne pas impacter les autres résultats.
  */
 export interface UnifiedSearchResults {
   brands: Brand[];
   webRadios: WebRadioWithBrand[];
   users: UserSearchResult[];
+  contents: ContentDTO[];
+  publicCollections: CollectionDTO[];
 }
 
-/**
- * WebRadioWithBrand : Une webRadio enrichie de l'info de sa Brand parente.
- * Nécessaire pour afficher "FIP Jazz" sans perdre l'info que c'est une sous-station de FIP.
- */
 export interface WebRadioWithBrand extends WebRadio {
   brandId: string;
   brandTitle: string;
 }
 
-/**
- * HistoryEntry : Une entrée d'historique de recherche persistée.
- */
 export interface HistoryEntry {
   query: string;
   timestamp: number;

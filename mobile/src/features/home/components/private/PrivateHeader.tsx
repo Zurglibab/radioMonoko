@@ -17,7 +17,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
-  // Nombre de notifications non lues, mis à jour automatiquement par le polling
+  // Nombre de notifications non lues
   const { unreadCount } = useNotificationContext();
   const hasUnread = unreadCount > 0;
 
@@ -43,7 +43,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
           className="w-11 h-11 rounded-[16px] items-center justify-center border mr-3 shadow-sm"
         >
           <Text style={{ color: colors.text }} className="font-black text-lg uppercase">
-            {user.username[0]}
+            {(user.username ?? 'utilisateur')[0]}
           </Text>
         </TouchableOpacity>
 
@@ -58,7 +58,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
             style={{ color: colors.text }}
             className="text-xl font-black tracking-tighter italic"
           >
-            Salut, {user.username}
+            Salut, {user.username ?? 'utilisateur'}
           </Text>
         </View>
       </View>

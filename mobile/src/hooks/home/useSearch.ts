@@ -1,86 +1,93 @@
-import { useState, useEffect } from "react";
-import { SearchService, UnifiedSearchResults } from "@/services/content/search.service";
-import { useHome } from "./useHome";
+import { useState, useEffect, useCallback } from "react";
+import { SearchService } from "@/services/search/search.service";
+import { SearchHistoryService } from "@/services/search/search-history.service";
+import { HistoryEntry } from "@/types/search";
+import { Brand } from "@/types/brand";
+import { BrandService } from "@/services/brand/brand.service";
+import { useAuthContext } from "@/context/AuthContext";
 import { Station } from "@/types/content";
+import { Friend } from "@/types/social";
+import { ContentDTO } from "@/types/content-api";
+import { CollectionDTO } from "@/types/collection";
+import { mapBrandToStation, mapWebRadioToStation } from "@/utils/mappers/brand.mapper";
 
 /**
- * useSearch : Hook de gestion de la recherche globale et de l'historique.
- * Pilote le filtrage asynchrone multi-entités (Stations, Users, Playlists),
- * gère le "debouncing" et persiste l'historique des consultations récentes.
+ * useSearch : Hook personnalisé pour gérer la recherche d'éléments dans l'application.
+ * @returns Un objet contenant les données de recherche et les fonctions de gestion.
  */
 export const useSearch = () => {
-  // Récupération de la source de vérité pour le filtrage local des stations
-  const { stations: allStations } = useHome();
-  
-  // État de la saisie textuelle
+  const { token } = useAuthContext();
   const [query, setQuery] = useState("");
-  
-  // Résultats de recherche structurés par catégories (Unified)
-  const [results, setResults] = useState<UnifiedSearchResults>({
-    stations: [],
-    users: [],
-    playlists: []
-  });
-  
-  // Indicateur de chargement pour le feedback visuel (Skeleton ou Spinner)
+  const [stations, setStations] = useState<Station[]>([]);
+  const [users, setUsers] = useState<Friend[]>([]);
+  const [contents, setContents] = useState<ContentDTO[]>([]);
+  const [publicCollections, setPublicCollections] = useState<CollectionDTO[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  
-  /**
-   * État de l'historique :
-   * Conserve les dernières stations sélectionnées pour un accès rapide.
-   */
-  const [history, setHistory] = useState<Station[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [allBrands, setAllBrands] = useState<Brand[]>([]);
 
-  /**
-   * addToHistory : Enregistre un item dans les recherches récentes.
-   * Assure l'unicité (remonte l'élément) et limite la liste aux 5 entrées les plus fraîches.
-   */
-  const addToHistory = (item: Station) => {
-    setHistory((prev) => {
-      // Suppression des doublons pour placer le dernier consulté en haut de liste
-      const filtered = prev.filter((s) => s.id !== item.id);
-      return [item, ...filtered].slice(0, 5);
-    });
-  };
-
-  /**
-   * clearHistory : Purge complète de l'historique de recherche local.
-   */
-  const clearHistory = () => setHistory([]);
-
-  /**
-   * Effet de recherche unifiée avec Debounce (300ms) :
-   * Déclenche l'appel au SearchService uniquement après une pause dans la saisie.
-   * Optimise les cycles de rendu et simule un comportement de recherche serveur.
-   */
   useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      // On ignore les espaces vides pour éviter les requêtes inutiles
-      if (query.trim()) {
-        setIsSearching(true);
-        
-        // Exécution de la recherche unifiée (Stations, Users, Playlists)
-        const unifiedResults = await SearchService.searchUnified(query, allStations);
-        setResults(unifiedResults);
-        
+    SearchHistoryService.load().then(setHistory);
+    BrandService.fetchAllBrands().then(setAllBrands).catch(() => {});
+  }, []);
+
+  const addToHistory = useCallback(async (q: string) => {
+    setHistory((prev) => {
+      const updated = SearchHistoryService.addEntry(prev, q);
+      SearchHistoryService.save(updated);
+      return updated;
+    });
+  }, []);
+
+  const clearHistory = useCallback(async () => {
+    setHistory([]);
+    await SearchHistoryService.clear();
+  }, []);
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setStations([]);
+      setUsers([]);
+      setContents([]);
+      setPublicCollections([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await SearchService.searchUnified(token ?? "", query, allBrands);
+        const brandStations = res.brands.map(mapBrandToStation);
+        const webRadioStations = res.webRadios.map((wr) =>
+          mapWebRadioToStation(wr, { id: wr.brandId, title: wr.brandTitle } as Brand)
+        );
+        setStations([...brandStations, ...webRadioStations]);
+        setUsers(res.users);
+        setContents(res.contents);
+        setPublicCollections(res.publicCollections);
+      } catch {
+        setStations([]);
+        setUsers([]);
+        setContents([]);
+        setPublicCollections([]);
+      } finally {
         setIsSearching(false);
-      } else {
-        // Reset des résultats pour laisser place à l'affichage de l'historique
-        setResults({ stations: [], users: [], playlists: [] });
       }
     }, 300);
 
-    // Nettoyage : annule le déclenchement si l'utilisateur continue de taper
-    return () => clearTimeout(delayDebounceFn);
-  }, [query, allStations]);
+    return () => clearTimeout(timer);
+  }, [query, token, allBrands]);
 
-  return { 
-    query, 
-    setQuery, 
-    results, 
-    isSearching, 
-    history, 
-    addToHistory, 
-    clearHistory 
+  return {
+    query,
+    setQuery,
+    stations,
+    users,
+    contents,
+    publicCollections,
+    isSearching,
+    history,
+    addToHistory,
+    clearHistory,
   };
 };

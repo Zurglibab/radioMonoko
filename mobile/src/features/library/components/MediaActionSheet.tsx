@@ -229,7 +229,7 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
                 secondary="Partager votre avis avec le réseau"
                 onPress={() => {
                   handleClose();
-                  router.push({ pathname: "/library/review/ReviewScreen", params: { id: station.id } });
+                  router.push({ pathname: "/library/review/ReviewScreen", params: { id: station.brandId ?? station.id } });
                 }}
               />
               <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mt-8 mb-2">Favoris & Collections</Text>
