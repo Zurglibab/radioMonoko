@@ -1,6 +1,7 @@
 import type { CommentItemProps } from "../../interfaces/Props.types";
 import { useState, memo } from "react";
 import { HiPaperAirplane, HiArrowTurnDownRight, HiHandThumbUp, HiHandThumbDown } from "react-icons/hi2";
+import NotificationsService from "../../services/NotificationsService.ts";
 
 interface EnhancedCommentItemProps extends CommentItemProps {
     onLikeInteraction: (reviewId: string, actionType: "like" | "dislike" | "remove") => Promise<void>;
@@ -22,20 +23,45 @@ export const CommentItem = memo(({
     const cachedUser = usersCache[comment.user_id];
     const authorName = cachedUser ? (cachedUser.display_name || cachedUser.username) : `Auditeur ${comment.user_id ? comment.user_id.slice(-4) : "Anonyme"}`;
 
+    const sendNotification = async (targetUserId: string, type: "like" | "dislike" | "reply", contentPreview: string | null | undefined) => {
+        if (targetUserId === currentUserId) return;
+        const safePreview = (contentPreview || "Aucun contenu").toString();
+
+        const messages = {
+            like: `a aimé votre commentaire : "${safePreview.slice(0, 30)}..."`,
+            dislike: `a réagi négativement à votre commentaire : "${safePreview.slice(0, 30)}..."`,
+            reply: `a répondu à votre commentaire : "${safePreview.slice(0, 30)}..."`
+        };
+
+        try {
+            await NotificationsService.createNotification({
+                user_id: targetUserId,
+                type: type,
+                message: messages[type],
+                is_read: false
+            });
+        } catch (error) {
+            console.error("Erreur notification:", error);
+        }
+    };
+
     const handleReplySubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!replyText.trim()) return;
         await onPostReply(replyText.trim(), comment.id);
+        await sendNotification(comment.user_id, "reply", replyText);
         setReplyText("");
         setReplyingToId(null);
     };
 
-    const clickLike = (targetId: string, type: "like" | "dislike") => {
-        if (!isLoggedIn) return;
-        if (comment.userChoice === type) {
-            onLikeInteraction(targetId, "remove");
+    const clickLike = async (commentData: any, type: "like" | "dislike") => {
+        if (!isLoggedIn || !currentUserId) return;
+
+        if (commentData.userChoice === type) {
+            onLikeInteraction(commentData.id, "remove");
         } else {
-            onLikeInteraction(targetId, type);
+            await sendNotification(commentData.user_id, type, commentData.comment);
+            onLikeInteraction(commentData.id, type);
         }
     };
 
@@ -72,7 +98,7 @@ export const CommentItem = memo(({
 
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={() => clickLike(comment.id, "like")}
+                                onClick={() => clickLike(comment, "like")}
                                 disabled={!isLoggedIn}
                                 className={`h-7 px-3 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border transition-all duration-200 
                                 ${comment.userChoice === 'like'
@@ -86,7 +112,7 @@ export const CommentItem = memo(({
                             </button>
 
                             <button
-                                onClick={() => clickLike(comment.id, "dislike")}
+                                onClick={() => clickLike(comment, "dislike")}
                                 disabled={!isLoggedIn}
                                 className={`h-7 px-3 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border transition-all duration-200
                                 ${comment.userChoice === 'dislike'
@@ -123,7 +149,6 @@ export const CommentItem = memo(({
                 </form>
             )}
 
-            {/* --- REPLIES ENFANTS AVEC LES COMPTEURS DYNAMIQUE --- */}
             {comment.replies && comment.replies.length > 0 && (
                 <div className="flex flex-col gap-4 pl-8 border-l-2 border-dashed border-neutral-200 dark:border-white/5 mt-1">
                     {comment.replies.map((reply: any) => {

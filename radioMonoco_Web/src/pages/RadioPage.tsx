@@ -21,6 +21,7 @@ import {BRAND_THEMES} from "../assets/themes/BrandThemes";
 import {DEFAULT_THEME} from "../assets/themes/DefaultTheme";
 import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
 import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
+import {Loader} from "../components/utils/Loader.tsx";
 
 const RadioPage = () => {
     const { station } = useParams<{ station: string }>();
@@ -196,13 +197,12 @@ const RadioPage = () => {
                         reviewsList.map(async (review: any) => {
                             const likesData = await cached(`review_choice_${review.id}_${currentUserId}`, () => likeReviewsService.getReviewLikes(review.id, currentUserId).catch(() => null), 15_000);
                             const { likesCount, dislikesCount, userChoice } = likeReviewsService.transformLikesData(likesData, currentUserId);
-                            const enriched = {
+                            return {
                                 ...review,
                                 likesCount,
                                 dislikesCount,
                                 userChoice
                             };
-                            return enriched;
                         })
                     );
 
@@ -357,97 +357,148 @@ const RadioPage = () => {
         }
     };
 
-     const handleLikeInteraction = async (reviewId: string, actionType: "like" | "dislike" | "remove") => {
-         if (!isLoggedIn || !currentUserId) return;
-         const previousCommentsSnapshot = JSON.parse(JSON.stringify(comments));
+    const handleLikeInteraction = async (
+        reviewId: string,
+        actionType: "like" | "dislike" | "remove"
+    ) => {
 
-         setComments((prevComments) => {
-             const updateCommentCounters = (c: any) => {
-                 if (c.id !== reviewId) return c;
-                 const previousChoice = c.userChoice;
-                 let newLikes = c.likesCount ?? 0;
-                 let newDislikes = c.dislikesCount ?? 0;
+        if (!isLoggedIn || !currentUserId) {
+            console.warn("[DEBUG] User not logged in or currentUserId missing");
+            return;
+        }
 
-                 if (previousChoice === "like") newLikes = Math.max(0, newLikes - 1);
-                 if (previousChoice === "dislike") newDislikes = Math.max(0, newDislikes - 1);
+        if (!reviewId) {
+            console.error("[DEBUG] reviewId is missing!");
+            return;
+        }
 
-                 if (actionType === "like") newLikes += 1;
-                 if (actionType === "dislike") newDislikes += 1;
+        const previousCommentsSnapshot = JSON.parse(JSON.stringify(comments));
 
-                 return {
-                     ...c,
-                     likesCount: newLikes,
-                     dislikesCount: newDislikes,
-                     userChoice: actionType === "remove" ? null : actionType
-                 };
-             };
+        setComments((prevComments) => {
 
-             return prevComments.map((comment) => {
-                 if (comment.id === reviewId) return updateCommentCounters(comment);
-                 if (comment.replies && comment.replies.length > 0) {
-                     return { ...comment, replies: comment.replies.map(updateCommentCounters) };
-                 }
-                 return comment;
-             });
-         });
+            const updateCommentCounters = (c: any) => {
+                if (c.id !== reviewId) return c;
 
-         try {
-             if (actionType === "remove") {
-                 await likeReviewsService.removeLikeReview(reviewId, currentUserId);
-             } else {
-                 const isLikeBool = actionType === "like";
-                 await likeReviewsService.toggleLikeReview(reviewId, currentUserId, isLikeBool);
-             }
-             let freshData = null;
-             try {
-                 freshData = await likeReviewsService.getReviewLikes(reviewId, currentUserId);
-             } catch (err) {
-                 console.error("[handleLikeInteraction] Error fetching fresh likes:", {
-                     error: err,
-                     reviewId,
-                     currentUserId,
-                     timestamp: new Date().toISOString()
-                 });
-                 freshData = null;
-             }
+                const previousChoice = c.userChoice;
+                let newLikes = c.likesCount ?? 0;
+                let newDislikes = c.dislikesCount ?? 0;
 
-             if (freshData) {
-                 const { likesCount: finalLikes, dislikesCount: finalDislikes, userChoice: finalUserChoice } = likeReviewsService.transformLikesData(freshData, currentUserId);
-                 setComments((prevComments) => {
-                     const alignWithDb = (c: any) => {
-                         if (c.id !== reviewId) return c;
-                         return {
-                             ...c,
-                             likesCount: finalLikes,
-                             dislikesCount: finalDislikes,
-                             userChoice: finalUserChoice
-                         };
-                     };
-                     return prevComments.map((comment) => {
-                         if (comment.id === reviewId) return alignWithDb(comment);
-                         if (comment.replies && comment.replies.length > 0) {
-                             return { ...comment, replies: comment.replies.map(alignWithDb) };
-                         }
-                         return comment;
-                     });
-                 });
-             } else {
-                 console.warn("[handleLikeInteraction] No fresh data from API, keeping optimistic state");
-             }
-         } catch (err) {
-             console.error("[handleLikeInteraction] CRITICAL ERROR during like interaction:", {
-                 error: err,
-                 reviewId,
-                 currentUserId,
-                 timestamp: new Date().toISOString()
-             });
-             try {
-                 setComments(previousCommentsSnapshot);
-             } catch (e) {
-                 console.error("[handleLikeInteraction] CRITICAL ERROR: Failed to revert state:", e);
-             }
-         }
-     };
+                if (previousChoice === "like") newLikes = Math.max(0, newLikes - 1);
+                if (previousChoice === "dislike") newDislikes = Math.max(0, newDislikes - 1);
+
+                if (actionType === "like") newLikes++;
+                if (actionType === "dislike") newDislikes++;
+
+                return {
+                    ...c,
+                    likesCount: newLikes,
+                    dislikesCount: newDislikes,
+                    userChoice: actionType === "remove" ? null : actionType
+                };
+            };
+
+            return prevComments.map((comment) => {
+                if (comment.id === reviewId) return updateCommentCounters(comment);
+
+                if (comment.replies?.length > 0) {
+                    return {
+                        ...comment,
+                        replies: comment.replies.map(updateCommentCounters)
+                    };
+                }
+
+                return comment;
+            });
+        });
+
+        try {
+
+            if (actionType === "remove") {
+                await likeReviewsService.removeLikeReview(
+                    reviewId,
+                    currentUserId
+                );
+            } else {
+                const isLikeBool = actionType === "like";
+
+                await likeReviewsService.toggleLikeReview(
+                    reviewId,
+                    currentUserId,
+                    isLikeBool
+                );
+            }
+
+            let freshData = null;
+
+            try {
+
+                freshData = await likeReviewsService.getReviewLikes(
+                    reviewId,
+                    currentUserId
+                );
+
+            } catch (err) {
+                console.error("[DEBUG] getReviewLikes failed:", err);
+            }
+
+            if (freshData) {
+                const transformed =
+                    likeReviewsService.transformLikesData(
+                        freshData,
+                        currentUserId
+                    );
+
+                const {
+                    likesCount: finalLikes,
+                    dislikesCount: finalDislikes,
+                    userChoice: finalUserChoice
+                } = transformed;
+
+                setComments((prevComments) => {
+                    const alignWithDb = (c: any) => {
+                        if (c.id !== reviewId) return c;
+
+                        return {
+                            ...c,
+                            likesCount: finalLikes,
+                            dislikesCount: finalDislikes,
+                            userChoice: finalUserChoice
+                        };
+                    };
+
+                    return prevComments.map((comment) => {
+                        if (comment.id === reviewId) return alignWithDb(comment);
+
+                        if (comment.replies?.length > 0) {
+                            return {
+                                ...comment,
+                                replies: comment.replies.map(alignWithDb)
+                            };
+                        }
+
+                        return comment;
+                    });
+                });
+            } else {
+                console.warn(
+                    "[DEBUG] No fresh data returned, keeping optimistic state"
+                );
+            }
+        } catch (err) {
+            console.error("[DEBUG] CRITICAL ERROR:", err);
+            console.error("[DEBUG] Context:", {
+                reviewId,
+                currentUserId,
+                actionType
+            });
+
+            try {
+                setComments(previousCommentsSnapshot);
+            } catch (e) {
+                console.error("[DEBUG] Failed to revert state:", e);
+            }
+        }
+    };
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -490,9 +541,7 @@ const RadioPage = () => {
 
     if (loading) {
         return (
-            <div className={`flex items-center justify-center min-h-screen ${theme === 'dark' ? 'bg-app-bg text-app-text' : 'bg-neutral-50 text-neutral-800'}`}>
-                <div className="w-6 h-6 border-2 border-current border-t-rose-500 rounded-full animate-spin" />
-            </div>
+            <Loader />
         );
     }
 

@@ -171,7 +171,6 @@ export const RadioCommunityZone = ({
         }
     };
 
-    // If parent provided a handler, use it; otherwise use the internal handler
     const handleLikeInteraction = externalOnLikeInteraction ?? internalHandleLikeInteraction;
 
     const handleRateStation = async (nextRating: number) => {

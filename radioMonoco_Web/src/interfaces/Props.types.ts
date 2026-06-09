@@ -65,3 +65,24 @@ export interface RadioListsSectionProps {
     theme: string;
     matchedTheme: any;
 }
+
+export interface Message {
+    id: string;
+    channelId: string;
+    senderId: string;
+    content: string;
+    createdAt: string;
+}
+
+export interface ChatInputProps {
+    onSend: (text: string) => void;
+    disabled?: boolean;
+}
+
+export interface ChatContainerProps {
+    channelId: string;
+    channelName: string;
+    currentUserId: string;
+    onBack: () => void;
+    onCloseAll: () => void;
+}

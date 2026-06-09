@@ -20,6 +20,7 @@ import { SettingsModal } from "./SettingsModal";
 import SearchService from "../../services/SearchService.ts";
 import type { SearchResult } from "../../interfaces/Search.types.ts";
 import CollectionsService from "../../services/CollectionsService.ts";
+import {useNotificationContext} from "../../context/NotificationContext.tsx";
 
 const NavBar = () => {
     const { user, logout } = useAuth();
@@ -27,6 +28,7 @@ const NavBar = () => {
     const isConnected = !!user;
     const navigate = useNavigate();
     const location = useLocation();
+    const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationContext();
 
     const isHomePage = location.pathname === "/";
 
@@ -97,6 +99,19 @@ const NavBar = () => {
         setSearchQuery(value);
     };
 
+    const getNotificationIcon = (type: string) => {
+        switch (type) {
+            case 'like':
+                return <HiOutlineHeart className="text-rose-500 text-xl flex-shrink-0" />;
+            case 'dislike':
+                return <HiOutlineHeart className="text-amber-500 text-xl flex-shrink-0 rotate-180" />;
+            case 'reply':
+                return <HiOutlineMenu className="text-blue-500 text-xl flex-shrink-0" />;
+            default:
+                return <HiOutlineBell className="text-primary text-xl flex-shrink-0" />;
+        }
+    };
+
     useEffect(() => {
         const timeout = setTimeout(async () => {
             if (searchQuery.trim().length < 2) {
@@ -131,11 +146,6 @@ const NavBar = () => {
     };
 
     const IconCircleStyle = "flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full transition-all duration-300 cursor-pointer active:scale-95 hover:bg-app-text/10 group";
-
-    const notifications = [
-        { id: 1, text: 'Lucas a aimé votre critique', time: 'il y a 2m', icon: <HiOutlineHeart className="text-rose-500" /> },
-        { id: 2, text: 'Sarah s\'est abonnée', time: 'il y a 1h', icon: <HiOutlineUserAdd className="text-blue-500" /> },
-    ];
 
     return (
         <>
@@ -252,24 +262,40 @@ const NavBar = () => {
                         <>
                             <div className="relative" ref={notifRef}>
                                 <button onClick={() => { setIsNotifOpen(!isNotifOpen); setIsProfileOpen(false); }} className={`${IconCircleStyle} ${isNotifOpen ? 'bg-app-text/20' : ''}`}>
-                                    <HiOutlineBell className={`text-lg md:text-xl transition-colors cursor-pointer ${isNotifOpen ? 'text-primary' : 'text-app-text'}`} />
-                                    <span className="absolute top-2 right-2 md:top-2.5 md:right-2.5 w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full border-2 border-app-bg animate-pulse"></span>
+                                    <HiOutlineBell className={`text-lg md:text-xl ${isNotifOpen ? 'text-primary' : 'text-app-text'}`} />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-app-bg animate-pulse"></span>
+                                    )}
                                 </button>
                                 {isNotifOpen && (
-                                    <div className="absolute top-12 right-0 w-72 md:w-80 bg-app-card border border-app-border rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 z-60">
-                                        <div className="px-4 py-3 border-b border-app-border bg-app-text/2">
-                                            <p className="text-[10px] uppercase tracking-[0.2em] opacity-50 font-black">Notifications</p>
+                                    <div className="absolute top-12 right-0 w-72 md:w-80 bg-app-card border border-app-border rounded-2xl shadow-2xl overflow-hidden z-60">
+                                        <div className="px-4 py-3 border-b border-app-border bg-app-text/5 flex items-center justify-between">
+                                            <p className="text-[10px] uppercase tracking-[0.2em] font-black">Notifications</p>
+                                            {unreadCount > 0 && (
+                                                <button
+                                                    onClick={markAllAsRead}
+                                                    className="text-[10px] uppercase font-bold text-primary hover:underline cursor-pointer"
+                                                >
+                                                    Tout lu
+                                                </button>
+                                            )}
                                         </div>
                                         <div className="max-h-80 overflow-y-auto">
-                                            {notifications.map((n) => (
-                                                <div key={n.id} className="px-4 py-4 border-b border-app-border hover:bg-app-text/3 transition-colors cursor-pointer flex gap-3">
-                                                    <div className="text-xl mt-0.5">{n.icon}</div>
+                                            {notifications.length > 0 ? notifications.map((n) => (
+                                                <div
+                                                    key={n.id}
+                                                    onClick={() => markAsRead(n.id)}
+                                                    className={`px-4 py-4 border-b border-app-border hover:bg-app-text/5 cursor-pointer flex gap-3 ${n.isRead ? 'opacity-60' : ''}`}
+                                                >
+                                                    <div className="mt-0.5">
+                                                        {getNotificationIcon(n.type)}
+                                                    </div>
                                                     <div>
-                                                        <p className="text-xs text-app-text leading-tight">{n.text}</p>
-                                                        <p className="text-[10px] opacity-40 mt-1 font-medium uppercase tracking-tighter">{n.time}</p>
+                                                        <p className="text-xs text-app-text">{n.message}</p>
+                                                        <p className="text-[10px] opacity-40 mt-1 uppercase">{n.timestamp}</p>
                                                     </div>
                                                 </div>
-                                            ))}
+                                            )) : <p className="p-4 text-center text-xs opacity-50">Aucune notification.</p>}
                                         </div>
                                     </div>
                                 )}
