@@ -1,5 +1,5 @@
 import api from "./Api.ts";
-import type {CollectionItem} from "../interfaces/CollectionItems.types.ts";
+import type {CollectionItem} from "../interfaces/CollectionItem.types.ts";
 
 const getItemsByCollection = async (collectionId: string):Promise<CollectionItem[]> => {
     const response = await api.get(`/collectionItems/collection/${collectionId}`);

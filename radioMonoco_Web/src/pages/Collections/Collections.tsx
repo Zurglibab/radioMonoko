@@ -17,9 +17,11 @@ const Collections = () => {
     const [error, setError] = useState("");
     const [isWindowOpen, setIsWindowOpen] = useState(false);
     const [isModifyWindowOpen, setIsModifyWindowOpen] = useState(false);
-    const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
     const [isDeleteWindowOpen, setIsDeleteWindowOpen] = useState(false);
+    const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
     const [collectionToDelete, setCollectionToDelete] = useState<Collection | null>(null);
+    const [publicCollection, setPublicCollection] = useState<Collection[]>([]);
+    const [recentCollection, setRecentCollection] = useState<Collection[]>([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -30,19 +32,24 @@ const Collections = () => {
                     setLoading(false);
                     return;
                 }
+                const userCollectionsData = await CollectionsService.getUserCollections(user.id);
+                setCollections(userCollectionsData);
 
-                const data = await CollectionsService.getUserCollections(user.id);
+                const allCollections = await CollectionsService.getAllCollections();
 
-                setCollections(data);
+                const publicOnly = allCollections.filter((collection) => collection.is_public);
+                setPublicCollection(publicOnly);
+
+                const sortedCollections = [...allCollections].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                setRecentCollection(sortedCollections.slice(0, 5));
+
             } catch (err) {
-
                 console.error(err);
                 setError("Impossible de charger les collections");
             } finally {
                 setLoading(false);
             }
         };
-
         fetchCollections();
 
     }, [user]);
@@ -95,10 +102,8 @@ const Collections = () => {
     return (
         <div className="flex min-h-screen bg-[#0a0a0a]">
 
-            {/* CONTENU PRINCIPAL */}
             <div className="flex-1 px-6 md:px-12 py-24 relative overflow-hidden">
 
-                {/* background glow */}
                 <div className="absolute inset-0 z-0 pointer-events-none">
                     <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-rose-600/10 rounded-full blur-[140px]" />
                     <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px]" />
@@ -106,17 +111,12 @@ const Collections = () => {
 
                 <div className="relative z-10">
 
-                    {/* HEADER */}
                     <div className="flex items-center justify-between mb-12">
                         <div>
                             <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight">
                                 Votre Bibliothèque
                             </h1>
-                            <p className="text-neutral-500 mt-2 text-sm">
-                                Organise et retrouve ta musique
-                            </p>
                         </div>
-
                         <button
                             onClick= {() => setIsWindowOpen(true)}
                             className="flex items-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-full font-semibold transition-all shadow-lg shadow-rose-600/20">
@@ -124,91 +124,60 @@ const Collections = () => {
                             Créer
                         </button >
                     </div>
+                    {loading && (
+                        <p className="text-neutral-500 mt-4">Chargement des collections…</p>
+                    )}
+                    {error && (
+                        <p className="text-rose-400 mt-4">{error}</p>
+                    )}
 
-                    {/* COLLECTIONS */}
                     <div>
-                        <h2 className="text-2xl font-bold text-white mb-6">Tes collections</h2>
+                        <h2 className="text-2xl font-bold text-white mb-6">
+                            Mes collections
+                        </h2>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-
-                            {loading && (
-                                <p className="text-neutral-400">
-                                    Chargement des collections...
-                                </p>
-                            )}
-
-                            {error && (
-                                <p className="text-red-500">
-                                    {error}
-                                </p>
-                            )}
-
-                            {!loading && collections.length === 0 && (
-                                <div className="col-span-full bg-neutral-900/40 border border-white/5 rounded-2xl p-8 text-center">
-                                    <p className="text-white font-semibold">
-                                        Aucune collection trouvée
-                                    </p>
-
-                                    <p className="text-neutral-500 text-sm mt-2">
-                                        Crée ta première collection
-                                    </p>
-                                </div>
-                            )}
-
+                        <div className="grid md:grid-cols-3 gap-6">
                             {collections.map((item) => (
                                 <div
                                     key={item.id}
                                     onClick={() => navigate(`/collections/${item.id}`)}
-                                    className="group cursor-pointer"
+                                    className="cursor-pointer bg-neutral-900/40 border border-white/5 rounded-2xl p-5 hover:border-rose-500/30 transition"
                                 >
-                                    <div className="relative rounded-2xl overflow-hidden bg-neutral-900/40 backdrop-blur-xl border border-white/5 hover:border-rose-500/30 transition-all duration-300 p-6">
+                                    <h3 className="text-white font-semibold">
+                                        {item.name}
+                                    </h3>
 
-                                        <div className="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                                    <p className="text-neutral-500 text-sm mt-2">
+                                        {item.description || "Aucune description"}
+                                    </p>
 
-                                        <div className="relative z-10">
-                                            <h2 className="text-white font-bold text-lg group-hover:text-rose-400 transition-colors">
-                                                {item.name}
-                                            </h2>
+                                    <div className="flex justify-between items-center mt-5">
+                                        <span className="text-xs text-neutral-500">
+                                            {item.is_public ? "Public" : "Privé"}
+                                        </span>
+                                        <div className="flex gap-3">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCollectionToDelete(item);
+                                                    setIsDeleteWindowOpen(true);
+                                                }}
+                                                className="text-red-400 hover:text-red-300 text-sm"
+                                            >
+                                                Supprimer
+                                            </button>
 
-                                            <p className="text-neutral-500 text-sm mt-2 line-clamp-2">
-                                                {item.description || "Aucune description"}
-                                            </p>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedCollection(item);
+                                                    setIsModifyWindowOpen(true);
+                                                }}
+                                                className="text-blue-400 hover:text-blue-300 text-sm"
+                                            >
+                                                Modifier
+                                            </button>
 
-                                            <div className="flex items-center justify-between mt-6">
-                                                <span className="text-xs text-neutral-600">
-                                                    {item.is_public ? "Public" : "Privé"}
-                                                </span>
-
-                                                <div className="flex items-center gap-3">
-
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setCollectionToDelete(item);
-                                                            setIsDeleteWindowOpen(true);
-                                                        }}
-                                                        className="text-xs text-red-400 hover:text-red-300 transition"
-                                                    >
-                                                        Supprimer
-                                                    </button>
-
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-
-                                                            setSelectedCollection(item);
-                                                            setIsModifyWindowOpen(true);
-                                                        }}
-                                                        className="text-xs text-blue-400 hover:text-blue-300 transition"
-                                                    >
-                                                        Modifier
-                                                    </button>
-                                                </div>
-
-                                                <span className="text-xs text-rose-400 font-semibold">
-                                                    Voir →
-                                                </span>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -216,99 +185,111 @@ const Collections = () => {
                         </div>
                     </div>
 
-                    {/* RECENT */}
-                    <div className="mt-16">
-                        <h2 className="text-2xl font-bold text-white mb-6">Récemment écouté</h2>
+                    <div className="mt-20">
+                        <h2 className="text-2xl font-bold text-white mb-6">
+                            Collections publiques
+                        </h2>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                            {[1,2,3,4,5,6].map((i) => (
-                                <div key={i} className="bg-neutral-900/40 p-4 rounded-xl hover:bg-neutral-900/60 transition cursor-pointer">
-                                    <img src={`https://picsum.photos/200?random=${i}`} className="rounded-lg mb-3"  alt={"image"}/>
-                                    <p className="text-white text-sm font-semibold">Track {i}</p>
-                                    <p className="text-neutral-500 text-xs">Artiste</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="mt-16">
-                        <h2 className="text-2xl font-bold text-white mb-6">Continue ton écoute</h2>
-
-                        <div className="flex gap-4 overflow-x-auto pb-2">
-                            {[1,2,3,4].map((i) => (
-                                <div key={i} className="min-w-[250px] bg-neutral-900/40 p-4 rounded-xl">
-                                    <p className="text-white font-semibold mb-2">Playlist {i}</p>
-                                    <div className="h-2 bg-neutral-700 rounded-full overflow-hidden">
-                                        <div className="w-1/3 h-full bg-rose-500"></div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="mt-16">
-                        <h2 className="text-2xl font-bold text-white mb-6">Votre suivi</h2>
-
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {[
-                                { title: "À découvrir", count: 12 },
-                                { title: "En cours", count: 5 },
-                                { title: "Terminé", count: 34 },
-                                { title: "Abandonné", count: 2 },
-                            ].map((item, index) => (
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {publicCollection.slice(0,6).map((collection) => (
                                 <div
-                                    key={index}
-                                    className="bg-neutral-900/40 border border-white/5 rounded-xl p-4 backdrop-blur-xl hover:bg-neutral-900/60 transition"
+                                    key={collection.id}
+                                    onClick={() =>
+                                        navigate(`/collections/${collection.id}`)
+                                    }
+                                    className="cursor-pointer bg-neutral-900/40 border border-white/5 rounded-2xl p-5 hover:border-rose-500/30 transition"
                                 >
-                                    <p className="text-neutral-400 text-sm">{item.title}</p>
-                                    <p className="text-2xl font-bold text-white">{item.count}</p>
+                                    <h3 className="text-white font-semibold">
+                                        {collection.name}
+                                    </h3>
+
+                                    <p className="text-neutral-500 text-sm mt-2">
+                                        {collection.description}
+                                    </p>
                                 </div>
                             ))}
                         </div>
                     </div>
-
-                    {/* STATS */}
-                    <div className="mt-16">
-                        <h2 className="text-2xl font-bold text-white mb-6">Statistiques</h2>
-
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <div className="bg-gradient-to-br from-rose-600/20 to-purple-600/20 p-6 rounded-xl border border-white/5">
-                                <p className="text-neutral-400 text-sm">Œuvres terminées</p>
-                                <p className="text-3xl font-bold text-white">128</p>
-                            </div>
-
-                            <div className="bg-gradient-to-br from-blue-500/20 to-indigo-500/20 p-6 rounded-xl border border-white/5">
-                                <p className="text-neutral-400 text-sm">Temps total</p>
-                                <p className="text-3xl font-bold text-white">320h</p>
-                            </div>
-
-                            <div className="bg-gradient-to-br from-emerald-500/20 to-green-500/20 p-6 rounded-xl border border-white/5">
-                                <p className="text-neutral-400 text-sm">Collections</p>
-                                <p className="text-3xl font-bold text-white">8</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-16">
-                        <h2 className="text-2xl font-bold text-white mb-6">Activité récente</h2>
+                    <div className="mt-20">
+                        <h2 className="text-2xl font-bold text-white mb-6">
+                            Dernières collections créées
+                        </h2>
 
                         <div className="space-y-4">
-                            {[
-                                "Tu as ajouté 'Chill vibes'",
-                                "Nouvelle playlist créée",
-                                "Album ajouté aux favoris"
-                            ].map((activity, i) => (
-                                <div key={i} className="bg-neutral-900/40 p-4 rounded-xl border border-white/5">
-                                    <p className="text-neutral-300 text-sm">{activity}</p>
+                            {recentCollection.map((collection) => (
+                                <div
+                                    key={collection.id}
+                                    className="bg-neutral-900/40 border border-white/5 rounded-xl p-4 flex justify-between items-center"
+                                >
+                                    <div>
+                                        <p className="text-white font-semibold">
+                                            {collection.name}
+                                        </p>
+                                        <p className="text-neutral-500 text-sm">
+                                            {new Date(
+                                                collection.created_at
+                                            ).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() =>
+                                            navigate(`/collections/${collection.id}`)
+                                        }
+                                        className="text-rose-400"
+                                    >
+                                        Voir →
+                                    </button>
                                 </div>
                             ))}
                         </div>
                     </div>
+                    <div className="mt-20">
+                        <h2 className="text-2xl font-bold text-white mb-6">
+                            Vos statistiques
+                        </h2>
 
+                        <div className="grid md:grid-cols-3 gap-4">
+                            <div className="bg-neutral-900/40 p-6 rounded-xl">
+                                <p className="text-neutral-400 text-sm">
+                                    Mes collections
+                                </p>
+
+                                <p className="text-3xl font-bold text-white">
+                                    {collections.length}
+                                </p>
+                            </div>
+
+                            <div className="bg-neutral-900/40 p-6 rounded-xl">
+                                <p className="text-neutral-400 text-sm">
+                                    Collections publiques
+                                </p>
+                                <p className="text-3xl font-bold text-white">
+                                    {
+                                        collections.filter(
+                                            (c) => c.is_public
+                                        ).length
+                                    }
+                                </p>
+                            </div>
+                            <div className="bg-neutral-900/40 p-6 rounded-xl">
+                                <p className="text-neutral-400 text-sm">
+                                    Collections privées
+                                </p>
+
+                                <p className="text-3xl font-bold text-white">
+                                    {
+                                        collections.filter(
+                                            (c) => !c.is_public
+                                        ).length
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <CreateCollection isOpen={isWindowOpen} onClose={()=> setIsWindowOpen(false)} onSubmit={handleCreateCollection}/>
-            <ModifyCollections isOpen={isModifyWindowOpen} onClose={() => setIsModifyWindowOpen(false)} onSubmit={handleModifyCollection} collection={selectedCollection}/>
+            <ModifyCollections isOpen={isModifyWindowOpen} onClose={() => setIsModifyWindowOpen(false)} onSubmit={handleModifyCollection} collection={selectedCollection} />
             <DeleteCollection isOpen={isDeleteWindowOpen} onClose={() => {setIsDeleteWindowOpen(false); setCollectionToDelete(null);}} onSubmit={handleDeleteCollection} collection={collectionToDelete} />
         </div>
     );
