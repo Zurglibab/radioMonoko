@@ -24,6 +24,7 @@ interface AuthContextType {
     register: (email: string, username:string, password: string) => Promise<void>;
     logout: () => void;
     updateUser: (user: User) => void;
+    loginWithGoogleToken: (googleToken: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -40,32 +41,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
-    const register = async (email: string, username:string, password: string) => {
-        const response = await authService.register(email,username,password,);
-        const token = response.token;
-
+    const saveSession = async (token: string) => {
         localStorage.setItem('token', token);
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
         const userData = await authService.getMe();
-
         localStorage.setItem('user', JSON.stringify(userData));
-
         setUser(userData);
+    }
+
+    const register = async (email: string, username:string, password: string) => {
+        const response = await authService.register(email,username,password,);
+        await saveSession(response.token);
     };
 
     const login = async (email: string, password: string) => {
         const response = await authService.login(email, password);
-        const token = response.token;
+        await saveSession(response.token);
+    };
 
-        localStorage.setItem('token', token);
-        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    const loginWithGoogleToken = async (googleToken: string) => {
+        const response = await authService.loginWithGoogleToken(googleToken);
 
-        const userData = await authService.getMe();
-
-        localStorage.setItem('user', JSON.stringify(userData));
-
-        setUser(userData);
+        if (!response.token) {
+            throw new Error("Token JWT manquant après connexion Google");
+        }
+        await saveSession(response.token);
     };
 
     const logout = () => {
@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, register, logout, updateUser }}>
+        <AuthContext.Provider value={{ user, login, register, logout, updateUser, loginWithGoogleToken }}>
             {children}
         </AuthContext.Provider>
     );

@@ -4,13 +4,35 @@ import { Link } from "react-router-dom";
 import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
 import {useNavigate} from "react-router-dom";
+import {useGoogleLogin} from "@react-oauth/google";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const { login } = useAuth();
+    const { login,loginWithGoogleToken } = useAuth();
     const navigate = useNavigate();
+
+    const googleLogin = useGoogleLogin({scope: "profile email", onSuccess: async (tokenResponse) => {
+            try {
+                setError("");
+
+                if (!tokenResponse.access_token) {
+                    setError("Token Google manquant.");
+                    return;
+                }
+                await loginWithGoogleToken(tokenResponse.access_token);
+                navigate("/");
+
+            } catch (err: any) {
+                console.error("Erreur Google Auth:", err);
+                setError(err.response?.data?.error || err.response?.data?.message || "Connexion Google impossible");
+            }
+        },
+        onError: () => {
+            setError("La connexion avec Google a échoué.");
+        },
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -98,6 +120,23 @@ const Login = () => {
                         >
                             Se connecter
                             <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                        </button>
+
+                        <div className="flex items-center gap-3 my-6">
+                            <div className="h-px flex-1 bg-white/5" />
+                            <span className="text-neutral-600 text-xs uppercase tracking-widest">
+                                ou
+                            </span>
+                            <div className="h-px flex-1 bg-white/5" />
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={()=> googleLogin()}
+                            className="w-full bg-white hover:bg-neutral-200 text-black font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer"
+                        >
+                            <span className="text-lg">G</span>
+                            Continuer avec Google
                         </button>
 
                         <div className="mt-8 flex flex-col gap-4 items-center">
