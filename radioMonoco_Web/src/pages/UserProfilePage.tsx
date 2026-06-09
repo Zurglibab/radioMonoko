@@ -2,19 +2,24 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UsersService from "../services/UsersService.ts";
 import CollectionsService from "../services/CollectionsService.ts";
+import UserRelationsService from "../services/UserRelationsService.ts";
 import { useAuth } from "../context/AuthContext.tsx";
+import { DMButton } from "../components/chat/DMButton.tsx";
 import type { User } from "../interfaces/Users.types.ts";
 import type { Collection } from "../interfaces/Collections.types.ts";
 import { FiGlobe, FiLock, FiUserPlus } from "react-icons/fi";
+import NotificationsService from "../services/NotificationsService.ts";
 
 const UserProfilePage = () => {
-    const {id} = useParams<{id:string}>();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const {user : connectedUser} = useAuth();
+    const { user: connectedUser } = useAuth();
     const [profilUser, setProfilUser] = useState<User | null>(null);
     const [collections, setCollections] = useState<Collection[]>([]);
+    const [isFriend, setIsFriend] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [isFollow, setFollow] = useState(false);
 
     const isOwnProfile = connectedUser?.id === profilUser?.id;
     const isPrivateProfil = profilUser?.privacy === "private";
@@ -25,7 +30,7 @@ const UserProfilePage = () => {
                 setLoading(true);
                 setError("");
 
-                if(!id) {
+                if (!id) {
                     setError("ID utilisateur manquant.");
                     return;
                 }
@@ -37,10 +42,20 @@ const UserProfilePage = () => {
                 }
                 setProfilUser(userData);
 
+                if (connectedUser?.id && id !== connectedUser.id) {
+                    const friendStatus = await UserRelationsService.checkIsFriend(id);
+                    setIsFriend(friendStatus);
+                    const followingList = await UserRelationsService.getFollowing();
+                    const isFollowing = followingList.some(
+                        (rel) => rel.receiver_id === id
+                    );
+                    setFollow(isFollowing);
+                }
+
                 const allCollections = await CollectionsService.getAllCollections();
                 const userCollections = allCollections.filter((collection) => collection.user_id === userData.id);
-                let visibleCollections: Collection[] = [];
 
+                let visibleCollections: Collection[] = [];
                 if (connectedUser?.id === userData.id) {
                     visibleCollections = userCollections;
                 } else if (userData.privacy === "private") {
@@ -67,9 +82,46 @@ const UserProfilePage = () => {
         alert("Cette collection est privée vous ne pouvez pas y accéder .");
     };
 
-    const handleFollowClick = () => {
-        alert("La fonctionnalité de follow click arrive apres zebi");
+    const sendNotification = async (targetUserId: string, type: "follow") => {
+        if (targetUserId === connectedUser?.id) return;
+
+        const messages = {
+            follow: `a commencé à vous suivre`
+        };
+
+        try {
+            await NotificationsService.createNotification({
+                user_id: targetUserId,
+                type: type,
+                message: messages[type],
+                is_read: false
+            });
+        } catch (error) {
+            console.error("Erreur notification:", error);
+        }
     };
+
+    const handleFollowToggle = async () => {
+        if (!id || !connectedUser?.id) return;
+
+        try {
+            if (isFollow) {
+                await UserRelationsService.unfollow(id);
+                setFollow(false);
+                setIsFriend(false);
+            } else {
+                await UserRelationsService.follow(id);
+                setFollow(true);
+                await sendNotification(id, "follow");
+                const friendStatus = await UserRelationsService.checkIsFriend(id);
+                setIsFriend(friendStatus);
+            }
+        } catch (err) {
+            console.error("Erreur lors de l'interaction de suivi :", err);
+            alert("Une erreur est survenue.");
+        }
+    };
+
 
     if (loading) {
         return (
@@ -98,7 +150,7 @@ const UserProfilePage = () => {
             </div>
         );
     }
-
+    console.log(isFollow);
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white px-6 md:px-12 py-24 relative overflow-hidden">
 
@@ -188,13 +240,26 @@ const UserProfilePage = () => {
                         </div>
 
                         {!isOwnProfile && (
-                            <button
-                                onClick={handleFollowClick}
-                                className="flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-5 py-3 rounded-full font-semibold transition shadow-lg shadow-rose-600/20"
-                            >
-                                <FiUserPlus />
-                                Suivre
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleFollowToggle}
+                                    className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold transition shadow-lg ${
+                                        isFollow
+                                            ? "bg-neutral-800 hover:bg-neutral-700 text-white"
+                                            : "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20"
+                                    }`}
+                                >
+                                    <FiUserPlus />
+                                    {isFollow ? "Abonné" : "Suivre"}
+                                </button>
+
+                                {isFriend && id && connectedUser?.id && (
+                                    <DMButton
+                                        otherUserId={id}
+                                        currentUserId={connectedUser.id}
+                                    />
+                                )}
+                            </div>
                         )}
                     </div>
 

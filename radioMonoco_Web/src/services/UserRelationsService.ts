@@ -101,6 +101,16 @@ const block = async (id: string) => {
     }
 };
 
+const checkIsFriend = async (id: string): Promise<boolean> => {
+    try {
+        const response = await api.get(`/userRelation/is-friend/${id}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Erreur lors de la vérification de l'amitié avec ${id}:`, error);
+        return false;
+    }
+};
+
 export default {
     getFriends,
     getFollowers,
@@ -111,5 +121,6 @@ export default {
     unfollow,
     acceptRequest,
     refuseRequest,
-    block
+    block,
+    checkIsFriend,
 };

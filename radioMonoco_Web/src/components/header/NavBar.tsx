@@ -12,7 +12,7 @@ import {
     HiOutlineX,
     HiOutlineSearch,
     HiOutlineSun,
-    HiOutlineMoon,
+    HiOutlineMoon, HiOutlineUserGroup,
 } from "react-icons/hi";
 import { useAuth } from "../../context/AuthContext";
 import { useAppearance } from "../../context/AppearanceContext";
@@ -21,6 +21,7 @@ import SearchService from "../../services/SearchService.ts";
 import type { SearchResult } from "../../interfaces/Search.types.ts";
 import CollectionsService from "../../services/CollectionsService.ts";
 import {useNotificationContext} from "../../context/NotificationContext.tsx";
+import { FriendsModal } from "./FriendsModal";
 
 const NavBar = () => {
     const { user, logout } = useAuth();
@@ -37,6 +38,7 @@ const NavBar = () => {
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isFriendsOpen, setIsFriendsOpen] = useState(false);
 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -336,6 +338,15 @@ const NavBar = () => {
                                             </div>
                                         </div>
                                         <button
+                                            onClick={() => {
+                                                setIsFriendsOpen(true);
+                                                setIsProfileOpen(false);
+                                            }}
+                                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-app-text/70 hover:text-app-text hover:bg-app-text/5 transition-colors text-left cursor-pointer outline-none"
+                                        >
+                                            <HiOutlineUserGroup className="text-lg" /> Mes Amis
+                                        </button>
+                                        <button
                                             onClick={() => { setIsSettingsOpen(true); setIsProfileOpen(false); }}
                                             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-app-text/70 hover:text-app-text hover:bg-app-text/5 transition-colors text-left cursor-pointer outline-none"
                                         >
@@ -377,6 +388,8 @@ const NavBar = () => {
             </nav>
 
             <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
+
+            <FriendsModal isOpen={isFriendsOpen} onClose={() => setIsFriendsOpen(false)} />
 
             <div className={`fixed inset-0 z-100 flex items-center transition-all duration-400 md:duration-700 ${isMenuOpen ? "visible opacity-100" : "invisible opacity-0"}`}>
                 <div className={`absolute inset-0 bg-app-bg/98 backdrop-blur-3xl transition-opacity duration-400 md:duration-700 cursor-pointer ${isMenuOpen ? "opacity-100" : "opacity-0"}`} onClick={() => setIsMenuOpen(false)} />

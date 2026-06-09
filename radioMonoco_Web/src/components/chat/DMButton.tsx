@@ -1,6 +1,10 @@
 import ChatService from '../../services/ChatService';
+import { FiMessageSquare } from "react-icons/fi";
 
-export const  DMButton = ({ otherUserId, currentUserId }: { otherUserId: string, otherUserName: string, currentUserId: string }) => {
+export const DMButton = ({ otherUserId, currentUserId }: {
+    otherUserId: string,
+    currentUserId: string
+}) => {
 
     const startDM = async () => {
         try {
@@ -23,9 +27,14 @@ export const  DMButton = ({ otherUserId, currentUserId }: { otherUserId: string,
             console.error("Erreur MP", err);
         }
     };
+
     return (
-        <button onClick={startDM} className="...">
-            Message Privé
+        <button
+            onClick={startDM}
+            className="flex items-center justify-center gap-2.5 px-5 py-3 rounded-full font-semibold transition-all duration-300 bg-neutral-800 hover:bg-neutral-700 text-white border border-white/5 hover:border-white/20 shadow-lg shadow-black/20"
+        >
+            <FiMessageSquare size={18} />
+            <span>Message</span>
         </button>
     );
 };
