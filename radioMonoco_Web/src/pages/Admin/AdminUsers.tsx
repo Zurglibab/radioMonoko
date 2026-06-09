@@ -7,6 +7,7 @@ const AdminUsers = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate()
 
     useEffect(() => {
@@ -64,6 +65,11 @@ const AdminUsers = () => {
         );
     }
 
+    const filteredUsers = users.filter(u => 
+        (u.username && u.username.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (u.email && u.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+
     return (
         <div className="p-8">
 
@@ -80,13 +86,23 @@ const AdminUsers = () => {
                 Gestion des utilisateurs ({users.length})
             </h1>
 
-            {users.length === 0 ? (
+            <div className="mb-8">
+                <input 
+                    type="text" 
+                    placeholder="Rechercher par nom ou email..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full max-w-md bg-neutral-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-primary transition"
+                />
+            </div>
+
+            {filteredUsers.length === 0 ? (
                 <p className="text-neutral-400">
                     Aucun utilisateur trouvé
                 </p>
             ) : (
                 <div className="space-y-4">
-                    {users.map((u) => (
+                    {filteredUsers.map((u) => (
 
                     <div
                         key={u.id}
