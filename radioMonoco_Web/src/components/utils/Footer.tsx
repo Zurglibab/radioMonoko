@@ -1,5 +1,6 @@
 import logo from "../../assets/images/icon_large.png";
 import { useAppearance } from "../../context/AppearanceContext";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
     const { theme } = useAppearance();
@@ -24,12 +25,12 @@ const Footer = () => {
                 </div>
 
                 <nav className="flex items-center gap-10">
-                    <a href="#" className={LinkStyle}>
+                    <Link to="/about" className={LinkStyle}>
                         À propos
-                    </a>
-                    <a href="#" className={LinkStyle}>
+                    </Link>
+                    <Link to="/contact" className={LinkStyle}>
                         Contact
-                    </a>
+                    </Link>
                 </nav>
             </div>
             <div className="mt-8 text-center">
