@@ -7,8 +7,8 @@ import {
 
 /**
  * NotificationService : Communication avec l'API /notifications.
- * Toutes les routes renvoient/manipulent des NotificationDTO bruts (snake_case).
- * La transformation vers le modèle UI se fait via le mapper dans le hook.
+ * Ce service gère toutes les interactions liées aux notifications, incluant la récupération,
+ * la mise à jour, la suppression, et la création de notifications pour les utilisateurs.
  */
 export const NotificationService = {
   /**
@@ -47,8 +47,15 @@ export const NotificationService = {
     apiFetch<NotificationDTO>(`/notifications/${id}`, { token, method: 'PUT', body: payload }),
 
   /**
+   * markAllAsRead : PATCH /notifications/user/{userId}/read-all
+   * Marque toutes les notifications d'un utilisateur comme lues en une seule requête.
+   */
+  markAllAsRead: (token: string, userId: string): Promise<NotificationDTO[]> =>
+    apiFetch<NotificationDTO[]>(`/notifications/user/${userId}/read-all`, { token, method: 'PATCH' }),
+
+  /**
    * create : POST /notifications
-   * Crée une notification (usage système, ex: backend déclenche sur un follow).
+   * Crée une notification pour un utilisateur (like, commentaire, follow, etc.).
    */
   create: (token: string, payload: CreateNotificationPayload): Promise<NotificationDTO> =>
     apiFetch<NotificationDTO>('/notifications', { token, method: 'POST', body: payload }),

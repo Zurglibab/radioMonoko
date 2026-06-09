@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, Alert, useColorScheme, Image } from "react-native";
 import { Star, Heart, MessageSquare, MoreVertical, UserPlus, UserCheck } from "lucide-react-native";
 import { theme } from "@/constants/theme";
@@ -7,6 +7,7 @@ import { SocialActivity } from "@/types/community";
 import { useRouter } from "expo-router";
 import { SocialService } from "@/services/social/social.service";
 import { LikeReviewService } from "@/services/reviews/likeReview.service";
+import { NotificationService } from "@/services/notifications/notification.service";
 
 /**
  * ActivityCard : Composant central du fil d'actualité.
@@ -24,12 +25,21 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
 
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(activity.hasLiked ?? false);
   const [likesCount, setLikesCount] = useState(activity.likes);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+
+  useEffect(() => {
+    if (!isLiking) {
+      setLikesCount(activity.likes);
+      setIsLiked(activity.hasLiked ?? false);
+    }
+  }, [activity.likes, activity.hasLiked]);
 
   const handleLike = async () => {
-    if (!token || !user?.id) return;
+    if (!token || !user?.id || isLiking) return;
+    setIsLiking(true);
     const wasLiked = isLiked;
     setIsLiked(!wasLiked);
     setLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
@@ -38,10 +48,21 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         await LikeReviewService.remove(token, activity.id, user.id);
       } else {
         await LikeReviewService.upsert(token, activity.id, user.id, true);
+        if (activity.userId !== user.id) {
+          NotificationService.create(token, {
+            user_id: activity.userId,
+            type: 'like',
+            message: `${user.username ?? 'Quelqu\'un'} a aimé votre critique de ${activity.targetMedia}`,
+            is_read: false,
+          }).catch(() => {});
+        }
       }
-    } catch {
+    } catch (err) {
+      if (__DEV__) console.warn('[ActivityCard] like failed:', err);
       setIsLiked(wasLiked);
       setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
+    } finally {
+      setIsLiking(false);
     }
   };
 
@@ -159,7 +180,7 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
           </View>
         )}
 
-        {/* Texte de la critique (si type REVIEW) */}
+        {/* Texte de la critique */}
         {activity.text && (
           <Text 
             style={{ color: colors.text }} 
@@ -175,7 +196,7 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         className="flex-row gap-x-6 pt-4 border-t" 
         style={{ borderColor: colors.border }}
       >
-        <TouchableOpacity onPress={handleLike} className="flex-row items-center">
+        <TouchableOpacity onPress={handleLike} disabled={isLiking} className="flex-row items-center">
           <Heart 
             size={16} 
             color={isLiked ? colors.live : colors.muted} 

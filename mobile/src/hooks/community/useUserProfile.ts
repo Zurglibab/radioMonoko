@@ -4,12 +4,20 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useAuthContext } from "@/context/AuthContext";
 import { UserService, PublicUserProfile } from "@/services/users/user.service";
 import { SocialService } from "@/services/social/social.service";
+import { NotificationService } from "@/services/notifications/notification.service";
 import { CollectionService } from "@/services/collections/collection.service";
 import { Friend } from "@/types/social";
 import { CollectionDTO } from "@/types/collection";
 
+// Cache local pour l'état de suivi des profils, afin d'éviter les incohérences d'UI lors du follow/unfollow
 const followCache = new Map<string, boolean>();
 
+/**
+ * UserProfileState : Interface de l'état du profil utilisateur.
+ * Cette interface définit la structure de l'état géré par le hook useUserProfile, 
+ * incluant les informations de base du profil, le nombre d'amis en commun, la liste des amis en commun, 
+ * les collections publiques de l'utilisateur, et l'état de suivi.
+ */
 export interface UserProfileState {
   profile: PublicUserProfile | null;
   targetFriendsCount: number;
@@ -19,9 +27,11 @@ export interface UserProfileState {
 }
 
 /**
- * useUserProfile : Hook personnalisé pour gérer l'affichage du profil utilisateur.
- * Il récupère les informations du profil, les amis en commun, et les collections publiques.
- * @returns Un objet contenant les données du profil et les fonctions de gestion.
+ * useUserProfile : Hook de gestion du profil utilisateur.
+ * Ce hook centralise la logique de chargement et de gestion du profil d'un utilisateur, 
+ * incluant les informations de base, les amis en commun, les collections publiques, 
+ * et l'état de suivi. Il gère également les actions de suivi/désabonnement et de blocage,
+ * @returns 
  */
 export const useUserProfile = () => {
   const { id, username: usernameParam } = useLocalSearchParams<{ id: string; username?: string }>();
@@ -93,6 +103,12 @@ export const useUserProfile = () => {
         await SocialService.unfollowUser(token, id);
       } else {
         await SocialService.followUser(token, id);
+        NotificationService.create(token, {
+          user_id: id,
+          type: "follow",
+          message: `${currentUser?.username ?? "Quelqu'un"} vous suit maintenant`,
+          is_read: false,
+        }).catch(() => {});
       }
       followCache.set(id, !wasFollowing);
     } catch (e: any) {

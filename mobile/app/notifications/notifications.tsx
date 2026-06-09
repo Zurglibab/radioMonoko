@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { View, Text, ScrollView, TouchableOpacity, useColorScheme, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Bell, Heart, MessageSquare, UserPlus, Sparkles, CheckCheck } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "expo-router";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useNotificationContext } from "@/context/NotificationContext";
@@ -18,14 +19,17 @@ export default function NotificationsScreen() {
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
-  const { 
-    notifications, 
-    isLoading, 
-    error, 
-    markAsRead, 
-    markAllAsRead, 
-    unreadCount 
+  const {
+    notifications,
+    isLoading,
+    error,
+    markAsRead,
+    markAllAsRead,
+    unreadCount,
+    refetch,
   } = useNotificationContext();
+
+  useFocusEffect(useCallback(() => { refetch(true); }, [refetch]));
 
   // LOGIQUE DE THÈME
   const isDark = appearanceSettings.themeMode === 'system'

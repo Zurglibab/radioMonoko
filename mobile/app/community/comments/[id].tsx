@@ -1,212 +1,274 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  useColorScheme,
-  KeyboardAvoidingView,
-  Platform,
+  View, Text, ScrollView, TextInput, TouchableOpacity,
+  ActivityIndicator, useColorScheme, KeyboardAvoidingView, Platform, Image,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Send, X } from "lucide-react-native";
+import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ChevronLeft, Send, X, Heart, MessageSquare, Trash2 } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useComments } from "@/hooks/community/useComments";
-import { CommentItem } from "@/features/home/components/private/CommentItem";
+import { ReviewService } from "@/services/reviews/review.service";
+import { ReviewDTO } from "@/types/review";
+import { UserService } from "@/services/users/user.service";
+import { ReviewComment } from "@/types/community";
 
 /**
- * CommentsScreen : Contrôleur d'affichage et de saisie des fils de discussion.
- * Gère de manière unifiée deux modes d'affichage :
- * Mode Racine : Liste chronologique des commentaires généraux liés à une critique.
- * Mode Thread : Focus sur un commentaire parent spécifique et liste de ses réponses directes.
+ * CommentsScreen : Écran de gestion des commentaires d'une critique.
+ * Affiche la critique originale, le parent et la liste des commentaires associés.
+ * Permet de répondre à un commentaire spécifique, de liker, et de supprimer ses propres commentaires.
+ * Gère également l'affichage d'un thread de réponses ciblé lorsqu'on accède à un commentaire précis.
+ * @returns 
  */
 export default function CommentsScreen() {
-  // id : ID de la critique ou de l'œuvre / targetCommentId : ID du commentaire ciblé si vue fil imbriqué
   const { id, targetCommentId } = useLocalSearchParams<{ id: string; targetCommentId?: string }>();
   const router = useRouter();
-  const { appearanceSettings } = useAuthContext();
+  const { appearanceSettings, token, user } = useAuthContext();
   const systemTheme = useColorScheme();
-  const inputRef = useRef<TextInput>(null); // Référence pour piloter l'ouverture forcée du clavier
+  const inputRef = useRef<TextInput>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
-  const isDark =
-    appearanceSettings.themeMode === "system"
-      ? systemTheme === "dark"
-      : appearanceSettings.themeMode === "dark";
+  const isDark = appearanceSettings.themeMode === "system" ? systemTheme === "dark" : appearanceSettings.themeMode === "dark";
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
-  const {
-    comments,
-    focusedComment,
-    replyingTo,
-    setReplyingTo,
-    isLoading,
-    sendComment,
-    toggleLikeComment,
-    deleteMyComment,
-    currentUserId,
-  } = useComments(id, targetCommentId);
+  const insets = useSafeAreaInsets();
 
+  const [parentReview, setParentReview] = useState<ReviewDTO | null>(null);
+  const [parentAuthor, setParentAuthor] = useState<string>("...");
+  const [parentAvatar, setParentAvatar] = useState<string | undefined>();
+  const [parentContentId, setParentContentId] = useState<string | null>(null);
+
+  const { comments, focusedComment, replyingTo, setReplyingTo, isLoading, sendComment, toggleLikeComment, deleteMyComment, currentUserId } = useComments(id, targetCommentId, parentContentId, parentReview?.user_id ?? null);
   const [newComment, setNewComment] = useState("");
   const isThreadView = !!targetCommentId;
 
-  useEffect(() => {
-    if (replyingTo) inputRef.current?.focus();
-  }, [replyingTo]);
+  useFocusEffect(useCallback(() => {
+    if (!token || !id) return;
+    ReviewService.getById(token, id)
+      .then(async (review) => {
+        setParentReview(review);
+        setParentContentId(review.content_id);
+        try {
+          const profile = await UserService.getById(token, review.user_id);
+          setParentAuthor(profile.display_name ?? profile.username);
+          setParentAvatar(profile.avatar);
+        } catch { /* ignore */ }
+      })
+      .catch(() => { /* not blocking */ });
+  }, [token, id]));
 
-  /**
-   * handleSend : Orchestre l'expédition du message
-   * Valide les données locales puis délègue au hook la création de la réponse structurée.
-   */
+  useEffect(() => { if (replyingTo) inputRef.current?.focus(); }, [replyingTo]);
+
   const handleSend = () => {
     if (!newComment.trim()) return;
     sendComment(newComment);
-    setNewComment(""); // Nettoyage de la boite de saisie
+    setNewComment("");
+  };
+
+  const CommentRow = ({ comment, isParent = false }: { comment: ReviewComment; isParent?: boolean }) => {
+    const isMine = comment.userId === currentUserId;
+    return (
+      <View>
+        <View className="flex-row px-4 py-3">
+          {/* Avatar */}
+          <TouchableOpacity onPress={() => router.push(`/community/user/${comment.userId}` as any)} className="mr-3 mt-0.5">
+            <Image
+              source={{ uri: comment.avatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.username)}&background=333&color=fff` }}
+              className="w-10 h-10 rounded-full"
+            />
+          </TouchableOpacity>
+
+          <View className="flex-1">
+            {/* Name + timestamp */}
+            <View className="flex-row items-center flex-wrap mb-1">
+              <TouchableOpacity onPress={() => router.push(`/community/user/${comment.userId}` as any)}>
+                <Text style={{ color: colors.text }} className="font-bold text-[15px] mr-2">{comment.username}</Text>
+              </TouchableOpacity>
+              {comment.replyTo && (
+                <Text style={{ color: colors.primary }} className="text-xs font-semibold mr-2">@{comment.replyTo}</Text>
+              )}
+              <Text style={{ color: colors.muted }} className="text-xs">{comment.timestamp}</Text>
+            </View>
+
+            {/* Text */}
+            <Text style={{ color: colors.text }} className="text-[15px] leading-[22px] mb-3">{comment.text}</Text>
+
+            {/* Actions */}
+            <View className="flex-row items-center gap-x-6">
+              <TouchableOpacity
+                className="flex-row items-center"
+                onPress={() => router.push({ pathname: `/community/comments/${id}`, params: { targetCommentId: comment.id } } as any)}
+              >
+                <MessageSquare size={16} color={colors.muted} />
+                {(comment.repliesCount ?? 0) > 0 && (
+                  <Text style={{ color: colors.muted }} className="text-xs ml-1.5">{comment.repliesCount}</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity className="flex-row items-center" onPress={() => toggleLikeComment(comment.id)}>
+                <Heart
+                  size={16}
+                  color={comment.hasLiked ? "#e11d48" : colors.muted}
+                  fill={comment.hasLiked ? "#e11d48" : "transparent"}
+                />
+                {comment.likes > 0 && (
+                  <Text style={{ color: comment.hasLiked ? "#e11d48" : colors.muted }} className="text-xs ml-1.5">{comment.likes}</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => setReplyingTo(comment)}>
+                <Text style={{ color: colors.primary }} className="text-xs font-semibold">Répondre</Text>
+              </TouchableOpacity>
+
+              {isMine && (
+                <TouchableOpacity onPress={() => deleteMyComment(comment.id)}>
+                  <Trash2 size={14} color={colors.muted} />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
+        <View style={{ height: 1, backgroundColor: colors.border, marginLeft: 60 }} />
+      </View>
+    );
   };
 
   return (
-    <SafeAreaView 
-      className="flex-1" 
-      style={{ backgroundColor: colors.background }} 
-      edges={["top", "left", "right"]}
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       {/* Header */}
-      <View className="flex-row items-center px-6 py-4 border-b" style={{ borderBottomColor: colors.border }}>
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-          className="p-2 rounded-full border active:opacity-60"
-        >
-          <ChevronLeft color={colors.text} size={20} />
-        </TouchableOpacity>
-        <Text style={{ color: colors.text }} className="text-lg font-black italic ml-4">
-          {isThreadView ? "Fil de discussion" : "Discussion"}
-        </Text>
+      <View
+        style={{ paddingTop: insets.top, borderBottomWidth: 1, borderColor: colors.border }}
+      >
+        <View className="flex-row items-center px-4 py-3">
+          <TouchableOpacity onPress={() => router.back()} hitSlop={16} className="mr-4">
+            <ChevronLeft color={colors.text} size={22} />
+          </TouchableOpacity>
+          <Text style={{ color: colors.text }} className="text-[17px] font-bold">
+            {isThreadView ? "Fil" : "Post"}
+          </Text>
+        </View>
       </View>
 
-      {isLoading ? (
-        /* Loader pendant la latence réseau simulée */
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      ) : (
-        <ScrollView
-          className="flex-1 px-6 pt-4"
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Rendu du message parent mis en valeur */}
-          {isThreadView && focusedComment && (
-            <>
-              <CommentItem
-                comment={focusedComment}
-                colors={colors}
-                currentUserId={currentUserId}
-                isInThread
-                onLike={() => toggleLikeComment(focusedComment.id)}
-                onReply={() => setReplyingTo(focusedComment)}
-                onDelete={() => deleteMyComment(focusedComment.id)}
+      {/* Contenu scrollable */}
+      <ScrollView
+        ref={scrollRef}
+        style={{ flex: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+      >
+        {/* Commentaire parent */}
+        {!isThreadView && parentReview && (
+          <View className="px-4 pt-4 pb-3">
+            <View className="flex-row mb-3">
+              <Image
+                source={{ uri: parentAvatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(parentAuthor)}&background=333&color=fff` }}
+                className="w-11 h-11 rounded-full mr-3"
               />
-              {/* Connecteur visuel de fil d'actualité pour matérialiser l'arbre de discussion */}
-              <View className="flex-row items-center mb-3 ml-2">
-                <View style={{ backgroundColor: colors.border }} className="w-[2px] h-5 ml-[17px] mr-3" />
-                <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest">
-                  Réponses
+              <View className="flex-1 justify-center">
+                <Text style={{ color: colors.text }} className="font-bold text-[15px]">{parentAuthor}</Text>
+                <Text style={{ color: colors.muted }} className="text-xs">
+                  {new Date(parentReview.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </Text>
               </View>
-            </>
-          )}
-
-          {/* Rendu séquentiel des commentaires / réponses */}
-          {comments.map(c => (
-            <CommentItem
-              key={c.id}
-              comment={c}
-              colors={colors}
-              currentUserId={currentUserId}
-              isInThread={isThreadView}
-              onLike={() => toggleLikeComment(c.id)}
-              onReply={() => {
-                if (isThreadView) {
-                  // On est déjà au fond du thread, alors on ajoute une mention @pseudo dans la zone de saisie actuelle
-                  setReplyingTo(c);
-                } else {
-                  // On est à la racine, alors on s'enfonce dans le sous-thread dédié à ce commentaire
-                  router.push({
-                    pathname: `/community/comments/${id}`,
-                    params: { targetCommentId: c.id },
-                  } as any);
-                }
-              }}
-              onDelete={() => deleteMyComment(c.id)}
-            />
-          ))}
-
-          {/* Gestion de la liste vide */}
-          {comments.length === 0 && (
-            <View className="items-center py-16">
-              <Text style={{ color: colors.muted }} className="text-sm font-bold text-center">
-                {isThreadView ? "Aucune réponse pour l'instant." : "Soyez le premier à commenter."}
-              </Text>
             </View>
-          )}
-        </ScrollView>
-      )}
 
-      {/* Zone d'écriture avec ancrage clavier intelligent */}
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
-        
-        {/* Indique visuellement à qui s'adresse la réponse */}
+            <Text style={{ color: colors.text }} className="text-[17px] leading-[26px] mb-4">{parentReview.comment}</Text>
+
+            <View className="flex-row items-center gap-x-5 py-3 border-t border-b" style={{ borderColor: colors.border }}>
+              <View className="flex-row items-center">
+                <MessageSquare size={16} color={colors.muted} />
+                <Text style={{ color: colors.muted }} className="text-sm ml-1.5">{comments.length} réponses</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Thread parent */}
+        {isThreadView && focusedComment && (
+          <>
+            <CommentRow comment={focusedComment} isParent />
+            <View className="px-4 py-2">
+              <View style={{ backgroundColor: colors.border }} className="w-[2px] h-4 ml-5" />
+              <Text style={{ color: colors.muted }} className="text-xs font-bold uppercase tracking-widest ml-5 mt-1">Réponses</Text>
+            </View>
+          </>
+        )}
+
+        {/* Comments list */}
+        {isLoading ? (
+          <View className="py-16 items-center">
+            <ActivityIndicator color={colors.primary} />
+          </View>
+        ) : comments.length === 0 ? (
+          <View className="py-16 items-center px-8">
+            <Text style={{ color: colors.muted }} className="text-center text-[15px]">
+              {isThreadView ? "Aucune réponse pour l'instant." : "Soyez le premier à commenter."}
+            </Text>
+          </View>
+        ) : (
+          comments.map(c => <CommentRow key={c.id} comment={c} />)
+        )}
+
+        <View className="h-4" />
+      </ScrollView>
+
+      {/* Zone fixe en bas */}
+      <View style={{ backgroundColor: colors.background, borderTopWidth: 1, borderColor: colors.border }}>
+        {/* Reply indicator */}
         {replyingTo && (
           <View
-            className="px-5 pt-2 pb-1 flex-row items-center"
-            style={{ backgroundColor: colors.background }}
+            className="flex-row items-center px-4 py-2"
+            style={{ borderBottomWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }}
           >
-            <Text style={{ color: colors.muted }} className="text-xs font-bold flex-1">
+            <Text style={{ color: colors.muted }} className="flex-1 text-xs">
               Réponse à{" "}
-              <Text style={{ color: colors.primary }}>@{replyingTo.username}</Text>
+              <Text style={{ color: colors.primary }} className="font-semibold">@{replyingTo.username}</Text>
             </Text>
-            {/* Annule le ciblage de la réponse et repasse en mode global */}
             <TouchableOpacity onPress={() => setReplyingTo(null)} hitSlop={12}>
               <X size={14} color={colors.muted} />
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Conteneur du TextInput et bouton Send */}
+        {/* Input bar + safe area bottom */}
         <View
-          className="p-4 border-t flex-row items-center mb-2"
-          style={{ borderTopColor: colors.border, backgroundColor: colors.background }}
+          style={{ paddingBottom: insets.bottom > 0 ? insets.bottom : 8 }}
+          className="flex-row items-end px-3 pt-2 gap-x-2"
         >
-          <TextInput
-            ref={inputRef}
-            value={newComment}
-            onChangeText={setNewComment}
-            placeholder={
-              replyingTo
-                ? `Répondre à @${replyingTo.username}...`
-                : isThreadView
-                ? "Ajouter une réponse..."
-                : "Commenter..."
-            }
-            placeholderTextColor={colors.muted}
-            className="flex-1 h-12 px-5 rounded-full border font-medium text-sm"
-            style={{ borderColor: colors.border, color: colors.text, backgroundColor: colors.surface }}
-            returnKeyType="send"
-            onSubmitEditing={handleSend}
+          <Image
+            source={{ uri: user?.avatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username ?? 'Me')}&background=333&color=fff` }}
+            className="w-8 h-8 rounded-full mb-1"
           />
+          <View
+            className="flex-1 rounded-2xl border px-4 py-2.5"
+            style={{ borderColor: colors.border, backgroundColor: colors.surface, minHeight: 42, maxHeight: 120 }}
+          >
+            <TextInput
+              ref={inputRef}
+              value={newComment}
+              onChangeText={setNewComment}
+              placeholder={replyingTo ? `Répondre à @${replyingTo.username}...` : "Votre réponse..."}
+              placeholderTextColor={colors.muted}
+              style={{ color: colors.text, fontSize: 15 }}
+              multiline
+              returnKeyType="default"
+            />
+          </View>
           <TouchableOpacity
             onPress={handleSend}
-            className="ml-3 p-3 rounded-full active:scale-95"
-            style={{ backgroundColor: colors.primary }}
+            disabled={!newComment.trim()}
+            style={{ backgroundColor: newComment.trim() ? colors.primary : colors.border }}
+            className="w-9 h-9 rounded-full items-center justify-center mb-1"
           >
-            <Send size={16} color={colors.background} />
+            <Send size={16} color={newComment.trim() ? colors.background : colors.muted} />
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

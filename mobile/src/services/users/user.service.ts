@@ -2,13 +2,15 @@ import { apiFetch } from "@/utils/apiFetch";
 import { Friend } from "@/types/social";
 
 /**
- * Interface représentant la structure renvoyée par /user/me/library
- * basée sur la documentation Swagger de l'API RadioMonoko.
+ * Types et services liés aux utilisateurs : profils publics, recherche, bibliothèque personnelle.
+ * Ces types définissent les structures de données pour les profils publics et les éléments de bibliothèque.
+ * Le UserService fournit des méthodes pour interagir avec les endpoints liés aux utilisateurs, comme la
+ * récupération de profils publics, la recherche d'utilisateurs, et l'accès à la bibliothèque personnelle.
  */
 export interface LibraryItem {
   content_id: string;
   user_id: string;
-  status: string; // "à voir" | "commencer" | "fini" | "abandonné"
+  status: string;
   created_at: string;
   updated_at: string;
   content: {
@@ -29,7 +31,11 @@ export interface PublicUserProfile {
 }
 
 /**
- * UserService : Recherche, consultation et gestion du compte utilisateur connecté.
+ * UserService : Communication avec l'API /user.
+ * Ce service centralise toutes les interactions avec les endpoints liés aux utilisateurs,
+ * permettant de récupérer les profils publics, de rechercher des utilisateurs, et d'accéder à la bibliothèque
+ * personnelle de l'utilisateur connecté. Il utilise la fonction apiFetch pour effectuer les requêtes HTTP
+ * et gère les tokens d'authentification nécessaires.
  */
 export const UserService = {
   /**
@@ -37,7 +43,7 @@ export const UserService = {
    * Récupère le profil public d'un utilisateur par son UUID.
    */
   getById: (token: string, userId: string): Promise<PublicUserProfile> =>
-    apiFetch<PublicUserProfile>(`/user/${userId}`, { token }),
+    apiFetch<PublicUserProfile>(`/user/id/${userId}`, { token }),
 
   /**
    * search : GET /user/search?q=...

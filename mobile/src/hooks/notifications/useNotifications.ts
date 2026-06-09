@@ -4,15 +4,25 @@ import { useAuthContext } from "@/context/AuthContext";
 import { NotificationService } from "@/services/notifications/notification.service";
 import { mapNotificationDtoToApp } from "@/utils/mappers/notification.mapper";
 import { AppNotification } from "@/types/content";
+import { NotificationDTO } from "@/types/notification";
 
-const POLL_INTERVAL = 30_000;
+// Interval de polling pour les notifications en arrière-plan (10 secondes)
+const POLL_INTERVAL = 10_000;
+
+// Normalise les réponses API : tableau direct ou { data: [...] }
+function toArray<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw as T[];
+  if (raw && typeof raw === "object" && Array.isArray((raw as any).data))
+    return (raw as any).data as T[];
+  return [];
+}
 
 /**
- * useNotifications : Hook de gestion des notifications utilisateur.
- * 
- * Ce hook centralise la logique de récupération, mise à jour et marquage des notifications
- * pour l'utilisateur connecté. Il gère également le polling en arrière-plan lorsque l'app est active,
- * et suspend le polling lorsque l'app est en arrière-plan pour économiser les ressources.
+ * useNotifications : Hook de gestion des notifications de l'utilisateur.
+ * Ce hook centralise la logique de récupération, de mise à jour, et de gestion des notifications pour l'utilisateur connecté.
+ * Il gère le polling en arrière-plan pour les nouvelles notifications, la synchronisation avec l'état de l'application (actif/inactif),
+ * et fournit des fonctions pour marquer les notifications comme lues. Il utilise le NotificationService pour interagir avec l'API
+ * et mappe les données brutes en modèles adaptés à l'affichage dans l'interface utilisateur.
  * @returns 
  */
 export const useNotifications = () => {
@@ -27,7 +37,8 @@ export const useNotifications = () => {
     if (!token || !user?.id) return;
     if (!silent) setIsLoading(true);
     try {
-      const dtos = await NotificationService.getUserNotifications(token, user.id);
+      const raw = await NotificationService.getUserNotifications(token, user.id);
+      const dtos = toArray<NotificationDTO>(raw);
       const mapped = dtos
         .map(mapNotificationDtoToApp)
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -49,7 +60,7 @@ export const useNotifications = () => {
     if (loadedForSession.current) return;
     loadedForSession.current = true;
     loadNotifications();
-  }, [isAuthLoading, token, user?.id]);
+  }, [isAuthLoading, token, user?.id, loadNotifications]);
 
   useEffect(() => {
     if (isAuthLoading || !token || !user?.id) return;
@@ -69,7 +80,7 @@ export const useNotifications = () => {
     };
 
     const handleAppStateChange = (state: AppStateStatus) => {
-      if (state === 'active') {
+      if (state === "active") {
         loadNotifications(true);
         startPolling();
       } else {
@@ -78,13 +89,13 @@ export const useNotifications = () => {
     };
 
     startPolling();
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener("change", handleAppStateChange);
 
     return () => {
       stopPolling();
       subscription.remove();
     };
-  }, [isAuthLoading, token, user?.id]);
+  }, [isAuthLoading, token, user?.id, loadNotifications]);
 
   const markAsRead = useCallback(async (id: string) => {
     if (!token) return;
@@ -92,23 +103,23 @@ export const useNotifications = () => {
     try {
       await NotificationService.markAsRead(token, id);
     } catch (err: any) {
-      if (__DEV__) console.warn("[useNotifications] markAsRead échoué, rollback", err?.message);
+      if (__DEV__) console.warn("[useNotifications] markAsRead rollback", err?.message);
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: false } : n));
     }
   }, [token]);
 
   const markAllAsRead = useCallback(async () => {
-    if (!token) return;
-    const unread = notifications.filter(n => !n.isRead);
-    if (unread.length === 0) return;
+    if (!token || !user?.id) return;
+    const hasUnread = notifications.some(n => !n.isRead);
+    if (!hasUnread) return;
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     try {
-      await Promise.all(unread.map(n => NotificationService.markAsRead(token, n.id)));
+      await NotificationService.markAllAsRead(token, user.id);
     } catch (err: any) {
-      if (__DEV__) console.warn("[useNotifications] markAllAsRead partiel", err?.message);
+      if (__DEV__) console.warn("[useNotifications] markAllAsRead failed", err?.message);
       loadNotifications(true);
     }
-  }, [token, notifications, loadNotifications]);
+  }, [token, user?.id, notifications, loadNotifications]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 

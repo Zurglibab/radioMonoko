@@ -1,16 +1,18 @@
 /**
- * ActivityType : Définit la nature d'une action sociale.
- * Permet au Fil d'actualité (Feed) d'adapter le rendu visuel.
- * - RATING : L'utilisateur a juste mis des étoiles.
- * - REVIEW : L'utilisateur a écrit une critique textuelle.
- * - FOLLOW : L'utilisateur a suivi quelqu'un.
+ * Types liés à la communauté : critiques, commentaires, activités sociales.
+ * 
+ * Ces types définissent les structures de données utilisées pour représenter
+ * les critiques d'œuvres, les commentaires associés, et les activités sociales
+ * (likes, follows) dans l'application. Ils sont essentiels pour assurer une
+ * cohérence entre les différentes parties de l'app qui manipulent ces données.
  */
 export type ActivityType = 'RATING' | 'REVIEW' | 'FOLLOW';
 
 /**
- * ReviewComment : Structure d'un commentaire sous une activité.
- * Supporte deux niveaux : commentaires racine et réponses (parentId défini).
- * Les réponses imbriquées pointent toujours vers un commentaire racine (pas de sous-sous-fils).
+ * ReviewComment : Modèle d'un commentaire sur une critique.
+ * Un commentaire peut être une réponse à une critique ou à un autre commentaire.
+ * Il contient des informations sur l'auteur, le contenu, les likes, et les
+ * éventuelles réponses associées.
  */
 export interface ReviewComment {
   id: string;
@@ -22,43 +24,48 @@ export interface ReviewComment {
   likes: number;
   hasLiked?: boolean;
   parentId?: string;
-  replyTo?: string;       // Nom d'affichage du destinataire (@mention)
-  replyToUserId?: string; // ID pour la navigation vers son profil
-  repliesCount?: number;  // Affiché sur les commentaires racine
+  replyTo?: string;
+  replyToUserId?: string;
+  repliesCount?: number;
 }
 
 /**
- * Review : Modèle complet d'une critique d'œuvre.
- * C'est l'objet central qui lie un utilisateur RadioMonoco à une œuvre (API tierce).
+ * Review : Modèle d'une critique d'œuvre.
+ * Il contient des informations sur l'auteur, la note, le contenu de la critique,
+ * les likes, et les commentaires associés. Ce modèle est utilisé pour afficher
+ * les critiques dans les différentes sections de l'app (profil, feed, etc.).
  */
 export interface Review {
   id: string;
   userId: string;
   username: string;
-  stationId: string; // Lien avec l'ID de la Radio/Podcast
-  rating: number;    // Note de 1 à 5 étoiles
-  content: string;   // Texte formaté de la critique
-  likes: number;     // Compteur de "J'aime"
-  timestamp: string; // Date de publication
-  comments: ReviewComment[]; // Discussions associées
+  stationId: string;
+  rating: number;
+  content: string;
+  likes: number;
+  timestamp: string;
+  comments: ReviewComment[];
 }
 
 /**
- * SocialActivity : Objet pivot pour le Fil d'actualité.
- * Conçu pour être affiché de manière chronologique inverse.
- * Il agrège les informations essentielles pour une "ActivityCard" sans charger
- * toute la lourdeur d'une Review complète si ce n'est pas nécessaire.
+ * SocialActivity : Modèle d'une activité sociale dans le feed.
+ * Représente une action d'un utilisateur (publication d'une critique, like, follow)
+ * qui peut être affichée dans le feed d'activité. Contient des informations sur
+ * l'utilisateur, le type d'activité, le contenu associé, les likes, et les
+ * commentaires.
  */
 export interface SocialActivity {
   id: string;
   userId: string;
-  user: string;       // Nom de l'acteur
-  avatar?: string;    // Image de profil pour l'aspect réseau social
-  type: ActivityType; // Type d'action (Badge visuel)
-  targetMedia: string; // Titre du média concerné (Radio ou Podcast)
-  value?: number;      // Note (si type RATING ou REVIEW)
-  text?: string;       // Extrait de la critique (si type REVIEW)
+  user: string;
+  avatar?: string;
+  type: ActivityType;
+  targetMedia: string;
+  contentId?: string;
+  value?: number;
+  text?: string;
   timestamp: string;
-  likes: number;       // Score d'engagement
-  commentsCount: number; // Nombre de commentaires
+  likes: number;
+  hasLiked?: boolean;
+  commentsCount: number;
 }

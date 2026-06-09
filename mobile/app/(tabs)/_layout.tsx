@@ -5,6 +5,7 @@ import {
   Library,
   Search,
   User,
+  Newspaper,
 } from "lucide-react-native";
 import React from "react";
 import { Platform, useColorScheme } from "react-native";
@@ -79,6 +80,15 @@ export default function TabsLayout() {
         options={{
           title: "Accueil",
           tabBarIcon: ({ color }) => <LayoutDashboard size={22} color={color} />,
+        }}
+      />
+
+      {/* Onglet Flux */}
+      <Tabs.Screen
+        name="feed"
+        options={{
+          title: "Flux",
+          tabBarIcon: ({ color }) => <Newspaper size={22} color={color} />,
         }}
       />
 

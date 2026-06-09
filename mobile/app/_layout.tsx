@@ -4,31 +4,33 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuthContext } from "@/context/AuthContext";
 import { NotificationProvider, useNotificationContext } from "@/context/NotificationContext";
 import { PlayerProvider } from "@/context/PlayerContext";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import "../global.css";
 import { MiniPlayer } from "@/features/player/components/MiniPlayer";
 import { useColorScheme, Alert } from "react-native";
 
-/**
- * NotificationWatcher : Composant invisible qui écoute les notifications globales
- * et déclenche des alertes à l'écran en temps réel lors du polling.
- */
+// Composant invisible qui déclenche une alerte pour chaque nouvelle notification non lue et fraîche.
+// Le Set shownIds évite de réafficher la même alerte à chaque re-render.
 function NotificationWatcher() {
   const { notifications } = useNotificationContext();
   const { user, token } = useAuthContext();
+  const shownIds = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!token || !user?.id || notifications.length === 0) return;
 
-    const latestNotif = notifications[0];
-    const isFresh = (Date.now() - new Date(latestNotif.timestamp).getTime()) < 45000;
+    for (const notif of notifications) {
+      if (notif.isRead || shownIds.current.has(notif.id)) continue;
+      const isFresh = (Date.now() - new Date(notif.timestamp).getTime()) < 45_000;
+      if (!isFresh) continue;
 
-    if (!latestNotif.isRead && isFresh) {
+      shownIds.current.add(notif.id);
       Alert.alert(
-        "Nouvelle notification 🔔",
-        latestNotif.message,
+        "Nouvelle notification",
+        notif.message,
         [{ text: "Fermer", style: "cancel" }]
       );
+      break; // une alerte à la fois pour ne pas spammer
     }
   }, [notifications, token, user?.id]);
 
@@ -66,14 +68,10 @@ function AppContent() {
 }
 
 /**
- * RootLayout : Point d'entrée de l'application.
- * Enveloppe l'application dans les providers nécessaires à la gestion
- * de l'état global (Auth, Notifications, Audio, Gestures).
- *
- * Ordre des providers important :
- * - AuthProvider en premier (source du token/user)
- * - NotificationProvider ensuite (dépend du token pour son polling)
- * - PlayerProvider (indépendant, peut être n'importe où sous Auth)
+ * RootLayout : Le layout racine de l'application.
+ * Il enveloppe l'ensemble de l'application avec les Context Providers nécessaires (Auth, Notification, Player).
+ * C'est le point d'entrée de l'application où les Contextes sont initialisés et disponibles pour tous les composants enfants.
+ * @returns 
  */
 export default function RootLayout() {
   return (

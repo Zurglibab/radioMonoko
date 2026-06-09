@@ -1,105 +1,253 @@
-import { useState, useEffect } from "react";
-import { SocialService } from "@/services/community/social.service";
+import { useState, useEffect, useCallback } from "react";
+import { ReviewService } from "@/services/reviews/review.service";
+import { LikeReviewService } from "@/services/reviews/likeReview.service";
+import { UserService } from "@/services/users/user.service";
+import { NotificationService } from "@/services/notifications/notification.service";
 import { ReviewComment } from "@/types/community";
 import { useAuthContext } from "@/context/AuthContext";
 
+// Normalise les réponses API : tableau direct ou { data: [...] }
+function toArray<T>(raw: unknown): T[] {
+  if (Array.isArray(raw)) return raw as T[];
+  if (raw && typeof raw === "object" && Array.isArray((raw as any).data))
+    return (raw as any).data as T[];
+  return [];
+}
+
 /**
- * useComments : Hook gérant l'espace des commentaires sous une critique ou activité.
- * Supporte les commentaires de premier niveau, le focus sur un commentaire spécifique,
- * le système de réponse imbriqué (Replies), les likes et la suppression.
- * 
- * @param activityId - L'identifiant de la critique ou de l'activité parente.
- * @param targetCommentId - (Optionnel) ID d'un commentaire ciblé à mettre en avant.
+ * enrichWithUsernames : Fonction d'enrichissement des commentaires avec les noms d'utilisateur.
+ * Cette fonction prend une liste de commentaires bruts (contenant seulement les user_id) et enrichit chaque commentaire
+ * avec le nom d'utilisateur correspondant. Elle effectue des appels parallèles pour récupérer les profils utilisateur
+ * et construire une map d'id vers nom d'utilisateur, afin d'optimiser les performances.
+ * @param token 
+ * @param raw 
+ * @returns 
  */
-export const useComments = (activityId: string, targetCommentId?: string) => {
-  const { user } = useAuthContext();
-  const currentUserId = user?.id ?? "current_user";
+const enrichWithUsernames = async (token: string, raw: unknown): Promise<ReviewComment[]> => {
+  const dtos = toArray<any>(raw);
+  if (dtos.length === 0) return [];
+  const uniqueIds = [...new Set(dtos.map((d: any) => d.user_id as string))];
+  const userMap: Record<string, string> = {};
+  await Promise.all(
+    uniqueIds.map(async id => {
+      try {
+        const profile = await UserService.getById(token, id);
+        userMap[id] = profile.display_name ?? profile.username;
+      } catch {
+        userMap[id] = "Utilisateur";
+      }
+    })
+  );
+  return dtos.map(dto => ({
+    id: dto.id,
+    userId: dto.user_id,
+    username: userMap[dto.user_id] ?? "Utilisateur",
+    text: dto.comment,
+    timestamp: new Date(dto.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }),
+    likes: 0,
+    hasLiked: false,
+    parentId: dto.parent_review_id ?? undefined,
+  }));
+};
 
-  // ÉTATS LOCAUX
-  const [comments, setComments] = useState<ReviewComment[]>([]); // Liste des commentaires affichés
-  const [focusedComment, setFocusedComment] = useState<ReviewComment | null>(null); // Commentaire mis en avant (si targetCommentId)
-  const [replyingTo, setReplyingTo] = useState<ReviewComment | null>(null); // Stocke le commentaire auquel l'utilisateur répond
+/**
+ * enrichWithLikes : Fonction d'enrichissement des commentaires avec les données de like.
+ * Cette fonction prend une liste de commentaires et ajoute à chacun le nombre de likes, 
+ * ainsi que l'information si l'utilisateur actuel a aimé le commentaire ou pas. 
+ * Elle utilise le LikeReviewService pour récupérer les données de like depuis l'API.
+ * @param token 
+ * @param comments 
+ * @param currentUserId 
+ * @returns 
+ */
+const enrichWithLikes = async (
+  token: string,
+  comments: ReviewComment[],
+  currentUserId: string
+): Promise<ReviewComment[]> => {
+  if (comments.length === 0) return comments;
+  return Promise.all(
+    comments.map(async c => {
+      try {
+        const [likesRaw, repliesRaw] = await Promise.all([
+          LikeReviewService.getByReview(token, c.id),
+          ReviewService.getByParent(token, c.id),
+        ]);
+        const likes = toArray<any>(likesRaw);
+        const replies = toArray<any>(repliesRaw);
+        return {
+          ...c,
+          likes: likes.filter((l: any) => l.is_like).length,
+          hasLiked: likes.some((l: any) => l.user_id === currentUserId && l.is_like),
+          repliesCount: replies.length,
+        };
+      } catch {
+        return c;
+      }
+    })
+  );
+};
+
+/**
+ * useComments : Hook de gestion des commentaires sur une critique ou un commentaire.
+ * Ce hook centralise la logique de chargement, d'enrichissement, et de gestion des commentaires associés à une critique ou à un commentaire spécifique.
+ * Il gère l'état des commentaires, le commentaire ciblé (pour les liens directs), les réponses, et les interactions de like. Il utilise les services ReviewService et LikeReviewService pour interagir avec l'API et enrichir les données pour l'affichage.
+ * @param activityId 
+ * @param targetCommentId 
+ * @param externalContentId 
+ * @param parentAuthorId 
+ * @returns 
+ */
+export const useComments = (
+  activityId: string,
+  targetCommentId?: string,
+  externalContentId?: string | null,
+  parentAuthorId?: string | null
+) => {
+  const { user, token } = useAuthContext();
+  const currentUserId = user?.id ?? "";
+  const [comments, setComments] = useState<ReviewComment[]>([]);
+  const [focusedComment, setFocusedComment] = useState<ReviewComment | null>(null);
+  const [replyingTo, setReplyingTo] = useState<ReviewComment | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [contentId, setContentId] = useState<string | null>(externalContentId ?? null);
 
-  /**
-   * Récupère tous les commentaires et filtre selon le contexte :
-   * - Si targetCommentId : On isole le commentaire focus et on affiche ses réponses (parentId).
-   * - Sinon : On affiche uniquement les commentaires racine (!parentId).
-   */
   useEffect(() => {
-    const loadComments = async () => {
-      // Appel au service communautaire pour récupérer les commentaires liés à l'activité
-      const data = await SocialService.getCommentsForActivity(activityId);
+    if (externalContentId) setContentId(externalContentId);
+  }, [externalContentId]);
+  useEffect(() => {
+    if (!externalContentId && token && activityId) {
+      ReviewService.getById(token, activityId)
+        .then(r => setContentId(r.content_id))
+        .catch(() => {});
+    }
+  }, [externalContentId, token, activityId]);
+
+  const load = useCallback(async () => {
+    if (!token || !activityId) return;
+    setIsLoading(true);
+
+    try {
+      let baseComments: ReviewComment[];
 
       if (targetCommentId) {
-        const target = data.find(c => c.id === targetCommentId);
-        if (target) setFocusedComment(target);
-        setComments(data.filter(c => c.parentId === targetCommentId));
+        const [directRaw, replyRaw] = await Promise.all([
+          ReviewService.getByParent(token, activityId),
+          ReviewService.getByParent(token, targetCommentId),
+        ]);
+        const directComments = await enrichWithUsernames(token, toArray(directRaw));
+        const target = directComments.find(c => c.id === targetCommentId) ?? null;
+        setFocusedComment(target);
+        baseComments = await enrichWithUsernames(token, toArray(replyRaw));
       } else {
-        setComments(data.filter(c => !c.parentId));
+        const raw = await ReviewService.getByParent(token, activityId);
+        baseComments = await enrichWithUsernames(token, toArray(raw));
       }
+      setComments(baseComments);
       setIsLoading(false);
-    };
+      if (baseComments.length > 0) {
+        const enriched = await enrichWithLikes(token, baseComments, currentUserId);
+        setComments(enriched);
+        if (targetCommentId && focusedComment) {
+          const updatedFocused = enriched.find(c => c.id === focusedComment.id);
+          if (updatedFocused) setFocusedComment(updatedFocused);
+        }
+      }
+    } catch (err) {
+      if (__DEV__) console.warn("[useComments] load failed:", err);
+      setIsLoading(false);
+    }
+  }, [token, activityId, targetCommentId, currentUserId]);
 
-    if (activityId) loadComments();
-  }, [activityId, targetCommentId]);
+  useEffect(() => { if (activityId) load(); }, [load, activityId]);
 
-  /**
-   * sendComment : Simule l'envoi d'un commentaire ou d'une réponse.
-   * Injecte dynamiquement les métadonnées de l'utilisateur connecté et les liaisons parentes.
-   */
   const sendComment = async (text: string) => {
-    if (!text.trim()) return;
+    if (!text.trim() || !token || !user?.id || !contentId) return;
 
-    // Construction de l'objet selon l'interface ReviewComment
-    const newComment: ReviewComment = {
-      id: Date.now().toString(), // ID temporaire unique
-      userId: currentUserId,
-      username: user?.username ?? "Moi",
-      avatar: user?.avatar,
+    const optimistic: ReviewComment = {
+      id: `temp-${Date.now()}`,
+      userId: user.id,
+      username: user.username ?? "Moi",
+      avatar: user.avatar,
       text,
       timestamp: "Maintenant",
       likes: 0,
       hasLiked: false,
-      parentId: targetCommentId, // Lie la réponse au fil actuel
-      replyTo: replyingTo?.username, // Métadonnée sociale
+      parentId: targetCommentId ?? activityId,
+      replyTo: replyingTo?.username,
       replyToUserId: replyingTo?.userId,
     };
+    setComments(prev => [...prev, optimistic]);
+    setReplyingTo(null);
 
-    setComments(prev => [...prev, newComment]);
-    setReplyingTo(null); // Reset de l'état de réponse après envoi
+    try {
+      const created = await ReviewService.create(token, {
+        user_id: user.id,
+        content_id: contentId,
+        parent_review_id: targetCommentId ?? activityId,
+        comment: text,
+      });
+      setComments(prev => prev.map(c =>
+        c.id === optimistic.id ? { ...optimistic, id: created.id } : c
+      ));
+      // Notifier l'auteur du post original (sauf si c'est soi-même)
+      if (parentAuthorId && parentAuthorId !== user.id) {
+        NotificationService.create(token, {
+          user_id: parentAuthorId,
+          type: "comment",
+          message: `${user.username ?? "Quelqu'un"} a commenté votre critique`,
+          is_read: false,
+        }).catch(() => {});
+      }
+    } catch {
+      setComments(prev => prev.filter(c => c.id !== optimistic.id));
+    }
   };
 
-  /**
-   * toggleLikeComment : Gère l'incrémentation/décrémentation des likes.
-   * Traite séparément le commentaire principal mis au focus et la liste des réponses secondaires.
-   */
-  const toggleLikeComment = (commentId: string) => {
-    // Cas 1 : C'est le commentaire mis en avant qui est liké
+  const toggleLikeComment = async (commentId: string) => {
+    if (!token || !user?.id) return;
+
+    const current =
+      comments.find(c => c.id === commentId) ??
+      (focusedComment?.id === commentId ? focusedComment : null);
+    if (!current) return;
+
+    const wasLiked = current.hasLiked ?? false;
+    const update = (c: ReviewComment) =>
+      c.id === commentId
+        ? { ...c, hasLiked: !wasLiked, likes: wasLiked ? c.likes - 1 : c.likes + 1 }
+        : c;
+    const revert = (c: ReviewComment) =>
+      c.id === commentId
+        ? { ...c, hasLiked: wasLiked, likes: wasLiked ? c.likes + 1 : c.likes - 1 }
+        : c;
+
     if (focusedComment?.id === commentId) {
-      setFocusedComment(prev =>
-        prev
-          ? { ...prev, likes: prev.hasLiked ? prev.likes - 1 : prev.likes + 1, hasLiked: !prev.hasLiked }
-          : null
-      );
-      return;
+      setFocusedComment(prev => (prev ? update(prev) : null));
+    } else {
+      setComments(prev => prev.map(update));
     }
 
-    // Cas 2 : C'est un commentaire de la liste standard
-    setComments(prev =>
-      prev.map(c =>
-        c.id === commentId
-          ? { ...c, likes: c.hasLiked ? c.likes - 1 : c.likes + 1, hasLiked: !c.hasLiked }
-          : c
-      )
-    );
+    try {
+      if (wasLiked) {
+        await LikeReviewService.remove(token, commentId, user.id);
+      } else {
+        await LikeReviewService.upsert(token, commentId, user.id, true);
+      }
+    } catch {
+      if (focusedComment?.id === commentId) {
+        setFocusedComment(prev => (prev ? revert(prev) : null));
+      } else {
+        setComments(prev => prev.map(revert));
+      }
+    }
   };
 
-  /**
-   * deleteMyComment : Permet à l'utilisateur d'effacer sa propre critique/réponse.
-   */
-  const deleteMyComment = (commentId: string) => {
+  const deleteMyComment = async (commentId: string) => {
     setComments(prev => prev.filter(c => c.id !== commentId));
+    if (token) {
+      try { await ReviewService.remove(token, commentId); } catch { /* non-blocking */ }
+    }
   };
 
   return {
@@ -108,6 +256,7 @@ export const useComments = (activityId: string, targetCommentId?: string) => {
     replyingTo,
     setReplyingTo,
     isLoading,
+    contentId,
     sendComment,
     toggleLikeComment,
     deleteMyComment,

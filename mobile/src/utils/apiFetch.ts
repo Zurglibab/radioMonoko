@@ -1,7 +1,7 @@
 import { API_BASE_URL } from './apiConfig';
 
 // Limitation de la concurrence à MAX_CONCURRENT requêtes simultanées pour éviter de saturer le serveur et gérer les ressources côté client.
-const MAX_CONCURRENT = 3;
+const MAX_CONCURRENT = 2;
 let _active = 0;
 const _queue: Array<() => void> = [];
 
@@ -46,35 +46,37 @@ export async function apiFetch<T>(
       body: options.body ? JSON.stringify(options.body) : undefined,
     };
 
-    let response: Response;
-    try {
-      response = await fetch(url, fetchOpts);
-    } catch {
-      throw new Error("Réseau injoignable.");
-    }
-
-    if (response.status === 429) {
-      const retryAfterHeader = response.headers.get('Retry-After');
-      const delayMs = retryAfterHeader ? parseInt(retryAfterHeader) * 1000 : 1500;
-      await new Promise(r => setTimeout(r, delayMs));
+    const MAX_RETRIES = 3;
+    let response: Response | null = null;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
         response = await fetch(url, fetchOpts);
       } catch {
         throw new Error("Réseau injoignable.");
       }
+      if (response.status !== 429 || attempt === MAX_RETRIES) break;
+      const delay = Math.min(1500 * Math.pow(2, attempt), 4000);
+      if (__DEV__) console.warn(`[API] 429 sur ${path} — retry ${attempt + 1}/${MAX_RETRIES} dans ${delay}ms`);
+      await new Promise(r => setTimeout(r, delay));
     }
+    if (!response) throw new Error("Réseau injoignable.");
 
     if (!response.ok) {
-      if (__DEV__ && response.status !== 404) {
+      if (__DEV__) {
         const body = await response.text().catch(() => '');
-        console.warn(`[API] HTTP ${response.status} on ${path} —`, body);
+        console.warn(`[API] HTTP ${response.status} on ${path} —`, body || '(empty body)');
       }
       if (response.status === 401) throw new Error("Session d'authentification expirée.");
       throw new Error(`HTTP ${response.status}`);
     }
 
     const text = await response.text();
-    return (text ? JSON.parse(text) : undefined) as T;
+    if (!text) return undefined as T;
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      return undefined as T;
+    }
   } finally {
     _release();
   }
