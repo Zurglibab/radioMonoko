@@ -1,7 +1,7 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import AdminService from "../../services/AdminService.ts";
 import type { Review } from "../../interfaces/Review.types.ts";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const AdminReviews = () => {
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -16,39 +16,66 @@ const AdminReviews = () => {
     const fetchReviews = async () => {
         try {
             setLoading(true);
+            setError("");
+
             const data = await AdminService.getReviews();
             setReviews(data);
         } catch (err) {
             console.error(err);
-            setError("Erreur de chargelent des reviews")
+            setError("Erreur de chargement des reviews");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleFeature = async (id:string, featured:boolean) => {
+    const isReviewFeatured = (review: any) => {
+        return Boolean(review.featured ?? review.is_featured);
+    };
+
+    const getReviewText = (review: any) => {
+        return review.comment || review.content || "Critique sans contenu";
+    };
+
+    const handleFeature = async (id: string, featured: boolean) => {
         try {
             await AdminService.featureReview(id, !featured);
-            fetchReviews();
+
+            setReviews((prev) =>
+                prev.map((review: any) =>
+                    review.id === id
+                        ? {
+                            ...review,
+                            featured: !featured,
+                            is_featured: !featured,
+                        }
+                        : review
+                )
+            );
         } catch (err) {
-            console.error(" Erreur lors de la modifcation :", err);
+            console.error("Erreur lors de la modification :", err);
         }
     };
 
-    const handleDelete = async (id:string) => {
+    const handleDelete = async (id: string) => {
+        const confirmDelete = window.confirm(
+            "Voulez-vous vraiment supprimer cette critique ?"
+        );
+
+        if (!confirmDelete) return;
+
         try {
             await AdminService.deleteReview(id);
-            fetchReviews();
+            setReviews((prev) => prev.filter((review) => review.id !== id));
         } catch (err) {
             console.error("Erreur lors de la suppression :", err);
         }
-    }
+    };
 
     return (
         <div className="p-8">
             <div className="flex items-center gap-4 mb-8">
                 <button
-                    onClick={() => navigate('/admin')}
+                    onClick={() => navigate("/admin")}
                     className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
                 >
                     ← Retour
@@ -65,6 +92,12 @@ const AdminReviews = () => {
                 </p>
             )}
 
+            {error && (
+                <p className="text-red-500 mb-6">
+                    {error}
+                </p>
+            )}
+
             {!loading && reviews.length === 0 && (
                 <div className="bg-neutral-900/40 p-6 rounded-2xl text-center">
                     <p className="text-white font-semibold">
@@ -77,54 +110,81 @@ const AdminReviews = () => {
                 </div>
             )}
 
-            {error && (
-                <p className="text-red-500">
-                    {error}
-                </p>
-            )}
-
             <div className="space-y-4">
+                {reviews.map((review: any) => {
+                    const featured = isReviewFeatured(review);
 
-                {reviews.map((review) => (
+                    return (
+                        <div
+                            key={review.id}
+                            className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-6"
+                        >
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="text-xs px-3 py-1 rounded-full bg-neutral-800 text-neutral-400">
+                                    Critique
+                                </span>
 
-                    <div
-                        key={review.id}
-                        className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-6"
-                    >
-                        <p className="text-white mb-4">
-                            {review.content}
-                        </p>
+                                {featured && (
+                                    <span className="text-xs px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                        Coup de cœur
+                                    </span>
+                                )}
+                            </div>
 
-                        {review.featured && (
-                            <span className="text-rose-400 text-sm">
-                                Coup de cœur
-                            </span>
-                        )}
+                            <p className="text-white mb-4">
+                                {getReviewText(review)}
+                            </p>
 
-                        <div className="flex gap-3 mt-4">
+                            <div className="grid md:grid-cols-3 gap-3 text-sm mb-4">
+                                <div className="bg-black/20 border border-white/5 rounded-xl p-3">
+                                    <p className="text-neutral-500 text-xs">
+                                        Review ID
+                                    </p>
+                                    <p className="text-neutral-300 break-all mt-1">
+                                        {review.id}
+                                    </p>
+                                </div>
 
-                            <button
-                                onClick={() => handleFeature(review.id, review.featured)}
-                                className="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl text-white"
-                            >
-                                {review.featured
-                                    ? "Retirer coup de cœur"
-                                    : "Mettre en avant"}
-                            </button>
+                                <div className="bg-black/20 border border-white/5 rounded-xl p-3">
+                                    <p className="text-neutral-500 text-xs">
+                                        User ID
+                                    </p>
+                                    <p className="text-neutral-300 break-all mt-1">
+                                        {review.user_id || "Non renseigné"}
+                                    </p>
+                                </div>
 
-                            <button
-                                onClick={() => handleDelete(review.id)}
-                                className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white"
-                            >
-                                Supprimer
-                            </button>
+                                <div className="bg-black/20 border border-white/5 rounded-xl p-3">
+                                    <p className="text-neutral-500 text-xs">
+                                        Content ID
+                                    </p>
+                                    <p className="text-neutral-300 break-all mt-1">
+                                        {review.content_id || "Non renseigné"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-3 mt-4">
+                                <button
+                                    onClick={() => handleFeature(review.id, featured)}
+                                    className="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl text-white"
+                                >
+                                    {featured ? "Retirer coup de cœur" : "Mettre en avant"}
+                                </button>
+
+                                <button
+                                    onClick={() => handleDelete(review.id)}
+                                    className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white"
+                                >
+                                    Supprimer
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
-
+                    );
+                })}
             </div>
-
         </div>
     );
-}
+};
+
 export default AdminReviews;
