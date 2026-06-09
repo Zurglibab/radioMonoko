@@ -3,18 +3,19 @@ import { useAuth } from "../context/AuthContext.tsx";
 import { Link } from "react-router-dom";
 import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
-import {useNavigate} from "react-router-dom";
-import {useGoogleLogin} from "@react-oauth/google";
+import { useNavigate } from "react-router-dom";
+import { useGoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const { login,loginWithGoogleToken } = useAuth();
+    const { login, loginWithGoogleToken } = useAuth();
     const navigate = useNavigate();
 
-    const googleLogin = useGoogleLogin({scope: "profile email", onSuccess: async (tokenResponse) => {
+    const googleLogin = useGoogleLogin({
+        scope: "profile email", onSuccess: async (tokenResponse) => {
             try {
                 setError("");
                 setIsLoading(true);
@@ -47,8 +48,8 @@ const Login = () => {
             setIsLoading(true);
             await login(email, password);
             navigate("/");
-        } catch (error:any) {
-            setError(error.response?.data?.message || "une erreur est survenue" );
+        } catch (error: any) {
+            setError(error.response?.data?.message || "une erreur est survenue");
         } finally {
             setIsLoading(false);
         }
@@ -59,7 +60,7 @@ const Login = () => {
 
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className="absolute inset-0 opacity-[0.15]"
-                     style={{ backgroundImage: `radial-gradient(#ffffff 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }}>
+                    style={{ backgroundImage: `radial-gradient(#ffffff 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }}>
                 </div>
 
                 <div className="absolute top-[-10%] left-[-5%] w-125 h-125 bg-white/5 rounded-full blur-[120px]"></div>
@@ -160,7 +161,7 @@ const Login = () => {
 
                         <button
                             type="button"
-                            onClick={()=> {
+                            onClick={() => {
                                 setIsLoading(true);
                                 googleLogin();
                             }}
