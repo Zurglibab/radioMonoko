@@ -4,6 +4,15 @@ interface AuthResponse{
     token: string;
 }
 
+interface GoogleAuthResponse {
+    success: boolean;
+    token: string;
+    user?: {
+        id: string;
+        email: string;
+    };
+}
+
 const register = async (email: string, username:string, password: string): Promise<AuthResponse> => {
     const response = await api.post("/user/register", { email, username, password});
     return response.data;
@@ -19,5 +28,12 @@ const getMe = async () => {
     return response.data;
 };
 
-export default {register,login, getMe};
+const loginWithGoogleToken = async (googleToken: string): Promise<GoogleAuthResponse> => {
+    const response = await api.post("/auth/google-mobile", {googleToken,});
+    return response.data;
+};
+
+
+
+export default {register,login, getMe, loginWithGoogleToken};
 
