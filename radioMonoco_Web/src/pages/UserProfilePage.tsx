@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext.tsx";
 import type { User } from "../interfaces/Users.types.ts";
 import type { Collection } from "../interfaces/Collections.types.ts";
 import { FiGlobe, FiLock, FiUserPlus } from "react-icons/fi";
+import ReportButton from "../components/utils/ReportButton.tsx";
 
 const UserProfilePage = () => {
     const {id} = useParams<{id:string}>();
@@ -196,6 +197,11 @@ const UserProfilePage = () => {
                                 Suivre
                             </button>
                         )}
+                        <ReportButton
+                            type="user"
+                            targetId={profilUser.id}
+                            targetLabel={`@${profilUser.username}`}
+                        />
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-4 mt-10">

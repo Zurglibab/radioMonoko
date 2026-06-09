@@ -1,6 +1,7 @@
 import type { CommentItemProps } from "../../interfaces/Props.types";
 import { useState, memo } from "react";
 import { HiPaperAirplane, HiArrowTurnDownRight, HiHandThumbUp, HiHandThumbDown } from "react-icons/hi2";
+import ReportButton from "../utils/ReportButton.tsx";
 
 interface EnhancedCommentItemProps extends CommentItemProps {
     onLikeInteraction: (reviewId: string, actionType: "like" | "dislike" | "remove") => Promise<void>;
@@ -98,6 +99,19 @@ export const CommentItem = memo(({
                                 <HiHandThumbDown size={13} className={`transition-transform duration-200 ${comment.userChoice === 'dislike' ? "scale-110 rotate-[10deg]" : ""}`} />
                                 <span>{comment.dislikesCount ?? 0}</span>
                             </button>
+
+                            {isLoggedIn && currentUserId !== comment.user_id && (
+                                <ReportButton
+                                    type="review"
+                                    targetId={comment.id}
+                                    targetLabel={
+                                        comment.comment
+                                            ? `"${comment.comment.slice(0, 60)}..."`
+                                            : "Critique utilisateur"
+                                    }
+                                    compact
+                                />
+                            )}
                         </div>
 
                         {isLoggedIn && comment.user_id === currentUserId && (
@@ -180,6 +194,18 @@ export const CommentItem = memo(({
                                                 <HiHandThumbDown size={11} className={reply.userChoice === 'dislike' ? "scale-110" : ""} />
                                                 <span>{reply.dislikesCount ?? 0}</span>
                                             </button>
+                                            {isLoggedIn && currentUserId !== reply.user_id && (
+                                                <ReportButton
+                                                    type="review"
+                                                    targetId={reply.id}
+                                                    targetLabel={
+                                                        reply.comment
+                                                            ? `"${reply.comment.slice(0, 60)}..."`
+                                                            : "Réponse utilisateur"
+                                                    }
+                                                    compact
+                                                />
+                                            )}
                                         </div>
 
                                         {isLoggedIn && reply.user_id === currentUserId && (
