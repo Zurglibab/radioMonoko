@@ -13,7 +13,7 @@ export interface User {
     bio: string | null;
     website: string | null;
     privacy: "public" | "private";
-    ban?: boolean;
+    is_banned?: boolean;
     created_at: string;
     updated_at: string;
 }

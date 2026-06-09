@@ -30,12 +30,12 @@ const AdminUsers = () => {
 
     const handleBan = async (id: string, banned:boolean) => {
         try {
-            setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ban: !banned } : u)));
+            setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, is_banned: !banned } : u)));
             await AdminService.banUser(id, !banned);
         }catch(err) {
             console.error("❌ Erreur ban/débannir:", err);
             setError(err instanceof Error ? err.message : "Erreur lors du ban");
-            setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ban: banned } : u)));
+            setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, is_banned: banned } : u)));
         }
     };
 
@@ -112,8 +112,17 @@ const AdminUsers = () => {
 
                             <div>
 
-                                <h2 className="text-white font-semibold text-lg">
+                                <h2 className="text-white font-semibold text-lg flex items-center gap-3">
                                     {u.username ?? "sans nom"}
+                                    {u.is_banned ? (
+                                        <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-500 text-xs uppercase tracking-wider font-bold border border-red-500/30">
+                                            Banni
+                                        </span>
+                                    ) : (
+                                        <span className="px-2 py-0.5 rounded bg-green-500/20 text-green-500 text-xs uppercase tracking-wider font-bold border border-green-500/30">
+                                            Actif
+                                        </span>
+                                    )}
                                 </h2>
 
                                 <p className="text-neutral-500">
@@ -130,16 +139,16 @@ const AdminUsers = () => {
                                 onClick={() =>
                                     handleBan(
                                         u.id,
-                                        u.ban ?? false
+                                        u.is_banned ?? false
                                     )
                                 }
                                 className={`px-4 py-2 rounded-xl font-semibold transition ${
-                                    u.ban
+                                    u.is_banned
                                         ? "bg-green-600 hover:bg-green-500"
                                         : "bg-red-600 hover:bg-red-500"
                                 }`}
                             >
-                                {u.ban
+                                {u.is_banned
                                     ? "Débannir"
                                     : "Bannir"}
 

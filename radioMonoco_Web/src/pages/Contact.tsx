@@ -10,6 +10,7 @@ const Contact = () => {
         message: ""
     });
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -22,6 +23,8 @@ const Contact = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const formspreeEndpoint = "https://formspree.io/f/mrevkywe";
+        
+        setIsLoading(true);
 
         try {
             const response = await fetch(formspreeEndpoint, {
@@ -48,6 +51,8 @@ const Contact = () => {
         } catch (error) {
             console.error("Erreur réseau :", error);
             alert("Erreur réseau. Veuillez réessayer.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -82,8 +87,9 @@ const Contact = () => {
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
+                                    disabled={isLoading}
                                     required
-                                    className={`p-4 rounded-xl outline-none transition-all duration-300 border focus:border-primary ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-white focus:bg-neutral-900' : 'bg-neutral-50 border-neutral-200 text-black focus:bg-white'}`}
+                                    className={`p-4 rounded-xl outline-none transition-all duration-300 border focus:border-primary disabled:opacity-50 ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-white focus:bg-neutral-900' : 'bg-neutral-50 border-neutral-200 text-black focus:bg-white'}`}
                                     placeholder="Votre nom complet"
                                 />
                             </div>
@@ -95,8 +101,9 @@ const Contact = () => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
+                                    disabled={isLoading}
                                     required
-                                    className={`p-4 rounded-xl outline-none transition-all duration-300 border focus:border-primary ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-white focus:bg-neutral-900' : 'bg-neutral-50 border-neutral-200 text-black focus:bg-white'}`}
+                                    className={`p-4 rounded-xl outline-none transition-all duration-300 border focus:border-primary disabled:opacity-50 ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-white focus:bg-neutral-900' : 'bg-neutral-50 border-neutral-200 text-black focus:bg-white'}`}
                                     placeholder="votre.email@exemple.com"
                                 />
                             </div>
@@ -110,8 +117,9 @@ const Contact = () => {
                                 name="subject"
                                 value={formData.subject}
                                 onChange={handleChange}
+                                disabled={isLoading}
                                 required
-                                className={`p-4 rounded-xl outline-none transition-all duration-300 border focus:border-primary ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-white focus:bg-neutral-900' : 'bg-neutral-50 border-neutral-200 text-black focus:bg-white'}`}
+                                className={`p-4 rounded-xl outline-none transition-all duration-300 border focus:border-primary disabled:opacity-50 ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-white focus:bg-neutral-900' : 'bg-neutral-50 border-neutral-200 text-black focus:bg-white'}`}
                                 placeholder="De quoi s'agit-il ?"
                             />
                         </div>
@@ -123,18 +131,27 @@ const Contact = () => {
                                 name="message"
                                 value={formData.message}
                                 onChange={handleChange}
+                                disabled={isLoading}
                                 required
                                 rows={6}
-                                className={`p-4 rounded-xl outline-none resize-none transition-all duration-300 border focus:border-primary ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-white focus:bg-neutral-900' : 'bg-neutral-50 border-neutral-200 text-black focus:bg-white'}`}
+                                className={`p-4 rounded-xl outline-none resize-none transition-all duration-300 border focus:border-primary disabled:opacity-50 ${theme === 'dark' ? 'bg-neutral-900/50 border-neutral-800 text-white focus:bg-neutral-900' : 'bg-neutral-50 border-neutral-200 text-black focus:bg-white'}`}
                                 placeholder="Votre message..."
                             />
                         </div>
 
                         <button
                             type="submit"
-                            className="mt-4 px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-[0.98]"
+                            disabled={isLoading}
+                            className="mt-4 px-8 py-4 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed transition-all shadow-lg shadow-primary/20 active:scale-[0.98] flex items-center justify-center gap-2"
                         >
-                            Envoyer le message
+                            {isLoading ? (
+                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            ) : (
+                                "Envoyer le message"
+                            )}
                         </button>
                     </form>
                 </div>
