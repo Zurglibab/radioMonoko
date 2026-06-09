@@ -3,14 +3,11 @@ import type { SearchResult } from "../interfaces/Search.types";
 import {useEffect, useState} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import CollectionsService from "../services/CollectionsService.ts";
-import {useAuth} from "../context/AuthContext.tsx";
+//import {useAuth} from "../context/AuthContext.tsx";
 
 const SearchResults = () => {
-    const { user } = useAuth();
     const [results, setResults] = useState<SearchResult>({users: [], collections: [], shows:[]});
     const [loading, setLoading] = useState(false);
-    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-    const [userCollections, setUserCollections] = useState<any[]>([]);
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const query = searchParams.get("q") || "";
@@ -18,9 +15,6 @@ const SearchResults = () => {
     useEffect(() => {
         const loadSearch = async () => {
             setLoading(true);
-            setSelectedUserId(null);
-            setUserCollections([]);
-
             try {
                 const allCollections = await CollectionsService.getAllCollections();
                 const data = await SearchService.searchUnified(query, allCollections);
@@ -33,22 +27,6 @@ const SearchResults = () => {
         };
         loadSearch();
     }, [query]);
-
-    const handleUserClick = async (selectedUser: any) => {
-        setSelectedUserId(selectedUser.id);
-
-        try {
-            const allCollections = await CollectionsService.getAllCollections();
-            const filtered = allCollections.filter(
-                (c: any) =>
-                    (c.user_id === selectedUser.id && (c.is_public || (user && user.id === selectedUser.id)))
-            );
-            setUserCollections(filtered);
-        } catch (error) {
-            console.error("Erreur lors de la récupération des collections:", error);
-            setUserCollections([]);
-        }
-    };
 
     return (
         <div className="min-h-screen bg-app-bg text-app-text px-10 py-24">
@@ -87,109 +65,58 @@ const SearchResults = () => {
                         </p>
                     ) : (
                         <div className="grid md:grid-cols-3 gap-4 mb-12">
-
                             {results.users.map((u) => (
-
                                 <div
                                     key={u.id}
-                                    className={`bg-app-bg-secondary p-4 rounded-xl transition-all cursor-pointer ${
-                                        selectedUserId === u.id ? 'ring-2 ring-rose-500' : 'hover:bg-app-bg-secondary/80'
-                                    }`}
-                                    onClick={() => handleUserClick(u)}
+                                    onClick={() => navigate(`/users/${u.id}`)}
+                                    className="bg-app-bg-secondary p-5 rounded-xl transition-all cursor-pointer hover:bg-app-bg-secondary/80 hover:ring-2 hover:ring-rose-500/40"
                                 >
-                                    <h3 className="text-white font-bold">
-                                        {u.username}
-                                    </h3>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-500/40 to-blue-500/30 flex items-center justify-center overflow-hidden">
+                                            {u.avatar ? (
+                                                <img
+                                                    src={u.avatar}
+                                                    alt={u.username}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <span className="text-white font-black">
+                                {u.username?.charAt(0)?.toUpperCase() || "U"}
+                            </span>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <h3 className="text-white font-bold">
+                                                {u.display_name || u.username}
+                                            </h3>
+
+                                            <p className="text-neutral-500 text-sm">
+                                                @{u.username}
+                                            </p>
+                                        </div>
+                                    </div>
 
                                     {u.bio && (
-                                        <p className="text-neutral-500 text-sm mt-2">
+                                        <p className="text-neutral-500 text-sm mt-4 line-clamp-2">
                                             {u.bio}
                                         </p>
                                     )}
 
-                                    <p className="text-xs text-rose-400 mt-3 font-semibold">
-                                        → Voir ses collections
-                                    </p>
-                                </div>
+                                    <div className="flex items-center justify-between mt-5">
+                                        <span className="text-xs text-neutral-500">
+                                            {u.privacy === "public" ? "Profil public" : "Profil privé"}
+                                        </span>
 
+                                        <span className="text-xs text-rose-400 font-semibold">
+                                            Voir le profil →
+                                        </span>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     )}
 
-                    {selectedUserId && (
-                        <div className="mb-12">
-                            <h2 className="text-2xl font-bold text-white mb-4">
-                                Collections de
-                                <span className="text-rose-500 ml-2">
-                                    {results.users.find(u => u.id === selectedUserId)?.username}
-                                </span>
-                            </h2>
-
-                            {userCollections.length === 0 ? (
-                                <p className="text-neutral-500">
-                                    Aucune collection accessible
-                                </p>
-                            ) : (
-                                <div className="grid md:grid-cols-3 gap-4">
-                                    {userCollections.map((collection) => (
-                                        <div
-                                            key={collection.id}
-                                            className="bg-app-bg-secondary p-4 rounded-xl cursor-pointer hover:bg-app-bg-secondary/80 transition"
-                                            onClick={() => navigate(`/collections/${collection.id}`)}
-                                        >
-                                            <h3 className="text-white font-bold">
-                                                {collection.name}
-                                            </h3>
-
-                                            <p className="text-neutral-500 text-sm mt-2">
-                                                {collection.description}
-                                            </p>
-
-                                            <span className="text-xs text-rose-400 mt-3 inline-block">
-                                                {collection.is_public ? "Public" : "Privé"}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    <div>
-                        <h2 className="text-2xl font-bold text-white mb-4">
-                            Collections
-                        </h2>
-                        {results.collections.length === 0 ? (
-                            <p className="text-neutral-500">
-                                Aucune collection trouvée
-                            </p>
-                        ) : (
-                            <div className="grid md:grid-cols-3 gap-4">
-                                {results.collections.map((collection) => (
-                                    <div
-                                        key={collection.id}
-                                        className="bg-neutral-900 p-4 rounded-xl cursor-pointer hover:bg-neutral-800 transition"
-                                        onClick={() => {
-                                            if (collection.is_public || (user && user.id === collection.user_id)) {
-                                                navigate(`/collections/${collection.id}`);
-                                            } else {
-                                                alert("Cette collection est privée. Vous pouvez y accéder seulement si vous en êtes le propriétaire.");
-                                            }
-                                        }}
-                                    >
-                                        <h3 className="text-white font-bold">
-                                            {collection.name}
-                                        </h3>
-                                        <p className="text-neutral-500 text-sm">
-                                            {collection.description}
-                                        </p>
-                                        <span className="text-xs text-rose-400">
-                                            {collection.is_public ? "Public" : "Privé"}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
                     <div className="mt-12">
                         <h2 className="text-2xl font-bold text-white mb-4">
                             Émissions
