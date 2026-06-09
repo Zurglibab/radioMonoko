@@ -49,7 +49,7 @@ const toggleLikeReview = async (reviewId: string, userId: string, isLike: boolea
 const removeLikeReview = async (reviewId: string, userId: string): Promise<boolean> => {
     try {
         await api.delete(`/review/${reviewId}/likes`, {
-            params: { user_id: userId }
+            data: { user_id: userId }
         });
         return true;
     } catch (error) {

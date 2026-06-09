@@ -16,7 +16,6 @@ const GlobalPlayer: React.FC = () => {
 
     const isDark = theme === 'dark';
 
-    // Détecte si le flux actuel est un podcast externe (Sujet aux blocages CORS)
     const isPodcastStream = currentRadio?.streamUrl?.includes("proxycast.radiofrance.fr") || currentRadio?.desc === "Podcast";
 
     useEffect(() => {
@@ -64,14 +63,10 @@ const GlobalPlayer: React.FC = () => {
         `}>
             <div className="w-full flex items-center justify-between">
 
-                {/* BLOC GAUCHE */}
                 <div className="flex items-center gap-4 w-1/3 min-w-0">
                     <div className={`w-12 h-12 rounded-2xl overflow-hidden shadow-lg shrink-0 relative border ${isDark ? "border-white/5" : "border-black/5"}`}>
                         {isPlaying && (
                             <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] bg-gradient-to-t from-black/50 to-transparent flex items-center justify-center">
-                                {/* On force le visualiseur à utiliser une animation CSS (simulée) si c'est un podcast,
-                                  pour éviter que l'API Web Audio ne tente d'analyser le stream et ne déclenche le CORS.
-                                */}
                                 <AudioVisualiser
                                     isPlaying={isPlaying}
                                     barCount={3}

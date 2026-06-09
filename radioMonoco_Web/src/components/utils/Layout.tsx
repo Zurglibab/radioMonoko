@@ -3,26 +3,25 @@ import { Outlet } from "react-router-dom";
 import { FaArrowUp } from "react-icons/fa";
 import Header from "../header/Header.tsx";
 import GlobalPlayer from "./GlobalPlayer.tsx";
+import { ChatManager } from "../chat/ChatManager.tsx";
+import { useAuth } from "../../context/AuthContext.tsx";
 import { useRadio } from "../../context/RadioContext";
 
 const Layout = () => {
     const [isVisible, setIsVisible] = useState(false);
     const { currentRadio } = useRadio();
+    const { user } = useAuth();
 
     useEffect(() => {
         const toggleVisibility = () => {
             setIsVisible(window.scrollY > 300);
         };
-
         window.addEventListener("scroll", toggleVisibility);
         return () => window.removeEventListener("scroll", toggleVisibility);
     }, []);
 
     const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth",
-        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     return (
@@ -33,14 +32,17 @@ const Layout = () => {
                 <Outlet />
             </main>
 
+            {/* ChatManager reste à droite */}
+            {user && <ChatManager currentUserId={user.id} />}
+
             <GlobalPlayer />
 
+            {/* Bouton Back to top à gauche */}
             <button
                 onClick={scrollToTop}
                 className={`
-                    fixed right-8 p-4 z-50 rounded-full shadow-2xl transition-all duration-500 ease-in-out
+                    fixed left-8 p-4 z-50 rounded-full shadow-2xl transition-all duration-500 ease-in-out
                     bg-neutral-900 text-white border border-neutral-800
-                    /* Ajustement dynamique de la hauteur si le player est présent */
                     ${currentRadio ? "bottom-36" : "bottom-8"}
                     ${isVisible
                     ? "opacity-100 translate-y-0 scale-100 cursor-pointer"
