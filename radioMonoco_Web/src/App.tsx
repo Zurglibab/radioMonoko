@@ -18,6 +18,7 @@ import SearchResults from "./pages/SearchResults.tsx";
 import ShowPage from "./pages/ShowPage.tsx";
 import About from "./pages/About.tsx";
 import Contact from "./pages/Contact.tsx";
+import UserProfilePage from "./pages/UserProfilePage.tsx";
 
 function App() {
     return (
@@ -41,6 +42,7 @@ function App() {
                     <Route path="/collections/:id" element={<ProtectedRoute><CollectionsDetails /></ProtectedRoute>}/>
                     <Route path={"/radio/:station"} element={<RadioPage />} />
                     <Route path={"/show/:id"} element={<ShowPage />} />
+                    <Route path="/users/:id" element={<UserProfilePage />} />
                 </Route>
             </Routes>
         </RadioProvider>
