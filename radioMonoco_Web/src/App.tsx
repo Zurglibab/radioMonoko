@@ -16,6 +16,8 @@ import AdminUsers from "./pages/Admin/AdminUsers.tsx";
 import AdminReports from "./pages/Admin/AdminReports.tsx";
 import SearchResults from "./pages/SearchResults.tsx";
 import ShowPage from "./pages/ShowPage.tsx";
+import About from "./pages/About.tsx";
+import Contact from "./pages/Contact.tsx";
 
 function App() {
     return (
@@ -31,6 +33,8 @@ function App() {
 
                 <Route path="/" element={<Layout />}>
                     <Route index element={<HomePage/>} />
+                    <Route path="/about" element={<About/>} />
+                    <Route path="/contact" element={<Contact/>} />
                     <Route path= "/search" element={<SearchResults/>} />
                     <Route path="/feed" element={<ProtectedRoute><Feed /></ProtectedRoute>}/>
                     <Route path="/collections" element={<ProtectedRoute><Collections /></ProtectedRoute>}/>
