@@ -10,6 +10,7 @@ const Register = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const { register } = useAuth();
     const navigate = useNavigate();
 
@@ -21,10 +22,13 @@ const Register = () => {
         }
         try {
             setError("");
+            setIsLoading(true);
             await register(email,username, password);
             navigate("/");
         } catch (error:any) {
             setError(error.response?.data?.message || "une erreur est survenue" );
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -71,7 +75,8 @@ const Register = () => {
                                     placeholder="Email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
+                                    disabled={isLoading}
+                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all disabled:opacity-50"
                                     required
                                 />
                             </div>
@@ -83,7 +88,8 @@ const Register = () => {
                                     placeholder="Pseudo utilisateur"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
+                                    disabled={isLoading}
+                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all disabled:opacity-50"
                                 />
                             </div>
 
@@ -94,7 +100,8 @@ const Register = () => {
                                     placeholder="Mot de passe"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
+                                    disabled={isLoading}
+                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all disabled:opacity-50"
                                     required
                                 />
                             </div>
@@ -106,7 +113,8 @@ const Register = () => {
                                     placeholder="Confirmer le mot de passe"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all"
+                                    disabled={isLoading}
+                                    className="w-full bg-neutral-800/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:border-rose-500/50 focus:ring-1 focus:ring-rose-500/50 transition-all disabled:opacity-50"
                                     required
                                 />
                             </div>
@@ -122,10 +130,20 @@ const Register = () => {
 
                         <button
                             type="submit"
-                            className="w-full mt-10 bg-rose-600 hover:bg-rose-500 text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg shadow-rose-600/20 cursor-pointer"
+                            disabled={isLoading}
+                            className="w-full mt-10 bg-rose-600 hover:bg-rose-500 disabled:bg-rose-600/50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg shadow-rose-600/20 cursor-pointer"
                         >
-                            Créer mon compte
-                            <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                            {isLoading ? (
+                                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            ) : (
+                                <>
+                                    Créer mon compte
+                                    <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
+                                </>
+                            )}
                         </button>
 
                         <div className="mt-8 flex flex-col gap-4 items-center">
