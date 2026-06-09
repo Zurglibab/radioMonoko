@@ -106,13 +106,20 @@ const Login = () => {
                             </div>
                         </div>
 
-                        {error && (
+                        {error === "Votre compte a été banni." ? (
+                            <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/20 p-5 text-center shadow-[0_0_15px_rgba(239,68,68,0.2)]">
+                                <h3 className="text-red-500 font-black text-xl mb-2 uppercase tracking-wide">Accès Interdit</h3>
+                                <p className="text-red-400 text-sm">
+                                    Votre compte a été suspendu par un administrateur en raison du non-respect de nos règles de communauté.
+                                </p>
+                            </div>
+                        ) : error ? (
                             <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3">
                                 <p className="text-red-400 text-sm">
                                     {error}
                                 </p>
                             </div>
-                        )}
+                        ) : null}
 
                         <button
                             type="submit"
