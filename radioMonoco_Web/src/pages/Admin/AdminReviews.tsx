@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import AdminService from "../../services/AdminService.ts";
 import type { Review } from "../../interfaces/Review.types.ts";
 import { useNavigate } from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const AdminReviews = () => {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const {t} = useTranslation();
 
     useEffect(() => {
         fetchReviews();
@@ -22,7 +24,7 @@ const AdminReviews = () => {
             setReviews(data);
         } catch (err) {
             console.error(err);
-            setError("Erreur de chargement des reviews");
+            setError(t("admin.errorLoadingReviews"));
         } finally {
             setLoading(false);
         }
@@ -58,7 +60,7 @@ const AdminReviews = () => {
 
     const handleDelete = async (id: string) => {
         const confirmDelete = window.confirm(
-            "Voulez-vous vraiment supprimer cette critique ?"
+            t("admin.confirmDeleteReview")
         );
 
         if (!confirmDelete) return;
@@ -78,17 +80,17 @@ const AdminReviews = () => {
                     onClick={() => navigate("/admin")}
                     className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
                 >
-                    ← Retour
+                    ← {t("common.back")}
                 </button>
             </div>
 
             <h1 className="text-4xl font-bold text-white mb-8">
-                Gestion des critiques
+                {t("admin.manageReviews")}
             </h1>
 
             {loading && (
                 <p className="text-neutral-400">
-                    Chargement...
+                    {t("common.loading")}
                 </p>
             )}
 
@@ -101,11 +103,11 @@ const AdminReviews = () => {
             {!loading && reviews.length === 0 && (
                 <div className="bg-neutral-900/40 p-6 rounded-2xl text-center">
                     <p className="text-white font-semibold">
-                        Aucune critique disponible
+                        {t("admin.noReviews")}
                     </p>
 
                     <p className="text-neutral-500 mt-2">
-                        Les critiques créées par les utilisateurs apparaîtront ici.
+                        {t("admin.reviewsCreatedText")}
                     </p>
                 </div>
             )}
@@ -121,12 +123,12 @@ const AdminReviews = () => {
                         >
                             <div className="flex items-center gap-3 mb-4">
                                 <span className="text-xs px-3 py-1 rounded-full bg-neutral-800 text-neutral-400">
-                                    Critique
+                                    {t("admin.review")}
                                 </span>
 
                                 {featured && (
                                     <span className="text-xs px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                        Coup de cœur
+                                        {t("admin.featured")}
                                     </span>
                                 )}
                             </div>
@@ -138,7 +140,7 @@ const AdminReviews = () => {
                             <div className="grid md:grid-cols-3 gap-3 text-sm mb-4">
                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
                                     <p className="text-neutral-500 text-xs">
-                                        Review ID
+                                        {t("admin.reviewId")}
                                     </p>
                                     <p className="text-neutral-300 break-all mt-1">
                                         {review.id}
@@ -147,16 +149,16 @@ const AdminReviews = () => {
 
                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
                                     <p className="text-neutral-500 text-xs">
-                                        User ID
+                                        {t("admin.userId")}
                                     </p>
                                     <p className="text-neutral-300 break-all mt-1">
-                                        {review.user_id || "Non renseigné"}
+                                        {review.user_id || t("common.unavailable")}
                                     </p>
                                 </div>
 
                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
                                     <p className="text-neutral-500 text-xs">
-                                        Content ID
+                                        {t("admin.contentId")}
                                     </p>
                                     <p className="text-neutral-300 break-all mt-1">
                                         {review.content_id || "Non renseigné"}
@@ -169,14 +171,14 @@ const AdminReviews = () => {
                                     onClick={() => handleFeature(review.id, featured)}
                                     className="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl text-white"
                                 >
-                                    {featured ? "Retirer coup de cœur" : "Mettre en avant"}
+                                    {featured ? t("admin.unfeature") : t("admin.feature")}
                                 </button>
 
                                 <button
                                     onClick={() => handleDelete(review.id)}
                                     className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white"
                                 >
-                                    Supprimer
+                                    {t("common.delete")}
                                 </button>
                             </div>
                         </div>

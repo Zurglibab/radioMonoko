@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext.tsx";
 import { useNavigate, Link } from "react-router-dom";
 import {FiMail, FiLock, FiArrowRight, FiUser} from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
+import {useTranslation} from "react-i18next";
 
 const Register = () => {
     const [email, setEmail] = useState("");
@@ -12,12 +13,13 @@ const Register = () => {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { register } = useAuth();
-    const navigate = useNavigate();
+    const navigate = useNavigate()
+    const {t} = useTranslation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (password !== confirmPassword) {
-            alert("Les mots de passe ne correspondent pas");
+            alert(t("auth.passwordsDoNotMatch"));
             return;
         }
         try {
@@ -26,7 +28,7 @@ const Register = () => {
             await register(email,username, password);
             navigate("/");
         } catch (error:any) {
-            setError(error.response?.data?.message || "une erreur est survenue" );
+            setError(error.response?.data?.message || t("auth.errorOccurred"));
         } finally {
             setIsLoading(false);
         }
@@ -64,7 +66,7 @@ const Register = () => {
                         className="bg-neutral-900/40 backdrop-blur-2xl p-8 rounded-3xl border border-white/5 shadow-2xl"
                     >
                         <h1 className="text-3xl text-center font-black text-white uppercase tracking-tighter mb-8">
-                            Inscription
+                            {t("auth.registerTitle")}
                         </h1>
 
                         <div className="space-y-5">
@@ -72,7 +74,7 @@ const Register = () => {
                                 <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-rose-500 transition-colors" />
                                 <input
                                     type="email"
-                                    placeholder="Email"
+                                    placeholder={t("auth.email")}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     disabled={isLoading}
@@ -85,7 +87,7 @@ const Register = () => {
                                 <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-rose-500 transition-colors" />
                                 <input
                                     type="text"
-                                    placeholder="Pseudo utilisateur"
+                                    placeholder={t("auth.usernamePlaceholder")}
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     disabled={isLoading}
@@ -97,7 +99,7 @@ const Register = () => {
                                 <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-rose-500 transition-colors" />
                                 <input
                                     type="password"
-                                    placeholder="Mot de passe"
+                                    placeholder={t("auth.password")}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     disabled={isLoading}
@@ -110,7 +112,7 @@ const Register = () => {
                                 <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-rose-500 transition-colors" />
                                 <input
                                     type="password"
-                                    placeholder="Confirmer le mot de passe"
+                                    placeholder={t("auth.confirmPassword")}
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     disabled={isLoading}
@@ -140,7 +142,7 @@ const Register = () => {
                                 </svg>
                             ) : (
                                 <>
-                                    Créer mon compte
+                                    {t("auth.createAccount")}
                                     <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                                 </>
                             )}
@@ -149,16 +151,16 @@ const Register = () => {
                         <div className="mt-8 flex flex-col gap-4 items-center">
                             <div className="h-px w-full bg-white/5"></div>
                             <p className="text-neutral-500 text-xs">
-                                Déjà membre ?{" "}
+                                {t("auth.alreadyMember")} {" "}
                                 <Link to="/login" className="text-rose-500 font-bold hover:underline transition-all">
-                                    Se connecter
+                                    {t("auth.loginLink")}
                                 </Link>
                             </p>
                         </div>
                     </form>
 
                     <p className="mt-12 text-center text-[8px] uppercase tracking-[0.5em] text-neutral-800">
-                        © 2026 RadioMonoco - Tous droits réservés
+                        {t("footer.rights")}
                     </p>
                 </div>
             </div>

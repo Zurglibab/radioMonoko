@@ -10,6 +10,7 @@ import type { User } from "../../interfaces/Users.types";
 import { CommentForm } from "./CommentForm.tsx";
 import { CommentItem } from "./CommentItem.tsx";
 import type { RadioCommunityZoneProps } from "../../interfaces/Props.types.ts";
+import { useTranslation } from "react-i18next";
 
 export const RadioCommunityZone = ({
     contentId,
@@ -29,6 +30,7 @@ export const RadioCommunityZone = ({
     onLikeInteraction: externalOnLikeInteraction
 }: RadioCommunityZoneProps) => {
 
+    const { t } = useTranslation();
     const isLoggedIn = !!currentUserId;
     const [loadingReviews, setLoadingReviews] = useState<boolean>(externalLoadingReviews ?? true);
     const [ratingSummary, setRatingSummary] = useState<any | null>(externalRatingSummary ?? null);
@@ -325,13 +327,13 @@ export const RadioCommunityZone = ({
     return (
         <section className={`grid grid-cols-1 lg:grid-cols-12 gap-16 border-t pt-16 ${theme === 'dark' ? 'border-white/5' : 'border-neutral-200'}`}>
             <div className="lg:col-span-4 space-y-6">
-                <h3 className={`text-xs font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>Audience Rating</h3>
+                <h3 className={`text-xs font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>{t("radio.audienceRating")}</h3>
                 <div className="flex items-baseline gap-4">
                     <span className={`text-7xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-neutral-900'}`}>
                         {currentAverage > 0 ? Number(currentAverage).toFixed(1) : "0.0"}
                     </span>
                     <span className={`text-xs font-bold uppercase tracking-widest ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>
-                        / 5.0 ({totalVotes} {totalVotes > 1 ? "votes" : "vote"})
+                        / 5.0 ({totalVotes} {totalVotes > 1 ? t("radio.votes") : t("radio.vote")})
                     </span>
                 </div>
                 <div className="pt-2 flex flex-col gap-3">
@@ -341,14 +343,14 @@ export const RadioCommunityZone = ({
                             <button
                                 onClick={handleDeleteRating}
                                 className={`p-1.5 rounded-lg transition-colors group ${theme === 'dark' ? 'hover:bg-white/5 text-neutral-500 hover:text-rose-400' : 'hover:bg-neutral-100 text-neutral-400 hover:text-rose-600'}`}
-                                title="Supprimer ma note"
+                                title={t("radio.deleteRating")}
                             >
                                 <HiOutlineTrash size={16} className="transition-transform group-hover:scale-105" />
                             </button>
                         )}
                     </div>
                     <p className={`text-[10px] font-black uppercase tracking-widest ${theme === 'dark' ? 'opacity-40' : 'text-neutral-400'}`}>
-                        {!isLoggedIn ? "Connexion requise pour voter" : userRating > 0 ? "Note enregistrée (cliquez pour modifier)" : "Cliquez pour noter cette station"}
+                        {!isLoggedIn ? t("radio.loginToRate") : userRating > 0 ? t("radio.ratingSaved") : t("radio.clickToRate")}
                     </p>
                 </div>
             </div>
@@ -356,7 +358,7 @@ export const RadioCommunityZone = ({
             <div className="lg:col-span-8 space-y-8">
                 <div className="flex items-center justify-between border-b pb-4 border-transparent">
                     <h3 className={`text-sm font-black uppercase tracking-[0.15em] flex items-center gap-2.5 ${theme === 'dark' ? 'text-white/80' : 'text-neutral-800'}`}>
-                        <HiOutlineChatBubbleLeftRight size={18} className="text-rose-500" /> Commentaires
+                        <HiOutlineChatBubbleLeftRight size={18} className="text-rose-500" /> {t("radio.comments")}
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${theme === 'dark' ? 'bg-white/10 text-white/60' : 'bg-neutral-200/60 text-neutral-500'}`}>{totalCommentsCount}</span>
                     </h3>
                 </div>
@@ -364,9 +366,9 @@ export const RadioCommunityZone = ({
                 {!isLoggedIn ? (
                     <div className={`p-10 rounded-[2rem] text-center border border-dashed transition-all ${theme === "dark" ? "bg-white/[0.01] border-white/10" : "bg-neutral-100/40 border-neutral-200 shadow-inner"}`}>
                         <HiLockClosed size={20} className="mx-auto mb-3 text-rose-500/70" />
-                        <p className={`text-sm font-semibold mb-5 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>Inscrivez-vous pour rejoindre le salon des auditeurs.</p>
+                        <p className={`text-sm font-semibold mb-5 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>{t("radio.joinAudience")}</p>
                         <button className={`px-7 py-3 text-[10px] font-black uppercase tracking-wider rounded-xl hover:opacity-90 transition-all duration-300 active:scale-95 shadow-md ${theme === 'dark' ? 'bg-white text-neutral-900' : 'bg-neutral-900 text-white'}`}>
-                            Se connecter
+                            {t("auth.loginButton")}
                         </button>
                     </div>
                 ) : (
@@ -376,12 +378,12 @@ export const RadioCommunityZone = ({
                 {loadingReviews ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-3">
                         <div className="w-5 h-5 border-2 border-neutral-400 border-t-rose-500 rounded-full animate-spin" />
-                        <p className="text-xs font-medium opacity-50">Chargement du salon...</p>
+                        <p className="text-xs font-medium opacity-50">{t("radio.loadingLounge")}</p>
                     </div>
                 ) : (
                     <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin">
                         {comments.length === 0 ? (
-                            <p className={`text-xs italic py-8 text-center ${theme === 'dark' ? 'opacity-40' : 'text-neutral-400'}`}>Aucun commentaire pour le moment. Soyez le premier à donner votre avis !</p>
+                            <p className={`text-xs italic py-8 text-center ${theme === 'dark' ? 'opacity-40' : 'text-neutral-400'}`}>{t("radio.noComments")}</p>
                         ) : (
                             comments.map((c) => (
                                 <CommentItem

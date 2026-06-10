@@ -21,6 +21,8 @@ import SearchService from "../../services/SearchService.ts";
 import type { SearchResult } from "../../interfaces/Search.types.ts";
 import CollectionsService from "../../services/CollectionsService.ts";
 import {useNotificationContext} from "../../context/NotificationContext.tsx";
+import LanguageSwitcher from "../utils/LanguageSwitcher.tsx";
+import { useTranslation } from "react-i18next";
 
 const NavBar = () => {
     const { user, logout } = useAuth();
@@ -29,6 +31,7 @@ const NavBar = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationContext();
+    const { t } = useTranslation();
 
     const isHomePage = location.pathname === "/";
 
@@ -53,10 +56,10 @@ const NavBar = () => {
     const showLogo = !isHomePage || isPastThreshold;
 
     const menuLinks = [
-        { path: "/", label: "Accueil", authRequired: false },
-        { path: "/feed", label: "Fil d'actualité", authRequired: true },
-        { path : "/collections",label: "Collections", authRequired: true },
-        ...(user?.role === "admin" ? [{ path : "/admin", label: "Administration", authRequired: true  }] : [])
+        { path: "/", label: t("navBar.menu.home"), authRequired: false },
+        { path: "/feed", label: t("navBar.menu.feed"), authRequired: true },
+        { path : "/collections",label: t("navBar.menu.collections"), authRequired: true },
+        ...(user?.role === "admin" ? [{ path : "/admin", label: t("navBar.menu.admin"), authRequired: true  }] : [])
     ];
 
     const toggleTheme = () => {
@@ -185,7 +188,7 @@ const NavBar = () => {
                                     ref={searchInputRef}
                                     type="text"
                                     aria-label="Recherche"
-                                    placeholder="Rechercher..."
+                                    placeholder={t("navBar.searchPlaceholder")}
                                     value={searchQuery}
                                     onChange={(e) => handleSearch(e.target.value)}
                                     onKeyDown={(e) => {
@@ -245,11 +248,14 @@ const NavBar = () => {
                     </Link>
                 </div>
 
+
+
                 <div className="flex items-center gap-2 md:gap-3">
+                    <LanguageSwitcher />
                     <button
                         onClick={toggleTheme}
                         className={`${IconCircleStyle}`}
-                        title={theme === 'dark' ? "Passer au mode clair" : "Passer au mode sombre"}
+                        title={theme === 'dark' ? t("navBar.theme.toLight") : t("navBar.theme.toDark")}
                     >
                         {theme === 'dark' ? (
                             <HiOutlineSun className="text-lg md:text-xl text-white animate-in zoom-in spin-in-90 duration-500" />
@@ -270,13 +276,13 @@ const NavBar = () => {
                                 {isNotifOpen && (
                                     <div className="absolute top-12 right-0 w-72 md:w-80 bg-app-card border border-app-border rounded-2xl shadow-2xl overflow-hidden z-60">
                                         <div className="px-4 py-3 border-b border-app-border bg-app-text/5 flex items-center justify-between">
-                                            <p className="text-[10px] uppercase tracking-[0.2em] font-black">Notifications</p>
+                                            <p className="text-[10px] uppercase tracking-[0.2em] font-black">{t("navBar.notifications.title")}</p>
                                             {unreadCount > 0 && (
                                                 <button
                                                     onClick={markAllAsRead}
                                                     className="text-[10px] uppercase font-bold text-primary hover:underline cursor-pointer"
                                                 >
-                                                    Tout lu
+                                                    {t("navBar.notifications.markAllRead")}
                                                 </button>
                                             )}
                                         </div>
@@ -295,7 +301,7 @@ const NavBar = () => {
                                                         <p className="text-[10px] opacity-40 mt-1 uppercase">{n.timestamp}</p>
                                                     </div>
                                                 </div>
-                                            )) : <p className="p-4 text-center text-xs opacity-50">Aucune notification.</p>}
+                                            )) : <p className="p-4 text-center text-xs opacity-50">{t("navBar.notifications.empty")}</p>}
                                         </div>
                                     </div>
                                 )}
@@ -329,7 +335,7 @@ const NavBar = () => {
                                                 )}
                                             </div>
                                             <div className="overflow-hidden">
-                                                <p className="text-[10px] uppercase tracking-widest opacity-50 font-bold leading-none mb-1 text-app-text">Connecté</p>
+                                                <p className="text-[10px] uppercase tracking-widest opacity-50 font-bold leading-none mb-1 text-app-text">{t("navBar.profile.connected")}</p>
                                                 <p className="text-xs md:text-sm text-app-text font-bold truncate">
                                                     {user?.display_name || user?.username || user?.email}
                                                 </p>
@@ -339,13 +345,13 @@ const NavBar = () => {
                                             onClick={() => { setIsSettingsOpen(true); setIsProfileOpen(false); }}
                                             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-app-text/70 hover:text-app-text hover:bg-app-text/5 transition-colors text-left cursor-pointer outline-none"
                                         >
-                                            <HiOutlineCog className="text-lg" /> Paramètres
+                                            <HiOutlineCog className="text-lg" /> {t("navBar.profile.settings")}
                                         </button>
                                         <button
                                             onClick={handleLogout}
                                             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-primary hover:bg-primary/10 transition-colors text-left cursor-pointer outline-none font-bold"
                                         >
-                                            <HiOutlineLogout className="text-lg" /> Déconnexion
+                                            <HiOutlineLogout className="text-lg" /> {t("navBar.profile.logout")}
                                         </button>
                                     </div>
                                 )}
@@ -358,7 +364,7 @@ const NavBar = () => {
                                 className="group flex items-center justify-center h-9 md:h-10 px-4 rounded-full border border-app-border hover:border-app-text/30 transition-all duration-300 active:scale-95"
                             >
                                 <span className="text-[10px] font-black uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">
-                                    Connexion
+                                    {t("navBar.auth.login")}
                                 </span>
                             </Link>
 
@@ -368,7 +374,7 @@ const NavBar = () => {
                             >
                                 <HiOutlineUserAdd className="text-white text-lg md:hidden" />
                                 <span className="hidden md:block text-[10px] font-black uppercase tracking-widest text-white">
-                                    S'inscrire
+                                    {t("navBar.auth.register")}
                                 </span>
                             </Link>
                         </div>

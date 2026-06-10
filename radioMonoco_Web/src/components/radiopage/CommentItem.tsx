@@ -3,6 +3,7 @@ import { useState, memo } from "react";
 import { HiPaperAirplane, HiArrowTurnDownRight, HiHandThumbUp, HiHandThumbDown } from "react-icons/hi2";
 import ReportButton from "../utils/ReportButton.tsx";
 import NotificationsService from "../../services/NotificationsService.ts";
+import { useTranslation } from "react-i18next";
 
 interface EnhancedCommentItemProps extends CommentItemProps {
     onLikeInteraction: (reviewId: string, actionType: "like" | "dislike" | "remove") => Promise<void>;
@@ -18,20 +19,21 @@ export const CommentItem = memo(({
                                      onDeleteReview,
                                      onLikeInteraction
                                  }: EnhancedCommentItemProps) => {
+    const { t } = useTranslation();
     const [replyingToId, setReplyingToId] = useState<string | null>(null);
     const [replyText, setReplyText] = useState("");
 
     const cachedUser = usersCache[comment.user_id];
-    const authorName = cachedUser ? (cachedUser.display_name || cachedUser.username) : `Auditeur ${comment.user_id ? comment.user_id.slice(-4) : "Anonyme"}`;
+    const authorName = cachedUser ? (cachedUser.display_name || cachedUser.username) : `${t("radio.listener")} ${comment.user_id ? comment.user_id.slice(-4) : t("radio.anonymous")}`;
 
     const sendNotification = async (targetUserId: string, type: "like" | "dislike" | "reply", contentPreview: string | null | undefined) => {
         if (targetUserId === currentUserId) return;
         const safePreview = (contentPreview || "Aucun contenu").toString();
 
         const messages = {
-            like: `a aimé votre commentaire : "${safePreview.slice(0, 30)}..."`,
-            dislike: `a réagi négativement à votre commentaire : "${safePreview.slice(0, 30)}..."`,
-            reply: `a répondu à votre commentaire : "${safePreview.slice(0, 30)}..."`
+            like: t("radio.notifLike", { preview: safePreview.slice(0, 30) }),
+            dislike: t("radio.notifDislike", { preview: safePreview.slice(0, 30) }),
+            reply: t("radio.notifReply", { preview: safePreview.slice(0, 30) })
         };
 
         try {
@@ -76,10 +78,10 @@ export const CommentItem = memo(({
                     <div className="flex items-center gap-2">
                         <span className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-neutral-800'}`}>{authorName}</span>
                         {comment.user_id === currentUserId && (
-                            <span className="text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded-md">Vous</span>
+                            <span className="text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded-md">{t("radio.you")}</span>
                         )}
                         <span className={`text-[9px] font-medium opacity-40 ${theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'}`}>
-                            {comment.created_at ? new Date(comment.created_at).toLocaleDateString() : "Récemment"}
+                            {comment.created_at ? new Date(comment.created_at).toLocaleDateString() : t("radio.recently")}
                         </span>
                     </div>
                     <p className={`text-xs leading-relaxed font-normal ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>{comment.comment}</p>
@@ -93,7 +95,7 @@ export const CommentItem = memo(({
                                 }}
                                 className={`text-[10px] font-black uppercase tracking-wider hover:underline transition-all ${replyingToId === comment.id ? 'text-rose-500' : theme === 'dark' ? 'text-white/40 hover:text-white' : 'text-neutral-400 hover:text-neutral-800'}`}
                             >
-                                {replyingToId === comment.id ? "Annuler" : "Répondre"}
+                                {replyingToId === comment.id ? t("common.cancel") : t("radio.reply")}
                             </button>
                         )}
 
@@ -133,7 +135,7 @@ export const CommentItem = memo(({
                                     targetLabel={
                                         comment.comment
                                             ? `"${comment.comment.slice(0, 60)}..."`
-                                            : "Critique utilisateur"
+                                            : t("radio.userReview")
                                     }
                                     compact
                                 />
@@ -141,7 +143,7 @@ export const CommentItem = memo(({
                         </div>
 
                         {isLoggedIn && comment.user_id === currentUserId && (
-                            <button onClick={() => onDeleteReview(comment.id)} className="text-[10px] font-black uppercase tracking-wider text-neutral-400 hover:text-rose-500 transition-colors">Supprimer</button>
+                            <button onClick={() => onDeleteReview(comment.id)} className="text-[10px] font-black uppercase tracking-wider text-neutral-400 hover:text-rose-500 transition-colors">{t("common.delete")}</button>
                         )}
                     </div>
                 </div>
@@ -153,7 +155,7 @@ export const CommentItem = memo(({
                         type="text"
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder={`Répondre à ${authorName}...`}
+                        placeholder={t("radio.replyTo", { name: authorName })}
                         className={`flex-1 h-10 px-4 border rounded-xl text-xs focus:outline-none transition-all ${theme === 'dark' ? 'bg-white/[0.02] border-white/10 text-white focus:border-white/20' : 'bg-neutral-50 border-neutral-200 text-neutral-800 focus:border-neutral-400'}`}
                         autoFocus
                     />
@@ -167,7 +169,7 @@ export const CommentItem = memo(({
                 <div className="flex flex-col gap-4 pl-8 border-l-2 border-dashed border-neutral-200 dark:border-white/5 mt-1">
                     {comment.replies.map((reply: any) => {
                         const replyUser = usersCache[reply.user_id];
-                        const replyAuthorName = replyUser ? (replyUser.display_name || replyUser.username) : `Auditeur ${reply.user_id ? reply.user_id.slice(-4) : "Anonyme"}`;
+                        const replyAuthorName = replyUser ? (replyUser.display_name || replyUser.username) : `${t("radio.listener")} ${reply.user_id ? reply.user_id.slice(-4) : t("radio.anonymous")}`;
 
                         return (
                             <div key={reply.id} className="flex gap-3 items-start group/item w-full relative">
@@ -180,11 +182,11 @@ export const CommentItem = memo(({
                                         <div className="flex items-center gap-1.5">
                                             <span className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-neutral-800'}`}>{replyAuthorName}</span>
                                             {reply.user_id === currentUserId && (
-                                                <span className="text-[8px] font-black uppercase tracking-wide bg-rose-500/10 text-rose-500 px-1 py-0.2 rounded">Vous</span>
+                                                <span className="text-[8px] font-black uppercase tracking-wide bg-rose-500/10 text-rose-500 px-1 py-0.2 rounded">{t("radio.you")}</span>
                                             )}
                                         </div>
                                         <span className={`text-[9px] font-medium ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>
-                                            {reply.created_at ? new Date(reply.created_at).toLocaleDateString() : "Récemment"}
+                                            {reply.created_at ? new Date(reply.created_at).toLocaleDateString() : t("radio.recently")}
                                         </span>
                                     </div>
                                     <p className={`text-xs leading-relaxed font-normal ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>{reply.comment}</p>
@@ -226,7 +228,7 @@ export const CommentItem = memo(({
                                                     targetLabel={
                                                         reply.comment
                                                             ? `"${reply.comment.slice(0, 60)}..."`
-                                                            : "Réponse utilisateur"
+                                                            : t("radio.userReply")
                                                     }
                                                     compact
                                                 />
@@ -238,7 +240,7 @@ export const CommentItem = memo(({
                                                 onClick={() => onDeleteReview(reply.id, comment.id)}
                                                 className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 hover:text-rose-500 transition-colors"
                                             >
-                                                Supprimer
+                                                {t("common.delete")}
                                             </button>
                                         )}
                                     </div>

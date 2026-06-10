@@ -2,6 +2,7 @@ import type {User} from "../../context/AuthContext.tsx";
 import {useEffect, useState} from "react";
 import AdminService from "../../services/AdminService.ts";
 import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const AdminUsers = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -9,6 +10,7 @@ const AdminUsers = () => {
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate()
+    const {t} = useTranslation();
 
     useEffect(() => {
         fetchUsers();
@@ -43,10 +45,10 @@ const AdminUsers = () => {
         return (
             <div className="p-8">
                 <h1 className="text-4xl font-bold text-white mb-8">
-                    Gestion des utilisateurs
+                    {t("admin.manageUsersTitle")}
                 </h1>
                 <p className="text-neutral-400">
-                    ⏳ Chargement...
+                    {t("admin.loadingUsers")}
                 </p>
             </div>
         );
@@ -56,7 +58,7 @@ const AdminUsers = () => {
         return (
             <div className="p-8">
                 <h1 className="text-4xl font-bold text-white mb-8">
-                    Gestion des utilisateurs
+                    {t("admin.manageUsersTitle")}
                 </h1>
                 <div className="bg-red-900/40 border border-red-600 rounded-2xl p-4 text-red-400">
                     Erreur: {error}
@@ -78,18 +80,18 @@ const AdminUsers = () => {
                     onClick={() => navigate('/admin')}
                     className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
                 >
-                    ← Retour
+                    ← {t("common.back")}
                 </button>
             </div>
 
             <h1 className="text-4xl font-bold text-white mb-8">
-                Gestion des utilisateurs ({users.length})
+                {t("admin.manageUsersTitle")} ({users.length})
             </h1>
 
             <div className="mb-8">
                 <input 
                     type="text" 
-                    placeholder="Rechercher par nom ou email..." 
+                    placeholder={t("admin.searchUserPlaceholder")} 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full max-w-md bg-neutral-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-primary transition"
@@ -98,7 +100,7 @@ const AdminUsers = () => {
 
             {filteredUsers.length === 0 ? (
                 <p className="text-neutral-400">
-                    Aucun utilisateur trouvé
+                    {t("searchPage.noUsers")}
                 </p>
             ) : (
                 <div className="space-y-4">
@@ -113,14 +115,14 @@ const AdminUsers = () => {
                             <div>
 
                                 <h2 className="text-white font-semibold text-lg flex items-center gap-3">
-                                    {u.username ?? "sans nom"}
+                                    {u.username ?? t("admin.noName")}
                                     {u.is_banned ? (
                                         <span className="px-2 py-0.5 rounded bg-red-500/20 text-red-500 text-xs uppercase tracking-wider font-bold border border-red-500/30">
-                                            Banni
+                                            {t("admin.banned")}
                                         </span>
                                     ) : (
                                         <span className="px-2 py-0.5 rounded bg-green-500/20 text-green-500 text-xs uppercase tracking-wider font-bold border border-green-500/30">
-                                            Actif
+                                            {t("admin.active")}
                                         </span>
                                     )}
                                 </h2>
@@ -149,8 +151,8 @@ const AdminUsers = () => {
                                 }`}
                             >
                                 {u.is_banned
-                                    ? "Débannir"
-                                    : "Bannir"}
+                                    ? t("admin.unban")
+                                    : t("admin.ban")}
 
                             </button>
                         </div>

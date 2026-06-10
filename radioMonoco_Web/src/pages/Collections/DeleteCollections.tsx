@@ -1,5 +1,6 @@
 import {useState} from "react";
 import type {Collection} from "../../interfaces/Collections.types.ts";
+import {useTranslation} from "react-i18next";
 
 interface DeleteCollectionsProps {
     isOpen: boolean;
@@ -10,6 +11,7 @@ interface DeleteCollectionsProps {
 
 const DeleteCollections = ({ isOpen, onClose, onSubmit, collection }: DeleteCollectionsProps) => {
     const [isDeleting, setIsDeleting] = useState(false);
+    const {t} = useTranslation();
     if (!isOpen || !collection) return null;
 
     const handleDelete = async () => {
@@ -30,11 +32,11 @@ const DeleteCollections = ({ isOpen, onClose, onSubmit, collection }: DeleteColl
             <div className="bg-neutral-900 border border-white/10 rounded-2xl p-6 w-full max-w-md">
 
                 <h2 className="text-2xl font-bold text-white mb-4">
-                    Supprimer la collection
+                    {t("collections.deleteModal.title")}
                 </h2>
 
                 <p className="text-neutral-400 mb-6">
-                    Voulez-vous vraiment supprimer :
+                    {t("collections.deleteModal.confirmText")}
                     <span className="text-white font-semibold">
                         {" "}{collection.name}
                     </span> ?
@@ -46,7 +48,7 @@ const DeleteCollections = ({ isOpen, onClose, onSubmit, collection }: DeleteColl
                         onClick={onClose}
                         className="px-4 py-2 rounded-lg bg-neutral-800 text-white hover:bg-neutral-700 transition"
                     >
-                        Annuler
+                        {t("collections.deleteModal.cancel")}
                     </button>
 
                     <button
@@ -54,7 +56,7 @@ const DeleteCollections = ({ isOpen, onClose, onSubmit, collection }: DeleteColl
                         disabled={isDeleting}
                         className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white transition disabled:opacity-50"
                     >
-                        {isDeleting ? "Suppression..." : "Supprimer"}
+                        {isDeleting ? t("collections.deleteModal.deleting") : t("collections.deleteModal.submit")}
                     </button>
 
                 </div>

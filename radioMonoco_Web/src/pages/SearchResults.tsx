@@ -3,6 +3,7 @@ import type { SearchResult } from "../interfaces/Search.types";
 import {useEffect, useState} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import CollectionsService from "../services/CollectionsService.ts";
+import {useTranslation} from "react-i18next";
 //import {useAuth} from "../context/AuthContext.tsx";
 
 const SearchResults = () => {
@@ -11,6 +12,7 @@ const SearchResults = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const query = searchParams.get("q") || "";
+    const {t} = useTranslation();
 
     useEffect(() => {
         const loadSearch = async () => {
@@ -35,12 +37,12 @@ const SearchResults = () => {
                     onClick={() => navigate('/')}
                     className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-app-text px-3 py-2 rounded-full transition"
                 >
-                    ← Retour
+                    ← {t("common.back")}
                 </button>
             </div>
 
             <h1 className="text-4xl font-black text-app-text mb-8">
-                Résultats pour :
+                {t("searchPage.title")}
                 <span className="text-rose-500 ml-3">
                     {query}
                 </span>
@@ -48,7 +50,7 @@ const SearchResults = () => {
 
             {loading && (
                 <p className="text-app-text-secondary">
-                    Recherche en cours...
+                    {t("searchPage.loading")}
                 </p>
             )}
 
@@ -56,12 +58,12 @@ const SearchResults = () => {
                 <div className="mb-12">
 
                     <h2 className="text-2xl font-bold text-white mb-4">
-                        Utilisateurs
+                        {t("searchPage.users")}
                     </h2>
 
                     {results.users.length === 0 ? (
                         <p className="text-neutral-500">
-                            Aucun utilisateur trouvé
+                            {t("searchPage.noUsers")}
                         </p>
                     ) : (
                         <div className="grid md:grid-cols-3 gap-4 mb-12">
@@ -105,11 +107,11 @@ const SearchResults = () => {
 
                                     <div className="flex items-center justify-between mt-5">
                                         <span className="text-xs text-neutral-500">
-                                            {u.privacy === "public" ? "Profil public" : "Profil privé"}
+                                            {u.privacy === "public" ? t("searchPage.publicProfile") : t("searchPage.privateProfile")}
                                         </span>
 
                                         <span className="text-xs text-rose-400 font-semibold">
-                                            Voir le profil →
+                                            {t("searchPage.viewProfile")}
                                         </span>
                                     </div>
                                 </div>
@@ -119,11 +121,11 @@ const SearchResults = () => {
 
                     <div className="mt-12">
                         <h2 className="text-2xl font-bold text-white mb-4">
-                            Émissions
+                            {t("searchPage.shows")}
                         </h2>
                         {results.shows.length === 0 ? (
                             <p className="text-neutral-500">
-                                Aucune émission trouvée
+                                {t("searchPage.noShows")}
                             </p>
                         ) : (
                             <div className="grid md:grid-cols-3 gap-4">
@@ -144,11 +146,11 @@ const SearchResults = () => {
                                         </h3>
 
                                         <p className="text-neutral-500 text-sm mt-2 line-clamp-3">
-                                            {show.standFirst || "Aucune description disponible"}
+                                            {show.standFirst || t("searchPage.noDescription")}
                                         </p>
 
                                         <span className="text-xs text-rose-400 mt-3 inline-block">
-                                            Voir l'émission →
+                                            {t("searchPage.viewShow")}
                                         </span>
                                     </div>
                                 ))}

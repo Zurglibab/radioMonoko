@@ -5,6 +5,7 @@ import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
+import {useTranslation} from "react-i18next";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { login, loginWithGoogleToken } = useAuth();
     const navigate = useNavigate();
+    const {t} = useTranslation();
 
     const googleLogin = useGoogleLogin({
         scope: "profile email", onSuccess: async (tokenResponse) => {
@@ -21,7 +23,7 @@ const Login = () => {
                 setIsLoading(true);
 
                 if (!tokenResponse.access_token) {
-                    setError("Token Google manquant.");
+                    setError(t("auth.missingGoogleToken"));
                     setIsLoading(false);
                     return;
                 }
@@ -30,13 +32,13 @@ const Login = () => {
 
             } catch (err: any) {
                 console.error("Erreur Google Auth:", err);
-                setError(err.response?.data?.error || err.response?.data?.message || "Connexion Google impossible");
+                setError(err.response?.data?.error || err.response?.data?.message || t("auth.googleLoginFailed"));
             } finally {
                 setIsLoading(false);
             }
         },
         onError: () => {
-            setError("La connexion avec Google a échoué.");
+            setError(t("auth.googleLoginError"));
             setIsLoading(false);
         },
     });
@@ -49,7 +51,7 @@ const Login = () => {
             await login(email, password);
             navigate("/");
         } catch (error: any) {
-            setError(error.response?.data?.message || "une erreur est survenue");
+            setError(error.response?.data?.message || t("auth.errorOccurred"));
         } finally {
             setIsLoading(false);
         }
@@ -87,7 +89,7 @@ const Login = () => {
                         className="bg-neutral-900/40 backdrop-blur-2xl p-8 rounded-3xl border border-white/5 shadow-2xl"
                     >
                         <h1 className="text-3xl font-black text-center text-white uppercase tracking-tighter mb-8">
-                            Connexion
+                            {t("auth.loginTitle")}
                         </h1>
 
                         <div className="space-y-6">
@@ -95,7 +97,7 @@ const Login = () => {
                                 <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-rose-500 transition-colors" />
                                 <input
                                     type="email"
-                                    placeholder="Email"
+                                    placeholder={t("auth.email")}
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     disabled={isLoading}
@@ -108,7 +110,7 @@ const Login = () => {
                                 <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-rose-500 transition-colors" />
                                 <input
                                     type="password"
-                                    placeholder="Mot de passe"
+                                    placeholder={t("auth.password")}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     disabled={isLoading}
@@ -118,11 +120,11 @@ const Login = () => {
                             </div>
                         </div>
 
-                        {error === "Votre compte a été banni." ? (
+                        {error === "Votre compte a été banni." || error === t("auth.bannedAccount") ? (
                             <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/20 p-5 text-center shadow-[0_0_15px_rgba(239,68,68,0.2)]">
-                                <h3 className="text-red-500 font-black text-xl mb-2 uppercase tracking-wide">Accès Interdit</h3>
+                                <h3 className="text-red-500 font-black text-xl mb-2 uppercase tracking-wide">{t("auth.accessDenied")}</h3>
                                 <p className="text-red-400 text-sm">
-                                    Votre compte a été suspendu par un administrateur en raison du non-respect de nos règles de communauté.
+                                    {t("auth.bannedDescription")}
                                 </p>
                             </div>
                         ) : error ? (
@@ -145,7 +147,7 @@ const Login = () => {
                                 </svg>
                             ) : (
                                 <>
-                                    Se connecter
+                                    {t("auth.loginButton")}
                                     <FiArrowRight className="group-hover:translate-x-1 transition-transform" />
                                 </>
                             )}
@@ -154,7 +156,7 @@ const Login = () => {
                         <div className="flex items-center gap-3 my-6">
                             <div className="h-px flex-1 bg-white/5" />
                             <span className="text-neutral-600 text-xs uppercase tracking-widest">
-                                ou
+                                {t("auth.or")}
                             </span>
                             <div className="h-px flex-1 bg-white/5" />
                         </div>
@@ -169,22 +171,22 @@ const Login = () => {
                             className="w-full bg-white hover:bg-neutral-200 disabled:bg-neutral-400 disabled:cursor-not-allowed text-black font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer"
                         >
                             <span className="text-lg">G</span>
-                            Continuer avec Google
+                            {t("auth.continueWithGoogle")}
                         </button>
 
                         <div className="mt-8 flex flex-col gap-4 items-center">
                             <div className="h-px w-full bg-white/5"></div>
                             <p className="text-neutral-500 text-xs">
-                                Pas encore de compte ?{" "}
+                                {t("auth.noAccount")} {" "}
                                 <Link to="/register" className="text-rose-500 font-bold hover:underline">
-                                    S'inscrire
+                                    {t("auth.registerLink")}
                                 </Link>
                             </p>
                         </div>
                     </form>
 
                     <p className="mt-12 text-center text-[8px] uppercase tracking-[0.5em] text-neutral-800">
-                        © 2026 RadioMonoco - Tous droits réservés
+                        {t("footer.rights")}
                     </p>
                 </div>
             </div>

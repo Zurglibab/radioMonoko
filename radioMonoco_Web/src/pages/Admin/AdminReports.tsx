@@ -4,6 +4,8 @@ import type { ReportReview, ReportUser } from "../../interfaces/Report.types.ts"
 import type { User } from "../../context/AuthContext.tsx";
 import type { Review } from "../../interfaces/Review.types.ts";
 import { useNavigate } from "react-router-dom";
+import {useTranslation} from "react-i18next";
+
 
 type ActiveTab = "users" | "reviews";
 
@@ -15,6 +17,7 @@ const AdminReports = () => {
     const [activeTab, setActiveTab] = useState<ActiveTab>("reviews");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const {t} = useTranslation();
 
     const navigate = useNavigate();
 
@@ -41,7 +44,7 @@ const AdminReports = () => {
             setReviews(reviewsData);
         } catch (err) {
             console.error("Erreur récupération signalements :", err);
-            setError("Impossible de charger les signalements");
+            setError(t("admin.errorLoadingReports"));
         } finally {
             setLoading(false);
         }
@@ -109,7 +112,7 @@ const AdminReports = () => {
 
     const handleDeleteReview = async (reviewId: string) => {
         const confirmDelete = window.confirm(
-            "Voulez-vous vraiment supprimer cette critique ?"
+            t("admin.confirmDeleteReview")
         );
 
         if (!confirmDelete) return;
@@ -129,7 +132,7 @@ const AdminReports = () => {
 
     const handleBanUser = async (userId: string) => {
         const confirmBan = window.confirm(
-            "Voulez-vous vraiment bannir cet utilisateur ?"
+            t("admin.confirmBanUser")
         );
 
         if (!confirmBan) return;
@@ -153,12 +156,12 @@ const AdminReports = () => {
                     onClick={() => navigate("/admin")}
                     className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
                 >
-                    ← Retour
+                    ← {t("common.back")}
                 </button>
             </div>
 
             <h1 className="text-4xl font-black text-white mb-8">
-                Signalements
+                {t("admin.reports")}
             </h1>
 
             <div className="flex gap-3 mb-8">
@@ -170,7 +173,7 @@ const AdminReports = () => {
                             : "bg-neutral-800 text-neutral-400 hover:text-white"
                     }`}
                 >
-                    Critiques signalées ({reviewReports.length})
+                    {t("admin.reportedReviews")} ({reviewReports.length})
                 </button>
 
                 <button
@@ -181,12 +184,12 @@ const AdminReports = () => {
                             : "bg-neutral-800 text-neutral-400 hover:text-white"
                     }`}
                 >
-                    Utilisateurs signalés ({userReports.length})
+                    {t("admin.reportedUsers")} ({userReports.length})
                 </button>
             </div>
 
             {loading && (
-                <p className="text-neutral-400">Chargement des signalements...</p>
+                <p className="text-neutral-400">{t("admin.loadingReports")}</p>
             )}
 
             {error && (
@@ -198,10 +201,10 @@ const AdminReports = () => {
                     {reviewReports.length === 0 ? (
                         <div className="bg-neutral-900/40 border border-white/5 rounded-2xl p-8 text-center">
                             <p className="text-white font-semibold">
-                                Aucun signalement de critique
+                                {t("admin.noReviewReports")}
                             </p>
                             <p className="text-neutral-500 mt-2">
-                                Les critiques signalées apparaîtront ici.
+                                {t("admin.noReviewReportsText")}
                             </p>
                         </div>
                     ) : (
@@ -221,7 +224,7 @@ const AdminReports = () => {
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-3">
                                                 <span className="text-xs px-3 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
-                                                    Critique signalée
+                                                    {t("admin.reportedReview")}
                                                 </span>
 
                                                 <span className="text-xs text-neutral-500">
@@ -230,7 +233,7 @@ const AdminReports = () => {
                                             </div>
 
                                             <p className="text-neutral-400 text-sm mb-2">
-                                                Type de signalement :
+                                                {t("admin.reportType")}
                                                 <span className="text-white font-semibold ml-2">
                                                     {report.report_type}
                                                 </span>
@@ -238,13 +241,13 @@ const AdminReports = () => {
 
                                             {report.description && (
                                                 <p className="text-neutral-300 text-sm mb-4">
-                                                    Description : {report.description}
+                                                    {t("admin.description")} {report.description}
                                                 </p>
                                             )}
 
                                             <div className="bg-black/20 border border-white/5 rounded-2xl p-4 mt-4">
                                                 <p className="text-neutral-500 text-xs mb-2">
-                                                    Critique concernée
+                                                    {t("admin.concernedReview")}
                                                 </p>
                                                 <p className="text-white">
                                                     {getReviewText(review)}
@@ -254,7 +257,7 @@ const AdminReports = () => {
                                             <div className="grid md:grid-cols-2 gap-3 mt-4">
                                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
                                                     <p className="text-neutral-500 text-xs">
-                                                        Auteur de la critique
+                                                        {t("admin.reviewAuthor")}
                                                     </p>
                                                     <p className="text-white text-sm mt-1">
                                                         {author
@@ -265,7 +268,7 @@ const AdminReports = () => {
 
                                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
                                                     <p className="text-neutral-500 text-xs">
-                                                        Signalé par
+                                                        {t("admin.reportedBy")}
                                                     </p>
                                                     <p className="text-white text-sm mt-1">
                                                         {reporter
@@ -281,21 +284,21 @@ const AdminReports = () => {
                                                 onClick={() => handleDeleteReview(report.review_id)}
                                                 className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white text-sm"
                                             >
-                                                Supprimer critique
+                                                {t("admin.deleteReview")}
                                             </button>
 
                                             <button
                                                 onClick={() => handleClearReviewReports(report.review_id)}
                                                 className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-xl text-white text-sm"
                                             >
-                                                Retirer tous les reports
+                                                {t("admin.clearReports")}
                                             </button>
 
                                             <button
                                                 onClick={() => handleDeleteReviewReport(report.id)}
                                                 className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-xl text-neutral-300 text-sm"
                                             >
-                                                Retirer ce report
+                                                {t("admin.deleteReport")}
                                             </button>
                                         </div>
                                     </div>
@@ -311,10 +314,10 @@ const AdminReports = () => {
                     {userReports.length === 0 ? (
                         <div className="bg-neutral-900/40 border border-white/5 rounded-2xl p-8 text-center">
                             <p className="text-white font-semibold">
-                                Aucun signalement utilisateur
+                                {t("admin.noUserReports")}
                             </p>
                             <p className="text-neutral-500 mt-2">
-                                Les utilisateurs signalés apparaîtront ici.
+                                {t("admin.noUserReportsText")}
                             </p>
                         </div>
                     ) : (
@@ -331,7 +334,7 @@ const AdminReports = () => {
                                         <div className="flex-1">
                                             <div className="flex items-center gap-3 mb-3">
                                                 <span className="text-xs px-3 py-1 rounded-full bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                                                    Utilisateur signalé
+                                                    {t("admin.reportedUser")}
                                                 </span>
 
                                                 <span className="text-xs text-neutral-500">
@@ -340,7 +343,7 @@ const AdminReports = () => {
                                             </div>
 
                                             <p className="text-neutral-400 text-sm mb-2">
-                                                Type de signalement :
+                                                {t("admin.reportType")}
                                                 <span className="text-white font-semibold ml-2">
                                                     {report.report_type}
                                                 </span>
@@ -348,14 +351,14 @@ const AdminReports = () => {
 
                                             {report.description && (
                                                 <p className="text-neutral-300 text-sm mb-4">
-                                                    Description : {report.description}
+                                                    {t("admin.description")} {report.description}
                                                 </p>
                                             )}
 
                                             <div className="grid md:grid-cols-2 gap-3 mt-4">
                                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
                                                     <p className="text-neutral-500 text-xs">
-                                                        Utilisateur concerné
+                                                        {t("admin.concernedUser")}
                                                     </p>
                                                     <p className="text-white text-sm mt-1">
                                                         {reportedUser
@@ -364,14 +367,14 @@ const AdminReports = () => {
                                                     </p>
                                                     {reportedUser?.is_banned && (
                                                         <p className="text-red-400 text-xs mt-2">
-                                                            Utilisateur déjà banni
+                                                            {t("admin.userAlreadyBanned")}
                                                         </p>
                                                     )}
                                                 </div>
 
                                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
                                                     <p className="text-neutral-500 text-xs">
-                                                        Signalé par
+                                                        {t("admin.reportedBy")}
                                                     </p>
                                                     <p className="text-white text-sm mt-1">
                                                         {reporter ? `@${reporter.username}` : report.reporter_id}
@@ -385,28 +388,28 @@ const AdminReports = () => {
                                                 onClick={() => navigate(`/users/${report.reported_user_id}`)}
                                                 className="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl text-white text-sm"
                                             >
-                                                Voir profil
+                                                {t("admin.viewProfile")}
                                             </button>
 
                                             <button
                                                 onClick={() => handleBanUser(report.reported_user_id)}
                                                 className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white text-sm"
                                             >
-                                                Bannir
+                                                {t("admin.ban")}
                                             </button>
 
                                             <button
                                                 onClick={() => handleClearUserReports(report.reported_user_id)}
                                                 className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-xl text-white text-sm"
                                             >
-                                                Retirer tous les reports
+                                                {t("admin.clearReports")}
                                             </button>
 
                                             <button
                                                 onClick={() => handleDeleteUserReport(report.id)}
                                                 className="bg-neutral-800 hover:bg-neutral-700 px-4 py-2 rounded-xl text-neutral-300 text-sm"
                                             >
-                                                Retirer ce report
+                                                {t("admin.deleteReport")}
                                             </button>
                                         </div>
                                     </div>

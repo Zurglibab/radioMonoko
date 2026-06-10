@@ -2,6 +2,8 @@ import { useState } from "react";
 import { HiOutlineFlag, HiOutlineX } from "react-icons/hi";
 import ReportsService, { type ReportType } from "../../services/ReportsService.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
+import {useTranslation} from "react-i18next";
+
 
 interface ReportButtonProps {
     type: ReportType;
@@ -11,20 +13,20 @@ interface ReportButtonProps {
     compact?: boolean;
 }
 
-const REVIEW_REASONS = [
-    "Spoiler non marqué",
-    "Insultes ou harcèlement",
-    "Spam",
-    "Contenu inapproprié",
-    "Autre",
+const REVIEW_REASONS_KEYS = [
+    "spoiler",
+    "insults",
+    "spam",
+    "inappropriate",
+    "other",
 ];
 
-const USER_REASONS = [
-    "Harcèlement",
-    "Compte suspect",
-    "Spam",
-    "Contenu inapproprié",
-    "Autre",
+const USER_REASONS_KEYS = [
+    "harassment",
+    "suspicious",
+    "spam",
+    "inappropriate",
+    "other",
 ];
 
 const ReportButton = ({type, targetId, targetLabel, className = "", compact = false,}: ReportButtonProps) => {
@@ -35,8 +37,9 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
+    const {t} = useTranslation();
 
-    const reasons = type === "review" ? REVIEW_REASONS : USER_REASONS;
+    const reasonsKeys = type === "review" ? REVIEW_REASONS_KEYS : USER_REASONS_KEYS;
 
     const handleSubmit = async () => {
         try {
@@ -44,17 +47,17 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
             setSuccess("");
 
             if (!user?.id) {
-                setError("Vous devez être connecté pour signaler.");
+                setError(t("reports.needLogin"));
                 return;
             }
 
             if (!reason) {
-                setError("Veuillez choisir une raison.");
+                setError(t("reports.chooseReason"));
                 return;
             }
 
-            if (reason === "Autre" && !customReason.trim()) {
-                setError("Veuillez décrire le problème.");
+            if (reason === "other" && !customReason.trim()) {
+                setError(t("reports.describeProblem"));
                 return;
             }
 
@@ -64,18 +67,18 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
                 await ReportsService.reportReview({
                     reporter_id: user.id,
                     review_id: targetId,
-                    report_type: reason,
-                    description: reason === "Autre" ? customReason.trim() : undefined,
+                    report_type: t(`reports.${reason}`),
+                    description: reason === "other" ? customReason.trim() : undefined,
                 });
             } else {
                 await ReportsService.reportUser({
                     reporter_id: user.id,
                     reported_user_id: targetId,
-                    report_type: reason,
-                    description: reason === "Autre" ? customReason.trim() : undefined,
+                    report_type: t(`reports.${reason}`),
+                    description: reason === "other" ? customReason.trim() : undefined,
                 });
             }
-            setSuccess("Signalement envoyé. Merci pour votre aide.");
+            setSuccess(t("reports.sent"));
             setReason("");
             setCustomReason("");
 
@@ -85,8 +88,7 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
             }, 2000);
         } catch (err: any) {
             console.error("Erreur signalement :", err);
-            setError(err.response?.data?.message || err.response?.data?.error || "Impossible d'envoyer le signalement."
-            );
+            setError(err.response?.data?.message || err.response?.data?.error || t("reports.sendError"));
         } finally {
             setLoading(false);
         }
@@ -94,7 +96,7 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
 
     const handleOpen = () => {
         if (!user?.id) {
-            alert("Vous devez être connecté pour signaler un contenu.");
+            alert(t("reports.needLoginContent"));
             return;
         }
 
@@ -117,7 +119,7 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
                 }
             >
                 <HiOutlineFlag />
-                {compact ? "Signaler" : "Signaler"}
+                {compact ? t("reports.report") : t("reports.report")}
             </button>
 
             {isOpen && (
@@ -136,15 +138,15 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
                         </button>
 
                         <h2 className="text-2xl font-black text-white mb-2">
-                            Signaler {type === "review" ? "une critique" : "un utilisateur"}
+                            {type === "review" ? t("reports.reportReview") : t("reports.reportUser")}
                         </h2>
 
                         <p className="text-neutral-500 text-sm mb-6">
-                            {targetLabel ? `Vous êtes sur le point de signaler : ${targetLabel}` : "Expliquez rapidement le problème afin d'aider la modération."}
+                            {targetLabel ? t("reports.aboutToReport", { label: targetLabel }) : t("reports.explain")}
                         </p>
 
                         <div className="space-y-3">
-                            {reasons.map((item) => (
+                            {reasonsKeys.map((item) => (
                                 <button
                                     key={item}
                                     type="button"
@@ -155,16 +157,16 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
                                             : "border-white/5 bg-neutral-900 text-neutral-400 hover:text-white hover:border-white/10"
                                     }`}
                                 >
-                                    {item}
+                                    {t(`reports.${item}`)}
                                 </button>
                             ))}
                         </div>
 
-                        {reason === "Autre" && (
+                        {reason === "other" && (
                             <textarea
                                 value={customReason}
                                 onChange={(e) => setCustomReason(e.target.value)}
-                                placeholder="Décrivez le problème..."
+                                placeholder={t("reports.describeProblemPlaceholder")}
                                 className="mt-4 w-full bg-neutral-900 border border-white/5 rounded-xl px-4 py-3 text-white outline-none focus:border-rose-500 transition resize-none h-28"
                             />
                         )}
@@ -188,7 +190,7 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
                                 onClick={() => setIsOpen(false)}
                                 className="px-5 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition disabled:opacity-50"
                             >
-                                Annuler
+                                {t("common.cancel")}
                             </button>
 
                             <button
@@ -197,7 +199,7 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
                                 onClick={handleSubmit}
                                 className="px-5 py-2 rounded-full bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-semibold transition"
                             >
-                                {loading ? "Envoi..." : "Envoyer le signalement"}
+                                {loading ? t("reports.sending") : t("reports.send")}
                             </button>
                         </div>
                     </div>

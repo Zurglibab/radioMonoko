@@ -1,8 +1,10 @@
 import {memo, useState} from "react";
 import type {CommentFormProps} from "../../interfaces/Props.types.ts";
 import {HiPaperAirplane} from "react-icons/hi2";
+import { useTranslation } from "react-i18next";
 
 export const CommentForm = memo(({ dbContentId, theme, onPostReview }: CommentFormProps) => {
+    const { t } = useTranslation();
     const [text, setText] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
@@ -22,7 +24,7 @@ export const CommentForm = memo(({ dbContentId, theme, onPostReview }: CommentFo
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 disabled={!dbContentId || submitting}
-                placeholder="Écrire un message public sur ce salon..."
+                placeholder={t("radio.writeMessage")}
                 className={`w-full h-14 border rounded-2xl pl-5 pr-16 focus:outline-none transition-all duration-300 text-sm ${theme === "dark" ? "bg-white/[0.02] border-white/10 text-white focus:border-white/20 focus:bg-white/[0.04]" : "bg-white border-neutral-200 text-neutral-800 focus:border-neutral-400 focus:bg-neutral-50 shadow-sm"} ${submitting ? "opacity-50 cursor-not-allowed" : ""}`}
             />
             <button type="submit" disabled={!text.trim() || submitting} className={`absolute right-2.5 top-2.5 bottom-2.5 px-4 rounded-xl transition-all flex items-center justify-center ${text.trim() && !submitting ? 'bg-rose-500 text-white shadow-md hover:bg-rose-600 active:scale-95' : theme === 'dark' ? 'bg-white/5 text-white/20' : 'bg-neutral-100 text-neutral-400'}`}>

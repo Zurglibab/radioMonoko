@@ -22,10 +22,12 @@ import {DEFAULT_THEME} from "../assets/themes/DefaultTheme";
 import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
 import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
 import {Loader} from "../components/utils/Loader.tsx";
+import {useTranslation} from "react-i18next";
 
 const RadioPage = () => {
     const { station } = useParams<{ station: string }>();
     const { theme } = useAppearance();
+    const {t} = useTranslation();
 
     const [currentUserId] = useState<string | null>(() => {
         const savedUser = localStorage.getItem("user");
@@ -574,7 +576,7 @@ const RadioPage = () => {
                                         : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50 shadow-sm'}`}
                             >
                                 <HiBookmark size={18} className="group-hover:scale-110 transition-transform" />
-                                <span>Enregistrer</span>
+                                <span>{t("radio.save")}</span>
                                 {collections.length > 0 && Object.values(collectionItemStates).some(v => v) && (
                                     <span className="ml-1 h-2 w-2 rounded-full bg-current"></span>
                                 )}
@@ -586,14 +588,14 @@ const RadioPage = () => {
             ${theme === 'dark' ? 'bg-neutral-900 border-white/10' : 'bg-white border-neutral-200'}`}>
                                     {/* Header */}
                                     <div className={`px-5 py-3 font-bold text-xs uppercase tracking-wider opacity-70 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>
-                                        Mes Collections
+                                        {t("radio.myCollections")}
                                     </div>
 
                                     {/* Collections List */}
                                     <div className="max-h-72 overflow-y-auto">
                                         {collections.length === 0 ? (
                                             <div className={`px-5 py-4 text-xs text-center ${theme === 'dark' ? 'text-neutral-500' : 'text-neutral-500'}`}>
-                                                Aucune collection créée
+                                                {t("radio.noCollection")}
                                             </div>
                                         ) : (
                                             collections.map((col) => {
@@ -658,7 +660,7 @@ const RadioPage = () => {
                                                 : 'text-rose-600 hover:text-rose-700'
                                         }`}>
                                             <span className="group-hover:translate-x-0.5 transition-transform inline-block">
-                                                + Nouvelle collection
+                                                {t("radio.newCollection")}
                                             </span>
                                         </button>
                                     </div>
@@ -701,7 +703,7 @@ const RadioPage = () => {
                     />
                 ) : (
                     <div className="flex justify-center border-t pt-16 border-dashed border-neutral-300 dark:border-white/10">
-                        <p className="text-xs font-semibold opacity-40">Connexion au serveur communautaire...</p>
+                        <p className="text-xs font-semibold opacity-40">{t("radio.communityLoading")}</p>
                     </div>
                 )}
             </main>

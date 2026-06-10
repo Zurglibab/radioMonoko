@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {HiOutlineX} from "react-icons/hi";
 import { FiLock, FiGlobe} from "react-icons/fi";
+import {useTranslation} from "react-i18next";
 
 interface CreateCollectionProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
     const [description, setDescription] = useState("");
     const [isPublic, setIsPublic] = useState(true);
     const [loading, setLoading] = useState(false);
+    const {t} = useTranslation();
 
     if (!isOpen) return null;
 
@@ -50,22 +52,22 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                 </button>
 
                 <h2 className="text-2xl font-black text-white mb-2">
-                    Créer une collection
+                    {t("collections.createModal.title")}
                 </h2>
 
                 <p className="text-neutral-500 text-sm mb-8">
-                    Organise ta bibliothèque en légende comme te le souhaite !
+                    {t("collections.createModal.subtitle")}
                 </p>
 
                 {/* nom */}
                 <div className="mb-5">
                     <label className="text-sm text-neutral-400 mb-2 block">
-                        Nom
+                        {t("collections.createModal.nameLabel")}
                     </label>
 
                     <input
                         type="text"
-                        placeholder="Ma collection"
+                        placeholder={t("collections.createModal.namePlaceholder")}
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         className="w-full bg-neutral-900 border border-white/5 rounded-xl px-4 py-3 text-white outline-none focus:border-rose-500 transition"
@@ -75,11 +77,11 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                 {/* description */}
                 <div className="mb-5">
                     <label className="text-sm text-neutral-400 mb-2 block">
-                        Description
+                        {t("collections.createModal.descLabel")}
                     </label>
 
                     <textarea
-                        placeholder="Décris ta collection..."
+                        placeholder={t("collections.createModal.descPlaceholder")}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         className="w-full bg-neutral-900 border border-white/5 rounded-xl px-4 py-3 text-white outline-none focus:border-rose-500 transition resize-none h-28"
@@ -103,7 +105,7 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                         )}
 
                         <span className="text-white text-sm">
-                            {isPublic ? "Collection publique" : "Collection privée"}
+                            {isPublic ? t("collections.createModal.publicLabel") : t("collections.createModal.privateLabel")}
                         </span>
                     </div>
                 </button>
@@ -115,7 +117,7 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                         onClick={onClose}
                         className="px-5 py-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition"
                     >
-                        Annuler
+                        {t("collections.createModal.cancel")}
                     </button>
 
                     <button
@@ -123,7 +125,7 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                         onClick={handleSubmit}
                         className="px-5 py-2 rounded-full bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white font-semibold transition"
                     >
-                        {loading ? "Création..." : "Créer"}
+                        {loading ? t("collections.createModal.creating") : t("collections.createModal.submit")}
                     </button>
 
                 </div>

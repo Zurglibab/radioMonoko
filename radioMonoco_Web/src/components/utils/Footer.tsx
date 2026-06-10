@@ -1,9 +1,11 @@
 import logo from "../../assets/images/icon_large.png";
 import { useAppearance } from "../../context/AppearanceContext";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Footer = () => {
     const { theme } = useAppearance();
+    const { t } = useTranslation();
 
     const LinkStyle = `
         text-[10px] font-semibold uppercase tracking-[0.3em] transition duration-300 relative 
@@ -26,17 +28,17 @@ const Footer = () => {
 
                 <nav className="flex items-center gap-10">
                     <Link to="/about" className={LinkStyle}>
-                        À propos
+                        {t("footer.about")}
                     </Link>
                     <Link to="/contact" className={LinkStyle}>
-                        Contact
+                        {t("footer.contact")}
                     </Link>
                 </nav>
             </div>
             <div className="mt-8 text-center">
                 <p className={`text-[8px] uppercase tracking-[0.5em] transition-colors duration-500 
                     ${theme === 'dark' ? 'text-neutral-800' : 'text-neutral-300'}`}>
-                    © 2026 RadioMonoco - Tous droits réservés
+                    {t("footer.rights")}
                 </p>
             </div>
         </footer>

@@ -18,10 +18,12 @@ import {BRAND_THEMES} from "../assets/themes/BrandThemes";
 import {DEFAULT_THEME} from "../assets/themes/DefaultTheme";
 import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
 import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
+import {useTranslation} from "react-i18next";
 
 const ShowPage = () => {
     const { id } = useParams<{ id:string }>();
     const { theme } = useAppearance();
+    const {t} = useTranslation();
 
     const [currentUserId] = useState<string | null>(() => {
         const savedUser = localStorage.getItem("user");
@@ -495,11 +497,11 @@ const ShowPage = () => {
             }`}>
                 <div className="max-w-lg text-center px-6">
                     <h2 className="text-2xl font-bold mb-3">
-                        Émission introuvable
+                        {t("radio.showNotFound")}
                     </h2>
 
                     <p className="text-sm opacity-60">
-                        Cette émission n'est pas disponible pour le moment ou une erreur serveur est survenue.
+                        {t("radio.showNotFoundText")}
                     </p>
                 </div>
             </div>
@@ -532,7 +534,7 @@ const ShowPage = () => {
                                         : 'bg-white border-neutral-200 text-neutral-600 hover:bg-neutral-50 shadow-sm'}`}
                             >
                                 <HiBookmark size={18} className="group-hover:scale-110 transition-transform" />
-                                <span>Enregistrer</span>
+                                <span>{t("radio.save")}</span>
                                 {collections.length > 0 && Object.values(collectionItemStates).some(v => v) && (
                                     <span className="ml-1 h-2 w-2 rounded-full bg-current"></span>
                                 )}
@@ -542,12 +544,12 @@ const ShowPage = () => {
                                 <div className={`absolute top-14 left-0 w-80 py-3 rounded-2xl border shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200
                                                 ${theme === 'dark' ? 'bg-neutral-900 border-white/10' : 'bg-white border-neutral-200'}`}>
                                     <div className={`px-5 py-3 font-bold text-xs uppercase tracking-wider opacity-70 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>
-                                        Mes Collections
+                                        {t("radio.myCollections")}
                                     </div>
                                     <div className="max-h-72 overflow-y-auto">
                                         {collections.length === 0 ? (
                                             <div className={`px-5 py-4 text-xs text-center ${theme === 'dark' ? 'text-neutral-500' : 'text-neutral-500'}`}>
-                                                Aucune collection créée
+                                                {t("radio.noCollection")}
                                             </div>
                                         ) : (
                                             collections.map((col) => {
@@ -605,9 +607,9 @@ const ShowPage = () => {
                     <div className="lg:col-span-7 w-full lg:mt-8 pb-4">
                         <div className="lg:col-span-7 w-full lg:mt-8 pb-4">
                             <div className="bg-neutral-100 dark:bg-white/[0.03] rounded-[2.5rem] p-12 border border-neutral-200 dark:border-white/5 flex flex-col justify-center min-h-[300px]">
-                                <h2 className="text-xl font-bold mb-4 opacity-80">À propos de l'émission</h2>
+                                <h2 className="text-xl font-bold mb-4 opacity-80">{t("radio.aboutShow")}</h2>
                                 <p className="text-base leading-relaxed opacity-60">
-                                    {show?.standFirst ?? "Aucune description disponible."}
+                                    {show?.standFirst ?? t("radio.noDescription")}
                                 </p>
                             </div>
                         </div>
@@ -640,7 +642,7 @@ const ShowPage = () => {
                     />
                 ) : (
                     <div className="flex justify-center border-t pt-16 border-dashed border-neutral-300 dark:border-white/10">
-                        <p className="text-xs font-semibold opacity-40">Connexion au serveur communautaire...</p>
+                        <p className="text-xs font-semibold opacity-40">{t("radio.communityLoading")}</p>
                     </div>
                 )}
             </main>

@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import type {Collection} from "../../interfaces/Collections.types.ts";
 import {FiGlobe, FiLock} from "react-icons/fi";
+import {useTranslation} from "react-i18next";
 
 interface ModifyCollectionsProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ const ModifyCollections = ({isOpen, onClose, onSubmit, collection}: ModifyCollec
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [isPublic, setIsPublic] = useState(false);
+    const {t} = useTranslation();
 
     useEffect(() => {
         if (collection) {
@@ -43,14 +45,14 @@ const ModifyCollections = ({isOpen, onClose, onSubmit, collection}: ModifyCollec
             <div className="w-full max-w-md bg-[#111] border border-white/10 rounded-2xl p-6">
 
                 <h1 className="text-2xl font-bold text-white mb-6">
-                    Modifier la collection
+                    {t("collections.modifyModal.title")}
                 </h1>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
 
                     <div>
                         <label className="block text-sm text-neutral-400 mb-2">
-                            Nom
+                            {t("collections.modifyModal.nameLabel")}
                         </label>
 
                         <input
@@ -63,7 +65,7 @@ const ModifyCollections = ({isOpen, onClose, onSubmit, collection}: ModifyCollec
 
                     <div>
                         <label className="block text-sm text-neutral-400 mb-2">
-                            Description
+                            {t("collections.modifyModal.descLabel")}
                         </label>
 
                         <textarea
@@ -91,7 +93,7 @@ const ModifyCollections = ({isOpen, onClose, onSubmit, collection}: ModifyCollec
                                 )}
 
                                 <span className="text-white text-sm">
-                            {isPublic ? "Collection publique" : "Collection privée"}
+                            {isPublic ? t("collections.modifyModal.publicLabel") : t("collections.modifyModal.privateLabel")}
                         </span>
                             </div>
                         </button>
@@ -104,14 +106,14 @@ const ModifyCollections = ({isOpen, onClose, onSubmit, collection}: ModifyCollec
                             onClick={onClose}
                             className="px-4 py-2 rounded-xl bg-neutral-800 text-white hover:bg-neutral-700 transition"
                         >
-                            Annuler
+                            {t("collections.modifyModal.cancel")}
                         </button>
 
                         <button
                             type="submit"
                             className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white transition"
                         >
-                            Sauvegarder
+                            {t("collections.modifyModal.submit")}
                         </button>
 
                     </div>

@@ -1,9 +1,11 @@
 import type {RadioCardProps} from "../../interfaces/Props.types.ts";
 import {type Radio, useRadio} from "../../context/RadioContext.tsx";
 import {HiOutlinePause, HiOutlinePlay} from "react-icons/hi2";
+import { useTranslation } from "react-i18next";
 
 export const RadioCard = ({ title, description, liveStream, theme, brandTheme, isPodcast, isWeb, host }: RadioCardProps) => {
     const { playRadio, isPlaying, currentRadio } = useRadio();
+    const { t } = useTranslation();
 
     const cleanTitle = title
         .replace(/^ICI\s+/, "")
@@ -12,7 +14,7 @@ export const RadioCard = ({ title, description, liveStream, theme, brandTheme, i
 
     const radioInfo: Radio = {
         name: cleanTitle,
-        desc: description || (isPodcast ? "Podcast" : isWeb ? "Web Radio" : "Radio Locale"),
+        desc: description || (isPodcast ? t("radio.podcast") : isWeb ? t("radio.webRadio") : t("radio.localRadio")),
         img: "",
         currentShow: cleanTitle,
         host: host || "",
@@ -61,7 +63,7 @@ export const RadioCard = ({ title, description, liveStream, theme, brandTheme, i
             <div className="flex items-start justify-between relative z-10 w-full">
                 <span className={`text-[9px] font-black tracking-widest uppercase px-3 py-1 rounded-full backdrop-blur-md border max-w-[65%] truncate
                     ${theme === "dark" ? "bg-white/5 border-white/10 text-white/60" : "bg-neutral-100 border-neutral-200 text-neutral-600"}`}>
-                    {isPodcast ? "Podcast" : isWeb ? "Digital" : "Studio"}
+                    {isPodcast ? t("radio.podcast") : isWeb ? t("radio.digital") : t("radio.studio")}
                 </span>
 
                 <div
@@ -99,7 +101,7 @@ export const RadioCard = ({ title, description, liveStream, theme, brandTheme, i
                         {cleanTitle}
                     </h4>
                     <p className={`text-[11px] line-clamp-2 leading-relaxed font-medium min-h-[2rem] ${theme === 'dark' ? 'text-neutral-400 opacity-40' : 'text-neutral-500'}`}>
-                        {description || "Flux disponible à la demande."}
+                        {description || t("radio.streamAvailableOnDemand")}
                     </p>
                 </div>
             </div>
