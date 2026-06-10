@@ -10,7 +10,7 @@ import {
   RelationActionResponse,
 } from "@/types/social";
 
-// Plafond de 20 activités pour éviter les temps de chargement trop longs sur le feed d'accueil (qui peut être très chargé en données liées : contenu, utilisateurs, likes, commentaires...)
+// Plafond de 20 activités pour éviter les temps de chargement trop longs sur le feed d'accueil
 const FEED_LIMIT = 20;
 
 // Permet de gérer les différentes formes de données que le backend peut renvoyer (liste directe ou enveloppée dans un objet { data: [...] })
@@ -118,33 +118,34 @@ export const SocialService = {
       }),
     ]);
 
-    await Promise.all(
-      topLevel.map(async (review: any) => {
-        try {
-          const raw = await LikeReviewService.getByReview(token, review.id);
-          const allLikes = toArray<LikeReview>(raw);
-          if (__DEV__) console.log("[getFeed] likes for", review.id.slice(-6), ":", allLikes.length);
-          likeMap[review.id] = allLikes.filter((l: LikeReview) => l.is_like).length;
-          if (currentUserId) {
-            const mine = allLikes.find((l: LikeReview) => l.user_id === currentUserId);
-            hasLikedMap[review.id] = mine?.is_like ?? false;
-          }
-        } catch (err) {
-          if (__DEV__) console.warn("[getFeed] likes failed for", review.id.slice(-6), ":", err);
-          likeMap[review.id] = 0;
-          hasLikedMap[review.id] = false;
-        }
-
-        if (!hasCommentDataFromAll) {
+    const LIKE_BATCH = 5;
+    for (let i = 0; i < topLevel.length; i += LIKE_BATCH) {
+      await Promise.all(
+        topLevel.slice(i, i + LIKE_BATCH).map(async (review: any) => {
           try {
-            const repliesRaw = await ReviewService.getByParent(token, review.id);
-            commentCountMap[review.id] = toArray<any>(repliesRaw).length;
+            const raw = await LikeReviewService.getByReview(token, review.id);
+            const allLikes = toArray<LikeReview>(raw);
+            likeMap[review.id] = allLikes.filter((l: LikeReview) => l.is_like).length;
+            if (currentUserId) {
+              const mine = allLikes.find((l: LikeReview) => l.user_id === currentUserId);
+              hasLikedMap[review.id] = mine?.is_like ?? false;
+            }
           } catch {
-            commentCountMap[review.id] = 0;
+            likeMap[review.id] = 0;
+            hasLikedMap[review.id] = false;
           }
-        }
-      })
-    );
+
+          if (!hasCommentDataFromAll) {
+            try {
+              const repliesRaw = await ReviewService.getByParent(token, review.id);
+              commentCountMap[review.id] = toArray<any>(repliesRaw).length;
+            } catch {
+              commentCountMap[review.id] = 0;
+            }
+          }
+        })
+      );
+    }
 
     return topLevel.map((review: any) => ({
       id: review.id,

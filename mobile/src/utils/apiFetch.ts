@@ -46,18 +46,15 @@ export async function apiFetch<T>(
       body: options.body ? JSON.stringify(options.body) : undefined,
     };
 
-    const MAX_RETRIES = 3;
     let response: Response | null = null;
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        response = await fetch(url, fetchOpts);
-      } catch {
-        throw new Error("Réseau injoignable.");
-      }
-      if (response.status !== 429 || attempt === MAX_RETRIES) break;
-      const delay = Math.min(1500 * Math.pow(2, attempt), 4000);
-      if (__DEV__) console.warn(`[API] 429 sur ${path} — retry ${attempt + 1}/${MAX_RETRIES} dans ${delay}ms`);
-      await new Promise(r => setTimeout(r, delay));
+    try {
+      response = await fetch(url, fetchOpts);
+    } catch {
+      throw new Error("Réseau injoignable.");
+    }
+    if (response.status === 429) {
+      if (__DEV__) console.warn(`[API] 429 sur ${path} — slot libéré sans retry`);
+      throw new Error("HTTP 429");
     }
     if (!response) throw new Error("Réseau injoignable.");
 
