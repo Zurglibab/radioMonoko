@@ -95,6 +95,15 @@ const exportUserProfile = async (id: string): Promise<ExportUserProfile | null> 
         return null;
     }
 };
+const updateEmailNotifications = async (value: boolean): Promise<User> => {
+    try {
+        const response = await api.patch("/user/me/notifications-email", { value });
+        return response.data?.data || response.data;
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour des notifs email :", error);
+        throw error;
+    }
+};
 
 export default {
     getMe,
@@ -105,4 +114,5 @@ export default {
     getUserById,
     deleteUser,
     exportUserProfile,
+    updateEmailNotifications
 };

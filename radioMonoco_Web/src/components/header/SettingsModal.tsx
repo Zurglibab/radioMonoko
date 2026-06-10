@@ -41,6 +41,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
 
     const [isSelectOpen, setIsSelectOpen] = useState(false);
     const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+    const [emailNotifs, setEmailNotifs] = useState(user?.notifications_email ?? false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const selectRef = useRef<HTMLDivElement>(null);
@@ -54,6 +55,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
             setBio(user.bio ?? "");
             setPrivacy(user.privacy ?? "public");
             setAvatarPreview(user.avatar ?? "");
+            setEmailNotifs(user.notifications_email ?? false);
         }
     }, [isOpen, user]);
 
@@ -97,6 +99,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
             alert(t("settings.updateError"));
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleEmailNotifChange = async (value: boolean) => {
+        try {
+            const updatedUser = await UsersService.updateEmailNotifications(value);
+            setEmailNotifs(value);
+            updateUser(updatedUser);
+        } catch (error) {
+            setEmailNotifs(!value);
+            alert(t("settings.updateError"));
         }
     };
 
@@ -233,6 +246,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                             </button>
                                         </div>
                                     </div>
+                                    <div className="mt-8 pt-4 border-t border-app-border">
+                                        <button
+                                            onClick={handleUpdateProfile}
+                                            disabled={loading}
+                                            className={`w-full font-black py-4 rounded-xl text-xs uppercase tracking-widest cursor-pointer bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all active:scale-95 outline-none flex items-center justify-center ${loading ? 'opacity-70 cursor-wait' : ''}`}
+                                        >
+                                            {loading ? (
+                                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            ) : (
+                                                t("settings.saveChanges")
+                                            )}
+                                        </button>
+                                    </div>
 
                                 </div>
                             )}
@@ -287,31 +313,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                             {activeTab === 'notifs' && (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-3 pb-2 border-b border-app-border">
-                                            <HiOutlineVolumeUp className="text-xl text-primary" />
-                                            <h3 className="font-bold text-sm">{t("settings.notifs.activityAlerts")}</h3>
-                                        </div>
-                                        {[
-                                            { id: 'n1', label: t("settings.notifs.newFollowers"), desc: t("settings.notifs.newFollowersDesc"), icon: <HiOutlineUser /> },
-                                            { id: 'n2', label: t("settings.notifs.directMessages"), desc: t("settings.notifs.directMessagesDesc"), icon: <HiOutlineMail /> },
-                                            { id: 'n3', label: t("settings.notifs.logins"), desc: t("settings.notifs.loginsDesc"), icon: <HiOutlineDeviceMobile /> },
-                                        ].map((item) => (
-                                            <div key={item.id} className="flex items-center justify-between group">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-10 h-10 rounded-xl bg-app-text/5 flex items-center justify-center text-lg group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                                        {item.icon}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-bold">{item.label}</p>
-                                                        <p className="text-[11px] opacity-50">{item.desc}</p>
-                                                    </div>
+                                        <div className="flex items-center justify-between group">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 rounded-xl bg-app-text/5 flex items-center justify-center text-lg group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                                    <HiOutlineMail />
                                                 </div>
-                                                <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input type="checkbox" defaultChecked className="sr-only peer" />
-                                                    <div className="w-10 h-5 bg-app-text/10 rounded-full peer peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                                                </label>
+                                                <div>
+                                                    <p className="text-sm font-bold">Notifications par email</p>
+                                                    <p className="text-[11px] opacity-50">Recevoir des alertes par email.</p>
+                                                </div>
                                             </div>
-                                        ))}
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" checked={emailNotifs} onChange={(e) => handleEmailNotifChange(e.target.checked)} className="sr-only peer" />
+                                                <div className="w-10 h-5 bg-app-text/10 rounded-full peer peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -352,20 +368,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                     </div>
                                 </div>
                             )}
-                        </div>
-
-                        <div className="mt-8 pt-4 border-t border-app-border">
-                            <button
-                                onClick={handleUpdateProfile}
-                                disabled={loading}
-                                className={`w-full font-black py-4 rounded-xl text-xs uppercase tracking-widest cursor-pointer bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all active:scale-95 outline-none flex items-center justify-center ${loading ? 'opacity-70 cursor-wait' : ''}`}
-                            >
-                                {loading ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                ) : (
-                                    t("settings.saveChanges")
-                                )}
-                            </button>
                         </div>
                     </div>
                 </div>
