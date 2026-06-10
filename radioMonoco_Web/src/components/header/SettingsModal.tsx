@@ -12,9 +12,7 @@ import {
     HiOutlineLockOpen,
     HiOutlineCamera,
     HiOutlineMail,
-    HiOutlineDeviceMobile,
     HiOutlineKey,
-    HiOutlineVolumeUp
 } from "react-icons/hi";
 import { useAppearance } from "../../context/AppearanceContext";
 import { useTranslation } from "react-i18next";

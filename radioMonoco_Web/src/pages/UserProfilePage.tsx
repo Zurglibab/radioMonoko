@@ -91,20 +91,30 @@ const UserProfilePage = () => {
     };
 
     const sendNotification = async (targetUserId: string, type: "follow") => {
+        if (!connectedUser) return;
         const senderName = connectedUser?.display_name || connectedUser?.username || "Quelqu'un";
         if (targetUserId === connectedUser?.id) return;
         const messages = {
             follow: `${senderName} a commencé à vous suivre`
         };
-        try {
-            await NotificationsService.createNotification({
-                user_id: targetUserId,
-                type: type,
-                message: messages[type],
-                is_read: false
-            });
-        } catch (error) {
-            console.error("Erreur notification:", error);
+
+        const user = await UsersService.getUserById(targetUserId);
+        if (!user) {
+            console.error("Utilisateur cible introuvable pour la notification");
+            return;
+        }
+
+        if(!user.notifications_email) {
+            try {
+                await NotificationsService.createNotification({
+                    user_id: targetUserId,
+                    type: type,
+                    message: messages[type],
+                    is_read: false
+                });
+            } catch (error) {
+                console.error("Erreur notification:", error);
+            }
         }
     };
 

@@ -415,7 +415,7 @@ const NavBar = () => {
                 </div>
             </nav>
 
-            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
+            {user && (<SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user}/>)}
 
             <FriendsModal isOpen={isFriendsOpen} onClose={() => setIsFriendsOpen(false)} />
 

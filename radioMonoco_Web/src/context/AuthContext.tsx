@@ -2,26 +2,12 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import type { ReactNode } from 'react';
 import authService from "../services/AuthService.ts";
 import api from "../services/Api.ts";
-
-export interface User {
-    id: string;
-    email: string;
-    username: string;
-    display_name: string | null;
-    avatar?: string | null;
-    role: string;
-    bio: string | null;
-    website: string | null;
-    privacy: "public" | "private";
-    is_banned?: boolean;
-    created_at: string;
-    updated_at: string;
-}
+import type { User } from "../interfaces/Users.types.ts";
 
 interface AuthContextType {
     user: User | null;
     login: (email: string, password: string) => Promise<void>;
-    register: (email: string, username:string, password: string) => Promise<void>;
+    register: (email: string, username: string, password: string) => Promise<void>;
     logout: () => void;
     updateUser: (user: User | null) => void;
     loginWithGoogleToken: (googleToken: string) => Promise<void>;
@@ -36,8 +22,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const token = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
         if (token && storedUser) {
-            api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            setUser(JSON.parse(storedUser));
+            try {
+                api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                console.error("Erreur de parsing user", e);
+            }
         }
     }, []);
 
@@ -49,8 +39,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(userData);
     }
 
-    const register = async (email: string, username:string, password: string) => {
-        const response = await authService.register(email,username,password,);
+    const register = async (email: string, username: string, password: string) => {
+        const response = await authService.register(email, username, password);
         await saveSession(response.token);
     };
 
@@ -61,9 +51,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const loginWithGoogleToken = async (googleToken: string) => {
         const response = await authService.loginWithGoogleToken(googleToken);
-
         if (!response.token) {
-            throw new Error("Token JWT manquant après connexion Google");
+            throw new Error("Token JWT manquant");
         }
         await saveSession(response.token);
     };
@@ -75,8 +64,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
     };
 
-    const updateUser = (updatedUser: User) => {
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+    // 3. Implémentation compatible avec User | null
+    const updateUser = (updatedUser: User | null) => {
+        if (updatedUser) {
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+        } else {
+            localStorage.removeItem('user');
+        }
         setUser(updatedUser);
     };
 

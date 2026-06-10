@@ -4,6 +4,7 @@ import ReportButton from "../utils/ReportButton.tsx";
 import { HiPaperAirplane, HiHandThumbUp, HiHandThumbDown, HiTrash } from "react-icons/hi2";
 import NotificationsService from "../../services/NotificationsService.ts";
 import { useTranslation } from "react-i18next";
+import UsersService from "../../services/UsersService.ts";
 interface EnhancedCommentItemProps extends CommentItemProps {
     onLikeInteraction: (reviewId: string, actionType: "like" | "dislike" | "remove") => Promise<void>;
 }
@@ -30,21 +31,28 @@ export const CommentItem = memo(({
         const senderName = currentUser?.display_name || currentUser?.username || "Un utilisateur";
         const safePreview = (contentPreview || "Aucun contenu").toString();
 
+        const user = await UsersService.getUserById(targetUserId);
+        if (!user) {
+            console.error("Utilisateur cible introuvable pour la notification");
+            return;
+        }
+
         const messages = {
             like: `${senderName} a aimé votre commentaire : "${safePreview.slice(0, 30)}..."`,
             dislike: `${senderName} a réagi négativement à votre commentaire : "${safePreview.slice(0, 30)}..."`,
             reply: `${senderName} a répondu à votre commentaire : "${safePreview.slice(0, 30)}..."`
         };
-
-        try {
-            await NotificationsService.createNotification({
-                user_id: targetUserId,
-                type: type,
-                message: messages[type],
-                is_read: false
-            });
-        } catch (error) {
-            console.error("Erreur notification:", error);
+        if(!user.notifications_email){
+            try {
+                await NotificationsService.createNotification({
+                    user_id: targetUserId,
+                    type: type,
+                    message: messages[type],
+                    is_read: false
+                });
+            } catch (error) {
+                console.error("Erreur notification:", error);
+            }
         }
     };
 
