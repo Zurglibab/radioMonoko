@@ -39,8 +39,44 @@ services:
       - redis
     networks:
       - internal-stack
+
+  web:
+    build:
+      context: ./radioMonoco_Web
+      dockerfile: Dockerfile
+    working_dir: /usr/src/app
+    volumes:
+      - ./radioMonoco_Web:/usr/src/app:delegated
+      - web_node_modules:/usr/src/app/node_modules
     ports:
-      - "3000:3000"
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - API_URL=http://api:3000
+    networks:
+      - internal-stack
+    depends_on:
+      - api
+
+  mobile:
+    build:
+      context: ./mobile
+      dockerfile: Dockerfile
+    working_dir: /usr/src/app
+    volumes:
+      - ./mobile:/usr/src/app:delegated
+      - mobile_node_modules:/usr/src/app/node_modules
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+    environment:
+      - EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0
+      - REACT_NATIVE_PACKAGER_HOSTNAME=host.docker.internal
+    networks:
+      - internal-stack
+    depends_on:
+      - api
 
 networks:
   internal-stack:
@@ -50,4 +86,8 @@ volumes:
   redis-data:
     driver: local
   postgres_data:
+    driver: local
+  web_node_modules:
+    driver: local
+  mobile_node_modules:
     driver: local

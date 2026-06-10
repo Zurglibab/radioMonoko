@@ -7,12 +7,12 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:3000",
+        target: process.env.API_URL || "http://localhost:3000",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
       "/socket.io": {
-        target: "http://localhost:3000",
+        target: process.env.API_URL || "http://localhost:3000",
         ws: true,
       },
     },
