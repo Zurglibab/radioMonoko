@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import ChatService from '../../services/ChatService';
 import { FiMessageSquare } from "react-icons/fi";
 
@@ -5,36 +6,41 @@ export const DMButton = ({ otherUserId, currentUserId }: {
     otherUserId: string,
     currentUserId: string
 }) => {
+    const [isStarting, setIsStarting] = useState(false);
 
     const startDM = async () => {
+        if (isStarting) return;
+        setIsStarting(true);
         try {
             const channels = await ChatService.listChannels();
-            const existingChannel = channels.find(c =>
-                c.type === `DM:${[currentUserId, otherUserId].sort().join(':')}`
-            );
+            const type = `DM:${[currentUserId, otherUserId].sort().join(':')}`;
+            const existingChannel = channels.find(c => c.type === type);
 
+            let channelId;
             if (existingChannel) {
-                window.dispatchEvent(new CustomEvent('open-channel', { detail: existingChannel.id }));
+                channelId = existingChannel.id;
             } else {
-                const newChannel = await ChatService.createChannel(
-                    `DM:${[currentUserId, otherUserId].sort().join(':')}`
-                );
+                const newChannel = await ChatService.createChannel(type);
                 await ChatService.addMember(newChannel.id, currentUserId);
                 await ChatService.addMember(newChannel.id, otherUserId);
-                window.dispatchEvent(new CustomEvent('open-channel', { detail: newChannel.id }));
+                channelId = newChannel.id;
             }
+            window.dispatchEvent(new CustomEvent('open-channel', { detail: channelId }));
         } catch (err) {
             console.error("Erreur MP", err);
+        } finally {
+            setIsStarting(false);
         }
     };
 
     return (
         <button
             onClick={startDM}
-            className="flex items-center justify-center gap-2.5 px-5 py-3 rounded-full font-semibold transition-all duration-300 bg-neutral-800 hover:bg-neutral-700 text-white border border-white/5 hover:border-white/20 shadow-lg shadow-black/20"
+            disabled={isStarting}
+            className={`flex items-center justify-center gap-2.5 px-5 py-3 rounded-full font-semibold transition-all duration-300 bg-neutral-800 hover:bg-neutral-700 text-white border border-white/5 hover:border-white/20 shadow-lg shadow-black/20 ${isStarting ? 'opacity-50 cursor-wait' : ''}`}
         >
             <FiMessageSquare size={18} />
-            <span>Message</span>
+            <span>{isStarting ? "Ouverture..." : "Message"}</span>
         </button>
     );
 };

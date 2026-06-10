@@ -27,12 +27,12 @@ const RadioPage = () => {
     const { station } = useParams<{ station: string }>();
     const { theme } = useAppearance();
 
-    const [currentUserId] = useState<string | null>(() => {
+    const [currentUser] = useState<User | null>(() => {
         const savedUser = localStorage.getItem("user");
         if (savedUser) {
             try {
                 const parsed = JSON.parse(savedUser);
-                return parsed.id || parsed._id || parsed.user_id || null;
+                return parsed || null;
             } catch (e) {
                 console.error(e);
                 return null;
@@ -40,7 +40,7 @@ const RadioPage = () => {
         }
         return null;
     });
-    const isLoggedIn = !!currentUserId;
+    const isLoggedIn = !!currentUser?.id;
 
     const [brand, setBrand] = useState<Brand | null>(null);
     const [localRadios, setLocalRadios] = useState<Brand["localRadios"]>([]);
@@ -129,12 +129,12 @@ const RadioPage = () => {
     }, [station]);
 
      useEffect(() => {
-         if (isLoggedIn && currentUserId) {
-             collectionsService.getUserCollections(currentUserId)
+         if (isLoggedIn && currentUser?.id) {
+             collectionsService.getUserCollections(currentUser?.id)
                  .then(setCollections)
                  .catch(console.error);
          }
-     }, [isLoggedIn, currentUserId]);
+     }, [isLoggedIn, currentUser?.id]);
 
      useEffect(() => {
          if (!dbContentId || collections.length === 0) return;
@@ -195,8 +195,8 @@ const RadioPage = () => {
 
                     const enrichedReviews = await Promise.all(
                         reviewsList.map(async (review: any) => {
-                            const likesData = await cached(`review_choice_${review.id}_${currentUserId}`, () => likeReviewsService.getReviewLikes(review.id, currentUserId).catch(() => null), 15_000);
-                            const { likesCount, dislikesCount, userChoice } = likeReviewsService.transformLikesData(likesData, currentUserId);
+                            const likesData = await cached(`review_choice_${review.id}_${currentUser?.id}`, () => likeReviewsService.getReviewLikes(review.id, currentUser?.id).catch(() => null), 15_000);
+                            const { likesCount, dislikesCount, userChoice } = likeReviewsService.transformLikesData(likesData, currentUser?.id);
                             return {
                                 ...review,
                                 likesCount,
@@ -216,9 +216,9 @@ const RadioPage = () => {
                     setComments(structuredComments);
                 }
 
-                if (isLoggedIn && currentUserId) {
+                if (isLoggedIn && currentUser?.id) {
                     try {
-                        const existingRating = await ratingContentService.getRatingByIds(targetContentId, currentUserId);
+                        const existingRating = await ratingContentService.getRatingByIds(targetContentId, currentUser?.id);
                         if (existingRating && isMounted) {
                             setUserRating(existingRating.average_rating || 0);
                         }
@@ -235,10 +235,10 @@ const RadioPage = () => {
 
         loadCommunityData();
         return () => { isMounted = false; };
-    }, [brand, isLoggedIn, currentUserId, fetchMissingUsers]);
+    }, [brand, isLoggedIn, currentUser?.id, fetchMissingUsers]);
 
     const handleRateStation = async (nextRating: number) => {
-        if (!isLoggedIn || !currentUserId || !dbContentId) return;
+        if (!isLoggedIn || !currentUser?.id || !dbContentId) return;
         const previousRating = userRating;
         setUserRating(nextRating);
         const isFirstVote = previousRating === 0;
@@ -246,12 +246,12 @@ const RadioPage = () => {
 
         try {
             let existing = null;
-            try { existing = await ratingContentService.getRatingByIds(dbContentId, currentUserId); } catch(err) {console.error(err)}
+            try { existing = await ratingContentService.getRatingByIds(dbContentId, currentUser?.id); } catch(err) {console.error(err)}
 
             if (existing) {
-                await ratingContentService.updateRating(dbContentId, currentUserId, { average_rating: nextRating });
+                await ratingContentService.updateRating(dbContentId, currentUser?.id, { average_rating: nextRating });
             } else {
-                await ratingContentService.createRating({ contentId: dbContentId, userId: currentUserId, average_rating: nextRating });
+                await ratingContentService.createRating({ contentId: dbContentId, userId: currentUser?.id, average_rating: nextRating });
             }
             const updatedSummary = await ratingContentService.getRatingSummary(dbContentId);
             setRatingSummary(updatedSummary);
@@ -262,14 +262,14 @@ const RadioPage = () => {
     };
 
     const handleDeleteRating = async () => {
-        if (!isLoggedIn || !currentUserId || userRating === 0 || !dbContentId) return;
+        if (!isLoggedIn || !currentUser?.id || userRating === 0 || !dbContentId) return;
         const previousRating = userRating;
         setUserRating(0);
         setTotalVotes((prev) => Math.max(0, prev - 1));
 
         try {
             if (typeof ratingContentService.deleteRating === "function") {
-                await ratingContentService.deleteRating(dbContentId, currentUserId);
+                await ratingContentService.deleteRating(dbContentId, currentUser?.id);
             }
             const updatedSummary = await ratingContentService.getRatingSummary(dbContentId);
             setRatingSummary(updatedSummary);
@@ -280,15 +280,15 @@ const RadioPage = () => {
     };
 
     const onPostReview = async (commentText: string) => {
-        if (!isLoggedIn || !currentUserId || !dbContentId) return;
+        if (!isLoggedIn || !currentUser?.id || !dbContentId) return;
         try {
             const createdReview = await reviewService.createReview({
                 contentId: dbContentId,
-                userId: currentUserId,
+                userId: currentUser?.id,
                 comment: commentText
             });
             if (createdReview) {
-                const newUsers = await fetchMissingUsers([currentUserId], usersCache);
+                const newUsers = await fetchMissingUsers([currentUser?.id], usersCache);
                 setUsersCache(prev => ({ ...prev, ...newUsers }));
                 setComments((prev) => [{
                     ...createdReview,
@@ -304,17 +304,17 @@ const RadioPage = () => {
     };
 
     const onPostReply = async (replyText: string, parentId: string) => {
-        if (!isLoggedIn || !currentUserId || !dbContentId) return;
+        if (!isLoggedIn || !currentUser?.id || !dbContentId) return;
         try {
             const createdReply = await reviewService.createReview({
                 contentId: dbContentId,
-                userId: currentUserId,
+                userId: currentUser?.id,
                 comment: replyText,
                 parent_review_id: parentId
             });
 
             if (createdReply) {
-                const newUsers = await fetchMissingUsers([currentUserId], usersCache);
+                const newUsers = await fetchMissingUsers([currentUser?.id], usersCache);
                 setUsersCache(prev => ({ ...prev, ...newUsers }));
                 setComments((prev) =>
                     prev.map((comment) => {
@@ -362,8 +362,8 @@ const RadioPage = () => {
         actionType: "like" | "dislike" | "remove"
     ) => {
 
-        if (!isLoggedIn || !currentUserId) {
-            console.warn("[DEBUG] User not logged in or currentUserId missing");
+        if (!isLoggedIn || !currentUser?.id) {
+            console.warn("[DEBUG] User not logged in or currentUser?.id missing");
             return;
         }
 
@@ -416,14 +416,14 @@ const RadioPage = () => {
             if (actionType === "remove") {
                 await likeReviewsService.removeLikeReview(
                     reviewId,
-                    currentUserId
+                    currentUser?.id
                 );
             } else {
                 const isLikeBool = actionType === "like";
 
                 await likeReviewsService.toggleLikeReview(
                     reviewId,
-                    currentUserId,
+                    currentUser?.id,
                     isLikeBool
                 );
             }
@@ -434,7 +434,7 @@ const RadioPage = () => {
 
                 freshData = await likeReviewsService.getReviewLikes(
                     reviewId,
-                    currentUserId
+                    currentUser?.id
                 );
 
             } catch (err) {
@@ -445,7 +445,7 @@ const RadioPage = () => {
                 const transformed =
                     likeReviewsService.transformLikesData(
                         freshData,
-                        currentUserId
+                        currentUser?.id
                     );
 
                 const {
@@ -486,12 +486,6 @@ const RadioPage = () => {
             }
         } catch (err) {
             console.error("[DEBUG] CRITICAL ERROR:", err);
-            console.error("[DEBUG] Context:", {
-                reviewId,
-                currentUserId,
-                actionType
-            });
-
             try {
                 setComments(previousCommentsSnapshot);
             } catch (e) {
@@ -541,7 +535,9 @@ const RadioPage = () => {
 
     if (loading) {
         return (
-            <Loader />
+            <div className={`flex justify-center items-center min-h-screen ${theme === 'dark' ? 'bg-app-bg text-app-text' : 'bg-neutral-50 text-neutral-800'}`}>
+                <Loader />
+            </div>
         );
     }
 
@@ -684,7 +680,7 @@ const RadioPage = () => {
                     <RadioCommunityZone
                         contentId={dbContentId}
                         theme={theme}
-                        currentUserId={currentUserId}
+                        currentUser={currentUser}
                         loadingReviews={loadingReviews}
                         ratingSummary={ratingSummary}
                         userRating={userRating}

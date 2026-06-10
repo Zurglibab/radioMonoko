@@ -33,7 +33,7 @@ export interface CommentFormProps {
 export interface CommentItemProps {
     comment: any;
     usersCache: Record<string, User>;
-    currentUserId: string | null;
+    currentUser: User | null;
     isLoggedIn: boolean;
     theme: string;
     onPostReply: (text: string, parentId: string) => Promise<void>;
@@ -43,7 +43,7 @@ export interface CommentItemProps {
 export interface RadioCommunityZoneProps {
     contentId: string;
     theme: "dark" | "light";
-    currentUserId: string | null;
+    currentUser: User | null;
     loadingReviews?: boolean;
     ratingSummary?: any;
     userRating?: number;
@@ -85,4 +85,10 @@ export interface ChatContainerProps {
     currentUserId: string;
     onBack: () => void;
     onCloseAll: () => void;
+}
+
+export interface SettingsModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    user: User;
 }

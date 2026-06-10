@@ -148,7 +148,6 @@ const NavBar = () => {
     };
 
     const IconCircleStyle = "flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full transition-all duration-300 cursor-pointer active:scale-95 hover:bg-app-text/10 group";
-
     return (
         <>
             <nav className="fixed top-0 left-0 right-0 h-14 md:h-16 flex items-center justify-between px-4 md:px-12 bg-app-bg/80 backdrop-blur-xl border-b border-app-border z-50 transition-colors duration-500">
@@ -270,9 +269,16 @@ const NavBar = () => {
                                     )}
                                 </button>
                                 {isNotifOpen && (
-                                    <div className="absolute top-12 right-0 w-72 md:w-80 bg-app-card border border-app-border rounded-2xl shadow-2xl overflow-hidden z-60">
-                                        <div className="px-4 py-3 border-b border-app-border bg-app-text/5 flex items-center justify-between">
-                                            <p className="text-[10px] uppercase tracking-[0.2em] font-black">Notifications</p>
+                                    <div className={`absolute top-12 right-0 w-72 md:w-80 border rounded-2xl shadow-2xl overflow-hidden z-60 
+                                        ${theme === 'dark' ? 'bg-neutral-900 border-neutral-800' : 'bg-white border-neutral-200'}`}
+                                    >
+                                        <div className={`px-4 py-3 border-b flex items-center justify-between 
+                                            ${theme === 'dark' ? 'bg-white/5 border-neutral-800' : 'bg-neutral-100 border-neutral-200'}`}
+                                        >
+                                            <p className={`text-[10px] uppercase tracking-[0.2em] font-black 
+                                                ${theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                                                Notifications
+                                            </p>
                                             {unreadCount > 0 && (
                                                 <button
                                                     onClick={markAllAsRead}
@@ -287,17 +293,29 @@ const NavBar = () => {
                                                 <div
                                                     key={n.id}
                                                     onClick={() => markAsRead(n.id)}
-                                                    className={`px-4 py-4 border-b border-app-border hover:bg-app-text/5 cursor-pointer flex gap-3 ${n.isRead ? 'opacity-60' : ''}`}
+                                                    className={`px-4 py-4 border-b cursor-pointer flex gap-3 transition-colors 
+                                                        ${theme === 'dark' ? 'border-neutral-800 hover:bg-neutral-800/50' : 'border-neutral-100 hover:bg-neutral-50'}
+                                                        ${n.isRead ? 'opacity-60' : ''}`}
                                                 >
                                                     <div className="mt-0.5">
                                                         {getNotificationIcon(n.type)}
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs text-app-text">{n.message}</p>
-                                                        <p className="text-[10px] opacity-40 mt-1 uppercase">{n.timestamp}</p>
+                                                        <p className={`text-xs ${theme === 'dark' ? 'text-neutral-200' : 'text-neutral-800'}`}>
+                                                            {n.message}
+                                                        </p>
+                                                        <p className={`text-[10px] mt-1 uppercase opacity-60 
+                                                                ${theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'}`}>
+                                                            {n.timestamp}
+                                                        </p>
                                                     </div>
                                                 </div>
-                                            )) : <p className="p-4 text-center text-xs opacity-50">Aucune notification.</p>}
+                                            )) : (
+                                                <p className={`p-4 text-center text-xs opacity-50 
+                                                        ${theme === 'dark' ? 'text-neutral-400' : 'text-neutral-600'}`}>
+                                                    Aucune notification.
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -313,7 +331,11 @@ const NavBar = () => {
                                     `}
                                 >
                                     {user?.avatar ? (
-                                        <img src={user.avatar} alt="Profil" className="w-full h-full object-cover" />
+                                        <img
+                                            src={user.avatar.startsWith('data:image') ? user.avatar : `data:image/png;base64,${user.avatar}`}
+                                            alt="Profil"
+                                            className="w-full h-full object-cover"
+                                        />
                                     ) : (
                                         <HiOutlineUser className="text-lg md:text-xl text-app-text opacity-50" />
                                     )}

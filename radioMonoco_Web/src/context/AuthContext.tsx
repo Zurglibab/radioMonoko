@@ -23,7 +23,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     register: (email: string, username:string, password: string) => Promise<void>;
     logout: () => void;
-    updateUser: (user: User) => void;
+    updateUser: (user: User | null) => void;
     loginWithGoogleToken: (googleToken: string) => Promise<void>;
 }
 

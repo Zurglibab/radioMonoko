@@ -5,7 +5,7 @@ import type { Channel } from '../../interfaces/Chat.types';
 import { HiOutlineChatBubbleLeftRight, HiXMark } from 'react-icons/hi2';
 import { useUserCache } from '../../hooks/useUserCache';
 import { DEFAULT_THEME } from "../../assets/themes/DefaultTheme.ts";
-import { useAppearance } from "../../context/AppearanceContext.tsx"; // Import du hook
+import { useAppearance } from "../../context/AppearanceContext.tsx";
 
 export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
     const [channels, setChannels] = useState<Channel[]>([]);
@@ -15,10 +15,22 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
     const [showMenu, setShowMenu] = useState(false);
 
     const { getPseudo } = useUserCache();
-    const { theme } = useAppearance(); // Récupération du thème
+    const { theme } = useAppearance();
 
     useEffect(() => {
         ChatService.listChannels().then(setChannels).catch(console.error);
+    }, []);
+
+    useEffect(() => {
+        const handleOpenChannel = (e: any) => {
+            const channelId = e.detail;
+            setIsOpen(true);
+            setShowMenu(false);
+            setActiveChannelId(channelId);
+            ChatService.listChannels().then(setChannels).catch(console.error);
+        };
+        window.addEventListener('open-channel', handleOpenChannel);
+        return () => window.removeEventListener('open-channel', handleOpenChannel);
     }, []);
 
     useEffect(() => {
@@ -73,7 +85,7 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
                                 key={c.id}
                                 onClick={() => { setActiveChannelId(c.id); setShowMenu(false); }}
                                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center gap-2 
-                                ${DEFAULT_THEME.bgHover} ${DEFAULT_THEME.text}
+                                ${DEFAULT_THEME.bgHover}
                                 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-700'}`}
                             >
                                 {channelNames[c.id] || "Chargement..."}
