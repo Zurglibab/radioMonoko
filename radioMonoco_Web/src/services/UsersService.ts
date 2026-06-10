@@ -1,5 +1,6 @@
 import api from "./Api";
 import type { User } from "../interfaces/Users.types";
+import type {ExportUserProfile} from "../interfaces/ExportUserProfile.types.ts";
 
 const getMe = async (): Promise<User | null> => {
     try {
@@ -85,6 +86,16 @@ const deleteUser = async (id: string): Promise<boolean> => {
     }
 };
 
+const exportUserProfile = async (id: string): Promise<ExportUserProfile | null> => {
+    try {
+        const response = await api.get(`/user/${id}/export`);
+        return response.data?.data || response.data;
+    } catch (error) {
+        console.error("Erreur lors de l'export du profil :", error);
+        return null;
+    }
+};
+
 export default {
     getMe,
     updateMe,
@@ -92,5 +103,6 @@ export default {
     getMyFeed,
     searchUsers,
     getUserById,
-    deleteUser
+    deleteUser,
+    exportUserProfile,
 };

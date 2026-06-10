@@ -205,6 +205,35 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                             )}
                                         </div>
                                     </div>
+                                    <div className="space-y-3 pt-6 border-t border-app-border">
+                                        <label className="text-[11px] font-bold opacity-50 ml-1 block uppercase tracking-wider">
+                                            {t("settings.profile.dataManagement")}
+                                        </label>
+                                        <div className="p-4 bg-app-text/5 rounded-2xl border border-app-border flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm font-bold">Exporter mes données</p>
+                                                <p className="text-[11px] opacity-50">Téléchargez une copie complète de vos informations.</p>
+                                            </div>
+                                            <button
+                                                onClick={async () => {
+                                                    const data = await UsersService.exportUserProfile(user!.id);
+                                                    if (data) {
+                                                        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                                                        const url = URL.createObjectURL(blob);
+                                                        const a = document.createElement('a');
+                                                        a.href = url;
+                                                        a.download = `profile_export_${user?.username}.json`;
+                                                        a.click();
+                                                        URL.revokeObjectURL(url);
+                                                    }
+                                                }}
+                                                className="text-[11px] font-black uppercase tracking-wider text-primary hover:bg-primary/10 px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                                            >
+                                                Exporter
+                                            </button>
+                                        </div>
+                                    </div>
+
                                 </div>
                             )}
 
