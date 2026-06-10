@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Modal, Pressable, ScrollView, Alert, Share, useColorScheme } from "react-native";
-import { Share2, UserPlus, Trash2, Globe, Edit3, X, Lock, Users } from "lucide-react-native";
+import { Share2, Trash2, Globe, Edit3, X, Lock } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { Playlist } from "@/types/content";
-import { useLibrary } from "@/hooks/home/useLibrary";
+import { CollectionService } from "@/services/collections/collection.service";
 import { useRouter } from "expo-router";
 import { useAuthContext } from "@/context/AuthContext";
 
@@ -11,90 +11,85 @@ interface PlaylistActionSheetProps {
   isVisible: boolean;
   onClose: () => void;
   playlist: Playlist;
+  onUpdate?: (patch: Partial<Playlist>) => void;
 }
 
-/**
- * PlaylistActionSheet : Menu contextuel de gestion des playlists.
- * Permet de piloter la confidentialité, la collaboration et le cycle de vie de la playlist.
- */
-export const PlaylistActionSheet = ({ isVisible, onClose, playlist }: PlaylistActionSheetProps) => {
-  const { appearanceSettings } = useAuthContext();
+export const PlaylistActionSheet = ({ isVisible, onClose, playlist, onUpdate }: PlaylistActionSheetProps) => {
+  const { appearanceSettings, token } = useAuthContext();
   const systemTheme = useColorScheme();
 
-  /**
-   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
-   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
-   * Détection du thème (Priorité Dark)
-   */
-  const isDark = appearanceSettings.themeMode === 'system' 
-    ? systemTheme === 'dark' 
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? systemTheme === 'dark'
     : appearanceSettings.themeMode === 'dark';
-        
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
 
-  const { 
-    removePlaylist, 
-    renamePlaylist, 
-    toggleVisibility, 
-    toggleCollaboration 
-  } = useLibrary();
+  const colors = isDark ? theme.dark.colors : theme.light.colors;
   const router = useRouter();
 
-  /**
-   * Partage Natif : Utilise l'API système pour diffuser l'URL de la playlist.
-   */
   const handleShare = async () => {
     try {
       await Share.share({
         message: `Découvre ma playlist "${playlist.name}" sur RadioMonoko !`,
-        url: `https://radiomonoko.app/playlist/${playlist.id}`,
       });
       onClose();
-    } catch (error) {
-      console.error("Erreur partage :", error);
+    } catch {}
+  };
+
+  const handleToggleVisibility = async () => {
+    if (!token) return;
+    try {
+      await CollectionService.update(token, playlist.id, { is_public: !playlist.isPublic });
+      onUpdate?.({ isPublic: !playlist.isPublic });
+      onClose();
+    } catch {
+      Alert.alert("Erreur", "Impossible de modifier la visibilité.");
     }
   };
 
-  /**
-   * Renommer : Déclenche un prompt système pour la saisie textuelle.
-   */
   const handleRename = () => {
     Alert.prompt(
       "Renommer la playlist",
       "Entrez le nouveau nom",
       [
         { text: "Annuler", style: "cancel" },
-        { 
-          text: "Enregistrer", 
-          onPress: (name?: string) => {
-            if (name) renamePlaylist(playlist.id, name);
+        {
+          text: "Enregistrer",
+          onPress: async (name?: string) => {
+            if (!name?.trim() || !token) return;
+            try {
+              await CollectionService.update(token, playlist.id, { name: name.trim() });
+              onUpdate?.({ name: name.trim() });
+            } catch {
+              Alert.alert("Erreur", "Impossible de renommer la playlist.");
+            }
             onClose();
-          } 
-        }
+          },
+        },
       ],
       "plain-text",
       playlist.name
     );
   };
 
-  /**
-   * Suppression : Confirmation sécurisée avant retrait définitif.
-   */
   const handleDelete = () => {
     Alert.alert(
       "Supprimer la playlist",
       "Cette action est définitive.",
       [
         { text: "Annuler", style: "cancel" },
-        { 
-          text: "Supprimer", 
-          style: "destructive", 
-          onPress: () => {
-            removePlaylist(playlist.id);
-            onClose();
-            router.back();
-          } 
-        }
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: async () => {
+            if (!token) return;
+            try {
+              await CollectionService.remove(token, playlist.id);
+              onClose();
+              router.back();
+            } catch {
+              Alert.alert("Erreur", "Impossible de supprimer la playlist.");
+            }
+          },
+        },
       ]
     );
   };
@@ -155,25 +150,18 @@ export const PlaylistActionSheet = ({ isVisible, onClose, playlist }: PlaylistAc
 
         <ScrollView showsVerticalScrollIndicator={false}>
           <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2">Communauté</Text>
-          
-          <ActionItem 
-            icon={<Share2 size={20} color={colors.text} />} 
-            label="Envoyer à un ami" 
-            onPress={handleShare} 
-          />
-          
-          <ActionItem 
-            icon={<Users size={20} color={playlist.isCollaborative ? colors.primary : colors.text} />} 
-            label={playlist.isCollaborative ? "Désactiver la collaboration" : "Rendre collaborative"} 
-            secondary={playlist.isCollaborative ? "🤝 Mode collaboratif actif" : "Autoriser des amis à ajouter des titres"}
-            onPress={() => { toggleCollaboration(playlist.id); onClose(); }}
+
+          <ActionItem
+            icon={<Share2 size={20} color={colors.text} />}
+            label="Envoyer à un ami"
+            onPress={handleShare}
           />
 
-          <ActionItem 
-            icon={playlist.isPublic ? <Lock size={20} color={colors.text} /> : <Globe size={20} color={colors.primary} />} 
-            label={playlist.isPublic ? "Passer en privé" : "Passer en public"} 
+          <ActionItem
+            icon={playlist.isPublic ? <Lock size={20} color={colors.text} /> : <Globe size={20} color={colors.primary} />}
+            label={playlist.isPublic ? "Passer en privé" : "Passer en public"}
             secondary={playlist.isPublic ? "Visible uniquement par vous" : "Visible par toute la communauté"}
-            onPress={() => { toggleVisibility(playlist.id); onClose(); }}
+            onPress={handleToggleVisibility}
           />
 
           <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mt-8 mb-2">Paramètres</Text>

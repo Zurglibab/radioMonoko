@@ -1,46 +1,46 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { SocialService } from "@/services/social/social.service";
 import { SocialActivity } from "@/types/community";
+import { isInBackoff } from "@/utils/rateLimitGuard";
 
-/**
- * useCommunity : Hook de gestion du fil d'actualité communautaire.
- * Ce hook centralise la logique de chargement et de gestion du feed communautaire, 
- * qui regroupe les interactions sociales (critiques, likes, commentaires) des utilisateurs.
- * Il gère l'état du feed, le chargement initial, et fournit une fonction de rafraîchissement pour recharger les données à la demande.
- * Il utilise le SocialService pour interagir avec l'API et récupérer les activités sociales à afficher dans le fil d'actualité.
- * @param skipInitialFetch 
- * @returns 
- */
 export const useCommunity = (skipInitialFetch = false) => {
-  const { token } = useAuthContext();
+  const { token, user, isLoading: isAuthLoading } = useAuthContext();
   const [feed, setFeed] = useState<SocialActivity[]>([]);
   const [isLoading, setIsLoading] = useState(!skipInitialFetch);
+  const loadedForSession = useRef(false);
 
-  const loadFeed = useCallback(async () => {
-    if (!token) return;
-    setIsLoading(true);
+  const loadFeed = useCallback(async (silent = false) => {
+    if (!token || !user?.id) return;
+    if (isInBackoff()) return;
+    if (!silent) setIsLoading(true);
     try {
-      const data = await SocialService.getFeed(token);
+      const data = await SocialService.getFeed(token, user.id);
       setFeed(Array.isArray(data) ? data : []);
     } catch (error) {
       if (__DEV__) console.warn("[useCommunity]", error);
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
-  }, [token]);
+  }, [token, user?.id]);
 
   useEffect(() => {
     if (skipInitialFetch) {
       setIsLoading(false);
       return;
     }
+    if (isAuthLoading || !token || !user?.id) {
+      if (!token) loadedForSession.current = false;
+      return;
+    }
+    if (loadedForSession.current) return;
+    loadedForSession.current = true;
     loadFeed();
-  }, [skipInitialFetch, loadFeed]);
+  }, [skipInitialFetch, isAuthLoading, token, user?.id, loadFeed]);
 
   return {
     feed,
     isLoading,
-    refetch: loadFeed
+    refetch: loadFeed,
   };
 };

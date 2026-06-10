@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Alert } from "react-native";
 import { SocialService } from "@/services/social/social.service";
 import { PendingFriendRequest } from "@/types/social";
+import { isInBackoff } from "@/utils/rateLimitGuard";
 
 /**
  * usePendingRequests : Hook personnalisé pour gérer les demandes d'amitié en attente.
@@ -16,6 +17,7 @@ export const usePendingRequests = (token: string | null) => {
 
   const load = useCallback(async () => {
     if (!token) return;
+    if (isInBackoff()) return;
     setIsLoading(true);
     try {
       const data = await SocialService.fetchPendingRequests(token);

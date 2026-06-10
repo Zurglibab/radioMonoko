@@ -1,19 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, useColorScheme, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, UserPlus, UserCheck, Users, ListMusic, MoreVertical } from "lucide-react-native";
+import { ChevronLeft, UserPlus, UserCheck, Users, ListMusic, MoreVertical, MessageSquare } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useUserProfile } from "@/hooks/community/useUserProfile";
+import { ChannelService } from "@/services/chat/channel.service";
 import { InitialAvatar } from "@/features/community/components/InitialAvatar";
 import { UserPlaylistsSection } from "@/features/community/components/UserPlaylistsSection";
 import { MutualFriendsSection } from "@/features/community/components/MutualFriendsSection";
 
 export default function UserProfileScreen() {
   const router = useRouter();
-  const { appearanceSettings } = useAuthContext();
+  const { appearanceSettings, token, user: currentUser } = useAuthContext();
   const systemTheme = useColorScheme();
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   const isDark = appearanceSettings.themeMode === "system"
     ? systemTheme === "dark"
@@ -21,6 +23,7 @@ export default function UserProfileScreen() {
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   const {
+    id,
     state,
     isLoading,
     error,
@@ -30,6 +33,20 @@ export default function UserProfileScreen() {
     handleFollowToggle,
     openOptions,
   } = useUserProfile();
+
+  const handleOpenChat = async () => {
+    if (!token || !currentUser?.id || !id || isChatLoading) return;
+    setIsChatLoading(true);
+    try {
+      const channelId = await ChannelService.getOrCreateDM(token, currentUser.id, id);
+      const displayName = state.profile?.display_name ?? state.profile?.username ?? "Conversation";
+      router.push(`/chat/${channelId}?username=${encodeURIComponent(displayName)}` as any);
+    } catch (err) {
+      if (__DEV__) console.warn("[UserProfile] getOrCreateDM failed:", err);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -125,34 +142,53 @@ export default function UserProfileScreen() {
             ))}
           </View>
 
-          {/* Bouton Suivre */}
+          {/* Boutons Suivre + Message */}
           {!isOwnProfile && (
-            <TouchableOpacity
-              onPress={handleFollowToggle}
-              disabled={isFollowLoading}
-              style={{
-                backgroundColor: isFollowing ? colors.surface : colors.text,
-                borderColor: colors.border,
-                opacity: isFollowLoading ? 0.6 : 1,
-              }}
-              className="w-full h-12 rounded-full flex-row items-center justify-center border shadow-sm mt-5 active:scale-[0.99]"
-            >
-              {isFollowing ? (
-                <>
-                  <UserCheck size={16} color={colors.text} />
-                  <Text style={{ color: colors.text }} className="font-black uppercase text-xs ml-2 tracking-widest">
-                    Abonné
-                  </Text>
-                </>
-              ) : (
-                <>
-                  <UserPlus size={16} color={colors.background} />
-                  <Text style={{ color: colors.background }} className="font-black uppercase text-xs ml-2 tracking-widest">
-                    Suivre
-                  </Text>
-                </>
-              )}
-            </TouchableOpacity>
+            <View className="flex-row mt-5 gap-x-3 w-full">
+              <TouchableOpacity
+                onPress={handleFollowToggle}
+                disabled={isFollowLoading}
+                style={{
+                  backgroundColor: isFollowing ? colors.surface : colors.text,
+                  borderColor: colors.border,
+                  opacity: isFollowLoading ? 0.6 : 1,
+                }}
+                className="flex-1 h-12 rounded-full flex-row items-center justify-center border shadow-sm active:scale-[0.99]"
+              >
+                {isFollowing ? (
+                  <>
+                    <UserCheck size={16} color={colors.text} />
+                    <Text style={{ color: colors.text }} className="font-black uppercase text-xs ml-2 tracking-widest">
+                      Abonné
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <UserPlus size={16} color={colors.background} />
+                    <Text style={{ color: colors.background }} className="font-black uppercase text-xs ml-2 tracking-widest">
+                      Suivre
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleOpenChat}
+                disabled={isChatLoading}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                  opacity: isChatLoading ? 0.6 : 1,
+                }}
+                className="h-12 w-12 rounded-full items-center justify-center border shadow-sm active:scale-[0.99]"
+              >
+                {isChatLoading ? (
+                  <ActivityIndicator size="small" color={colors.text} />
+                ) : (
+                  <MessageSquare size={18} color={colors.text} />
+                )}
+              </TouchableOpacity>
+            </View>
           )}
 
           <UserPlaylistsSection collections={collections} colors={colors} />

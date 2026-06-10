@@ -6,6 +6,7 @@ import {
   Search,
   User,
   Newspaper,
+  MessageSquare,
 } from "lucide-react-native";
 import React from "react";
 import { Platform, useColorScheme } from "react-native";
@@ -107,6 +108,15 @@ export default function TabsLayout() {
         options={{
           title: "Ma radio",
           tabBarIcon: ({ color }) => <Library size={22} color={color} />,
+        }}
+      />
+
+      {/* Onglet Messages */}
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Messages",
+          tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} />,
         }}
       />
 

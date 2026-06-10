@@ -4,6 +4,7 @@ import { ReviewService } from "@/services/reviews/review.service";
 import { RatingService } from "@/services/ratings/rating.service";
 import { ContentApiService } from "@/services/content/content-api.service";
 import { Station } from "@/types/content";
+import { isInBackoff } from "@/utils/rateLimitGuard";
 
 /**
  * useReviewForm : Hook de gestion du formulaire de critique et de notation.
@@ -21,11 +22,10 @@ export const useReviewForm = (station: Station | null) => {
    */
   useEffect(() => {
     if (!token || !user?.id || !station) return;
+    if (isInBackoff()) return;
     setIsLoadingExisting(true);
     (async () => {
       try {
-        // Trouve le content local correspondant à la station (via apiId). 
-        // Si pas trouvé, on considère qu'il n'y a pas de note existante.
         const content = await ContentApiService.findByApiId(token, station.id);
         if (!content) {
           setInitialRating(0);
@@ -35,7 +35,7 @@ export const useReviewForm = (station: Station | null) => {
           const rating = await RatingService.getByUserAndContent(token, content.id, user.id);
           setInitialRating(rating.average_rating);
         } catch {
-          setInitialRating(0); // pas encore noté
+          setInitialRating(0);
         }
       } catch (err: any) {
         if (__DEV__) console.warn("[useReviewForm] preload", err?.message);
@@ -56,14 +56,12 @@ export const useReviewForm = (station: Station | null) => {
     setSubmitError(null);
 
     try {
-      // Résout le content_id local, en créant le content si nécessaire (upsert).
       const contentId = await ContentApiService.resolveContentId(token, station.id, {
         title: station.title,
         description: station.description || "",
         content_type: station.type === 'podcast' ? 'podcast' : 'show',
       });
 
-      // Sauvegarde rating + review en parallèle (gain de temps)
       const promises: Promise<unknown>[] = [];
 
       if (rating > 0) {
