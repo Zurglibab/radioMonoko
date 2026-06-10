@@ -29,13 +29,13 @@ const UserProfilePage = () => {
                 setError("");
 
                 if(!id) {
-                    setError("ID utilisateur manquant.");
+                    setError(t("userProfile.missingUserId"));
                     return;
                 }
 
                 const userData = await UsersService.getUserById(id);
                 if (!userData) {
-                    setError("Utilisateur introuvable.");
+                    setError(t("userProfile.userNotFound"));
                     return;
                 }
                 setProfilUser(userData);
@@ -54,7 +54,7 @@ const UserProfilePage = () => {
                 setCollections(visibleCollections);
             } catch (err) {
                 console.error("Erreur chargement profil utilisateur :", err);
-                setError("Impossible de charger le profil utilisateur");
+                setError(t("userProfile.loadError"));
             } finally {
                 setLoading(false);
             }
@@ -67,18 +67,18 @@ const UserProfilePage = () => {
             navigate(`/collections/${collection.id}`);
             return;
         }
-        alert("Cette collection est privée vous ne pouvez pas y accéder .");
+        alert(t("userProfile.privateCollectionAlert"));
     };
 
     const handleFollowClick = () => {
-        alert("La fonctionnalité de follow click arrive apres zebi");
+        alert(t("userProfile.followFeatureComingSoon"));
     };
 
     if (loading) {
         return (
             <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
                 <p className="text-neutral-400">
-                    Chargement du profil...
+                    {t("userProfile.loading")}
                 </p>
             </div>
         );
@@ -88,14 +88,14 @@ const UserProfilePage = () => {
             <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
                 <div className="text-center">
                     <p className="text-white text-xl font-bold">
-                        {error || "Utilisateur introuvable"}
+                        {error || t("userProfile.userNotFound")}
                     </p>
 
                     <button
                         onClick={() => navigate("/search")}
                         className="mt-6 px-5 py-2 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-semibold transition"
                     >
-                        Retour à la recherche
+                        {t("userProfile.backToSearch")}
                     </button>
                 </div>
             </div>
@@ -116,7 +116,7 @@ const UserProfilePage = () => {
                     onClick={() => navigate(-1)}
                     className="mb-8 flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
                 >
-                    ← Retour
+                    ← {t("common.back")}
                 </button>
 
                 <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-8 md:p-10 mb-12">
@@ -141,7 +141,7 @@ const UserProfilePage = () => {
 
                             <div className="flex flex-wrap items-center gap-3 mb-3">
                                 <p className="uppercase tracking-[0.2em] text-neutral-500 text-xs font-bold">
-                                    Profil utilisateur
+                                    {t("userProfile.title")}
                                 </p>
 
                                 <span
@@ -152,7 +152,7 @@ const UserProfilePage = () => {
                                     }`}
                                 >
                                     {profilUser.privacy === "public" ? <FiGlobe /> : <FiLock />}
-                                    {profilUser.privacy === "public" ? "Public" : "Privé"}
+                                    {profilUser.privacy === "public" ? t("userProfile.public") : t("userProfile.private")}
                                 </span>
                             </div>
 
@@ -166,7 +166,7 @@ const UserProfilePage = () => {
 
                             {isPrivateProfil && !isOwnProfile ? (
                                 <p className="text-neutral-500 mt-5 max-w-2xl">
-                                    Ce profil est privé. Seules les informations publiques et les collections publiques sont visibles.
+                                    {t("userProfile.privateProfileNotice")}
                                 </p>
                             ) : (
                                 <>
@@ -196,7 +196,7 @@ const UserProfilePage = () => {
                                 className="flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-5 py-3 rounded-full font-semibold transition shadow-lg shadow-rose-600/20"
                             >
                                 <FiUserPlus />
-                                Suivre
+                                {t("userProfile.follow")}
                             </button>
                         )}
                         <ReportButton
@@ -209,7 +209,7 @@ const UserProfilePage = () => {
                     <div className="grid md:grid-cols-3 gap-4 mt-10">
                         <div className="bg-black/20 border border-white/5 rounded-2xl p-5">
                             <p className="text-neutral-500 text-sm">
-                                Collections affichées
+                                {t("userProfile.displayedCollections")}
                             </p>
                             <p className="text-3xl font-black mt-2">
                                 {collections.length}
@@ -218,7 +218,7 @@ const UserProfilePage = () => {
 
                         <div className="bg-black/20 border border-white/5 rounded-2xl p-5">
                             <p className="text-neutral-500 text-sm">
-                                Collections publiques
+                                {t("userProfile.publicCollections")}
                             </p>
                             <p className="text-3xl font-black mt-2">
                                 {collections.filter((c) => c.is_public).length}
@@ -227,12 +227,12 @@ const UserProfilePage = () => {
 
                         <div className="bg-black/20 border border-white/5 rounded-2xl p-5">
                             <p className="text-neutral-500 text-sm">
-                                Membre depuis
+                                {t("userProfile.memberSince")}
                             </p>
                             <p className="text-lg font-bold mt-3">
                                 {profilUser.created_at
                                     ? new Date(profilUser.created_at).toLocaleDateString()
-                                    : "Non renseigné"}
+                                    : t("userProfile.notProvided")}
                             </p>
                         </div>
                     </div>
@@ -240,7 +240,7 @@ const UserProfilePage = () => {
 
                 <div>
                     <h2 className="text-2xl font-bold mb-6">
-                        Collections de{" "}
+                        {t("userProfile.collectionsOf")}{" "}
                         <span className="text-rose-500">
                             {profilUser.username}
                         </span>
@@ -249,7 +249,7 @@ const UserProfilePage = () => {
                     {collections.length === 0 ? (
                         <div className="bg-neutral-900/40 border border-white/5 rounded-2xl p-8 text-center">
                             <p className="text-neutral-400">
-                                Aucune collection visible pour cet utilisateur.
+                                {t("userProfile.noVisibleCollections")}
                             </p>
                         </div>
                     ) : (
@@ -269,7 +269,7 @@ const UserProfilePage = () => {
                                     >
                                         <div className="flex items-center justify-between mb-4">
                                             <span className="text-xs text-rose-400 font-semibold">
-                                                Collection
+                                                {t("userProfile.collectionLabel")}
                                             </span>
 
                                             <span
@@ -280,7 +280,7 @@ const UserProfilePage = () => {
                                                 }`}
                                             >
                                                 {collection.is_public ? <FiGlobe /> : <FiLock />}
-                                                {collection.is_public ? "Public" : "Privé"}
+                                                {collection.is_public ? t("userProfile.public") : t("userProfile.private")}
                                             </span>
                                         </div>
 
@@ -289,7 +289,7 @@ const UserProfilePage = () => {
                                         </h3>
 
                                         <p className="text-neutral-500 text-sm mt-2 line-clamp-3">
-                                            {collection.description || "Aucune description"}
+                                            {collection.description || t("userProfile.noDescription")}
                                         </p>
 
                                         <span
@@ -298,8 +298,8 @@ const UserProfilePage = () => {
                                             }`}
                                         >
                                             {isLocked
-                                                ? "Collection privée verrouillée"
-                                                : "Voir la collection →"}
+                                                ? t("userProfile.lockedPrivateCollection")
+                                                : t("userProfile.viewCollection")}
                                         </span>
                                     </div>
                                 );

@@ -3,6 +3,7 @@ import { HiOutlineRadio, HiOutlinePlay, HiOutlinePause } from "react-icons/hi2";
 import { useRadio, type Radio } from "../../context/RadioContext";
 import liveService from "../../services/LivesService.ts";
 import type { Brand } from "../../interfaces/Brands.types";
+import { useTranslation } from "react-i18next";
 
 interface LiveCardProps {
     brandData: Brand;
@@ -18,6 +19,7 @@ interface LiveDataStructure {
 
 const LiveCard = ({ brandData, theme }: LiveCardProps) => {
     const { playRadio, isPlaying, currentRadio } = useRadio();
+    const { t } = useTranslation();
     const [liveData, setLiveData] = useState<LiveDataStructure | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -62,16 +64,16 @@ const LiveCard = ({ brandData, theme }: LiveCardProps) => {
         liveData?.diffusion?.title ||
         liveData?.program?.name ||
         liveData?.title ||
-        "Émission en direct";
+        t("radio.liveShow");
 
     const streamUrl = brandData.liveStream || `https://icecast.radiofrance.fr/${brandData.id.toLowerCase()}-midfi.mp3?id=openapi`;
 
     const radioInfo: Radio = {
         name: brandData.title === "ICI" ? "France Bleu" : brandData.title,
-        desc: brandData.baseline || brandData.description || "Écouter le direct national",
+        desc: brandData.baseline || brandData.description || t("radio.listenNationalLive"),
         img: "",
         currentShow: programTitle,
-        host: "Animateur",
+        host: t("radio.host"),
         streamUrl: streamUrl,
     };
 
@@ -95,7 +97,7 @@ const LiveCard = ({ brandData, theme }: LiveCardProps) => {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                     </span>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500">En direct</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500">{t("radio.live")}</span>
                 </div>
 
                 <h2 className={`text-xl md:text-2xl font-bold tracking-tight leading-tight line-clamp-2 ${isDark ? "text-white" : "text-neutral-900"}`}>
@@ -107,7 +109,7 @@ const LiveCard = ({ brandData, theme }: LiveCardProps) => {
                 onClick={() => playRadio(radioInfo)}
                 className={`w-16 h-16 shrink-0 rounded-full flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md relative z-10 cursor-pointer
                     ${isDark ? "bg-white text-black hover:bg-neutral-100" : "bg-neutral-900 text-white hover:bg-neutral-800"}`}
-                aria-label={isThisRadioPlaying ? "Mettre en pause" : "Écouter le direct"}
+                aria-label={isThisRadioPlaying ? t("radio.pause") : t("radio.listenLive")}
             >
                 {isThisRadioPlaying ? <HiOutlinePause size={24} /> : <HiOutlinePlay size={24} className="ml-1" />}
             </button>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import brandsService from "../../services/BrandsService";
 import type { Brand } from "../../interfaces/Brands.types";
 
@@ -24,6 +25,7 @@ const LiveRadios = () => {
     const [loading, setLoading] = useState(true);
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     useEffect(() => {
         const fetchBrands = async () => {
@@ -85,7 +87,7 @@ const LiveRadios = () => {
     if (brands.length === 0) {
         return (
             <div className="flex items-center justify-center h-[85vh] md:h-screen bg-black text-white">
-                <p className="opacity-60 text-sm font-medium">Aucune station disponible.</p>
+                <p className="opacity-60 text-sm font-medium">{t("homePage.noStations")}</p>
             </div>
         );
     }
@@ -110,7 +112,7 @@ const LiveRadios = () => {
                                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
                                       <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
                                     </span>
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">En direct</span>
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">{t("homePage.live")}</span>
                                 </div>
 
                                 <h3 className="text-3xl md:text-6xl font-black mb-4 uppercase tracking-tighter drop-shadow-2xl">
@@ -118,14 +120,14 @@ const LiveRadios = () => {
                                 </h3>
 
                                 <p className="text-neutral-200 max-w-2xl mb-10 text-lg md:text-2xl font-medium drop-shadow-md line-clamp-2 md:line-clamp-none">
-                                    {brand.baseline || brand.description || "Écouter le direct national"}
+                                    {brand.baseline || brand.description || t("homePage.listenNationalLive")}
                                 </p>
 
                                 <button
                                     className="px-12 py-5 bg-white text-black font-black rounded-full hover:scale-105 hover:bg-neutral-100 transition-all active:scale-95 shadow-2xl cursor-pointer text-xs uppercase tracking-wider"
                                     onClick={() => navigate(`/radio/${brand.id.toLowerCase()}`)}
                                 >
-                                    ÉCOUTER LE DIRECT
+                                    {t("homePage.listenLiveButton")}
                                 </button>
                             </div>
                         </div>

@@ -37,32 +37,32 @@ const AdminDashboard = () => {
                     onClick={() => navigate("/")}
                     className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
                 >
-                    ← Retour
+                    ← {t("common.back")}
                 </button>
             </div>
 
             <h1 className="text-5xl font-black text-white mb-10">
-                Dashboard Admin
+                {t("admin.dashboard")}
             </h1>
 
             <div className="grid md:grid-cols-4 gap-6">
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-                    <p className="text-neutral-400">Signalements</p>
+                    <p className="text-neutral-400">{t("admin.reports")}</p>
                     <p className="text-4xl font-bold text-white mt-2">{reportCount}</p>
                 </div>
 
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-                    <p className="text-neutral-400">Utilisateurs inscrits</p>
+                    <p className="text-neutral-400">{t("admin.users")}</p>
                     <p className="text-4xl font-bold text-white mt-2">{userCount}</p>
                 </div>
 
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-                    <p className="text-neutral-400">Critiques</p>
+                    <p className="text-neutral-400">{t("admin.reviews")}</p>
                     <p className="text-4xl font-bold text-white mt-2">{reviewCount}</p>
                 </div>
 
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-                    <p className="text-neutral-400">Administrateur connecté</p>
+                    <p className="text-neutral-400">{t("admin.connectedAdmin")}</p>
                     <p className="text-xl text-white mt-2">{user?.username}</p>
                 </div>
             </div>
@@ -72,9 +72,9 @@ const AdminDashboard = () => {
                     onClick={() => navigate("/admin/users")}
                     className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
                 >
-                    <h2 className="text-white font-bold text-xl">Utilisateurs</h2>
+                    <h2 className="text-white font-bold text-xl">{t("admin.manageUsers")}</h2>
                     <p className="text-neutral-500 mt-2">
-                        Gérer les comptes et bannissements
+                        {t("admin.manageUsersText")}
                     </p>
                 </div>
 
@@ -82,9 +82,9 @@ const AdminDashboard = () => {
                     onClick={() => navigate("/admin/reports")}
                     className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
                 >
-                    <h2 className="text-white font-bold text-xl">Signalements</h2>
+                    <h2 className="text-white font-bold text-xl">{t("admin.manageReports")}</h2>
                     <p className="text-neutral-500 mt-2">
-                        Modérer les utilisateurs et critiques signalés
+                        {t("admin.manageReportsText")}
                     </p>
                 </div>
 
@@ -92,9 +92,9 @@ const AdminDashboard = () => {
                     onClick={() => navigate("/admin/reviews")}
                     className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
                 >
-                    <h2 className="text-white font-bold text-xl">Gestion des critiques</h2>
+                    <h2 className="text-white font-bold text-xl">{t("admin.manageReviews")}</h2>
                     <p className="text-neutral-500 mt-2">
-                        Mettre des critiques en avant ou les supprimer
+                        {t("admin.manageReviewsText")}
                     </p>
                 </div>
             </div>

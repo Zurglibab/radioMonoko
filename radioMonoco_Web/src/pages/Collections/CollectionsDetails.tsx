@@ -61,7 +61,7 @@ const CollectionsDetails = () => {
                 setContentDetails(details);
             } catch (err) {
                 console.error("Erreur lors de la récupération de la collection :", err);
-                setError("Impossible de charger la collection");
+                setError(t("collections.errors.loadSingle"));
             } finally {
                 setLoading(false)
             }
@@ -81,21 +81,21 @@ const CollectionsDetails = () => {
             });
         } catch (err) {
             console.error("Erreur lors de la suppression de l'élément :", err);
-            setError("Impossible de supprimer l'élément");
+            setError(t("collections.errors.deleteItem"));
         }
     };
 
     if (loading) {
         return (
             <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-                <p className="text-white">Chargement...</p>
+                <p className="text-white">{t("collections.loadingSingle")}</p>
             </div>
         );
     }
     if (error || !collection) {
         return (
             <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-                <p className="text-white">{error || "Collection introuvable"}</p>
+                <p className="text-white">{error || t("collections.errors.notFound")}</p>
             </div>
         );
     }
@@ -108,7 +108,7 @@ const CollectionsDetails = () => {
                     onClick={() => navigate('/collections')}
                     className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
             >
-                    ← Retour
+                    {t("collections.details.back")}
                 </button>
             </div>
 
@@ -117,14 +117,14 @@ const CollectionsDetails = () => {
                     <div className="w-48 h-48 rounded-3xl bg-gradient-to-br from-rose-500/30 to-blue-500/20 border border-white/10" />
                     <div>
                         <p className="uppercase tracking-[0.2em] text-neutral-500 text-xs font-bold mb-3">
-                            Collection
+                            {t("collections.details.label")}
                         </p>
                         <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight">
                             {collection.name}
                         </h1>
 
                         <p className="text-neutral-400 mt-6 max-w-2xl">
-                            {collection.description || "Aucune description"}
+                            {collection.description || t("collections.noDescription")}
                         </p>
 
                         <div className="flex items-center gap-4 mt-6">
@@ -132,10 +132,10 @@ const CollectionsDetails = () => {
                                 {new Date(collection.created_at).toLocaleDateString()}
                             </span>
                             <span className="text-sm text-neutral-500">
-                                {collection.is_public ? "🌍 Publique" : "🔒 Privée"}
+                                {collection.is_public ? t("collections.details.publicBadge") : t("collections.details.privateBadge")}
                             </span>
                             <span className="text-sm text-rose-400">
-                                {items.length} élément{items.length > 1 ? "s" : ""}
+                                {items.length > 1 ? t("collections.details.itemCountPlural", { count: items.length }) : t("collections.details.itemCount", { count: items.length })}
                             </span>
                         </div>
                     </div>
@@ -143,24 +143,24 @@ const CollectionsDetails = () => {
             </div>
             <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-8">
                 <h2 className="text-2xl font-bold text-white mb-6">
-                    Contenu
+                    {t("collections.details.content")}
                 </h2>
 
                 {items.length === 0 ? (
                     <div className="text-center py-12">
                         <p className="text-white font-semibold text-lg">
-                            Aucun élément dans cette collection
+                            {t("collections.details.empty")}
                         </p>
 
                         <p className="text-neutral-500 mt-2">
-                            Va sur une page émission puis clique sur “Enregistrer” pour l’ajouter à cette collection.
+                            {t("collections.details.emptyHint")}
                         </p>
 
                         <button
                             onClick={() => navigate("/")}
                             className="mt-6 px-5 py-2 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-semibold transition"
                         >
-                            Rechercher une émission
+                            {t("collections.details.searchShow")}
                         </button>
                     </div>
                 ) : (
@@ -182,7 +182,7 @@ const CollectionsDetails = () => {
                                         {contentDetails[item.content_id]?.title || item.content_id}
                                     </p>
                                     <p className="text-neutral-500 text-sm">
-                                        Position : {item.position}
+                                        {t("collections.details.position", { pos: item.position })}
                                     </p>
                                     {contentDetails[item.content_id]?.description && (
                                         <p className="text-neutral-400 mt-2">
@@ -191,7 +191,7 @@ const CollectionsDetails = () => {
                                     )}
                                     {contentDetails[item.content_id]?.url && (
                                         <p className="text-rose-400 text-xs mt-2">
-                                            Voir la page émission →
+                                            {t("collections.details.viewShow")}
                                         </p>
                                     )}
                                 </div>
@@ -203,7 +203,7 @@ const CollectionsDetails = () => {
                                         }}
                                         className="text-red-400 hover:text-red-300"
                                     >
-                                    Supprimer
+                                    {t("collections.delete")}
                                 </button>
                                 )}
                             </div>
