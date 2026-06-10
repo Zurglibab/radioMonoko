@@ -24,7 +24,7 @@ export const CommentItem = memo(({
     const [replyText, setReplyText] = useState("");
 
     const cachedUser = usersCache[comment.user_id];
-    const authorName = cachedUser ? (cachedUser.display_name || cachedUser.username) : `${t("radio.listener")} ${comment.user_id ? comment.user_id.slice(-4) : t("radio.anonymous")}`;
+    const authorName = cachedUser?.display_name || cachedUser?.username || `${t("radio.listener")} ${comment.user_id ? String(comment.user_id).slice(-4) : t("radio.anonymous")}`;
 
     const sendNotification = async (targetUserId: string, type: "like" | "dislike" | "reply", contentPreview: string | null | undefined) => {
         if (targetUserId === currentUserId) return;
@@ -72,7 +72,7 @@ export const CommentItem = memo(({
         <div className={`p-5 rounded-2xl border flex flex-col gap-4 transition-all duration-300 ${theme === 'dark' ? 'bg-white/[0.01] border-white/5 hover:border-white/10' : 'bg-white border-neutral-200/70 shadow-sm hover:shadow-md'}`}>
             <div className="flex gap-4 items-start group/item w-full relative">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${theme === 'dark' ? 'bg-white/5 text-neutral-400' : 'bg-neutral-100 text-neutral-600'}`}>
-                    {authorName.slice(0, 2).toUpperCase()}
+                    {String(authorName).slice(0, 2).toUpperCase()}
                 </div>
                 <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -133,9 +133,9 @@ export const CommentItem = memo(({
                                     type="review"
                                     targetId={comment.id}
                                     targetLabel={
-                                        comment.comment
+                                        typeof comment.comment === "string" && comment.comment.trim()
                                             ? `"${comment.comment.slice(0, 60)}..."`
-                                            : t("radio.userReview")
+                                            : "Critique utilisateur"
                                     }
                                     compact
                                 />
@@ -169,13 +169,13 @@ export const CommentItem = memo(({
                 <div className="flex flex-col gap-4 pl-8 border-l-2 border-dashed border-neutral-200 dark:border-white/5 mt-1">
                     {comment.replies.map((reply: any) => {
                         const replyUser = usersCache[reply.user_id];
-                        const replyAuthorName = replyUser ? (replyUser.display_name || replyUser.username) : `${t("radio.listener")} ${reply.user_id ? reply.user_id.slice(-4) : t("radio.anonymous")}`;
+                        const replyAuthorName = replyUser?.display_name || replyUser?.username || `${t("radio.listener")} ${reply.user_id ? String(reply.user_id).slice(-4) : t("radio.anonymous")}`;
 
                         return (
                             <div key={reply.id} className="flex gap-3 items-start group/item w-full relative">
                                 <HiArrowTurnDownRight size={14} className="text-neutral-300 dark:text-white/20 mt-1.5 shrink-0" />
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${theme === 'dark' ? 'bg-white/5 text-neutral-400' : 'bg-neutral-100 text-neutral-600'}`}>
-                                    {replyAuthorName.slice(0, 2).toUpperCase()}
+                                    {String(replyAuthorName).slice(0, 2).toUpperCase()}
                                 </div>
                                 <div className="space-y-1 flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
@@ -226,9 +226,9 @@ export const CommentItem = memo(({
                                                     type="review"
                                                     targetId={reply.id}
                                                     targetLabel={
-                                                        reply.comment
+                                                        typeof reply.comment === "string" && reply.comment.trim()
                                                             ? `"${reply.comment.slice(0, 60)}..."`
-                                                            : t("radio.userReply")
+                                                            : "Réponse utilisateur"
                                                     }
                                                     compact
                                                 />
