@@ -32,12 +32,10 @@ const Layout = () => {
                 <Outlet />
             </main>
 
-            {/* ChatManager reste à droite */}
             {user && <ChatManager currentUserId={user.id} />}
 
             <GlobalPlayer />
 
-            {/* Bouton Back to top à gauche */}
             <button
                 onClick={scrollToTop}
                 className={`

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import {
     HiOutlineX,
     HiOutlineUser,
-    HiOutlineLockClosed,
     HiOutlineBell,
     HiOutlineColorSwatch,
     HiChevronDown,
@@ -18,6 +17,7 @@ import {
     HiOutlineVolumeUp
 } from "react-icons/hi";
 import { useAppearance } from "../../context/AppearanceContext";
+<<<<<<< HEAD
 import { useAuth, type User } from "../../context/AuthContext";
 import api from "../../services/Api";
 import { useTranslation } from "react-i18next";
@@ -27,6 +27,13 @@ interface SettingsModalProps {
     onClose: () => void;
     user: User | null;
 }
+=======
+import { useAuth } from "../../context/AuthContext";
+import { uploadAvatar } from "../../services/UsersService";
+import type {SettingsModalProps} from "../../interfaces/Props.types";
+import UsersService from "../../services/UsersService.ts";
+
+>>>>>>> follow
 
 type TabId = 'profile' | 'security' | 'notifs' | 'appearance';
 
@@ -75,19 +82,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
     const handleUpdateProfile = async () => {
         setLoading(true);
         try {
+            let finalAvatarUrl = user?.avatar;
+            if (avatarPreview !== user?.avatar) {
+                const uploadedUrl = await uploadAvatar(avatarPreview);
+                console.log(uploadedUrl);
+                if (uploadedUrl) {
+                    finalAvatarUrl = uploadedUrl.avatar;
+                } else {
+                    throw new Error("Échec de l'upload de l'avatar");
+                }
+            }
+
             const updateData = {
                 display_name: displayName,
                 email: email,
                 website: website,
                 bio: bio,
-                privacy: privacy
+                privacy: privacy,
+                avatar: finalAvatarUrl
             };
-            const response = await api.put<User>("/user/me", updateData);
-            updateUser(response.data);
+            const response = await UsersService.updateMe(updateData);
+            console.log(response);
+            updateUser(response);
             onClose();
         } catch (error: any) {
+<<<<<<< HEAD
             console.error("Erreur :", error.response?.data || error.message);
             alert(t("settings.updateError"));
+=======
+            console.error("Erreur de mise à jour :", error);
+            alert("Erreur lors de la mise à jour du profil.");
+>>>>>>> follow
         } finally {
             setLoading(false);
         }
@@ -120,10 +145,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                 <div className="flex flex-col md:flex-row h-140">
                     <div className="w-full md:w-52 border-b md:border-b-0 md:border-r border-app-border p-4 space-y-1">
                         {[
+<<<<<<< HEAD
                             { id: 'profile', label: t("settings.tabs.profile"), icon: <HiOutlineUser /> },
                             { id: 'security', label: t("settings.tabs.security"), icon: <HiOutlineLockClosed /> },
                             { id: 'notifs', label: t("settings.tabs.notifs"), icon: <HiOutlineBell /> },
                             { id: 'appearance', label: t("settings.tabs.appearance"), icon: <HiOutlineColorSwatch /> },
+=======
+                            { id: 'profile', label: 'Profil', icon: <HiOutlineUser /> },
+                            { id: 'notifs', label: 'Notifications', icon: <HiOutlineBell /> },
+                            { id: 'appearance', label: 'Apparence', icon: <HiOutlineColorSwatch /> },
+>>>>>>> follow
                         ].map((s) => (
                             <button
                                 key={s.id}

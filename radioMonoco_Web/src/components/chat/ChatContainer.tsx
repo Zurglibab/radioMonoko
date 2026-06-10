@@ -5,19 +5,18 @@ import { useState } from "react";
 import { HiXMark, HiChevronLeft } from "react-icons/hi2";
 import type { ChatContainerProps } from "../../interfaces/Props.types.ts";
 import { DEFAULT_THEME } from "../../assets/themes/DefaultTheme.ts";
-import { useAppearance } from "../../context/AppearanceContext.tsx"; // Import du hook
+import { useAppearance } from "../../context/AppearanceContext.tsx";
 
 export const ChatContainer = ({ channelId, channelName, currentUserId, onBack, onCloseAll }: ChatContainerProps) => {
     const { messages, sendMessage, removeMessage, isLoading } = useChat(channelId, currentUserId);
     const [isMinimized, setIsMinimized] = useState(false);
-    const { theme } = useAppearance(); // Récupération du thème actuel
+    const { theme } = useAppearance();
 
     return (
         <div className={`w-80 flex flex-col rounded-t-2xl shadow-2xl transition-all duration-300 overflow-hidden 
             ${isMinimized ? 'h-12' : 'h-[500px]'}
             ${theme === 'dark' ? 'bg-neutral-900 border border-neutral-800' : 'bg-white border border-neutral-200'}`}>
 
-            {/* Header avec couleurs dynamiques */}
             <div className={`h-12 px-4 flex items-center justify-between border-b cursor-pointer backdrop-blur-sm
                 ${theme === 'dark' ? 'bg-neutral-800/50 border-neutral-700' : 'bg-neutral-100 border-neutral-200'}`}
                  onClick={() => setIsMinimized(!isMinimized)}>

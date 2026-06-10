@@ -1,7 +1,7 @@
 import api from "./Api";
-import type { UserRelations } from "../interfaces/UserRelations.types.ts";
+import type { User } from "../interfaces/Users.types";
 
-const getFriends = async (): Promise<UserRelations[]> => {
+const getFriends = async (): Promise<User[]> => {
     try {
         const response = await api.get('/userRelation/friends');
         return response.data;
@@ -11,7 +11,7 @@ const getFriends = async (): Promise<UserRelations[]> => {
     }
 };
 
-const getFollowers = async (): Promise<UserRelations[]> => {
+const getFollowers = async (): Promise<User[]> => {
     try {
         const response = await api.get('/userRelation/followers');
         return response.data;
@@ -21,7 +21,7 @@ const getFollowers = async (): Promise<UserRelations[]> => {
     }
 };
 
-const getFriendsById = async (id: string): Promise<UserRelations[]> => {
+const getFriendsById = async (id: string): Promise<User[]> => {
     try {
         const response = await api.get(`/userRelation/friends/${id}`);
         return response.data;
@@ -31,7 +31,7 @@ const getFriendsById = async (id: string): Promise<UserRelations[]> => {
     }
 };
 
-const getRequests = async (): Promise<UserRelations[]> => {
+const getRequests = async (): Promise<User[]> => {
     try {
         const response = await api.get('/userRelation/request');
         return response.data;
@@ -41,7 +41,7 @@ const getRequests = async (): Promise<UserRelations[]> => {
     }
 };
 
-const getFollowing = async (): Promise<UserRelations[]> => {
+const getFollowing = async (): Promise<User[]> => {
     try {
         const response = await api.get('/userRelation/following');
         return response.data;
@@ -101,6 +101,16 @@ const block = async (id: string) => {
     }
 };
 
+const checkIsFriend = async (id: string): Promise<boolean> => {
+    try {
+        const response = await api.get(`/userRelation/is-friend/${id}`);
+        return response.data.isFriend;
+    } catch (error) {
+        console.error(`Erreur lors de la vérification de l'amitié avec ${id}:`, error);
+        return false;
+    }
+};
+
 export default {
     getFriends,
     getFollowers,
@@ -111,5 +121,6 @@ export default {
     unfollow,
     acceptRequest,
     refuseRequest,
-    block
+    block,
+    checkIsFriend,
 };

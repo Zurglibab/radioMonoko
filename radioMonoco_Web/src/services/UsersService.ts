@@ -21,6 +21,16 @@ const updateMe = async (userData: Partial<User>): Promise<User | null> => {
     }
 };
 
+export const uploadAvatar = async (avatar: string): Promise<User | null> => {
+    try {
+        const response = await api.post("/user/me/avatar-base64", { avatar });
+        return response.data?.data || response.data;
+    } catch (error) {
+        console.error("Erreur dans uploadAvatar:", error);
+        return null;
+    }
+};
+
 const getMyLibrary = async (): Promise<any> => {
     try {
         const response = await api.get("/user/me/library");

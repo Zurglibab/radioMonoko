@@ -2,22 +2,31 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import UsersService from "../services/UsersService.ts";
 import CollectionsService from "../services/CollectionsService.ts";
+import UserRelationsService from "../services/UserRelationsService.ts";
 import { useAuth } from "../context/AuthContext.tsx";
+import { DMButton } from "../components/chat/DMButton.tsx";
 import type { User } from "../interfaces/Users.types.ts";
 import type { Collection } from "../interfaces/Collections.types.ts";
-import { FiGlobe, FiLock, FiUserPlus } from "react-icons/fi";
 import ReportButton from "../components/utils/ReportButton.tsx";
 import {useTranslation} from "react-i18next";
+import { FiGlobe, FiLock, FiUserPlus, FiCheck } from "react-icons/fi";
+import NotificationsService from "../services/NotificationsService.ts";
+import {Loader} from "../components/utils/Loader.tsx";
+
 
 const UserProfilePage = () => {
-    const {id} = useParams<{id:string}>();
+    const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const {user : connectedUser} = useAuth();
+    const { user: connectedUser } = useAuth();
     const [profilUser, setProfilUser] = useState<User | null>(null);
     const [collections, setCollections] = useState<Collection[]>([]);
+    const [isFriend, setIsFriend] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const {t} = useTranslation();
+    const [isFollow, setFollow] = useState(false);
+    const [isActionLoading, setIsActionLoading] = useState(false);
+    const [friends, setFriends] = useState<User[]>([]);
 
     const isOwnProfile = connectedUser?.id === profilUser?.id;
     const isPrivateProfil = profilUser?.privacy === "private";
@@ -27,9 +36,8 @@ const UserProfilePage = () => {
             try {
                 setLoading(true);
                 setError("");
-
-                if(!id) {
-                    setError(t("userProfile.missingUserId"));
+                if (!id) {
+                    setError("ID utilisateur manquant.");
                     return;
                 }
 
@@ -40,10 +48,22 @@ const UserProfilePage = () => {
                 }
                 setProfilUser(userData);
 
+                const userFriends = await UserRelationsService.getFriendsById(id);
+                setFriends(userFriends);
+
+                if (connectedUser?.id && id !== connectedUser.id) {
+                    const friendStatus = await UserRelationsService.checkIsFriend(id);
+                    setIsFriend(friendStatus);
+
+                    const followingList = await UserRelationsService.getFollowing();
+                    const isFollowing = followingList.some((rel) => rel.id === id);
+                    setFollow(isFollowing);
+                }
+
                 const allCollections = await CollectionsService.getAllCollections();
                 const userCollections = allCollections.filter((collection) => collection.user_id === userData.id);
-                let visibleCollections: Collection[] = [];
 
+                let visibleCollections: Collection[] = [];
                 if (connectedUser?.id === userData.id) {
                     visibleCollections = userCollections;
                 } else if (userData.privacy === "private") {
@@ -70,19 +90,60 @@ const UserProfilePage = () => {
         alert(t("userProfile.privateCollectionAlert"));
     };
 
-    const handleFollowClick = () => {
-        alert(t("userProfile.followFeatureComingSoon"));
+    const sendNotification = async (targetUserId: string, type: "follow") => {
+        const senderName = connectedUser?.display_name || connectedUser?.username || "Quelqu'un";
+        if (targetUserId === connectedUser?.id) return;
+        const messages = {
+            follow: `${senderName} a commencé à vous suivre`
+        };
+        try {
+            await NotificationsService.createNotification({
+                user_id: targetUserId,
+                type: type,
+                message: messages[type],
+                is_read: false
+            });
+        } catch (error) {
+            console.error("Erreur notification:", error);
+        }
     };
+
+    const handleFollowToggle = async () => {
+        if (!id || !connectedUser?.id || isActionLoading) return;
+        setIsActionLoading(true);
+        try {
+            if (isFollow) {
+                await UserRelationsService.unfollow(id);
+                try { await UserRelationsService.unfollow(id); } catch(e) {}
+
+                setFollow(false);
+                setIsFriend(false);
+            } else {
+                await UserRelationsService.follow(id);
+                setFollow(true);
+                await sendNotification(id, "follow");
+                const friendStatus = await UserRelationsService.checkIsFriend(id);
+                setIsFriend(friendStatus);
+            }
+        } catch (err) {
+            console.error("Erreur lors de l'interaction :", err);
+            alert("Une erreur est survenue.");
+        } finally {
+            setIsActionLoading(false);
+        }
+    };
+
 
     if (loading) {
         return (
             <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-                <p className="text-neutral-400">
-                    {t("userProfile.loading")}
-                </p>
+                <div className="text-neutral-400">
+                    <Loader />
+                </div>
             </div>
         );
     }
+
     if (error || !profilUser) {
         return (
             <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
@@ -101,7 +162,6 @@ const UserProfilePage = () => {
             </div>
         );
     }
-
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white px-6 md:px-12 py-24 relative overflow-hidden">
 
@@ -191,13 +251,33 @@ const UserProfilePage = () => {
                         </div>
 
                         {!isOwnProfile && (
-                            <button
-                                onClick={handleFollowClick}
-                                className="flex items-center justify-center gap-2 bg-rose-600 hover:bg-rose-500 text-white px-5 py-3 rounded-full font-semibold transition shadow-lg shadow-rose-600/20"
-                            >
-                                <FiUserPlus />
-                                {t("userProfile.follow")}
-                            </button>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleFollowToggle}
+                                    disabled={isActionLoading}
+                                    className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold transition shadow-lg min-w-[120px] ${
+                                        isFollow
+                                            ? "bg-neutral-800 hover:bg-neutral-700 text-white"
+                                            : "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20"
+                                    } ${isActionLoading ? "opacity-70 cursor-wait" : ""}`}
+                                >
+                                    {isActionLoading ? (
+                                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                        <>
+                                            {isFollow ? <FiCheck /> : <FiUserPlus />}
+                                            {isFollow ? "Abonné" : "Suivre"}
+                                        </>
+                                    )}
+                                </button>
+
+                                {(!isOwnProfile && isFriend) && id && connectedUser?.id && (
+                                    <DMButton
+                                        otherUserId={id}
+                                        currentUserId={connectedUser.id}
+                                    />
+                                )}
+                            </div>
                         )}
                         <ReportButton
                             type="user"
@@ -227,12 +307,10 @@ const UserProfilePage = () => {
 
                         <div className="bg-black/20 border border-white/5 rounded-2xl p-5">
                             <p className="text-neutral-500 text-sm">
-                                {t("userProfile.memberSince")}
+                                Amis
                             </p>
-                            <p className="text-lg font-bold mt-3">
-                                {profilUser.created_at
-                                    ? new Date(profilUser.created_at).toLocaleDateString()
-                                    : t("userProfile.notProvided")}
+                            <p className="text-3xl font-black mt-2">
+                                {friends.length}
                             </p>
                         </div>
                     </div>
@@ -304,6 +382,55 @@ const UserProfilePage = () => {
                                     </div>
                                 );
                             })}
+                        </div>
+                    )}
+                </div>
+
+                <div className="mt-12">
+                    <h2 className="text-2xl font-bold mb-6">
+                        Amis de <span className="text-rose-500">{profilUser.username}</span>
+                    </h2>
+
+                    {friends.length === 0 ? (
+                        <div className="bg-neutral-900/40 border border-white/5 rounded-2xl p-8 text-center">
+                            <p className="text-neutral-400">
+                                Cet utilisateur n'a pas encore d'amis.
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {friends.map((friend) => (
+                                <div
+                                    key={friend.id}
+                                    onClick={() => navigate(`/profile/${friend.id}`)}
+                                    className="cursor-pointer bg-neutral-900/40 border border-white/5 rounded-2xl p-5 hover:border-rose-500/30 transition"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-500/40 to-blue-500/30 overflow-hidden flex items-center justify-center">
+                                            {friend.avatar ? (
+                                                <img
+                                                    src={friend.avatar}
+                                                    alt={friend.username}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <span className="text-xl font-bold">
+                                    {friend.username.charAt(0).toUpperCase()}
+                                </span>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <h3 className="font-bold">
+                                                {friend.display_name || friend.username}
+                                            </h3>
+                                            <p className="text-sm text-neutral-500">
+                                                @{friend.username}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>

@@ -1,7 +1,7 @@
-export interface UserRelations {
+export interface Friend {
     id: string;
-    sender_id: string;
-    receiver_id: string;
-    status: 'pending' | 'accepted' | 'blocked';
-    created_at: string;
+    username: string;
+    isPublic: boolean;
+    avatar: string | null;
+    bio: string | null;
 }

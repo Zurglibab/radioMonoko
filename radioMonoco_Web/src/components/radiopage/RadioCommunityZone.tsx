@@ -15,7 +15,7 @@ import { useTranslation } from "react-i18next";
 export const RadioCommunityZone = ({
     contentId,
     theme,
-    currentUserId,
+    currentUser,
     loadingReviews: externalLoadingReviews,
     ratingSummary: externalRatingSummary,
     userRating: externalUserRating,
@@ -31,7 +31,7 @@ export const RadioCommunityZone = ({
 }: RadioCommunityZoneProps) => {
 
     const { t } = useTranslation();
-    const isLoggedIn = !!currentUserId;
+    const isLoggedIn = !!currentUser?.id;
     const [loadingReviews, setLoadingReviews] = useState<boolean>(externalLoadingReviews ?? true);
     const [ratingSummary, setRatingSummary] = useState<any | null>(externalRatingSummary ?? null);
     const [userRating, setUserRating] = useState<number>(externalUserRating ?? 0);
@@ -84,7 +84,6 @@ export const RadioCommunityZone = ({
             const fetchedUsers = await Promise.all(
                 uniqueIds.map(async (id) => {
                     try {
-                        // use cached wrapper to dedupe user profile requests across the app
                         const profile = await cached(`user_${id}`, () => usersService.getUserById(id), 60_000);
                         return { id, profile };
                     } catch {
@@ -107,7 +106,7 @@ export const RadioCommunityZone = ({
 
 
     const internalHandleLikeInteraction = async (reviewId: string, actionType: "like" | "dislike" | "remove") => {
-        if (!isLoggedIn || !currentUserId) return;
+        if (!isLoggedIn || !currentUser?.id) return;
         setComments((prevComments) => {
             const updateCommentCounters = (c: any) => {
                 if (c.id !== reviewId) return c;
@@ -140,10 +139,10 @@ export const RadioCommunityZone = ({
 
         try {
             if (actionType === "remove") {
-                await likeReviewsService.removeLikeReview(reviewId, currentUserId);
+                await likeReviewsService.removeLikeReview(reviewId, currentUser?.id);
             } else {
                 const isLikeBool = actionType === "like";
-                await likeReviewsService.toggleLikeReview(reviewId, currentUserId, isLikeBool);
+                await likeReviewsService.toggleLikeReview(reviewId, currentUser?.id, isLikeBool);
             }
 
             const countData = await cached(`review_count_${reviewId}`, () => likeReviewsService.getReviewLikesCount(reviewId).catch(() => null), 15_000);
@@ -178,7 +177,7 @@ export const RadioCommunityZone = ({
     const handleRateStation = async (nextRating: number) => {
         if (externalHandleRateStation) {
             await externalHandleRateStation(nextRating);
-        } else if (!isLoggedIn || !currentUserId) {
+        } else if (!isLoggedIn || !currentUser?.id) {
             return;
         } else {
             const previousRating = userRating;
@@ -188,12 +187,12 @@ export const RadioCommunityZone = ({
 
             try {
                 let existing = null;
-                try { existing = await ratingContentService.getRatingByIds(contentId, currentUserId); } catch (err) { console.error(err); }
+                try { existing = await ratingContentService.getRatingByIds(contentId, currentUser?.id); } catch (err) { console.error(err); }
 
                 if (existing) {
-                    await ratingContentService.updateRating(contentId, currentUserId, { average_rating: nextRating });
+                    await ratingContentService.updateRating(contentId, currentUser?.id, { average_rating: nextRating });
                 } else {
-                    await ratingContentService.createRating({ contentId, userId: currentUserId, average_rating: nextRating });
+                    await ratingContentService.createRating({ contentId, userId: currentUser?.id, average_rating: nextRating });
                 }
 
                 const updatedSummary = await ratingContentService.getRatingSummary(contentId);
@@ -209,7 +208,7 @@ export const RadioCommunityZone = ({
     const handleDeleteRating = async () => {
         if (externalHandleDeleteRating) {
             await externalHandleDeleteRating();
-        } else if (!isLoggedIn || !currentUserId || userRating === 0) {
+        } else if (!isLoggedIn || !currentUser?.id || userRating === 0) {
             return;
         } else {
             const previousRating = userRating;
@@ -218,7 +217,7 @@ export const RadioCommunityZone = ({
 
             try {
                 if (typeof ratingContentService.deleteRating === "function") {
-                    await ratingContentService.deleteRating(contentId, currentUserId);
+                    await ratingContentService.deleteRating(contentId, currentUser?.id);
                 }
                 const updatedSummary = await ratingContentService.getRatingSummary(contentId);
                 setRatingSummary(updatedSummary);
@@ -233,17 +232,17 @@ export const RadioCommunityZone = ({
     const onPostReview = async (commentText: string) => {
         if (externalOnPostReview) {
             await externalOnPostReview(commentText);
-        } else if (!isLoggedIn || !currentUserId) {
+        } else if (!isLoggedIn || !currentUser?.id) {
             return;
         } else {
             try {
                 const createdReview = await reviewService.createReview({
                     contentId: contentId,
-                    userId: currentUserId,
+                    userId: currentUser?.id,
                     comment: commentText
                 });
                 if (createdReview) {
-                    await fetchMissingUsers([currentUserId]);
+                    await fetchMissingUsers([currentUser?.id]);
                     setComments((prev) => [{
                         ...createdReview,
                         replies: [],
@@ -261,19 +260,19 @@ export const RadioCommunityZone = ({
     const onPostReply = async (replyText: string, parentId: string) => {
         if (externalOnPostReply) {
             await externalOnPostReply(replyText, parentId);
-        } else if (!isLoggedIn || !currentUserId) {
+        } else if (!isLoggedIn || !currentUser?.id) {
             return;
         } else {
             try {
                 const createdReply = await reviewService.createReview({
                     contentId: contentId,
-                    userId: currentUserId,
+                    userId: currentUser?.id,
                     comment: replyText,
                     parent_review_id: parentId
                 });
 
                 if (createdReply) {
-                    await fetchMissingUsers([currentUserId]);
+                    await fetchMissingUsers([currentUser?.id]);
                     setComments((prev) =>
                         prev.map((comment) => {
                             if (comment.id === parentId) {
@@ -327,7 +326,7 @@ export const RadioCommunityZone = ({
     return (
         <section className={`grid grid-cols-1 lg:grid-cols-12 gap-16 border-t pt-16 ${theme === 'dark' ? 'border-white/5' : 'border-neutral-200'}`}>
             <div className="lg:col-span-4 space-y-6">
-                <h3 className={`text-xs font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>{t("radio.audienceRating")}</h3>
+                <h3 className={`text-xs font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>Notes de la communauté</h3>
                 <div className="flex items-baseline gap-4">
                     <span className={`text-7xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-neutral-900'}`}>
                         {currentAverage > 0 ? Number(currentAverage).toFixed(1) : "0.0"}
@@ -390,7 +389,7 @@ export const RadioCommunityZone = ({
                                     key={c.id}
                                     comment={c}
                                     usersCache={usersCache}
-                                    currentUserId={currentUserId}
+                                    currentUser={currentUser}
                                     isLoggedIn={isLoggedIn}
                                     theme={theme}
                                     onPostReply={onPostReply}
