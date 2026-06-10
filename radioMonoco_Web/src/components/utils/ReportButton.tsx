@@ -2,6 +2,8 @@ import { useState } from "react";
 import { HiOutlineFlag, HiOutlineX } from "react-icons/hi";
 import ReportsService, { type ReportType } from "../../services/ReportsService.ts";
 import { useAuth } from "../../context/AuthContext.tsx";
+import {useTranslation} from "react-i18next";
+
 
 interface ReportButtonProps {
     type: ReportType;
@@ -35,6 +37,7 @@ const ReportButton = ({type, targetId, targetLabel, className = "", compact = fa
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState("");
     const [error, setError] = useState("");
+    const {t} = useTranslation();
 
     const reasons = type === "review" ? REVIEW_REASONS : USER_REASONS;
 
