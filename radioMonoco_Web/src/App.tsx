@@ -9,7 +9,7 @@ import Feed from "./pages/Feed.tsx";
 import HomePage from "./pages/HomePage.tsx";
 import { RadioProvider } from "./context/RadioContext.tsx";
 import { NotificationProvider } from "./context/NotificationContext.tsx";
-import { AppearanceProvider } from "./context/AppearanceContext.tsx"; // Assure-toi d'avoir ceci
+import { AppearanceProvider } from "./context/AppearanceContext.tsx";
 import RadioPage from "./pages/RadioPage.tsx";
 import Collections from "./pages/Collections/Collections.tsx";
 import CollectionsDetails from "./pages/Collections/CollectionsDetails.tsx";

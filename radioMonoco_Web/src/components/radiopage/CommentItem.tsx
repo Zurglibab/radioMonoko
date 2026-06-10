@@ -1,14 +1,9 @@
 import type { CommentItemProps } from "../../interfaces/Props.types";
 import { useState, memo } from "react";
-<<<<<<< HEAD
-import { HiPaperAirplane, HiArrowTurnDownRight, HiHandThumbUp, HiHandThumbDown } from "react-icons/hi2";
 import ReportButton from "../utils/ReportButton.tsx";
-=======
 import { HiPaperAirplane, HiHandThumbUp, HiHandThumbDown, HiTrash } from "react-icons/hi2";
->>>>>>> follow
 import NotificationsService from "../../services/NotificationsService.ts";
 import { useTranslation } from "react-i18next";
-
 interface EnhancedCommentItemProps extends CommentItemProps {
     onLikeInteraction: (reviewId: string, actionType: "like" | "dislike" | "remove") => Promise<void>;
 }
@@ -36,15 +31,9 @@ export const CommentItem = memo(({
         const safePreview = (contentPreview || "Aucun contenu").toString();
 
         const messages = {
-<<<<<<< HEAD
-            like: t("radio.notifLike", { preview: safePreview.slice(0, 30) }),
-            dislike: t("radio.notifDislike", { preview: safePreview.slice(0, 30) }),
-            reply: t("radio.notifReply", { preview: safePreview.slice(0, 30) })
-=======
             like: `${senderName} a aimé votre commentaire : "${safePreview.slice(0, 30)}..."`,
             dislike: `${senderName} a réagi négativement à votre commentaire : "${safePreview.slice(0, 30)}..."`,
             reply: `${senderName} a répondu à votre commentaire : "${safePreview.slice(0, 30)}..."`
->>>>>>> follow
         };
 
         try {
@@ -82,10 +71,6 @@ export const CommentItem = memo(({
     return (
         <div className={`p-5 rounded-2xl border flex flex-col gap-4 transition-all duration-300 ${theme === 'dark' ? 'bg-white/[0.01] border-white/5 hover:border-white/10' : 'bg-white border-neutral-200/70 shadow-sm hover:shadow-md'}`}>
             <div className="flex gap-4 items-start group/item w-full relative">
-<<<<<<< HEAD
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 ${theme === 'dark' ? 'bg-white/5 text-neutral-400' : 'bg-neutral-100 text-neutral-600'}`}>
-                    {String(authorName).slice(0, 2).toUpperCase()}
-=======
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 overflow-hidden ${theme === 'dark' ? 'bg-white/5' : 'bg-neutral-100'}`}>
                     {cachedUser?.avatar ? (
                         <img
@@ -98,18 +83,12 @@ export const CommentItem = memo(({
                             {authorName.slice(0, 2).toUpperCase()}
                         </span>
                     )}
->>>>>>> follow
                 </div>
                 <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                         <span className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-neutral-800'}`}>{authorName}</span>
-<<<<<<< HEAD
-                        {comment.user_id === currentUserId && (
-                            <span className="text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded-md">{t("radio.you")}</span>
-=======
                         {comment.user_id === currentUser?.id && (
                             <span className="text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded-md">Vous</span>
->>>>>>> follow
                         )}
                         <span className={`text-[9px] font-medium opacity-40 ${theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'}`}>
                             {comment.created_at ? new Date(comment.created_at).toLocaleDateString() : t("radio.recently")}
@@ -158,9 +137,8 @@ export const CommentItem = memo(({
                                 <HiHandThumbDown size={13} className={`transition-transform duration-200 ${comment.userChoice === 'dislike' ? "scale-110 rotate-[10deg]" : ""}`} />
                                 <span>{comment.dislikesCount ?? 0}</span>
                             </button>
-<<<<<<< HEAD
 
-                            {isLoggedIn && currentUserId !== comment.user_id && (
+                            {isLoggedIn && comment.user_id === currentUser?.id && (
                                 <ReportButton
                                     type="review"
                                     targetId={comment.id}
@@ -172,12 +150,7 @@ export const CommentItem = memo(({
                                     compact
                                 />
                             )}
-                        </div>
 
-                        {isLoggedIn && comment.user_id === currentUserId && (
-                            <button onClick={() => onDeleteReview(comment.id)} className="text-[10px] font-black uppercase tracking-wider text-neutral-400 hover:text-rose-500 transition-colors">{t("common.delete")}</button>
-                        )}
-=======
                             {isLoggedIn && comment.user_id === currentUser?.id && (
                                 <button
                                     onClick={() => onDeleteReview(comment.id)}
@@ -188,7 +161,6 @@ export const CommentItem = memo(({
                                 </button>
                             )}
                         </div>
->>>>>>> follow
                     </div>
                 </div>
             </div>
@@ -213,15 +185,6 @@ export const CommentItem = memo(({
                 <div className="flex flex-col gap-4 pl-8 border-l-2 border-neutral-200 dark:border-white/5 mt-1">
                     {comment.replies.map((reply: any) => {
                         const replyUser = usersCache[reply.user_id];
-<<<<<<< HEAD
-                        const replyAuthorName = replyUser?.display_name || replyUser?.username || `${t("radio.listener")} ${reply.user_id ? String(reply.user_id).slice(-4) : t("radio.anonymous")}`;
-
-                        return (
-                            <div key={reply.id} className="flex gap-3 items-start group/item w-full relative">
-                                <HiArrowTurnDownRight size={14} className="text-neutral-300 dark:text-white/20 mt-1.5 shrink-0" />
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-black text-[10px] shrink-0 ${theme === 'dark' ? 'bg-white/5 text-neutral-400' : 'bg-neutral-100 text-neutral-600'}`}>
-                                    {String(replyAuthorName).slice(0, 2).toUpperCase()}
-=======
                         const replyAuthorName = replyUser ? (replyUser.display_name || replyUser.username) : `Auditeur ${reply.user_id ? reply.user_id.slice(-4) : "Anonyme"}`;
                         return (
                             <div key={reply.id} className="flex gap-3 items-start group/item w-full relative">
@@ -237,19 +200,13 @@ export const CommentItem = memo(({
                                             {replyAuthorName.slice(0, 2).toUpperCase()}
                                         </span>
                                     )}
->>>>>>> follow
                                 </div>
                                 <div className="space-y-1 flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                         <div className="flex items-center gap-1.5">
                                             <span className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-neutral-800'}`}>{replyAuthorName}</span>
-<<<<<<< HEAD
-                                            {reply.user_id === currentUserId && (
-                                                <span className="text-[8px] font-black uppercase tracking-wide bg-rose-500/10 text-rose-500 px-1 py-0.2 rounded">{t("radio.you")}</span>
-=======
                                             {reply.user_id === currentUser?.id && (
                                                 <span className="text-[8px] font-black uppercase tracking-wide bg-rose-500/10 text-rose-500 px-1 py-0.2 rounded">Vous</span>
->>>>>>> follow
                                             )}
                                         </div>
                                         <span className={`text-[9px] font-medium ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>
@@ -292,8 +249,7 @@ export const CommentItem = memo(({
                                                 <HiHandThumbDown size={13} className={reply.userChoice === 'dislike' ? "scale-110" : ""} />
                                                 <span>{reply.dislikesCount ?? 0}</span>
                                             </button>
-<<<<<<< HEAD
-                                            {isLoggedIn && currentUserId !== reply.user_id && (
+                                            {isLoggedIn && comment.user_id === currentUser?.id && (
                                                 <ReportButton
                                                     type="review"
                                                     targetId={reply.id}
@@ -305,17 +261,6 @@ export const CommentItem = memo(({
                                                     compact
                                                 />
                                             )}
-                                        </div>
-
-                                        {isLoggedIn && reply.user_id === currentUserId && (
-                                            <button
-                                                onClick={() => onDeleteReview(reply.id, comment.id)}
-                                                className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 hover:text-rose-500 transition-colors"
-                                            >
-                                                {t("common.delete")}
-                                            </button>
-                                        )}
-=======
                                             {isLoggedIn && comment.user_id === currentUser?.id && (
                                                 <button
                                                     onClick={() => onDeleteReview(comment.id)}
@@ -326,9 +271,6 @@ export const CommentItem = memo(({
                                                 </button>
                                             )}
                                         </div>
-
-
->>>>>>> follow
                                     </div>
                                 </div>
                             </div>
