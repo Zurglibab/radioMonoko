@@ -4,6 +4,8 @@ import type { ReportReview, ReportUser } from "../../interfaces/Report.types.ts"
 import type { User } from "../../context/AuthContext.tsx";
 import type { Review } from "../../interfaces/Review.types.ts";
 import { useNavigate } from "react-router-dom";
+import {useTranslation} from "react-i18next";
+
 
 type ActiveTab = "users" | "reviews";
 
@@ -15,6 +17,7 @@ const AdminReports = () => {
     const [activeTab, setActiveTab] = useState<ActiveTab>("reviews");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const {t} = useTranslation();
 
     const navigate = useNavigate();
 

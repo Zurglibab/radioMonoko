@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import AdminService from "../../services/AdminService.ts";
 import type { Review } from "../../interfaces/Review.types.ts";
 import { useNavigate } from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const AdminReviews = () => {
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const {t} = useTranslation();
 
     useEffect(() => {
         fetchReviews();

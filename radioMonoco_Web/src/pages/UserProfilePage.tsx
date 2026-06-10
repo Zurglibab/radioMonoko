@@ -7,6 +7,7 @@ import type { User } from "../interfaces/Users.types.ts";
 import type { Collection } from "../interfaces/Collections.types.ts";
 import { FiGlobe, FiLock, FiUserPlus } from "react-icons/fi";
 import ReportButton from "../components/utils/ReportButton.tsx";
+import {useTranslation} from "react-i18next";
 
 const UserProfilePage = () => {
     const {id} = useParams<{id:string}>();
@@ -16,6 +17,7 @@ const UserProfilePage = () => {
     const [collections, setCollections] = useState<Collection[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const {t} = useTranslation();
 
     const isOwnProfile = connectedUser?.id === profilUser?.id;
     const isPrivateProfil = profilUser?.privacy === "private";

@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
 import type {Collection} from "../../interfaces/Collections.types.ts";
 import {FiGlobe, FiLock} from "react-icons/fi";
+import {useTranslation} from "react-i18next";
 
 interface ModifyCollectionsProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ const ModifyCollections = ({isOpen, onClose, onSubmit, collection}: ModifyCollec
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [isPublic, setIsPublic] = useState(false);
+    const {t} = useTranslation();
 
     useEffect(() => {
         if (collection) {

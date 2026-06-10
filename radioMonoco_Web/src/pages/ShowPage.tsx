@@ -18,10 +18,12 @@ import {BRAND_THEMES} from "../assets/themes/BrandThemes";
 import {DEFAULT_THEME} from "../assets/themes/DefaultTheme";
 import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
 import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
+import {useTranslation} from "react-i18next";
 
 const ShowPage = () => {
     const { id } = useParams<{ id:string }>();
     const { theme } = useAppearance();
+    const {t} = useTranslation();
 
     const [currentUserId] = useState<string | null>(() => {
         const savedUser = localStorage.getItem("user");

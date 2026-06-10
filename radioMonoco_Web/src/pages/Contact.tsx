@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAppearance } from "../context/AppearanceContext";
+import {useTranslation} from "react-i18next";
 
 const Contact = () => {
     const { theme } = useAppearance();
@@ -11,6 +12,7 @@ const Contact = () => {
     });
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const {t} = useTranslation();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;

@@ -22,10 +22,12 @@ import {DEFAULT_THEME} from "../assets/themes/DefaultTheme";
 import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
 import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
 import {Loader} from "../components/utils/Loader.tsx";
+import {useTranslation} from "react-i18next";
 
 const RadioPage = () => {
     const { station } = useParams<{ station: string }>();
     const { theme } = useAppearance();
+    const {t} = useTranslation();
 
     const [currentUserId] = useState<string | null>(() => {
         const savedUser = localStorage.getItem("user");

@@ -9,6 +9,7 @@ import contentsService from "../../services/ContentsService.ts";
 import type {CollectionContent} from "../../interfaces/CollectionContent.types.ts";
 import {useAuth} from "../../context/AuthContext.tsx";
 import SearchService from "../../services/SearchService.ts";
+import {useTranslation} from "react-i18next";
 
 const CollectionsDetails = () => {
     const { id } = useParams()
@@ -20,6 +21,7 @@ const CollectionsDetails = () => {
     const [contentDetails, setContentDetails] = useState<Record<string, CollectionContent>>({})
     const navigate = useNavigate()
     const isOwner = user?.id === collection?.user_id
+    const {t} = useTranslation();
 
     const resolveShowUrlFromContent = async (content: any): Promise<string | undefined> => {
         if (content.url) return content.url;

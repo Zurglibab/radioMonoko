@@ -7,6 +7,8 @@ import { FiPlus } from "react-icons/fi";
 import CreateCollection from "./CreateCollections.tsx";
 import ModifyCollections from "./ModifyCollections.tsx";
 import DeleteCollection from "./DeleteCollections.tsx";
+import {useTranslation} from "react-i18next";
+
 
 const Collections = () => {
 
@@ -23,6 +25,7 @@ const Collections = () => {
     const [publicCollection, setPublicCollection] = useState<Collection[]>([]);
     const [recentCollection, setRecentCollection] = useState<Collection[]>([]);
     const navigate = useNavigate();
+    const {t} = useTranslation();
 
     useEffect(() => {
 

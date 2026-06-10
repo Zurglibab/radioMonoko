@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {HiOutlineX} from "react-icons/hi";
 import { FiLock, FiGlobe} from "react-icons/fi";
+import {useTranslation} from "react-i18next";
 
 interface CreateCollectionProps {
     isOpen: boolean;
@@ -17,6 +18,7 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
     const [description, setDescription] = useState("");
     const [isPublic, setIsPublic] = useState(true);
     const [loading, setLoading] = useState(false);
+    const {t} = useTranslation();
 
     if (!isOpen) return null;
 

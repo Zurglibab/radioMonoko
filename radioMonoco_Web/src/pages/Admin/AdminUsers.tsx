@@ -2,6 +2,7 @@ import type {User} from "../../context/AuthContext.tsx";
 import {useEffect, useState} from "react";
 import AdminService from "../../services/AdminService.ts";
 import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const AdminUsers = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -9,6 +10,7 @@ const AdminUsers = () => {
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const navigate = useNavigate()
+    const {t} = useTranslation();
 
     useEffect(() => {
         fetchUsers();

@@ -3,6 +3,7 @@ import type { SearchResult } from "../interfaces/Search.types";
 import {useEffect, useState} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import CollectionsService from "../services/CollectionsService.ts";
+import {useTranslation} from "react-i18next";
 //import {useAuth} from "../context/AuthContext.tsx";
 
 const SearchResults = () => {
@@ -11,6 +12,7 @@ const SearchResults = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const query = searchParams.get("q") || "";
+    const {t} = useTranslation();
 
     useEffect(() => {
         const loadSearch = async () => {

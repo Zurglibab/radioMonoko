@@ -2,6 +2,7 @@ import {useAuth} from "../../context/AuthContext.tsx";
 import {useEffect, useState} from "react";
 import AdminService from "../../services/AdminService.ts";
 import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const AdminDashboard = () => {
     const {user} = useAuth();
@@ -9,6 +10,7 @@ const AdminDashboard = () => {
     const [userCount, setUserCount] = useState(0);
     const [reviewCount, setReviewCount] = useState(0);
     const navigate = useNavigate()
+    const {t} = useTranslation();
 
     useEffect(() => {
         const fetchData = async () => {

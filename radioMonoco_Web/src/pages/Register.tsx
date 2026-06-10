@@ -3,6 +3,7 @@ import { useAuth } from "../context/AuthContext.tsx";
 import { useNavigate, Link } from "react-router-dom";
 import {FiMail, FiLock, FiArrowRight, FiUser} from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
+import {useTranslation} from "react-i18next";
 
 const Register = () => {
     const [email, setEmail] = useState("");
@@ -12,7 +13,8 @@ const Register = () => {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const { register } = useAuth();
-    const navigate = useNavigate();
+    const navigate = useNavigate()
+    const {t} = useTranslation();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

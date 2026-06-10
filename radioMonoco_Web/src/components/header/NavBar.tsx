@@ -21,6 +21,7 @@ import SearchService from "../../services/SearchService.ts";
 import type { SearchResult } from "../../interfaces/Search.types.ts";
 import CollectionsService from "../../services/CollectionsService.ts";
 import {useNotificationContext} from "../../context/NotificationContext.tsx";
+import LanguageSwitcher from "../utils/LanguageSwitcher.tsx";
 
 const NavBar = () => {
     const { user, logout } = useAuth();
@@ -245,7 +246,10 @@ const NavBar = () => {
                     </Link>
                 </div>
 
+
+
                 <div className="flex items-center gap-2 md:gap-3">
+                    <LanguageSwitcher />
                     <button
                         onClick={toggleTheme}
                         className={`${IconCircleStyle}`}

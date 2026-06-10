@@ -1,5 +1,6 @@
 import {useState} from "react";
 import type {Collection} from "../../interfaces/Collections.types.ts";
+import {useTranslation} from "react-i18next";
 
 interface DeleteCollectionsProps {
     isOpen: boolean;
@@ -10,6 +11,7 @@ interface DeleteCollectionsProps {
 
 const DeleteCollections = ({ isOpen, onClose, onSubmit, collection }: DeleteCollectionsProps) => {
     const [isDeleting, setIsDeleting] = useState(false);
+    const {t} = useTranslation();
     if (!isOpen || !collection) return null;
 
     const handleDelete = async () => {

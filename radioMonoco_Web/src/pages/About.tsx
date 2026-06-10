@@ -1,7 +1,9 @@
 import { useAppearance } from "../context/AppearanceContext";
+import {useTranslation} from "react-i18next";
 
 const About = () => {
     const { theme } = useAppearance();
+    const {t} = useTranslation();
 
     return (
         <div className="min-h-screen pt-32 pb-24 px-6 md:px-12 max-w-6xl mx-auto flex flex-col items-center transition-colors duration-700">

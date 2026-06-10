@@ -5,6 +5,7 @@ import { FiMail, FiLock, FiArrowRight } from "react-icons/fi";
 import logo from "../assets/images/icon_large.png";
 import { useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
+import {useTranslation} from "react-i18next";
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { login, loginWithGoogleToken } = useAuth();
     const navigate = useNavigate();
+    const {t} = useTranslation();
 
     const googleLogin = useGoogleLogin({
         scope: "profile email", onSuccess: async (tokenResponse) => {
