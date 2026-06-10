@@ -1,17 +1,25 @@
-import FeedItem from "./FeedItems.tsx";
+import type { FeedItem } from "../../interfaces/Feed.types.ts";
+import FeedItemCard from "./FeedItemCard.tsx";
 
-type FeedList = {
-    items: any[]
+interface FeedListProps {
+    items: FeedItem[];
+    onUserClick: (userId: string) => void;
+    onCollectionClick: (collectionId: string) => void;
 }
 
-const FeedList = ({ items }: FeedList) => {
+const FeedList = ({items, onUserClick, onCollectionClick,}: FeedListProps) => {
     return (
-        <div className="space-y-4">
-            {items.map((item, index) => (
-                <FeedItem key={index} item={item} />
+        <div className="space-y-5">
+            {items.map((item) => (
+                <FeedItemCard
+                    key={item.id}
+                    item={item}
+                    onUserClick={onUserClick}
+                    onCollectionClick={onCollectionClick}
+                />
             ))}
         </div>
-    )
-}
+    );
+};
 
-export default FeedList
+export default FeedList;
