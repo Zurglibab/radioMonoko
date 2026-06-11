@@ -385,35 +385,37 @@ export const RadioCommunityZone = ({
                         </button>
                     </div>
                 ) : (
+                    <>
                     <CommentForm dbContentId={contentId} theme={theme} onPostReview={onPostReview} />
-                )}
-
-                {loadingReviews ? (
-                    <div className="flex flex-col items-center justify-center py-12 gap-3">
-                        <div className="w-5 h-5 border-2 border-neutral-400 border-t-rose-500 rounded-full animate-spin" />
-                        <p className="text-xs font-medium opacity-50">{t("radio.loadingLounge")}</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin">
-                        {comments.length === 0 ? (
-                            <p className={`text-xs italic py-8 text-center ${theme === 'dark' ? 'opacity-40' : 'text-neutral-400'}`}>{t("radio.noComments")}</p>
-                        ) : (
-                            comments.map((c) => (
-                                <CommentItem
-                                    key={c.id}
-                                    comment={c}
-                                    usersCache={usersCache}
-                                    currentUser={currentUser}
-                                    isLoggedIn={isLoggedIn}
-                                    theme={theme}
-                                    onPostReply={onPostReply}
-                                    onDeleteReview={handleDeleteReview}
-                                    onLikeInteraction={handleLikeInteraction}
-                                    onUpdateReview={externalOnUpdateReview}
-                                />
-                            ))
-                        )}
-                    </div>
+                    {loadingReviews ? (
+                        <div className="flex flex-col items-center justify-center py-12 gap-3">
+                            <div className="w-5 h-5 border-2 border-neutral-400 border-t-rose-500 rounded-full animate-spin" />
+                            <p className="text-xs font-medium opacity-50">{t("radio.loadingLounge")}</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin">
+                            {comments.length === 0 ? (
+                                <p className={`text-xs italic py-8 text-center ${theme === 'dark' ? 'opacity-40' : 'text-neutral-400'}`}>{t("radio.noComments")}</p>
+                            ) : ( !isLoggedIn && (
+                                    comments.map((c) => (
+                                        <CommentItem
+                                            key={c.id}
+                                            comment={c}
+                                            usersCache={usersCache}
+                                            currentUser={currentUser}
+                                            isLoggedIn={isLoggedIn}
+                                            theme={theme}
+                                            onPostReply={onPostReply}
+                                            onDeleteReview={handleDeleteReview}
+                                            onLikeInteraction={handleLikeInteraction}
+                                            onUpdateReview={externalOnUpdateReview}
+                                        />
+                                    ))
+                                )
+                            )}
+                        </div>
+                    )}
+                    </>
                 )}
             </div>
         </section>
