@@ -23,25 +23,14 @@ import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
 import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
 import {Loader} from "../components/utils/Loader.tsx";
 import {useTranslation} from "react-i18next";
+import {useAuth} from "../context/AuthContext.tsx";
 
 const RadioPage = () => {
     const { station } = useParams<{ station: string }>();
     const { theme } = useAppearance();
     const {t} = useTranslation();
 
-    const [currentUser] = useState<User | null>(() => {
-        const savedUser = localStorage.getItem("user");
-        if (savedUser) {
-            try {
-                const parsed = JSON.parse(savedUser);
-                return parsed || null;
-            } catch (e) {
-                console.error(e);
-                return null;
-            }
-        }
-        return null;
-    });
+    const { user: currentUser } = useAuth();
     const isLoggedIn = !!currentUser?.id;
 
     const [brand, setBrand] = useState<Brand | null>(null);
@@ -645,19 +634,6 @@ const RadioPage = () => {
                                 );
                                             })
                                         )}
-                                    </div>
-
-                                    {/* New Collection Button */}
-                                    <div className={`border-t mt-2 pt-3 px-5 ${theme === 'dark' ? 'border-white/10' : 'border-neutral-200'}`}>
-                                        <button className={`text-xs font-bold transition-all duration-200 group
-                                        ${theme === 'dark'
-                                                ? 'text-rose-400 hover:text-rose-300'
-                                                : 'text-rose-600 hover:text-rose-700'
-                                        }`}>
-                                            <span className="group-hover:translate-x-0.5 transition-transform inline-block">
-                                                {t("radio.newCollection")}
-                                            </span>
-                                        </button>
                                     </div>
                                 </div>
                             )}

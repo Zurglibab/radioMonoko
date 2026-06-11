@@ -11,6 +11,7 @@ import { CommentForm } from "./CommentForm.tsx";
 import { CommentItem } from "./CommentItem.tsx";
 import type { RadioCommunityZoneProps } from "../../interfaces/Props.types.ts";
 import { useTranslation } from "react-i18next";
+import {useLocation, useNavigate} from "react-router-dom";
 
 export const RadioCommunityZone = ({
     contentId,
@@ -39,6 +40,8 @@ export const RadioCommunityZone = ({
     const [comments, setComments] = useState<any[]>(externalComments ?? []);
     const [usersCache, setUsersCache] = useState<Record<string, User>>(externalUsersCache ?? {});
     const [totalVotes, setTotalVotes] = useState<number>(externalTotalVotes ?? 0);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (externalLoadingReviews !== undefined) {
@@ -366,7 +369,17 @@ export const RadioCommunityZone = ({
                     <div className={`p-10 rounded-[2rem] text-center border border-dashed transition-all ${theme === "dark" ? "bg-white/[0.01] border-white/10" : "bg-neutral-100/40 border-neutral-200 shadow-inner"}`}>
                         <HiLockClosed size={20} className="mx-auto mb-3 text-rose-500/70" />
                         <p className={`text-sm font-semibold mb-5 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-600'}`}>{t("radio.joinAudience")}</p>
-                        <button className={`px-7 py-3 text-[10px] font-black uppercase tracking-wider rounded-xl hover:opacity-90 transition-all duration-300 active:scale-95 shadow-md ${theme === 'dark' ? 'bg-white text-neutral-900' : 'bg-neutral-900 text-white'}`}>
+                        <button
+                            onClick={() =>
+                                navigate("/login", {state: {from: location.pathname}
+                                })
+                            }
+                            className={`px-7 py-3 text-[10px] font-black uppercase tracking-wider rounded-xl hover:opacity-90 transition-all duration-300 active:scale-95 shadow-md ${
+                                theme === "dark"
+                                    ? "bg-white text-neutral-900"
+                                    : "bg-neutral-900 text-white"
+                            }`}
+                        >
                             {t("auth.loginButton")}
                         </button>
                     </div>

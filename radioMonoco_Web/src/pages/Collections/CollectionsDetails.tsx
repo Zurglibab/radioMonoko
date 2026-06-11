@@ -10,6 +10,7 @@ import type {CollectionContent} from "../../interfaces/CollectionContent.types.t
 import {useAuth} from "../../context/AuthContext.tsx";
 import SearchService from "../../services/SearchService.ts";
 import {useTranslation} from "react-i18next";
+import BrandsService from "../../services/BrandsService.ts";
 
 const CollectionsDetails = () => {
     const { id } = useParams()
@@ -23,12 +24,75 @@ const CollectionsDetails = () => {
     const isOwner = user?.id === collection?.user_id
     const {t} = useTranslation();
 
-    const resolveShowUrlFromContent = async (content: any): Promise<string | undefined> => {
-        if (content.url) return content.url;
-        if (content.external_url) return content.external_url;
-        if (!content.title) return undefined;
-        const shows = await SearchService.searchShows(content.title);
-        return shows.find((show: any) => show.url)?.url;
+    type CollectionTarget = { type: "show" | "radio" | "unknown"; path?: string; }
+
+    const getExternalId = (content: any): string | undefined => {
+        return (
+            content.external_api_id ||
+            content.externalApiId ||
+            content.external_id ||
+            content.brand_id ||
+            content.radio_id ||
+            content.station ||
+            content.id_api
+        );
+    };
+
+    const resolveTargetFromContent = async (content: any): Promise<CollectionTarget> => {
+        const externalId = getExternalId(content);
+        if (content.url) {
+            return {
+                type: "show",
+                path: `/show/${encodeURIComponent(content.url)}`
+            };
+        }
+
+        if (content.external_url) {
+            return {
+                type: "show",
+                path: `/show/${encodeURIComponent(content.external_url)}`
+            };
+        }
+
+        try {
+            const brands = await BrandsService.getAllBrands();
+            const radioMatch = brands.find((brand: any) => {
+                const brandId = brand.id?.toLowerCase();
+                const brandTitle = brand.title?.toLowerCase();
+                const contentTitle = content.title?.toLowerCase();
+                const contentExternalId = externalId?.toLowerCase();
+
+                return (
+                    brandId === contentExternalId ||
+                    brandTitle === contentTitle ||
+                    brandId === contentTitle
+                );
+            });
+
+            if (radioMatch) {
+                return {
+                    type: "radio",
+                    path: `/radio/${radioMatch.id}`
+                };
+            }
+        } catch (err) {
+            console.error("Erreur résolution radio depuis collection :", err);
+        }
+
+        if (content.title) {
+            const shows = await SearchService.searchShows(content.title);
+            const showMatch = shows.find((show: any) => show.url);
+
+            if (showMatch?.url) {
+                return {
+                    type: "show",
+                    path: `/show/${encodeURIComponent(showMatch.url)}`
+                };
+            }
+        }
+        return {
+            type: "unknown"
+        };
     };
 
     useEffect(() => {
@@ -45,14 +109,15 @@ const CollectionsDetails = () => {
                     itemsData.map(async (item) => {
                         const content = await contentsService.getContentById(item.content_id);
                         if (!content) return null;
-                        const resolvedUrl = await resolveShowUrlFromContent(content);
+                        const resolvedUrl = await resolveTargetFromContent(content);
                         return [
                             item.content_id,
                             {
                                 item,
                                 title: content.title,
                                 description: content.description || "",
-                                url: resolvedUrl
+                                url: resolvedUrl.path,
+                                targetType: resolvedUrl.type
                             }
                         ] as const;
                     })
@@ -172,7 +237,7 @@ const CollectionsDetails = () => {
                                     const content = contentDetails[item.content_id];
 
                                     if (content?.url) {
-                                        navigate(`/show/${encodeURIComponent(content.url)}`);
+                                        navigate(content.url);
                                     }
                                 }}
                                 className="bg-neutral-800 rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-neutral-700 transition"
@@ -191,7 +256,9 @@ const CollectionsDetails = () => {
                                     )}
                                     {contentDetails[item.content_id]?.url && (
                                         <p className="text-rose-400 text-xs mt-2">
-                                            {t("collections.details.viewShow")}
+                                            {contentDetails[item.content_id]?.targetType === "radio"
+                                                ? t("collections.details.viewRadio", "Voir la page radio →")
+                                                : t("collections.details.viewShow")}
                                         </p>
                                     )}
                                 </div>

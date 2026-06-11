@@ -6,4 +6,5 @@ export interface CollectionContent {
     description?: string;
     url?: string;
     external_api_id?: string;
+    targetType?: "show" | "radio" | "unknown";
 }

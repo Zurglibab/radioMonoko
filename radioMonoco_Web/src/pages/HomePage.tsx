@@ -4,12 +4,12 @@ import { useAppearance } from "../context/AppearanceContext";
 
 import LiveRadios from "../components/homepage/LiveRadios";
 import Footer from "../components/utils/Footer";
-import {useTranslation} from "react-i18next";
+//import {useTranslation} from "react-i18next";
 
 const HomePage = () => {
     const { theme } = useAppearance();
     const [isScrolled, setIsScrolled] = useState(false);
-    const {t} = useTranslation();
+    //const {t} = useTranslation();
 
     const handleScroll = useCallback(() => {
         setIsScrolled(window.scrollY > 200);

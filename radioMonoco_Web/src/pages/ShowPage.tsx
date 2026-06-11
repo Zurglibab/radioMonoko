@@ -19,26 +19,16 @@ import {DEFAULT_THEME} from "../assets/themes/DefaultTheme";
 import {RadioCommunityZone} from "../components/radiopage/RadioCommunityZone";
 import {RadioListsSection} from "../components/radiopage/RadioListsSection.tsx";
 import {useTranslation} from "react-i18next";
+import {useAuth} from "../context/AuthContext.tsx";
 
 const ShowPage = () => {
     const { id } = useParams<{ id:string }>();
     const { theme } = useAppearance();
     const {t} = useTranslation();
 
-    const [currentUserId] = useState<string | null>(() => {
-        const savedUser = localStorage.getItem("user");
-        if (savedUser) {
-            try {
-                const parsed = JSON.parse(savedUser);
-                return parsed.id || parsed._id || parsed.user_id || null;
-            } catch (e) {
-                console.error(e);
-                return null;
-            }
-        }
-        return null;
-    });
-    const isLoggedIn = !!currentUserId;
+    const { user: currentUser } = useAuth();
+    const currentUserId = currentUser?.id || null;
+    const isLoggedIn = !!currentUser;
 
     const [show, setShow] = useState<ApiShow | null>(null);
     const [diffusions, setDiffusions] = useState<ApiDiffusion[]>([]);
@@ -626,7 +616,7 @@ const ShowPage = () => {
                     <RadioCommunityZone
                         contentId={dbContentId}
                         theme={theme}
-                        currentUserId={currentUserId}
+                        currentUser={currentUser}
                         loadingReviews={loadingReviews}
                         ratingSummary={ratingSummary}
                         userRating={userRating}
