@@ -45,6 +45,7 @@ const NavBar = () => {
 
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [searchLoading, setSearchLoading] = useState(false);
     const [previewResults, setPreviewResults] = useState<SearchResult>({
         users: [],
         collections: [],
@@ -54,6 +55,7 @@ const NavBar = () => {
     const dropdownRef = useRef<HTMLDivElement>(null);
     const notifRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const searchContainerRef = useRef<HTMLInputElement>(null);
 
     const showLogo = !isHomePage || isPastThreshold;
 
@@ -89,15 +91,23 @@ const NavBar = () => {
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
-            if (dropdownRef.current && !dropdownRef.current.contains(target)) setIsProfileOpen(false);
-            if (notifRef.current && !notifRef.current.contains(target)) setIsNotifOpen(false);
 
-            if (isSearchOpen && searchInputRef.current && !searchInputRef.current.contains(target)) {
-                if (searchQuery === "") setIsSearchOpen(false);
+            if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+                setIsProfileOpen(false);
+            }
+            if (notifRef.current && !notifRef.current.contains(target)) {
+                setIsNotifOpen(false);
+            }
+            if (isSearchOpen && searchContainerRef.current && !searchContainerRef.current.contains(target)) {
+                if (searchQuery.trim() === "") {
+                    setIsSearchOpen(false);
+                }
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
     }, [isSearchOpen, searchQuery]);
 
     const handleSearch = (value: string) => {
@@ -119,29 +129,39 @@ const NavBar = () => {
 
     useEffect(() => {
         const timeout = setTimeout(async () => {
-            if (searchQuery.trim().length < 2) {
+            const trimmed = searchQuery.trim();
+
+            if (!isSearchOpen || trimmed.length < 2) {
                 setPreviewResults({
                     users: [],
                     collections: [],
                     shows: []
                 });
+                setSearchLoading(false);
                 return;
             }
             try {
-                const allCollections =
-                    await CollectionsService.getAllCollections();
-                const results =
-                    await SearchService.searchUnified(
-                        searchQuery,
-                        allCollections
-                    );
+                setSearchLoading(true);
+
+                const allCollections = await CollectionsService.getAllCollections();
+                const results = await SearchService.searchUnified(
+                    trimmed,
+                    allCollections
+                );
                 setPreviewResults(results);
             } catch (error) {
-                console.error(error);
+                console.error("Erreur preview recherche :", error);
+                setPreviewResults({
+                    users: [],
+                    collections: [],
+                    shows: []
+                });
+            } finally {
+                setSearchLoading(false);
             }
-        }, 300);
+        }, 350);
         return () => clearTimeout(timeout);
-    }, [searchQuery]);
+    }, [searchQuery, isSearchOpen]);
 
     const handleLogout = async () => {
         logout();
@@ -149,6 +169,30 @@ const NavBar = () => {
         setIsMenuOpen(false);
         navigate("/");
     };
+
+    const closeSearch = () => {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+        setPreviewResults({
+            users: [],
+            collections: [],
+            shows: []
+        });
+    };
+
+    const goToSearchPage = () => {
+        const trimmed = searchQuery.trim();
+
+        if (!trimmed) return;
+
+        navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+        closeSearch();
+    };
+
+    const hasPreviewResults =
+        previewResults.users.length > 0 ||
+        previewResults.collections.length > 0 ||
+        previewResults.shows.length > 0;
 
     const IconCircleStyle = "flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full transition-all duration-300 cursor-pointer active:scale-95 hover:bg-app-text/10 group";
     return (
@@ -161,27 +205,36 @@ const NavBar = () => {
                     </button>
                     {(
                         <div
+                            ref={searchContainerRef}
                             className={`
-                                relative flex items-center h-9 md:h-10 rounded-full transition-all 
-                                duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-                                ${isSearchOpen
-                                ? 'bg-app-text/10 px-3 w-40 md:w-72 border border-app-border shadow-lg'
-                                : 'w-10 bg-transparent border-transparent'}
-                            `}
+        relative flex items-center h-9 md:h-10 rounded-full transition-all 
+        duration-500
+        ${isSearchOpen
+                                ? "bg-app-text/10 px-3 w-64 md:w-96 border border-app-border shadow-lg"
+                                : "w-10 bg-transparent border-transparent"}
+    `}
                         >
                             <button
                                 onClick={() => {
-                                    if (isSearchOpen) setSearchQuery("");
-                                    setIsSearchOpen(!isSearchOpen);
+                                    if (isSearchOpen) {
+                                        closeSearch();
+                                    } else {
+                                        setIsSearchOpen(true);
+                                    }
                                 }}
                                 className={`
-                                    ${IconCircleStyle} w-9! h-9! md:w-10! md:h-10! absolute left-0
-                                    transition-all duration-500 z-10
-                                    ${isSearchOpen ? 'text-primary rotate-90 scale-110 hover:bg-transparent' : 'text-app-text rotate-0 scale-100'}
-                                `}
+            ${IconCircleStyle} w-9! h-9! md:w-10! md:h-10! absolute left-0
+            transition-all duration-500 z-10
+            ${isSearchOpen
+                                    ? "text-primary rotate-90 scale-110 hover:bg-transparent"
+                                    : "text-app-text rotate-0 scale-100"}
+        `}
                             >
-                                {isSearchOpen ? <HiOutlineX className="text-lg"/> :
-                                    <HiOutlineSearch className="text-lg md:text-xl"/>}
+                                {isSearchOpen ? (
+                                    <HiOutlineX className="text-lg" />
+                                ) : (
+                                    <HiOutlineSearch className="text-lg md:text-xl" />
+                                )}
                             </button>
 
                             {isSearchOpen && (
@@ -194,47 +247,167 @@ const NavBar = () => {
                                     onChange={(e) => handleSearch(e.target.value)}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {
-                                            navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+                                            goToSearchPage();
+                                        }
+
+                                        if (e.key === "Escape") {
+                                            closeSearch();
                                         }
                                     }}
-                                    className="ml-8 w-full bg-transparent outline-none text-app-text placeholder-app-text-secondary"
+                                    className="ml-8 w-full bg-transparent outline-none text-app-text placeholder-app-text-secondary text-sm"
                                 />
                             )}
-                            {
-                                searchQuery.length >=2 && (previewResults.users.length > 0 || previewResults.collections.length > 0)&&
-                                (
-                                    <div className="absolute top-full left-0 mt-2 w-full bg-app-bg border border-app-border rounded-x1 shadow-x1 overflow-hidden z-50">
-                                        {previewResults.users.slice(0, 3).map(user => (
 
-                                            <div
-                                                key={user.id}
-                                                className="px-4 py-3 hover:bg-app-bg-secondary cursor-pointer"
-                                                onClick={() =>
-                                                    navigate(`/search?q=${user.username}`)
-                                                }
-                                            >
-                                                <p className="font-medium">
-                                                    {user.username}
-                                                </p>
-                                            </div>
-                                        ))}
-                                        {previewResults.collections.slice(0, 3).map(collection => (
-                                            <div
-                                                key={collection.id}
-                                                className="px-4 py-3 hover:bg-app-bg-secondarycursor-pointer"
-                                                onClick={() =>
-                                                    navigate(`/search?q=${encodeURIComponent(searchQuery)}`)
-                                                }
-                                            >
-                                                <p>
-                                                    {collection.name}
-                                                </p>
-                                            </div>
+                            {isSearchOpen && searchQuery.trim().length >= 2 && (
+                                <div className="absolute top-full left-0 mt-3 w-[320px] md:w-[430px] bg-app-bg border border-app-border rounded-2xl shadow-2xl overflow-hidden z-[80]">
 
-                                        ))}
+                                    <div className="px-4 py-3 border-b border-app-border flex items-center justify-between">
+                                        <p className="text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
+                                            Recherche dynamique
+                                        </p>
+
+                                        {searchLoading && (
+                                            <div className="w-4 h-4 border-2 border-app-text/20 border-t-primary rounded-full animate-spin" />
+                                        )}
                                     </div>
-                                )
-                            }
+
+                                    {!searchLoading && !hasPreviewResults && (
+                                        <div className="px-4 py-6 text-center">
+                                            <p className="text-sm text-app-text-secondary">
+                                                Aucun résultat trouvé
+                                            </p>
+
+                                            <button
+                                                type="button"
+                                                onClick={goToSearchPage}
+                                                className="mt-4 text-xs text-rose-400 hover:text-rose-300 font-semibold"
+                                            >
+                                                Voir la recherche complète →
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {hasPreviewResults && (
+                                        <div className="max-h-[420px] overflow-y-auto">
+
+                                            {previewResults.users.length > 0 && (
+                                                <div className="py-2">
+                                                    <p className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
+                                                        Utilisateurs
+                                                    </p>
+
+                                                    {previewResults.users.slice(0, 3).map((u) => (
+                                                        <button
+                                                            key={u.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                navigate(`/users/${u.id}`);
+                                                                closeSearch();
+                                                            }}
+                                                            className="w-full px-4 py-3 hover:bg-app-bg-secondary cursor-pointer text-left flex items-center gap-3 transition"
+                                                        >
+                                                            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-rose-500/40 to-blue-500/30 flex items-center justify-center overflow-hidden shrink-0">
+                                                                {u.avatar ? (
+                                                                    <img
+                                                                        src={u.avatar}
+                                                                        alt={u.username}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <span className="text-white font-black text-sm">
+                                                {u.username?.charAt(0)?.toUpperCase() || "U"}
+                                            </span>
+                                                                )}
+                                                            </div>
+
+                                                            <div className="min-w-0">
+                                                                <p className="font-semibold text-app-text truncate">
+                                                                    {u.display_name || u.username}
+                                                                </p>
+
+                                                                <p className="text-xs text-app-text-secondary truncate">
+                                                                    @{u.username}
+                                                                </p>
+                                                            </div>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {previewResults.shows.length > 0 && (
+                                                <div className="py-2 border-t border-app-border">
+                                                    <p className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
+                                                        Émissions
+                                                    </p>
+
+                                                    {previewResults.shows.slice(0, 4).map((show) => (
+                                                        <button
+                                                            key={show.id ?? show.url}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                if (!show.url) return;
+
+                                                                navigate(`/show/${encodeURIComponent(show.url)}`, {
+                                                                    state: { show }
+                                                                });
+
+                                                                closeSearch();
+                                                            }}
+                                                            className="w-full px-4 py-3 hover:bg-app-bg-secondary cursor-pointer text-left transition"
+                                                        >
+                                                            <p className="font-semibold text-app-text line-clamp-1">
+                                                                {show.title}
+                                                            </p>
+
+                                                            <p className="text-xs text-app-text-secondary mt-1 line-clamp-2">
+                                                                {show.standFirst || "Aucune description disponible"}
+                                                            </p>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {previewResults.collections.length > 0 && (
+                                                <div className="py-2 border-t border-app-border">
+                                                    <p className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
+                                                        Collections
+                                                    </p>
+
+                                                    {previewResults.collections.slice(0, 3).map((collection) => (
+                                                        <button
+                                                            key={collection.id}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                navigate(`/collections/${collection.id}`);
+                                                                closeSearch();
+                                                            }}
+                                                            className="w-full px-4 py-3 hover:bg-app-bg-secondary cursor-pointer text-left transition"
+                                                        >
+                                                            <p className="font-semibold text-app-text line-clamp-1">
+                                                                {collection.name}
+                                                            </p>
+
+                                                            <p className="text-xs text-app-text-secondary mt-1 line-clamp-2">
+                                                                {collection.description || "Aucune description"}
+                                                            </p>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            <div className="border-t border-app-border p-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={goToSearchPage}
+                                                    className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold transition"
+                                                >
+                                                    Voir tous les résultats pour “{searchQuery.trim()}”
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
                 </div>
@@ -248,8 +421,6 @@ const NavBar = () => {
                         />
                     </Link>
                 </div>
-
-
 
                 <div className="flex items-center gap-2 md:gap-3">
                     <LanguageSwitcher />

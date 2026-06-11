@@ -60,7 +60,7 @@ const SearchResults = () => {
 
             {!loading && (
                 <div className="mb-12">
-                    <h2 className="text-2xl font-bold text-white mb-4">
+                    <h2 className={`text-2xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                         {t("searchPage.users")}
                     </h2>
                     {results.users.length === 0 ? (
@@ -109,8 +109,48 @@ const SearchResults = () => {
                         </div>
                     )}
 
+
                     <div className="mt-12">
-                        <h2 className="text-2xl font-bold text-white mb-4">
+                        <h2 className={`text-2xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
+                            Collections
+                        </h2>
+
+                        {results.collections.length === 0 ? (
+                            <p className="text-neutral-500">
+                                Aucune collection trouvée
+                            </p>
+                        ) : (
+                            <div className="grid md:grid-cols-3 gap-4">
+                                {results.collections.map((collection) => (
+                                    <div
+                                        key={collection.id}
+                                        onClick={() => navigate(`/collections/${collection.id}`)}
+                                        className={`p-4 rounded-xl cursor-pointer transition ${
+                                            theme === "dark"
+                                                ? "bg-neutral-900 hover:bg-neutral-800"
+                                                : "bg-white border border-neutral-200 hover:bg-neutral-50"
+                                        }`}
+                                    >
+                                        <h3 className={`font-bold ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
+                                            {collection.name}
+                                        </h3>
+
+                                        <p className="text-neutral-500 text-sm mt-2 line-clamp-3">
+                                            {collection.description || "Aucune description"}
+                                        </p>
+
+                                        <span className="text-xs text-rose-400 mt-3 inline-block">
+                                            Voir la collection →
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+
+                    <div className="mt-12">
+                        <h2 className={`text-2xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                             {t("searchPage.shows")}
                         </h2>
                         {results.shows.length === 0 ? (
