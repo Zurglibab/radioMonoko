@@ -146,7 +146,7 @@ export const CommentItem = memo(({
                                 <span>{comment.dislikesCount ?? 0}</span>
                             </button>
 
-                            {isLoggedIn && comment.user_id === currentUser?.id && (
+                            {isLoggedIn && currentUser?.id && String(comment.user_id) !== String(currentUser.id) && (
                                 <ReportButton
                                     type="review"
                                     targetId={comment.id}
@@ -257,7 +257,7 @@ export const CommentItem = memo(({
                                                 <HiHandThumbDown size={13} className={reply.userChoice === 'dislike' ? "scale-110" : ""} />
                                                 <span>{reply.dislikesCount ?? 0}</span>
                                             </button>
-                                            {isLoggedIn && comment.user_id === currentUser?.id && (
+                                            {isLoggedIn && currentUser?.id && String(reply.user_id) !== String(currentUser.id) && (
                                                 <ReportButton
                                                     type="review"
                                                     targetId={reply.id}
@@ -269,9 +269,9 @@ export const CommentItem = memo(({
                                                     compact
                                                 />
                                             )}
-                                            {isLoggedIn && comment.user_id === currentUser?.id && (
+                                            {isLoggedIn && currentUser?.id && String(reply.user_id) === String(currentUser.id) && (
                                                 <button
-                                                    onClick={() => onDeleteReview(comment.id)}
+                                                    onClick={() => onDeleteReview(reply.id, comment.id)}
                                                     className={`h-7 px-3 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border transition-all duration-200 
                                                     ${theme === 'dark' ? 'bg-white/[0.02] border-white/5 text-neutral-400 hover:text-rose-500 hover:border-rose-500/30' : 'bg-neutral-50 border-neutral-200 text-neutral-500 hover:text-rose-600 hover:border-rose-500/30'}`}
                                                 >

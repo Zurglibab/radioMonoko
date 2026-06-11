@@ -1,4 +1,4 @@
-import type {User} from "../../context/AuthContext.tsx";
+import type {User} from "../../interfaces/Users.types.ts";
 import {useEffect, useState} from "react";
 import AdminService from "../../services/AdminService.ts";
 import {useNavigate} from "react-router-dom";
