@@ -70,16 +70,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
         setLoading(true);
         try {
             let finalAvatarUrl = user?.avatar;
-            if (avatarPreview !== user?.avatar) {
+            if (avatarPreview && avatarPreview.startsWith('data:image')) {
                 const uploadedUrl = await uploadAvatar(avatarPreview);
-                console.log(uploadedUrl);
                 if (uploadedUrl) {
                     finalAvatarUrl = uploadedUrl.avatar;
                 } else {
                     throw new Error("Échec de l'upload de l'avatar");
                 }
             }
-
             const updateData = {
                 display_name: displayName,
                 email: email,
@@ -89,7 +87,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                 avatar: finalAvatarUrl
             };
             const response = await UsersService.updateMe(updateData);
-            console.log(response);
             updateUser(response);
             onClose();
         } catch (error: any) {

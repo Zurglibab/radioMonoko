@@ -3,27 +3,30 @@ import { useNavigate } from "react-router-dom";
 import { HiOutlineX, HiOutlineUserGroup, HiOutlineCheck } from "react-icons/hi";
 import { useAppearance } from "../../context/AppearanceContext";
 import UserRelationsService from "../../services/UserRelationsService";
-import type {User} from "../../context/AuthContext.tsx";
+import type {User} from "../../interfaces/Users.types.ts";
 
 export const FriendsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
     const { theme } = useAppearance();
     const [friends, setFriends] = useState<User[]>([]);
     const [pending, setPending] = useState<User[]>([]);
     const [following, setFollowing] = useState<User[]>([]);
-    const [activeTab, setActiveTab] = useState<'friends' | 'pending' | 'following'>('friends');
+    const [followers, setFollowers] = useState<User[]>([]);
+    const [activeTab, setActiveTab] = useState<'friends' | 'pending' | 'following' | 'followers'>('friends');
     const [isLoading, setIsLoading] = useState(false);
 
     const refreshData = async () => {
         setIsLoading(true);
         try {
-            const [f, p, fol] = await Promise.all([
+            const [friends, pending, following, followers ] = await Promise.all([
                 UserRelationsService.getFriends(),
                 UserRelationsService.getRequests(),
-                UserRelationsService.getFollowing()
+                UserRelationsService.getFollowing(),
+                UserRelationsService.getFollowers(),
             ]);
-            setFriends(f as unknown as User[]);
-            setPending(p as unknown as User[]);
-            setFollowing(fol as unknown as User[]);
+            setFriends(friends as unknown as User[]);
+            setPending(pending as unknown as User[]);
+            setFollowing(following as unknown as User[]);
+            setFollowers(followers as unknown as User[]);
         } catch (err) {
             console.error("Erreur chargement réseau :", err);
         } finally {
@@ -40,7 +43,7 @@ export const FriendsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
     const isDark = theme === 'dark';
     const bgClass = isDark ? "bg-neutral-900 text-white" : "bg-white text-neutral-800";
 
-    const currentList = activeTab === 'friends' ? friends : activeTab === 'pending' ? pending : following;
+    const currentList = activeTab === 'friends' ? friends : activeTab === 'pending' ? pending : activeTab === 'following' ? following : followers;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -52,9 +55,10 @@ export const FriendsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
                     <button onClick={onClose} className="opacity-50 hover:opacity-100 transition"><HiOutlineX /></button>
                 </div>
 
-                <div className={`flex gap-1 p-1 rounded-2xl mb-6 ${isDark ? 'bg-white/5' : 'bg-neutral-100'}`}>
+                <div className={`grid grid-cols-4 gap-1 p-1 rounded-2xl mb-6 ${isDark ? 'bg-white/5' : 'bg-neutral-100'}`}>
                     <TabButton active={activeTab === 'friends'} onClick={() => setActiveTab('friends')} label={`Amis (${friends.length})`} isDark={isDark} />
                     <TabButton active={activeTab === 'following'} onClick={() => setActiveTab('following')} label={`Suivis (${following.length})`} isDark={isDark} />
+                    <TabButton active={activeTab === 'followers'} onClick={() => setActiveTab('followers')} label={`Abonnés (${followers.length})`} isDark={isDark} />
                     <TabButton active={activeTab === 'pending'} onClick={() => setActiveTab('pending')} label={`Attente (${pending.length})`} isDark={isDark} />
                 </div>
 

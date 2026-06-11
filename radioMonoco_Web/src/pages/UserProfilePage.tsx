@@ -27,6 +27,8 @@ const UserProfilePage = () => {
     const [isFollow, setFollow] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [friends, setFriends] = useState<User[]>([]);
+    const [isBlocked, setIsBlocked] = useState(false);
+    const [isBlockLoading, setIsBlockLoading] = useState(false);
 
     const isOwnProfile = connectedUser?.id === profilUser?.id;
     const isPrivateProfil = profilUser?.privacy === "private";
