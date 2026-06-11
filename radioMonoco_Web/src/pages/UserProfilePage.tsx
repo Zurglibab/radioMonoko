@@ -409,7 +409,7 @@ const UserProfilePage = () => {
                             {friends.map((friend) => (
                                 <div
                                     key={friend.id}
-                                    onClick={() => navigate(`/profile/${friend.id}`)}
+                                    onClick={() => navigate(`/users/${friend.id}`)}
                                     className="cursor-pointer bg-neutral-900/40 border border-white/5 rounded-2xl p-5 hover:border-rose-500/30 transition"
                                 >
                                     <div className="flex items-center gap-4">
@@ -422,8 +422,8 @@ const UserProfilePage = () => {
                                                 />
                                             ) : (
                                                 <span className="text-xl font-bold">
-                                    {friend.username.charAt(0).toUpperCase()}
-                                </span>
+                                                    {friend.username.charAt(0).toUpperCase()}
+                                                </span>
                                             )}
                                         </div>
 

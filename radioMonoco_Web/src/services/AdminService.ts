@@ -1,5 +1,5 @@
 import api from "./Api";
-import type { User } from "../context/AuthContext";
+import type { User } from "../interfaces/Users.types.ts";
 import type { ReportReview, ReportUser, Report } from "../interfaces/Report.types";
 import type { Review } from "../interfaces/Review.types";
 

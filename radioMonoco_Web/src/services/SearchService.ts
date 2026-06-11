@@ -1,5 +1,5 @@
 import api from "./Api.ts";
-import type {User} from "../context/AuthContext.tsx";
+import type { User } from "../interfaces/Users.types.ts";
 import type {Collection} from "../interfaces/Collections.types.ts";
 import type {ApiShow} from "../interfaces/Shows.types";
 import type {SearchResult} from "../interfaces/Search.types.ts";

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { HiOutlineX, HiOutlineUserGroup, HiOutlineCheck } from "react-icons/hi";
 import { useAppearance } from "../../context/AppearanceContext";
 import UserRelationsService from "../../services/UserRelationsService";
-import type {User} from "../../context/AuthContext.tsx";
+import type { User } from "../../interfaces/Users.types.ts";
 
 export const FriendsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
     const { theme } = useAppearance();
