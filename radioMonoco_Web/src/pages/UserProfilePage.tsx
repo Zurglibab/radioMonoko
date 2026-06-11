@@ -103,18 +103,15 @@ const UserProfilePage = () => {
             console.error("Utilisateur cible introuvable pour la notification");
             return;
         }
-
-        if(!user.notifications_email) {
-            try {
-                await NotificationsService.createNotification({
-                    user_id: targetUserId,
-                    type: type,
-                    message: messages[type],
-                    is_read: false
-                });
-            } catch (error) {
-                console.error("Erreur notification:", error);
-            }
+        try {
+            await NotificationsService.createNotification({
+                user_id: targetUserId,
+                type: type,
+                message: messages[type],
+                is_read: false
+            });
+        } catch (error) {
+            console.error("Erreur notification:", error);
         }
     };
 
