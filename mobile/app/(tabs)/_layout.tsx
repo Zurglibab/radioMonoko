@@ -12,12 +12,15 @@ import React from "react";
 import { Platform, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 /**
  * TabsLayout : Structure de navigation principale par onglets.
  * Gère l'apparence de la TabBar et l'adaptation aux différentes tailles d'écran.
  */
 export default function TabsLayout() {
+  const { t } = useTranslation();
+
   // Récupération des préférences d'apparence de l'utilisateur
   const { appearanceSettings } = useAuthContext();
 
@@ -79,7 +82,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="home"
         options={{
-          title: "Accueil",
+          title: t('common.nav.home'),
           tabBarIcon: ({ color }) => <LayoutDashboard size={22} color={color} />,
         }}
       />
@@ -88,7 +91,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="feed"
         options={{
-          title: "Flux",
+          title: t('common.nav.feed'),
           tabBarIcon: ({ color }) => <Newspaper size={22} color={color} />,
         }}
       />
@@ -97,7 +100,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="search"
         options={{
-          title: "Recherche",
+          title: t('common.nav.search'),
           tabBarIcon: ({ color }) => <Search size={22} color={color} />,
         }}
       />
@@ -106,7 +109,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="library"
         options={{
-          title: "Ma radio",
+          title: t('common.nav.library'),
           tabBarIcon: ({ color }) => <Library size={22} color={color} />,
         }}
       />
@@ -115,7 +118,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="chat"
         options={{
-          title: "Messages",
+          title: t('common.nav.chat'),
           tabBarIcon: ({ color }) => <MessageSquare size={22} color={color} />,
         }}
       />
@@ -124,7 +127,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profil",
+          title: t('common.nav.profile'),
           tabBarIcon: ({ color }) => <User size={22} color={color} />,
         }}
       />

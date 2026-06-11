@@ -1,0 +1,20 @@
+{
+  "controls": {
+    "next": "Next",
+    "getStarted": "Join the wave"
+  },
+  "slides": {
+    "1": {
+      "title": "THE SOCIAL WAVE.",
+      "description": "Explore thousands of stations and podcasts. Save what makes your ears vibrate every day."
+    },
+    "2": {
+      "title": "YOUR VERDICT.",
+      "description": "Rate shows, share your reviews and discover what the community is listening to on repeat."
+    },
+    "3": {
+      "title": "LIVE TOGETHER.",
+      "description": "Follow your favorite curators, chat in real time and never miss an important live show."
+    }
+  }
+}

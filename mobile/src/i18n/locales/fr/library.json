@@ -1,0 +1,155 @@
+{
+  "library": {
+    "title": "Ma Radio",
+    "tabs": {
+      "all": "Tout",
+      "radios": "Radios",
+      "podcasts": "Podcasts",
+      "playlists": "Playlists"
+    },
+    "errorCreateCollection": "Impossible de créer la collection.",
+    "manageCollection": "Gérer la collection",
+    "makePrivate": "Rendre privée 🔒",
+    "makePublic": "Rendre publique 🌍",
+    "myCollection": "Ma Collection",
+    "ondesCount_one": "{{count}} onde",
+    "ondesCount_other": "{{count}} ondes",
+    "yourCreations": "Vos Créations",
+    "likedTitles": "Titres Likés",
+    "wave": "Onde",
+    "podcast": "Podcast",
+    "radioFrance": "Radio France",
+    "playlistTitlesCount_one": "Playlist • {{count}} titre",
+    "playlistTitlesCount_other": "Playlist • {{count}} titres",
+    "loadingCollections": "Chargement de vos collections...",
+    "noCollections": "Aucune collection. Touchez + pour en créer une.",
+    "noDescription": "Sans description",
+    "saved": "Enregistrés",
+    "newCollection": "Nouvelle collection"
+  },
+  "reviewScreen": {
+    "noMediaSelected": "Aucun média sélectionné.",
+    "loadMediaError": "Impossible de charger ce média.",
+    "ratingRequiredTitle": "Note requise",
+    "ratingRequiredMessage": "Veuillez attribuer au moins une étoile.",
+    "reviewTooShortTitle": "Critique trop courte",
+    "reviewTooShortMessage": "Dites-en un peu plus sur votre écoute.",
+    "publishedTitle": "Critique publiée",
+    "publishedMessage": "Votre critique a été diffusée sur l'onde ! 🎙️",
+    "great": "Génial",
+    "publishError": "Impossible de publier la critique.",
+    "ratingLabels": {
+      "disappointing": "Décevant",
+      "notBad": "Pas mal",
+      "veryGood": "Très bon",
+      "excellent": "Excellent",
+      "masterpiece": "Chef-d'œuvre"
+    },
+    "headerTitle": "Critique",
+    "mediaNotFound": "Média introuvable.",
+    "radioFallback": "Radio",
+    "alreadyRated": "Vous avez déjà noté cette œuvre {{rating}}/5. Votre note sera mise à jour.",
+    "rateTheWave": "Note l'onde",
+    "chooseIntensity": "Choisis ton intensité",
+    "ratingWithLabel": "{{rating}}/5 - {{label}}",
+    "yourOpinion": "Ton avis",
+    "commentPlaceholder": "Cette radio me rappelle...",
+    "publishReview": "Diffuser ma critique",
+    "visibilityNotice": "Ta critique sera visible par toute la communauté RadioMonoco."
+  },
+  "statusScreen": {
+    "unknownStatus": "Statut inconnu",
+    "noItems": "Aucune œuvre avec ce statut pour l'instant."
+  },
+  "collectionFormModal": {
+    "defaultTitle": "Nouvelle collection",
+    "nameTooShort": "Le nom doit contenir au moins 2 caractères.",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Ex: Mes pépites jazz",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "À quoi sert cette collection ?",
+    "visibilityLabel": "Visibilité",
+    "createButton": "Créer la collection"
+  },
+  "mediaActionSheet": {
+    "favoritesTitle": "Favoris",
+    "addedToLiked": "Ajouté à vos Titres Likés",
+    "removedFromLiked": "Retiré de vos Titres Likés",
+    "favoriteError": "Impossible de modifier le favori.",
+    "statusMessages": {
+      "toListen": "C'est noté ! On garde ça de côté.",
+      "inProgress": "Vous avez commencé \"{{title}}\"",
+      "finished": "Bravo ! Une onde de plus à votre palmarès.",
+      "dropped": "L'onde a été mise de côté."
+    },
+    "statusTitle": "Statut",
+    "statusUpdateError": "Impossible de mettre à jour le statut.",
+    "great": "Génial",
+    "collectionTitle": "Collection",
+    "addedToCollection": "\"{{title}}\" ajouté à \"{{collectionName}}\" !",
+    "perfect": "Parfait",
+    "addToCollectionError": "Impossible d'ajouter à la collection.",
+    "addedToNewCollection": "\"{{title}}\" ajouté à votre nouvelle collection !",
+    "createdCollectionTitle": "Collection créée",
+    "createdCollectionMessage": "La liste est prête, vous pouvez y ajouter le titre manuellement.",
+    "createCollectionError": "Impossible de générer la nouvelle collection.",
+    "currentStatus": "Statut actuel",
+    "socialSection": "Social & Communauté",
+    "rateAndReview": "Noter et critiquer",
+    "shareOpinion": "Partager votre avis avec le réseau",
+    "favoritesSection": "Favoris & Collections",
+    "removeFromLiked": "Retirer des Titres Likés",
+    "addToLiked": "Ajouter aux Titres Likés",
+    "addToCollection": "Ajouter à une collection",
+    "newCollection": "Nouvelle collection",
+    "myCollectionSection": "Ma Collection",
+    "statusActions": {
+      "toListen": "À écouter",
+      "inProgress": "En cours",
+      "finished": "Marquer comme Terminé",
+      "dropped": "Abandonner"
+    },
+    "chooseCollection": "Choisir une collection",
+    "createNewCollection": "Créer une nouvelle collection",
+    "noCollectionsCreateOne": "Aucune collection. Créez-en une ci-dessus."
+  },
+  "playlistActionSheet": {
+    "shareMessage": "Découvre ma playlist \"{{name}}\" sur RadioMonoco !",
+    "visibilityError": "Impossible de modifier la visibilité.",
+    "renameTitle": "Renommer la playlist",
+    "renameMessage": "Entrez le nouveau nom",
+    "renameError": "Impossible de renommer la playlist.",
+    "deleteTitle": "Supprimer la playlist",
+    "deleteMessage": "Cette action est définitive.",
+    "deleteError": "Impossible de supprimer la playlist.",
+    "titlesCount_one": "{{count}} titre",
+    "titlesCount_other": "{{count}} titres",
+    "communitySection": "Communauté",
+    "sendToFriend": "Envoyer à un ami",
+    "makePrivate": "Passer en privé",
+    "makePublic": "Passer en public",
+    "visibleByYouOnly": "Visible uniquement par vous",
+    "visibleByCommunity": "Visible par toute la communauté",
+    "settingsSection": "Paramètres",
+    "editName": "Modifier le nom",
+    "deletePermanently": "Supprimer définitivement"
+  },
+  "status": {
+    "toListen": {
+      "displayName": "À écouter",
+      "description": "Les ondes que vous souhaitez explorer."
+    },
+    "inProgress": {
+      "displayName": "En cours",
+      "description": "Ce que vous écoutez actuellement."
+    },
+    "finished": {
+      "displayName": "Terminé",
+      "description": "Vos écoutes accomplies."
+    },
+    "dropped": {
+      "displayName": "Abandonné",
+      "description": "Les ondes mises de côté."
+    }
+  }
+}

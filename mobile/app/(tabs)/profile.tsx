@@ -2,9 +2,10 @@ import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
-  Settings, LogOut, ShieldCheck, Bell, CircleHelp,
-  Share2, User, Paintbrush, FileText,
+  LogOut, ShieldCheck, CircleHelp,
+  User, Paintbrush, FileText,
 } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useLibrary } from "@/hooks/home/useLibrary";
 import { useRouter } from "expo-router";
@@ -24,6 +25,7 @@ const StatBox = ({ label, value, colors }: { label: string; value: number | stri
 );
 
 export default function ProfileScreen() {
+  const { t, i18n } = useTranslation();
   const { user, favorites, playlists, statusItems } = useLibrary();
   const { token, logout, appearanceSettings } = useAuthContext();
   const router = useRouter();
@@ -36,10 +38,14 @@ export default function ProfileScreen() {
 
   const { requests, isLoading: pendingLoading, respondingId, accept, refuse } = usePendingRequests(token);
 
+  const memberSince = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString(i18n.language === "en" ? "en-US" : "fr-FR", { month: "long", year: "numeric" })
+    : null;
+
   const handleLogout = () => {
-    Alert.alert("Déconnexion", "Voulez-vous vraiment quitter Radio Monoko ?", [
-      { text: "Annuler", style: "cancel" },
-      { text: "Se déconnecter", style: "destructive", onPress: async () => { await logout(); router.replace("/login"); } },
+    Alert.alert(t("profile.profileTab.logoutConfirmTitle"), t("profile.profileTab.logoutConfirmMessage"), [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("common.logout"), style: "destructive", onPress: async () => { await logout(); router.replace("/login"); } },
     ]);
   };
 
@@ -49,17 +55,14 @@ export default function ProfileScreen() {
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
 
       <View className="px-6 pb-2">
-        <View className="flex-row items-center justify-between mt-6">
-          <Text style={{ color: colors.text }} className="text-3xl font-black italic tracking-tighter">Moi</Text>
-          <TouchableOpacity style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="p-2.5 rounded-full border">
-            <Settings size={20} color={colors.text} />
-          </TouchableOpacity>
+        <View className="mt-6">
+          <Text style={{ color: colors.text }} className="text-3xl font-black italic tracking-tighter">{t("profile.profileTab.title")}</Text>
         </View>
 
         <View className="items-center mt-8">
           <View className="relative">
             <Image
-              source={{ uri: user.avatar || `https://ui-avatars.com/api/?name=${user.username}&background=333&color=fff` }}
+              source={{ uri: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.display_name || user.username)}&background=333&color=fff` }}
               style={{ borderColor: colors.border, backgroundColor: colors.surface }}
               className="w-32 h-32 rounded-[40px] border-2"
             />
@@ -71,18 +74,23 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <Text style={{ color: colors.text }} className="text-3xl font-black mt-6 tracking-tighter">{user.username}</Text>
-          <Text style={{ color: colors.muted }} className="font-bold mb-3 uppercase text-[10px] tracking-[2px]">{user.email}</Text>
+          <Text style={{ color: colors.text }} className="text-3xl font-black mt-6 tracking-tighter">{user.display_name || user.username}</Text>
+          {!!user.display_name && (
+            <Text style={{ color: colors.muted }} className="font-bold text-xs mt-1">@{user.username}</Text>
+          )}
+          <Text style={{ color: colors.muted }} className="font-bold mb-3 uppercase text-[10px] tracking-[2px] mt-1">{user.email}</Text>
 
           <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="px-6 py-2 rounded-full border">
-            <Text style={{ color: colors.muted }} className="text-[11px] font-medium">Radio Monoko • Membre depuis Mars 2026</Text>
+            <Text style={{ color: colors.muted }} className="text-[11px] font-medium">
+              {memberSince ? t("profile.profileTab.memberSince", { date: memberSince }) : "Radio Monoko"}
+            </Text>
           </View>
         </View>
 
         <View className="flex-row justify-between mt-10">
-          <StatBox colors={colors} label="Ondes" value={favorites.length} />
-          <StatBox colors={colors} label="Playlists" value={playlists.length} />
-          <StatBox colors={colors} label="Terminés" value={statusItems.find((i) => i.slug === "finished")?.count ?? 0} />
+          <StatBox colors={colors} label={t("profile.profileTab.stats.waves")} value={favorites.length} />
+          <StatBox colors={colors} label={t("profile.profileTab.stats.playlists")} value={playlists.length} />
+          <StatBox colors={colors} label={t("profile.profileTab.stats.finished")} value={statusItems.find((i) => i.slug === "finished")?.count ?? 0} />
         </View>
       </View>
 
@@ -97,27 +105,25 @@ export default function ProfileScreen() {
         />
 
         <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="mt-8 rounded-[16px] p-2 border">
-          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">Mon Compte</Text>
-          <SettingItem icon={User} label="Modifier le profil" secondary="Pseudo, Bio, Photo" onPress={() => router.push("/profile/edit")} colors={colors} />
-          <SettingItem icon={ShieldCheck} label="Sécurité" secondary="Mot de passe, 2FA" onPress={() => router.push("/profile/security")} isLast colors={colors} />
+          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">{t("profile.profileTab.accountSection")}</Text>
+          <SettingItem icon={User} label={t("profile.profileTab.editProfile.label")} secondary={t("profile.profileTab.editProfile.secondary")} onPress={() => router.push("/profile/edit")} colors={colors} />
+          <SettingItem icon={ShieldCheck} label={t("profile.profileTab.security.label")} secondary={t("profile.profileTab.security.secondary")} onPress={() => router.push("/profile/security")} isLast colors={colors} />
         </View>
 
         <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="mt-6 rounded-[16px] p-2 border">
-          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">Expérience</Text>
-          <SettingItem icon={Bell} label="Notifications" secondary="Alertes direct, Podcasts" onPress={() => router.push("/profile/notifications")} colors={colors} />
-          <SettingItem icon={Paintbrush} label="Apparence" secondary="Thèmes, Icones" onPress={() => router.push("/profile/appearance")} colors={colors} />
-          <SettingItem icon={Share2} label="Parrainage" secondary="Inviter des amis" isLast colors={colors} />
+          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">{t("profile.profileTab.experienceSection")}</Text>
+          <SettingItem icon={Paintbrush} label={t("profile.profileTab.appearance.label")} secondary={t("profile.profileTab.appearance.secondary")} onPress={() => router.push("/profile/appearance")} isLast colors={colors} />
         </View>
 
         <View style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="mt-6 rounded-[16px] p-2 border">
-          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">Assistance</Text>
-          <SettingItem icon={CircleHelp} label="Assistance" secondary="FAQ, Contact, Aide" onPress={() => router.push("/profile/support")} colors={colors} />
-          <SettingItem icon={FileText} label="Légal" secondary="CGU, Confidentialité, Export" onPress={() => router.push("/profile/legal")} isLast colors={colors} />
+          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">{t("profile.profileTab.supportSection")}</Text>
+          <SettingItem icon={CircleHelp} label={t("profile.profileTab.support.label")} secondary={t("profile.profileTab.support.secondary")} onPress={() => router.push("/profile/support")} colors={colors} />
+          <SettingItem icon={FileText} label={t("profile.profileTab.legal.label")} secondary={t("profile.profileTab.legal.secondary")} onPress={() => router.push("/profile/legal")} isLast colors={colors} />
         </View>
 
         <TouchableOpacity onPress={handleLogout} activeOpacity={0.8} className="flex-row items-center justify-center py-10 mb-10">
           <LogOut size={18} color={colors.primary} />
-          <Text style={{ color: colors.primary }} className="ml-3 font-black uppercase text-xs tracking-[3px]">Se déconnecter</Text>
+          <Text style={{ color: colors.primary }} className="ml-3 font-black uppercase text-xs tracking-[3px]">{t("profile.profileTab.logout")}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

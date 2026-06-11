@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, useColorScheme, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, UserPlus, UserCheck, Users, ListMusic, MoreVertical, MessageSquare } from "lucide-react-native";
 import { theme } from "@/constants/theme";
@@ -12,6 +13,7 @@ import { UserPlaylistsSection } from "@/features/community/components/UserPlayli
 import { MutualFriendsSection } from "@/features/community/components/MutualFriendsSection";
 
 export default function UserProfileScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { appearanceSettings, token, user: currentUser } = useAuthContext();
   const systemTheme = useColorScheme();
@@ -39,7 +41,7 @@ export default function UserProfileScreen() {
     setIsChatLoading(true);
     try {
       const channelId = await ChannelService.getOrCreateDM(token, currentUser.id, id);
-      const displayName = state.profile?.display_name ?? state.profile?.username ?? "Conversation";
+      const displayName = state.profile?.display_name ?? state.profile?.username ?? t('community.userProfile.defaultConversationName');
       router.push(`/chat/${channelId}?username=${encodeURIComponent(displayName)}` as any);
     } catch (err) {
       if (__DEV__) console.warn("[UserProfile] getOrCreateDM failed:", err);
@@ -64,7 +66,7 @@ export default function UserProfileScreen() {
         </TouchableOpacity>
         <View className="flex-1 items-center justify-center px-8">
           <Text style={{ color: colors.muted }} className="text-center font-bold">
-            {error ?? "Profil introuvable."}
+            {error ?? t('community.userProfile.notFound')}
           </Text>
         </View>
       </SafeAreaView>
@@ -87,7 +89,7 @@ export default function UserProfileScreen() {
           <ChevronLeft color={colors.text} size={20} />
         </TouchableOpacity>
         <Text style={{ color: colors.text }} className="text-lg font-black italic tracking-tighter">
-          Profil
+          {t('community.userProfile.title')}
         </Text>
         {!isOwnProfile ? (
           <TouchableOpacity
@@ -123,9 +125,9 @@ export default function UserProfileScreen() {
             className="flex-row mt-6 rounded-2xl border overflow-hidden"
           >
             {[
-              { value: targetFriendsCount, label: "Amis", icon: <Users size={10} color={colors.muted} /> },
-              { value: mutualFriends.length, label: "En commun", icon: <Users size={10} color={colors.muted} /> },
-              { value: collections.length, label: "Listes", icon: <ListMusic size={10} color={colors.muted} /> },
+              { value: targetFriendsCount, label: t('community.userProfile.statsFriends'), icon: <Users size={10} color={colors.muted} /> },
+              { value: mutualFriends.length, label: t('community.userProfile.statsMutual'), icon: <Users size={10} color={colors.muted} /> },
+              { value: collections.length, label: t('community.userProfile.statsLists'), icon: <ListMusic size={10} color={colors.muted} /> },
             ].map((stat, i) => (
               <React.Fragment key={stat.label}>
                 {i > 0 && <View style={{ width: 1, backgroundColor: colors.border }} />}
@@ -159,14 +161,14 @@ export default function UserProfileScreen() {
                   <>
                     <UserCheck size={16} color={colors.text} />
                     <Text style={{ color: colors.text }} className="font-black uppercase text-xs ml-2 tracking-widest">
-                      Abonné
+                      {t('community.userProfile.following')}
                     </Text>
                   </>
                 ) : (
                   <>
                     <UserPlus size={16} color={colors.background} />
                     <Text style={{ color: colors.background }} className="font-black uppercase text-xs ml-2 tracking-widest">
-                      Suivre
+                      {t('common.follow')}
                     </Text>
                   </>
                 )}

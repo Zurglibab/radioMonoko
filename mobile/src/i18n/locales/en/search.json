@@ -1,0 +1,33 @@
+{
+  "searchBar": {
+    "placeholder": "Stations, shows, playlists, curators..."
+  },
+  "searchDefaultView": {
+    "recentSearches": "Recent searches",
+    "clear": "Clear",
+    "exploreGenres": "Explore genres",
+    "genres": {
+      "jazz": "Jazz",
+      "rock": "Rock",
+      "classical": "Classical",
+      "news": "News",
+      "techno": "Techno",
+      "vocal": "Vocal"
+    }
+  },
+  "searchResultsView": {
+    "contentTypeLabels": {
+      "show": "Show",
+      "diffusion": "Broadcast",
+      "live": "Live",
+      "podcast": "Podcast",
+      "article": "Article",
+      "other": "Content"
+    },
+    "stationsSection": "Stations & Waves",
+    "showsSection": "Shows & Broadcasts",
+    "publicCollectionsSection": "Public playlists",
+    "communitySection": "Community",
+    "emptyState": "No wave caught on this frequency..."
+  }
+}

@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Users } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 /**
  * CommunitySection : Liste horizontale des membres actifs.
@@ -10,6 +11,7 @@ import { useAuthContext } from "@/context/AuthContext";
  * @param onPrompt : Callback pour déclencher une action (ex: ouvrir une modale de suggestion).
  */
 export const CommunitySection = ({ onPrompt }: { onPrompt: (msg: string) => void }) => {
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
   const isDark = appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
@@ -20,21 +22,21 @@ export const CommunitySection = ({ onPrompt }: { onPrompt: (msg: string) => void
     <View className="flex-row items-center px-6 mb-5">
       <Users size={18} color={colors.muted} className="mr-2" />
       <Text className="text-white text-lg font-bold italic tracking-tight">
-        Communauté
+        {t('home.communitySection.title')}
       </Text>
     </View>
 
     {/* Liste des membres actifs */}
-    <ScrollView 
-      horizontal 
-      showsHorizontalScrollIndicator={false} 
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ paddingHorizontal: 24 }}
     >
       {['Shérine', 'Tristan', 'Kilian', 'Aurélien', 'Romain'].map((name, i) => (
-        <TouchableOpacity 
-          key={i} 
-          className="items-center mr-8" 
-          onPress={() => onPrompt("suivre des utilisateurs")}
+        <TouchableOpacity
+          key={i}
+          className="items-center mr-8"
+          onPress={() => onPrompt(t('home.communitySection.followUsersAction'))}
           activeOpacity={0.7}
         >
           {/* Cercle des avatars */}

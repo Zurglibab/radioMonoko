@@ -1,0 +1,20 @@
+{
+  "controls": {
+    "next": "Suivant",
+    "getStarted": "Entrer dans l'onde"
+  },
+  "slides": {
+    "1": {
+      "title": "L'ONDE SOCIALE.",
+      "description": "Explorez des milliers de stations et podcasts. Archivez ce qui fait vibrer vos tympans au quotidien."
+    },
+    "2": {
+      "title": "VOTRE VERDICT.",
+      "description": "Notez les émissions, partagez vos critiques et découvrez ce que la communauté écoute en boucle."
+    },
+    "3": {
+      "title": "EN DIRECT ENSEMBLE.",
+      "description": "Suivez vos curateurs préférés, échangez en temps réel et ne manquez jamais un live important."
+    }
+  }
+}

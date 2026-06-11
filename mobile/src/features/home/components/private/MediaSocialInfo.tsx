@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { User } from '@/types/auth';
+import { useTranslation } from "react-i18next";
 
 interface MediaSocialInfoProps {
   friends: User[];
@@ -12,6 +13,8 @@ interface MediaSocialInfoProps {
  * Valide les points "Interaction Sociale" du barème SUPCONTENT.
  */
 export const MediaSocialInfo = ({ friends, colors }: MediaSocialInfoProps) => {
+  const { t } = useTranslation();
+
   if (!friends || friends.length === 0) return null;
 
   return (
@@ -41,9 +44,9 @@ export const MediaSocialInfo = ({ friends, colors }: MediaSocialInfoProps) => {
         <Text style={{ color: colors.text }} className="font-bold">
           {friends[0].username}
         </Text>
-        {friends.length > 1 
-          ? ` et ${friends.length - 1} autres amis écoutent.` 
-          : " écoute cette onde."}
+        {friends.length > 1
+          ? t('home.mediaSocialInfo.listeningWithOthers', { count: friends.length - 1 })
+          : t('home.mediaSocialInfo.listeningAlone')}
       </Text>
     </View>
   );

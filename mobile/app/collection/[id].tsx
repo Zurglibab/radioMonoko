@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, useColorScheme, ActivityIndic
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Globe, Lock, Trash2, Disc3, Music2, FolderOpen } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
@@ -16,6 +17,7 @@ import { CollectionDTO } from "@/types/collection";
  * - Liste des œuvres avec note utilisateur et bouton retrait
  */
 export default function CollectionDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const collectionId = id as string;
   const router = useRouter();
@@ -43,21 +45,21 @@ export default function CollectionDetailScreen() {
       .then(col => { setCollection(col); setHeaderError(null); })
       .catch(err => {
         if (__DEV__) console.warn("[CollectionDetail] header", err?.message);
-        setHeaderError("Collection introuvable.");
+        setHeaderError(t('content.collection.notFound'));
       })
       .finally(() => setIsHeaderLoading(false));
-  }, [token, collectionId]);
+  }, [token, collectionId, t]);
 
   const isLoading = isItemsLoading || isHeaderLoading;
   const error = itemsError || headerError;
 
   const handleRemove = (contentId: string, title: string) => {
     Alert.alert(
-      "Retirer de la collection",
-      `Retirer "${title}" de cette collection ?`,
+      t('content.collection.removeTitle'),
+      t('content.collection.removeMessage', { title }),
       [
-        { text: "Annuler", style: "cancel" },
-        { text: "Retirer", style: "destructive", onPress: () => removeItem(contentId) },
+        { text: t('common.cancel'), style: "cancel" },
+        { text: t('content.collection.removeConfirm'), style: "destructive", onPress: () => removeItem(contentId) },
       ]
     );
   };
@@ -74,7 +76,7 @@ export default function CollectionDetailScreen() {
           <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter flex-1" numberOfLines={1}>
-          {collection?.name || "Collection"}
+          {collection?.name || t('content.collection.defaultTitle')}
         </Text>
       </View>
 
@@ -108,11 +110,11 @@ export default function CollectionDetailScreen() {
                       : <Lock size={12} color={colors.muted} />
                     }
                     <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase ml-2 tracking-widest">
-                      {collection.is_public ? "Publique" : "Privée"}
+                      {collection.is_public ? t('common.public') : t('common.private')}
                     </Text>
                   </View>
                   <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest">
-                    {items.length} œuvre{items.length > 1 ? 's' : ''}
+                    {t('content.collection.itemsCount', { count: items.length })}
                   </Text>
                 </View>
               </View>
@@ -128,10 +130,10 @@ export default function CollectionDetailScreen() {
                   <Disc3 size={40} color={colors.muted} opacity={0.3} />
                 </View>
                 <Text style={{ color: colors.text }} className="text-lg font-black italic text-center mb-2">
-                  Collection vide
+                  {t('content.collection.emptyTitle')}
                 </Text>
                 <Text style={{ color: colors.muted }} className="text-sm text-center mb-8 leading-5">
-                  Ajoutez des œuvres depuis leur fiche pour les retrouver ici.
+                  {t('content.collection.emptyMessage')}
                 </Text>
                 <TouchableOpacity
                   style={{ backgroundColor: colors.primary }}
@@ -140,14 +142,14 @@ export default function CollectionDetailScreen() {
                 >
                   <Music2 size={18} color={colors.secondary} />
                   <Text style={{ color: colors.secondary }} className="font-black uppercase text-xs tracking-widest ml-2">
-                    Explorer
+                    {t('content.collection.explore')}
                   </Text>
                 </TouchableOpacity>
               </View>
             ) : (
               <View className="px-6">
                 {items.map((item) => {
-                  const title = item.content?.title || "Œuvre indisponible";
+                  const title = item.content?.title || t('content.collection.untitledWork');
                   return (
                     <View
                       key={item.contentId}
@@ -167,7 +169,7 @@ export default function CollectionDetailScreen() {
                         </Text>
                         {item.note ? (
                           <Text style={{ color: colors.muted }} className="text-xs italic mt-0.5" numberOfLines={2}>
-                            « {item.note} »
+                            {t('content.collection.noteQuote', { note: item.note })}
                           </Text>
                         ) : (
                           <Text style={{ color: colors.muted }} className="text-[10px] uppercase font-bold tracking-widest mt-0.5">

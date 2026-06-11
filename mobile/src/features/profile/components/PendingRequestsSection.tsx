@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { UserPlus, Check, X } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { PendingFriendRequest } from "@/types/social";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 
 export const PendingRequestsSection = ({ requests, isLoading, respondingId, onAccept, onRefuse, colors }: Props) => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   if (!isLoading && requests.length === 0) return null;
 
@@ -23,7 +25,7 @@ export const PendingRequestsSection = ({ requests, isLoading, respondingId, onAc
       <View className="flex-row items-center mb-3">
         <UserPlus size={14} color={colors.primary} />
         <Text style={{ color: colors.text }} className="text-[9px] font-black uppercase tracking-[3px] ml-2">
-          Demandes d'amis
+          {t("profile.pendingRequests.title")}
         </Text>
         {requests.length > 0 && (
           <View style={{ backgroundColor: colors.primary }} className="ml-2 px-2 py-0.5 rounded-full">
@@ -49,7 +51,7 @@ export const PendingRequestsSection = ({ requests, isLoading, respondingId, onAc
 
             <TouchableOpacity className="flex-1" onPress={() => router.push(`/community/user/${req.id}` as any)}>
               <Text style={{ color: colors.text }} className="font-bold text-sm">{req.username}</Text>
-              <Text style={{ color: colors.muted }} className="text-[10px]">Veut vous suivre</Text>
+              <Text style={{ color: colors.muted }} className="text-[10px]">{t("profile.pendingRequests.wantsToFollow")}</Text>
             </TouchableOpacity>
 
             <View className="flex-row gap-x-2">

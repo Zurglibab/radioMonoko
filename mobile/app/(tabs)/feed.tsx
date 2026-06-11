@@ -4,6 +4,7 @@ import {
   ActivityIndicator, useColorScheme, TextInput, Image, Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { Heart, MessageSquare, UserPlus, UserCheck, MoreVertical, Star, PenLine } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
@@ -15,6 +16,7 @@ import { SocialActivity } from "@/types/community";
 import { useRouter } from "expo-router";
 
 export default function FeedScreen() {
+  const { t } = useTranslation();
   const { appearanceSettings, token, user } = useAuthContext();
   const systemTheme = useColorScheme();
   const router = useRouter();
@@ -38,14 +40,14 @@ export default function FeedScreen() {
 
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 border-b" style={{ borderColor: colors.border }}>
-        <Text style={{ color: colors.text }} className="text-[20px] font-black italic tracking-tighter">Le Flux</Text>
+        <Text style={{ color: colors.text }} className="text-[20px] font-black italic tracking-tighter">{t('community.feed.title')}</Text>
         <TouchableOpacity
           onPress={() => router.push("/(tabs)/search" as any)}
           style={{ backgroundColor: colors.primary }}
           className="flex-row items-center px-4 py-2 rounded-full"
         >
           <PenLine size={14} color={colors.background} />
-          <Text style={{ color: colors.background }} className="text-xs font-black ml-2 uppercase tracking-wider">Publier</Text>
+          <Text style={{ color: colors.background }} className="text-xs font-black ml-2 uppercase tracking-wider">{t('community.feed.publish')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -61,7 +63,7 @@ export default function FeedScreen() {
           className="w-10 h-10 rounded-full mr-3"
         />
         <View className="flex-1 rounded-full px-4 py-2.5 border" style={{ borderColor: colors.border, backgroundColor: colors.surface }}>
-          <Text style={{ color: colors.muted }} className="text-[15px]">Critique une station...</Text>
+          <Text style={{ color: colors.muted }} className="text-[15px]">{t('community.feed.composerPlaceholder')}</Text>
         </View>
       </TouchableOpacity>
 
@@ -77,8 +79,8 @@ export default function FeedScreen() {
           {feed.length === 0 ? (
             <View className="py-24 items-center px-8">
               <Text style={{ color: colors.muted }} className="text-center text-[15px] leading-6">
-                Aucune critique dans le flux pour l'instant.{"\n"}
-                <Text style={{ color: colors.primary }}>Suis des utilisateurs</Text> pour voir leurs avis ici.
+                {t('community.feed.emptyFeedLine1')}{"\n"}
+                <Text style={{ color: colors.primary }}>{t('community.feed.emptyFeedLine2Link')}</Text> {t('community.feed.emptyFeedLine2Suffix')}
               </Text>
             </View>
           ) : (
@@ -109,6 +111,7 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
   colors: any;
   router: any;
 }) {
+  const { t } = useTranslation();
   const [isLiked, setIsLiked] = useState(activity.hasLiked ?? false);
   const [likesCount, setLikesCount] = useState(activity.likes);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -138,7 +141,10 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
           NotificationService.create(token, {
             user_id: activity.userId,
             type: 'like',
-            message: `${currentUsername ?? 'Quelqu\'un'} a aimé votre critique de ${activity.targetMedia}`,
+            message: t('home.activityCard.likeNotification', {
+              username: currentUsername ?? t('home.activityCard.someone'),
+              media: activity.targetMedia,
+            }),
             is_read: false,
           }).catch(() => {});
         }
@@ -164,9 +170,9 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
 
   const handleMore = () => {
     Alert.alert("", activity.user, [
-      { text: "Voir le profil", onPress: () => router.push(`/community/user/${activity.userId}`) },
-      { text: "Signaler", style: "destructive", onPress: () => Alert.alert("Merci", "Contenu signalé aux administrateurs.") },
-      { text: "Annuler", style: "cancel" },
+      { text: t('community.feed.viewProfile'), onPress: () => router.push(`/community/user/${activity.userId}`) },
+      { text: t('common.report'), style: "destructive", onPress: () => Alert.alert(t('community.feed.reportThanksTitle'), t('community.feed.reportThanksMessage')) },
+      { text: t('common.cancel'), style: "cancel" },
     ]);
   };
 
@@ -206,7 +212,7 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
                   style={{ borderColor: isFollowing ? colors.text : colors.border, backgroundColor: isFollowing ? colors.text : 'transparent' }}
                 >
                   <Text style={{ color: isFollowing ? colors.background : colors.muted }} className="text-[11px] font-bold">
-                    {isFollowing ? "Suivi" : "Suivre"}
+                    {isFollowing ? t('community.feed.following') : t('common.follow')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -218,7 +224,7 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
 
           {/* Media name + stars */}
           <Text style={{ color: colors.muted }} className="text-[13px] mb-1">
-            Critique de{" "}
+            {t('community.feed.reviewOf')}{" "}
             <Text style={{ color: colors.text }} className="font-semibold italic">{activity.targetMedia}</Text>
           </Text>
 

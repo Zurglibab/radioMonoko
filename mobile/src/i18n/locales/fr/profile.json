@@ -1,0 +1,124 @@
+{
+  "appearance": {
+    "title": "Apparence",
+    "displayMode": "Mode d'affichage",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système",
+    "languageSection": "Langue",
+    "french": "Français",
+    "english": "Anglais",
+    "accentColor": "Couleur d'accent",
+    "interface": "Interface",
+    "compactMode": "Mode Compact",
+    "compactModeDesc": "Afficher plus de contenus",
+    "philosophy": "L'apparence s'adapte en temps réel pour une immersion totale dans vos ondes préférées."
+  },
+  "profileTab": {
+    "title": "Moi",
+    "memberSince": "Radio Monoco • Membre depuis {{date}}",
+    "stats": {
+      "waves": "Ondes",
+      "playlists": "Playlists",
+      "finished": "Terminés"
+    },
+    "accountSection": "Mon Compte",
+    "editProfile": {
+      "label": "Modifier le profil",
+      "secondary": "Pseudo, Bio, Photo"
+    },
+    "security": {
+      "label": "Sécurité",
+      "secondary": "Mot de passe, Biométrie"
+    },
+    "experienceSection": "Expérience",
+    "appearance": {
+      "label": "Apparence",
+      "secondary": "Thèmes, Icones"
+    },
+    "supportSection": "Assistance",
+    "support": {
+      "label": "Assistance",
+      "secondary": "Contact, Signalement"
+    },
+    "legal": {
+      "label": "Mes données",
+      "secondary": "Export RGPD"
+    },
+    "logout": "Se déconnecter",
+    "logoutConfirmTitle": "Déconnexion",
+    "logoutConfirmMessage": "Voulez-vous vraiment quitter Radio Monoco ?"
+  },
+  "editProfile": {
+    "headerTitle": "Édition Profil",
+    "permissionDeniedTitle": "Permission refusée",
+    "permissionDeniedMessage": "L'accès aux photos est nécessaire.",
+    "cancelPhoto": "Annuler la photo",
+    "displayNameLabel": "Nom affiché",
+    "cooldownMessage": "Disponible dans {{days}} jours.",
+    "bioLabel": "Bio",
+    "bioPlaceholder": "Parlez-nous de vous...",
+    "websiteLabel": "Site web",
+    "websitePlaceholder": "https://...",
+    "privacyLabel": "Confidentialité",
+    "saveButton": "Mettre à jour",
+    "noChanges": "Aucun changement",
+    "securityNotePrefix": "Le pseudo (",
+    "securityNoteSuffix": ") et l'email ne sont pas modifiables depuis cet écran."
+  },
+  "security": {
+    "headerTitle": "Sécurité",
+    "protectionLabel": "Protection : {{status}}",
+    "protectionEnhanced": "Renforcée",
+    "protectionStandard": "Standard",
+    "accessSection": "Accès & Biométrie",
+    "password": {
+      "label": "Mot de passe",
+      "secondary": "Modifier via email de sécurité"
+    },
+    "biometry": {
+      "label": "Face ID / Touch ID",
+      "secondary": "Connexion rapide et sécurisée"
+    },
+    "unavailableTitle": "Indisponible",
+    "unavailableMessage": "Votre appareil ne supporte pas la biométrie ou aucun profil n'est enregistré.",
+    "confirmIdentityPrompt": "Confirmez votre identité pour RadioMonoco",
+    "fallbackLabel": "Utiliser le code de l'appareil",
+    "biometryEnabledTitle": "Succès",
+    "biometryEnabledMessage": "Biométrie activée pour vos prochaines connexions.",
+    "changePasswordTitle": "Modifier le mot de passe",
+    "changePasswordMessage": "Nous allons envoyer un code de vérification sécurisé sur l'adresse : {{email}}",
+    "sendCode": "Envoyer le code",
+    "privacyNote": "RadioMonoco utilise un cryptage de bout en bout pour protéger vos données de session et vos préférences de diffusion."
+  },
+  "legal": {
+    "headerTitle": "Mes données",
+    "portabilitySection": "Portabilité",
+    "exportArchiveTitle": "Export Archive",
+    "exportArchiveDesc": "Téléchargez l'intégralité de votre activité RadioMonoco (historique, préférences, métadonnées).",
+    "generateArchiveButton": "Générer l'archive",
+    "shareDialogTitle": "Export de mes données RadioMonoko",
+    "exportReadyTitle": "Export prêt",
+    "exportReadyMessage": "Votre archive a été enregistrée : {{uri}}",
+    "errorTitle": "Erreur",
+    "errorMessage": "Impossible de générer l'export. Réessayez plus tard.",
+    "footer": "Radio Monoco v1.0.0 • 2026"
+  },
+  "support": {
+    "headerTitle": "Assistance",
+    "needHelpSection": "Besoin d'aide ?",
+    "email": {
+      "label": "Envoyer un email",
+      "secondary": "Réponse sous 24h"
+    },
+    "bug": {
+      "label": "Signaler un bug",
+      "secondary": "Aidez-nous à nous améliorer"
+    },
+    "footer": "RadioMonoco Support v1.0"
+  },
+  "pendingRequests": {
+    "title": "Demandes d'amis",
+    "wantsToFollow": "Veut vous suivre"
+  }
+}

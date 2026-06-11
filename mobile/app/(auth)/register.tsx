@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ScrollView, TouchableOpacity, Text, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { theme } from "@/constants/theme";
 import { AuthInput } from "@/features/auth/components/AuthInput";
@@ -17,7 +18,8 @@ import { useRegister } from "@/hooks/auth/useRegister";
  */
 export default function RegisterScreen() {
   const router = useRouter();
-  
+  const { t } = useTranslation();
+
   // Utilisation d'un hook dédié pour isoler la logique d'inscription
   const { register, registerWithGoogle, isLoading, error } = useRegister();
   
@@ -41,9 +43,9 @@ export default function RegisterScreen() {
         contentContainerStyle={{ paddingTop: 40, paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        <AuthHeader 
-          title="Rejoindre l'onde." 
-          subtitle="Créez votre compte pour commencer à partager vos critiques audio sur RadioMonoco." 
+        <AuthHeader
+          title={t('auth.register.title')}
+          subtitle={t('auth.register.subtitle')}
         />
 
         {/* Zone d'affichage des erreurs provenant du backend */}
@@ -55,38 +57,38 @@ export default function RegisterScreen() {
 
         <View className="mb-2">
           <AuthInput
-            label="Email"
-            placeholder="votre@email.com"
+            label={t('auth.register.emailLabel')}
+            placeholder={t('auth.register.emailPlaceholder')}
             value={email}
             onChangeText={setEmail}
           />
           <AuthInput
-            label="Pseudo"
-            placeholder="votre_pseudo"
+            label={t('auth.register.usernameLabel')}
+            placeholder={t('auth.register.usernamePlaceholder')}
             value={username}
             onChangeText={setUsername}
           />
           <AuthInput
-            label="Mot de passe"
-            placeholder="••••••••"
+            label={t('auth.register.passwordLabel')}
+            placeholder={t('auth.register.passwordPlaceholder')}
             isPassword
             value={password}
             onChangeText={setPassword}
           />
-          <AuthInput 
-            label="Confirmer le mot de passe" 
-            placeholder="••••••••" 
-            isPassword 
-            value={confirmPassword} 
-            onChangeText={setConfirmPassword} 
+          <AuthInput
+            label={t('auth.register.confirmPasswordLabel')}
+            placeholder={t('auth.register.confirmPasswordPlaceholder')}
+            isPassword
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
           />
         </View>
 
         {/* Validation des CGU, élément bloquant pour l'inscription */}
-        <AuthCheckbox 
-          label="J'accepte les conditions d'utilisation" 
-          value={agree} 
-          onValueChange={setAgree} 
+        <AuthCheckbox
+          label={t('auth.register.agreeToTerms')}
+          value={agree}
+          onValueChange={setAgree}
         />
 
         {/* Bouton d'action avec changement de style dynamique */}
@@ -104,15 +106,15 @@ export default function RegisterScreen() {
           {isLoading ? (
             <ActivityIndicator color={theme.dark.colors.secondary} />
           ) : (
-            <Text 
-              style={{ 
-                color: isButtonDisabled 
-                  ? theme.dark.colors.muted 
-                  : theme.dark.colors.secondary 
-              }} 
+            <Text
+              style={{
+                color: isButtonDisabled
+                  ? theme.dark.colors.muted
+                  : theme.dark.colors.secondary
+              }}
               className="font-bold text-lg uppercase tracking-widest"
             >
-              S'inscrire
+              {t('auth.register.submitButton')}
             </Text>
           )}
         </TouchableOpacity>
@@ -126,13 +128,13 @@ export default function RegisterScreen() {
 
         {/* Redirection vers le login pour les utilisateurs déjà inscrits */}
         <View className="flex-row justify-center mt-12 mb-6">
-          <Text style={{ color: theme.dark.colors.muted }}>Déjà membre ? </Text>
+          <Text style={{ color: theme.dark.colors.muted }}>{t('auth.register.alreadyMember')}</Text>
           <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
-            <Text 
-              style={{ color: theme.dark.colors.text }} 
+            <Text
+              style={{ color: theme.dark.colors.text }}
               className="font-bold underline"
             >
-              Se connecter
+              {t('auth.register.loginLink')}
             </Text>
           </TouchableOpacity>
         </View>

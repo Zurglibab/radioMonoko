@@ -6,6 +6,7 @@ import { theme } from "@/constants/theme";
 import { User } from "@/types/auth";
 import { useAuthContext } from "@/context/AuthContext";
 import { useNotificationContext } from "@/context/NotificationContext";
+import { useTranslation } from "react-i18next";
 
 /**
  * PrivateHeader : En-tête personnalisé pour l'espace connecté.
@@ -13,6 +14,7 @@ import { useNotificationContext } from "@/context/NotificationContext";
  * Le badge de la cloche reflète en temps réel le nombre de notifications non lues grâce au contexte de notifications.
  */
 export const PrivateHeader = ({ user }: { user: User }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
@@ -43,7 +45,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
           className="w-11 h-11 rounded-[16px] items-center justify-center border mr-3 shadow-sm"
         >
           <Text style={{ color: colors.text }} className="font-black text-lg uppercase">
-            {(user.username ?? 'utilisateur')[0]}
+            {(user.username ?? t('home.privateHeader.defaultUsername'))[0]}
           </Text>
         </TouchableOpacity>
 
@@ -58,7 +60,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
             style={{ color: colors.text }}
             className="text-xl font-black tracking-tighter italic"
           >
-            Salut, {user.username ?? 'utilisateur'}
+            {t('home.privateHeader.greeting', { username: user.username ?? t('home.privateHeader.defaultUsername') })}
           </Text>
         </View>
       </View>

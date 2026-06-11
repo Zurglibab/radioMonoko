@@ -2,20 +2,21 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { Disc, Radio, List, Users, X } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { PublicStationCard } from "@/features/home/components/public/PublicStationCard";
 import { Station } from "@/types/content";
 
 /**
- * Labels pour les types de contenu, 
- * utilisés dans la vue des résultats de recherche pour indiquer le type d'émission ou de diffusion.
+ * Clés de traduction pour les types de contenu,
+ * utilisées dans la vue des résultats de recherche pour indiquer le type d'émission ou de diffusion.
  */
-const CONTENT_TYPE_LABEL: Record<string, string> = {
-  show: "Émission",
-  diffusion: "Diffusion",
-  live: "Direct",
-  podcast: "Podcast",
-  article: "Article",
-  other: "Contenu",
+const CONTENT_TYPE_KEYS: Record<string, string> = {
+  show: "show",
+  diffusion: "diffusion",
+  live: "live",
+  podcast: "podcast",
+  article: "article",
+  other: "other",
 };
 
 /**
@@ -50,6 +51,7 @@ export const SearchResultsView = ({
   colors,
 }: SearchResultsViewProps) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const totalResults = stations.length + users.length + contents.length + publicCollections.length;
 
   return (
@@ -61,7 +63,7 @@ export const SearchResultsView = ({
           <View className="flex-row items-center mb-6">
             <Disc size={18} color={colors.text} />
             <Text style={{ color: colors.text }} className="ml-3 text-lg font-black italic tracking-tighter">
-              Stations & Ondes
+              {t("search.searchResultsView.stationsSection")}
             </Text>
           </View>
           <View className="flex-row flex-wrap justify-between">
@@ -88,7 +90,7 @@ export const SearchResultsView = ({
           <View className="flex-row items-center mb-6">
             <Radio size={18} color={colors.text} />
             <Text style={{ color: colors.text }} className="ml-3 text-lg font-black italic tracking-tighter">
-              Émissions & Diffusions
+              {t("search.searchResultsView.showsSection")}
             </Text>
           </View>
           {contents.map((item) => (
@@ -106,7 +108,9 @@ export const SearchResultsView = ({
                 <View className="flex-row items-center mt-1">
                   <View style={{ backgroundColor: colors.primary + "33" }} className="px-2 py-0.5 rounded-full">
                     <Text style={{ color: colors.primary }} className="text-[9px] font-black uppercase tracking-wider">
-                      {CONTENT_TYPE_LABEL[item.content_type] ?? item.content_type}
+                      {CONTENT_TYPE_KEYS[item.content_type]
+                        ? t(`search.searchResultsView.contentTypeLabels.${CONTENT_TYPE_KEYS[item.content_type]}`)
+                        : item.content_type}
                     </Text>
                   </View>
                 </View>
@@ -125,7 +129,7 @@ export const SearchResultsView = ({
           <View className="flex-row items-center mb-6">
             <List size={18} color={colors.text} />
             <Text style={{ color: colors.text }} className="ml-3 text-lg font-black italic tracking-tighter">
-              Listes publiques
+              {t("search.searchResultsView.publicCollectionsSection")}
             </Text>
           </View>
           {publicCollections.map((col) => (
@@ -155,7 +159,7 @@ export const SearchResultsView = ({
           <View className="flex-row items-center mb-6">
             <Users size={18} color={colors.text} />
             <Text style={{ color: colors.text }} className="ml-3 text-lg font-black italic tracking-tighter">
-              Communauté
+              {t("search.searchResultsView.communitySection")}
             </Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingRight: 20 }}>
@@ -186,7 +190,7 @@ export const SearchResultsView = ({
             <X size={32} color={colors.muted} opacity={0.5} />
           </View>
           <Text style={{ color: colors.muted }} className="text-center font-bold italic opacity-60">
-            Aucune onde captée sur cette fréquence...
+            {t("search.searchResultsView.emptyState")}
           </Text>
         </View>
       )}

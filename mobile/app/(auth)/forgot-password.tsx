@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ScrollView, TouchableOpacity, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { AuthHeader } from "@/features/auth/components/AuthHeader";
 import { AuthInput } from "@/features/auth/components/AuthInput";
@@ -13,7 +14,8 @@ import { AuthService } from "@/services/auth/auth.service";
  */
 export default function ForgotPasswordScreen() {
   const router = useRouter();
-  
+  const { t } = useTranslation();
+
   // États locaux pour la gestion du formulaire et du feedback visuel
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -46,12 +48,17 @@ export default function ForgotPasswordScreen() {
         contentContainerStyle={{ paddingTop: 40 }}
         keyboardShouldPersistTaps="handled" // Permet de cliquer sur le bouton même si le clavier est ouvert
       >
-        <AuthHeader 
-          title="Mot de passe oublié" 
-          subtitle="Pas d'inquiétude, entrez votre email pour recevoir un code de réinitialisation." 
+        <AuthHeader
+          title={t('auth.forgotPassword.title')}
+          subtitle={t('auth.forgotPassword.subtitle')}
         />
 
-        <AuthInput label="Email" placeholder="votre@email.com" value={email} onChangeText={setEmail} />
+        <AuthInput
+          label={t('auth.forgotPassword.emailLabel')}
+          placeholder={t('auth.forgotPassword.emailPlaceholder')}
+          value={email}
+          onChangeText={setEmail}
+        />
 
         <TouchableOpacity 
           onPress={handleSend}
@@ -62,11 +69,11 @@ export default function ForgotPasswordScreen() {
             opacity: isLoading ? 0.7 : 1
           }}
         >
-          <Text 
-            className="font-bold text-black" 
+          <Text
+            className="font-bold text-black"
             style={{ color: theme.dark.colors.secondary }}
           >
-            {isLoading ? "ENVOI EN COURS..." : "ENVOYER LE CODE"}
+            {isLoading ? t('auth.forgotPassword.submitButtonLoading') : t('auth.forgotPassword.submitButton')}
           </Text>
         </TouchableOpacity>
       </ScrollView>

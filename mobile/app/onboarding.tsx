@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { ArrowRight, Check } from "lucide-react-native";
 import React, { useRef, useState } from "react";
 import { Animated, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { theme } from "@/constants/theme";
 import OnboardingItem from "@/features/onboarding/components/OnboardingItem";
@@ -15,6 +16,7 @@ import { setOnboardingSeen } from "@/services/onboarding/storage/onboarding.stor
  * Utilise une FlatList horizontale avec pagination pour présenter les features.
  */
 export default function OnboardingScreen() {
+  const { t } = useTranslation();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Valeur animée pour synchroniser l'indicateur (Paginator) avec le scroll
@@ -77,7 +79,9 @@ export default function OnboardingScreen() {
           style={{ backgroundColor: theme.light.colors.background }}
         >
           <Text className="text-black font-bold text-lg mr-2 tracking-widest uppercase">
-            {currentIndex === ONBOARDING_SLIDES.length - 1 ? "Entrer dans l'onde" : "Suivant"}
+            {currentIndex === ONBOARDING_SLIDES.length - 1
+              ? t("onboarding.controls.getStarted")
+              : t("onboarding.controls.next")}
           </Text>
           
           {/* Changement d'icône dynamique selon la progression */}

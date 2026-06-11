@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { ChevronRight, UserCircle } from "lucide-react-native";
 import React from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useAuthContext } from "@/context/AuthContext";
 import { WELCOME_IMAGE } from "@/features/onboarding/data/slides";
 
@@ -13,7 +14,8 @@ import { WELCOME_IMAGE } from "@/features/onboarding/data/slides";
  */
 export default function WelcomeScreen() {
   const router = useRouter();
-  
+  const { t } = useTranslation();
+
   // Je récupère la méthode logout pour garantir un état propre en mode invité
   const { logout } = useAuthContext();
 
@@ -64,11 +66,11 @@ export default function WelcomeScreen() {
             </View>
             
             <Text className="text-white font-bold text-6xl mb-4 tracking-tighter leading-[55px]">
-                L'onde{"\n"}<Text className="text-white/50">partagée.</Text>
+                {t('auth.welcome.titleLine1')}{"\n"}<Text className="text-white/50">{t('auth.welcome.titleLine2')}</Text>
             </Text>
-            
+
             <Text className="text-gray-400 text-lg font-light leading-7">
-                Découvrez des podcasts, critiquez les ondes et rejoignez la plus grande communauté de curateurs audio.
+                {t('auth.welcome.description')}
             </Text>
         </View>
 
@@ -81,28 +83,28 @@ export default function WelcomeScreen() {
                 activeOpacity={0.8}
                 className="bg-white w-full py-5 rounded-2xl items-center flex-row justify-center shadow-xl"
             >
-                <Text className="text-black font-bold text-lg">Se connecter</Text>
+                <Text className="text-black font-bold text-lg">{t('auth.welcome.loginButton')}</Text>
             </TouchableOpacity>
 
             {/* Bouton secondaire "s'inscrire" */}
-            <TouchableOpacity 
+            <TouchableOpacity
                 onPress={() => router.push("/(auth)/register")}
                 activeOpacity={0.7}
                 className="w-full py-5 rounded-2xl items-center border border-white/30 flex-row justify-center"
             >
-                <Text className="text-white font-bold text-lg mr-2">Rejoindre le club</Text>
+                <Text className="text-white font-bold text-lg mr-2">{t('auth.welcome.registerButton')}</Text>
                 <ChevronRight size={18} color="white" />
             </TouchableOpacity>
 
             {/* Accès invité plus discret */}
-            <TouchableOpacity 
-                onPress={handleGuestAccess} 
+            <TouchableOpacity
+                onPress={handleGuestAccess}
                 activeOpacity={0.6}
                 className="mt-2 py-2 items-center flex-row justify-center"
             >
                 <UserCircle size={16} color="#9CA3AF" />
                 <Text className="text-gray-400 font-medium text-sm ml-2 underline">
-                    Explorer sans compte
+                    {t('auth.welcome.guestButton')}
                 </Text>
             </TouchableOpacity>
         </View>
@@ -110,7 +112,7 @@ export default function WelcomeScreen() {
         {/* Footer discret pour la marque */}
         <View className="mt-12 items-center">
              <Text className="text-gray-600 text-[10px] tracking-widest uppercase font-bold">
-                Powered by RadioMonoco
+                {t('auth.welcome.poweredBy')}
              </Text>
         </View>
 

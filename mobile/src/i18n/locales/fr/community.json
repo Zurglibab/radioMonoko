@@ -1,0 +1,44 @@
+{
+  "comments": {
+    "headerThread": "Fil",
+    "headerPost": "Post",
+    "replies_one": "{{count}} réponse",
+    "replies_other": "{{count}} réponses",
+    "repliesSectionTitle": "Réponses",
+    "emptyThread": "Aucune réponse pour l'instant.",
+    "emptyComments": "Soyez le premier à commenter.",
+    "reply": "Répondre",
+    "replyingTo": "Réponse à",
+    "replyPlaceholder": "Répondre à @{{username}}...",
+    "commentPlaceholder": "Votre réponse..."
+  },
+  "userProfile": {
+    "notFound": "Profil introuvable.",
+    "title": "Profil",
+    "statsFriends": "Amis",
+    "statsMutual": "En commun",
+    "statsLists": "Listes",
+    "following": "Abonné",
+    "defaultConversationName": "Conversation"
+  },
+  "feed": {
+    "title": "Le Flux",
+    "publish": "Publier",
+    "composerPlaceholder": "Critique une station...",
+    "emptyFeedLine1": "Aucune critique dans le flux pour l'instant.",
+    "emptyFeedLine2Link": "Suis des utilisateurs",
+    "emptyFeedLine2Suffix": "pour voir leurs avis ici.",
+    "viewProfile": "Voir le profil",
+    "reportThanksTitle": "Merci",
+    "reportThanksMessage": "Contenu signalé aux administrateurs.",
+    "following": "Suivi",
+    "reviewOf": "Critique de"
+  },
+  "mutualFriends": {
+    "title": "Amis en commun"
+  },
+  "userPlaylists": {
+    "title": "Playlists"
+  },
+  "initialAvatar": {}
+}

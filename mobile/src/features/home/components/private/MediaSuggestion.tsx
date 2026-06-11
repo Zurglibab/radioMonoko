@@ -6,6 +6,7 @@ import { theme } from "@/constants/theme";
 import { usePlayer } from "@/context/PlayerContext";
 import { Station } from "@/types/content";
 import { useAuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 /**
  * MediaSuggestion : Carte de contenu interactive (Pochette carrée).
@@ -13,6 +14,7 @@ import { useAuthContext } from "@/context/AuthContext";
  * @param item - Données de la station ou du podcast.
  */
 export const MediaSuggestion = ({ item }: { item: Station }) => {
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
@@ -108,7 +110,7 @@ export const MediaSuggestion = ({ item }: { item: Station }) => {
           className="text-[10px] font-black uppercase tracking-tighter"
           numberOfLines={1}
         >
-          {isCurrentMedia && liveSongTitle ? `Direct : ${liveSongTitle}` : item.artist}
+          {isCurrentMedia && liveSongTitle ? t('home.mediaSuggestion.live', { song: liveSongTitle }) : item.artist}
         </Text>
       </View>
 

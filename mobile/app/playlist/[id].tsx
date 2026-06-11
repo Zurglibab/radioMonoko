@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "rea
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Play, MoreVertical, Globe, Lock } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 
 import { useLibrary } from "@/hooks/home/useLibrary";
 import { usePlayer } from "@/context/PlayerContext";
@@ -18,6 +19,7 @@ import { ContentApiService } from "@/services/content/content-api.service";
 import { UserService } from "@/services/users/user.service";
 
 export default function PlaylistDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const colors = useThemeColors();
@@ -43,9 +45,9 @@ export default function PlaylistDetailScreen() {
     if (id !== 'liked') return;
     setPlaylist({
       id: 'liked',
-      name: "Titres Likés",
-      creator: "Vous",
-      description: "Toutes vos ondes favorites",
+      name: t('content.playlist.likedTitlesName'),
+      creator: t('content.playlist.you'),
+      description: t('content.playlist.likedDescription'),
       coverImage: "",
       isPublic: false,
       isCollaborative: false,
@@ -59,9 +61,9 @@ export default function PlaylistDetailScreen() {
         );
         return {
           id: cleanStationId,
-          title: fav.content?.title || "Onde Likée",
+          title: fav.content?.title || t('content.playlist.likedItemTitle'),
           artist: isPod ? "Podcast" : "Radio France",
-          description: fav.content?.description || "Titre sauvegardé",
+          description: fav.content?.description || t('content.playlist.savedTitle'),
           imageUrl: "https://www.radiofrance.fr/images/logos/fip-circle.png",
           isLive: false,
           category: "",
@@ -70,7 +72,7 @@ export default function PlaylistDetailScreen() {
       }),
     });
     setIsOwnPlaylist(true);
-  }, [id, favorites, sanitizeStationId]);
+  }, [id, favorites, sanitizeStationId, t]);
 
   useEffect(() => {
     if (id === 'liked' || !id || !token || !user?.id) return;
@@ -80,13 +82,13 @@ export default function PlaylistDetailScreen() {
     CollectionService.getById(token, id)
       .then(async (dto) => {
         const own = dto.user_id === user.id;
-        let creatorName = "Vous";
+        let creatorName = t('content.playlist.you');
         if (!own) {
           try {
             const profile = await UserService.getById(token, dto.user_id);
-            creatorName = profile.display_name ?? profile.username ?? "Utilisateur";
+            creatorName = profile.display_name ?? profile.username ?? t('content.playlist.unknownUser');
           } catch {
-            creatorName = "Utilisateur";
+            creatorName = t('content.playlist.unknownUser');
           }
         }
         if (isMounted) {
@@ -110,7 +112,7 @@ export default function PlaylistDetailScreen() {
       .finally(() => { if (isMounted) setIsPlaylistLoading(false); });
 
     return () => { isMounted = false; };
-  }, [id, token, user?.id]);
+  }, [id, token, user?.id, t]);
 
   useEffect(() => {
     if (id === 'liked' || !id || !token) return;
@@ -203,11 +205,11 @@ export default function PlaylistDetailScreen() {
             className="flex-row items-center mt-3 px-4 py-2 rounded-full border"
           >
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest">
-              Par {playlist.creator}
+              {t('content.playlist.by', { name: playlist.creator })}
             </Text>
             <View style={{ backgroundColor: colors.border }} className="w-[1px] h-3 mx-3" />
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest">
-              {finalItems.length} titres
+              {t('content.playlist.tracksCount', { count: finalItems.length })}
             </Text>
           </View>
           <TouchableOpacity
@@ -217,7 +219,7 @@ export default function PlaylistDetailScreen() {
           >
             <Play size={20} color={colors.secondary} fill={colors.secondary} />
             <Text style={{ color: colors.secondary }} className="font-black ml-3 uppercase tracking-[2px] text-xs">
-              Lancer l'écoute
+              {t('content.playlist.startListening')}
             </Text>
           </TouchableOpacity>
         </View>

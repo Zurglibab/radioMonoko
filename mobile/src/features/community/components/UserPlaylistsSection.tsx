@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { ListMusic } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { CollectionDTO } from "@/types/collection";
 
 interface UserPlaylistsSectionProps {
@@ -17,13 +18,14 @@ interface UserPlaylistsSectionProps {
  */
 export const UserPlaylistsSection = ({ collections, colors }: UserPlaylistsSectionProps) => {
   const router = useRouter();
+  const { t } = useTranslation();
 
   if (collections.length === 0) return null;
 
   return (
     <View className="w-full mt-8">
       <Text style={{ color: colors.text }} className="text-[10px] font-black uppercase tracking-[3px] mb-4">
-        Playlists
+        {t('community.userPlaylists.title')}
       </Text>
       {collections.map((col) => (
         <TouchableOpacity

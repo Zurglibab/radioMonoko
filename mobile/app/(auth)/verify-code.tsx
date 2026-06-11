@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ScrollView, TouchableOpacity, Text, View, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { AuthHeader } from "@/features/auth/components/AuthHeader";
 import { OtpInput } from "@/features/auth/components/OtpInput";
@@ -13,7 +14,8 @@ import { AuthService } from "@/services/auth/auth.service";
  */
 export default function VerifyCodeScreen() {
   const router = useRouter();
-  
+  const { t } = useTranslation();
+
   // Le code est géré sous forme de tableau pour faciliter la liaison avec les 6 inputs individuels
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(60);
@@ -40,18 +42,18 @@ export default function VerifyCodeScreen() {
     const fullCode = code.join("");
     
     if (fullCode.length < 6) {
-      Alert.alert("Attention", "Veuillez entrer le code complet.");
+      Alert.alert(t('auth.verifyCode.incompleteAlertTitle'), t('auth.verifyCode.incompleteAlertMessage'));
       return;
     }
 
     setIsLoading(true);
     try {
       await AuthService.verifyOtpCode(fullCode);
-      
+
       // Une fois vérifié, je remplace l'écran actuel par la création du nouveau mot de passe
       router.replace("/(auth)/new-password");
     } catch (e) {
-      Alert.alert("Erreur", "Le code saisi est incorrect ou a expiré.");
+      Alert.alert(t('auth.verifyCode.errorAlertTitle'), t('auth.verifyCode.errorAlertMessage'));
     } finally {
       setIsLoading(false);
     }
@@ -64,9 +66,9 @@ export default function VerifyCodeScreen() {
         contentContainerStyle={{ paddingTop: 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        <AuthHeader 
-          title="Vérification" 
-          subtitle="Entrez le code à 6 chiffres envoyé par email." 
+        <AuthHeader
+          title={t('auth.verifyCode.title')}
+          subtitle={t('auth.verifyCode.subtitle')}
         />
 
         <OtpInput code={code} setCode={setCode} />
@@ -74,7 +76,7 @@ export default function VerifyCodeScreen() {
         {/* Feedback du timer */}
         <View className="items-center mb-8">
           <Text style={{ color: theme.dark.colors.muted }}>
-            Renvoyer le code dans <Text className="text-white font-bold">{timer}s</Text>
+            {t('auth.verifyCode.resendCode', { timer })}
           </Text>
         </View>
 
@@ -90,11 +92,11 @@ export default function VerifyCodeScreen() {
           {isLoading ? (
             <ActivityIndicator color={theme.dark.colors.secondary} />
           ) : (
-            <Text 
+            <Text
               className="font-bold text-lg uppercase tracking-widest"
               style={{ color: theme.dark.colors.secondary }}
             >
-              VÉRIFIER
+              {t('auth.verifyCode.submitButton')}
             </Text>
           )}
         </TouchableOpacity>

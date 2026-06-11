@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { X, Globe, Lock } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useColorScheme } from "react-native";
@@ -43,14 +44,16 @@ export const CollectionFormModal = ({
   onClose,
   onSubmit,
   initialData,
-  title = "Nouvelle collection",
+  title,
 }: CollectionFormModalProps) => {
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
   const isDark = appearanceSettings.themeMode === 'system'
     ? systemTheme === 'dark'
     : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const modalTitle = title ?? t('library.collectionFormModal.defaultTitle');
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -71,7 +74,7 @@ export const CollectionFormModal = ({
   const handleSubmit = async () => {
     const trimmedName = name.trim();
     if (trimmedName.length < 2) {
-      setError("Le nom doit contenir au moins 2 caractères.");
+      setError(t('library.collectionFormModal.nameTooShort'));
       return;
     }
     setIsSubmitting(true);
@@ -80,7 +83,7 @@ export const CollectionFormModal = ({
       await onSubmit({ name: trimmedName, description: description.trim(), isPublic });
       onClose();
     } catch (err: any) {
-      setError(err?.message || "Une erreur est survenue.");
+      setError(err?.message || t('common.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -100,7 +103,7 @@ export const CollectionFormModal = ({
           {/* Header */}
           <View className="flex-row justify-between items-center mb-8">
             <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-              {title}
+              {modalTitle}
             </Text>
             <TouchableOpacity
               onPress={onClose}
@@ -113,12 +116,12 @@ export const CollectionFormModal = ({
 
           {/* Champ Nom */}
           <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
-            Nom
+            {t('library.collectionFormModal.nameLabel')}
           </Text>
           <TextInput
             value={name}
             onChangeText={setName}
-            placeholder="Ex: Mes pépites jazz"
+            placeholder={t('library.collectionFormModal.namePlaceholder')}
             placeholderTextColor={colors.muted}
             style={{ backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }}
             className="w-full px-5 py-4 rounded-2xl border mb-5 font-medium"
@@ -126,12 +129,12 @@ export const CollectionFormModal = ({
 
           {/* Champ Description */}
           <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
-            Description
+            {t('library.collectionFormModal.descriptionLabel')}
           </Text>
           <TextInput
             value={description}
             onChangeText={setDescription}
-            placeholder="À quoi sert cette collection ?"
+            placeholder={t('library.collectionFormModal.descriptionPlaceholder')}
             placeholderTextColor={colors.muted}
             multiline
             style={{
@@ -146,7 +149,7 @@ export const CollectionFormModal = ({
 
           {/* Toggle Confidentialité */}
           <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
-            Visibilité
+            {t('library.collectionFormModal.visibilityLabel')}
           </Text>
           <View className="flex-row gap-x-3 mb-6">
             <TouchableOpacity
@@ -162,7 +165,7 @@ export const CollectionFormModal = ({
                 style={{ color: !isPublic ? colors.secondary : colors.muted }}
                 className="ml-2 font-bold text-xs"
               >
-                Privée
+                {t('common.private')}
               </Text>
             </TouchableOpacity>
 
@@ -179,7 +182,7 @@ export const CollectionFormModal = ({
                 style={{ color: isPublic ? colors.secondary : colors.muted }}
                 className="ml-2 font-bold text-xs"
               >
-                Publique
+                {t('common.public')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -202,7 +205,7 @@ export const CollectionFormModal = ({
               <ActivityIndicator color={colors.secondary} />
             ) : (
               <Text style={{ color: colors.secondary }} className="font-black uppercase tracking-[2px] text-xs">
-                {initialData ? "Enregistrer" : "Créer la collection"}
+                {initialData ? t('common.save') : t('library.collectionFormModal.createButton')}
               </Text>
             )}
           </TouchableOpacity>

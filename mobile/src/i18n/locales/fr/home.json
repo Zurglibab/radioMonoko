@@ -1,0 +1,74 @@
+{
+  "privateHome": {
+    "statListened": "Écoutés",
+    "statFollowing": "Abonnements",
+    "todaysDiscoveries": "Découvertes du jour",
+    "loadStationsError": "Impossible de charger les stations en direct.",
+    "networkActivity": "Activités du réseau",
+    "seeFullFeed": "Voir tout le flux"
+  },
+  "publicHome": {
+    "joinCommunityTitle": "Rejoignez la communauté",
+    "joinCommunityMessage": "La consultation est libre, mais vous devez être connecté pour {{action}}.",
+    "later": "Plus tard",
+    "register": "S'inscrire",
+    "popularGenres": "Genres populaires",
+    "genrePodcast": "Podcast",
+    "genreJournalism": "Journalisme",
+    "genreMusic": "Musique",
+    "genreCulture": "Culture",
+    "genreHistory": "Histoire",
+    "allStations": "Toutes les ondes",
+    "unlockContent": "Inscrivez-vous pour débloquer tout le contenu",
+    "actionAccessCatalog": "accéder à l'intégralité du catalogue"
+  },
+  "privateHeader": {
+    "greeting": "Salut, {{username}}",
+    "defaultUsername": "utilisateur"
+  },
+  "homeHeader": {
+    "title": "Découvrir",
+    "subtitle": "Le monde à votre écoute"
+  },
+  "libraryQuickNav": {
+    "title": "Ma Bibliothèque",
+    "manage": "Gérer",
+    "statusInProgress": "En cours",
+    "statusToListen": "À écouter",
+    "statusFavorites": "Favoris",
+    "statusArchives": "Archives",
+    "statusMixes": "Mes Mixes"
+  },
+  "mediaSocialInfo": {
+    "listeningAlone": " écoute cette onde.",
+    "listeningWithOthers_one": " et {{count}} autre ami écoute.",
+    "listeningWithOthers_other": " et {{count}} autres amis écoutent."
+  },
+  "mediaSuggestion": {
+    "live": "Direct : {{song}}"
+  },
+  "activityCard": {
+    "moderationTitle": "Modération",
+    "moderationMessage": "Signaler ce contenu pour non-respect de la charte ?",
+    "thanksTitle": "Merci",
+    "thanksMessage": "Le contenu a été envoyé aux administrateurs.",
+    "publishedReviewOn": "A publié une critique sur ",
+    "rated": "A noté ",
+    "likeNotification": "{{username}} a aimé votre critique de {{media}}",
+    "someone": "Quelqu'un",
+    "reviewsCount_one": "{{count}} avis",
+    "reviewsCount_other": "{{count}} avis"
+  },
+  "communitySection": {
+    "title": "Communauté",
+    "followUsersAction": "suivre des utilisateurs"
+  },
+  "featuredStation": {
+    "live": "LIVE",
+    "listenersCount_one": "{{count}} auditeur",
+    "listenersCount_other": "{{count}} auditeurs"
+  },
+  "publicStationCard": {
+    "live": "Direct"
+  }
+}

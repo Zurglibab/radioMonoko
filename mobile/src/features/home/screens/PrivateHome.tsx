@@ -16,8 +16,10 @@ import { MediaSuggestion } from "@/features/home/components/private/MediaSuggest
 import { PrivateHeader } from "@/features/home/components/private/PrivateHeader";
 import { LibraryQuickNav } from "@/features/home/components/private/LibraryQuickNav";
 import { useAuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export default function PrivateHome({ user }: { user: User }) {
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
 
   const isDark = appearanceSettings.themeMode === 'dark';
@@ -51,17 +53,17 @@ export default function PrivateHome({ user }: { user: User }) {
   const stats = useMemo(() => [
     {
       id: "1",
-      label: "Écoutés",
+      label: t('home.privateHome.statListened'),
       value: isStatusesLoading ? "..." : finishedCount.toString(),
       icon: <Clock size={18} color={colors.text} />
     },
     {
       id: "2",
-      label: "Abonnements",
+      label: t('home.privateHome.statFollowing'),
       value: isLoadingSocial ? "..." : friendsCount.toString(),
       icon: <Users size={18} color={colors.text} />
     },
-  ], [isStatusesLoading, finishedCount, isLoadingSocial, friendsCount, colors.text]);
+  ], [isStatusesLoading, finishedCount, isLoadingSocial, friendsCount, colors.text, t]);
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
@@ -80,7 +82,7 @@ export default function PrivateHome({ user }: { user: User }) {
         {/* Suggestions du jour */}
         <View className="mb-10">
           <Text style={{ color: colors.text }} className="text-xl font-black px-6 mb-6 italic tracking-tighter">
-            Découvertes du jour
+            {t('home.privateHome.todaysDiscoveries')}
           </Text>
 
           {isBrandsLoading ? (
@@ -90,7 +92,7 @@ export default function PrivateHome({ user }: { user: User }) {
           ) : brandsError ? (
             <View className="px-6 py-2">
               <Text className="text-red-500 text-xs font-bold">
-                Impossible de charger les stations en direct.
+                {t('home.privateHome.loadStationsError')}
               </Text>
             </View>
           ) : (
@@ -106,21 +108,21 @@ export default function PrivateHome({ user }: { user: User }) {
         <View className="px-6 mb-4">
           <View className="flex-row justify-between items-end mb-6">
             <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-              Activités du réseau
+              {t('home.privateHome.networkActivity')}
             </Text>
           </View>
-          
+
           {feed.map((act) => (
             <ActivityCard key={act.id} activity={act} />
           ))}
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             className="flex-row items-center justify-center p-6 rounded-[32px] mt-4 border-2 border-dashed"
             style={{ borderColor: colors.border, backgroundColor: colors.surface, opacity: 0.8 }}
             activeOpacity={0.7}
           >
             <Text style={{ color: colors.muted }} className="font-black mr-2 uppercase text-[10px] tracking-[2px]">
-              Voir tout le flux
+              {t('home.privateHome.seeFullFeed')}
             </Text>
             <ChevronRight size={14} color={colors.muted} />
           </TouchableOpacity>

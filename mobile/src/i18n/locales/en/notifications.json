@@ -1,0 +1,10 @@
+{
+  "screen": {
+    "title": "Alerts",
+    "markAllRead": "Mark all read",
+    "emptyState": "No notifications yet"
+  },
+  "watcher": {
+    "newNotificationTitle": "New notification"
+  }
+}

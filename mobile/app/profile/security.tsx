@@ -1,23 +1,23 @@
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, ShieldCheck, KeyRound, Smartphone, Fingerprint, ChevronRight } from "lucide-react-native";
+import { ChevronLeft, ShieldCheck, KeyRound, Fingerprint, ChevronRight } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import * as LocalAuthentication from 'expo-local-authentication';
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { AuthService } from "@/services/auth/auth.service";
 
 /**
  * SecurityScreen : Centre de contrôle de la confidentialité du compte.
- * Gère le changement de mot de passe, l'authentification biométrique locale
- * et la double authentification (2FA).
+ * Gère le changement de mot de passe et l'authentification biométrique locale.
  */
 export default function SecurityScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { user, securitySettings, updateSecurity, appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
-  const [isLoading, setIsLoading] = useState(false);
 
   /**
    * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
@@ -31,23 +31,6 @@ export default function SecurityScreen() {
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   /**
-   * handleToggle2FA : Active/Désactive la double authentification.
-   * Communique avec le serveur pour mettre à jour le statut du compte.
-   */
-  const handleToggle2FA = async (value: boolean) => {
-    setIsLoading(true);
-    try {
-      await AuthService.toggleTwoFactor(value);
-      await updateSecurity('is2FAEnabled', value);
-      Alert.alert("Sécurité", value ? "Double authentification activée." : "Double authentification désactivée.");
-    } catch (e) {
-      Alert.alert("Erreur", "Impossible de modifier ce paramètre.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  /**
    * handleToggleBiometry : Gère l'accès aux capteurs biométriques du device.
    * Vérifie la disponibilité du hardware (FaceID/TouchID) avant activation.
    */
@@ -58,19 +41,19 @@ export default function SecurityScreen() {
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
       if (!hasHardware || !isEnrolled) {
-        Alert.alert("Indisponible", "Votre appareil ne supporte pas la biométrie ou aucun profil n'est enregistré.");
+        Alert.alert(t("profile.security.unavailableTitle"), t("profile.security.unavailableMessage"));
         return;
       }
 
       // Test d'authentification immédiat pour valider l'activation
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Confirmez votre identité pour RadioMonoko",
-        fallbackLabel: "Utiliser le code de l'appareil",
+        promptMessage: t("profile.security.confirmIdentityPrompt"),
+        fallbackLabel: t("profile.security.fallbackLabel"),
       });
 
       if (result.success) {
         await updateSecurity('isBiometricEnabled', true);
-        Alert.alert("Succès", "Biométrie activée pour vos prochaines connexions.");
+        Alert.alert(t("profile.security.biometryEnabledTitle"), t("profile.security.biometryEnabledMessage"));
       }
     } else {
       await updateSecurity('isBiometricEnabled', false);
@@ -82,12 +65,12 @@ export default function SecurityScreen() {
    */
   const handlePasswordRequest = () => {
     Alert.alert(
-      "Modifier le mot de passe",
-      "Nous allons envoyer un code de vérification sécurisé sur l'adresse : " + user?.email,
+      t("profile.security.changePasswordTitle"),
+      t("profile.security.changePasswordMessage", { email: user?.email }),
       [
-        { text: "Annuler", style: "cancel" },
-        { 
-          text: "Envoyer le code", 
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("profile.security.sendCode"),
           onPress: async () => {
              await AuthService.sendResetPasswordEmail(user?.email!);
              router.push("/(auth)/verify-code");
@@ -109,7 +92,7 @@ export default function SecurityScreen() {
           <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-          Sécurité
+          {t("profile.security.headerTitle")}
         </Text>
       </View>
 
@@ -117,17 +100,17 @@ export default function SecurityScreen() {
         
         {/* Illustration de protection */}
         <View className="items-center mb-10">
-          <View 
+          <View
             className="w-20 h-20 rounded-[32px] items-center justify-center border shadow-xl"
-            style={{ 
-              backgroundColor: securitySettings.is2FAEnabled ? colors.success + '15' : colors.live + '15',
-              borderColor: securitySettings.is2FAEnabled ? colors.success : colors.live
+            style={{
+              backgroundColor: securitySettings.isBiometricEnabled ? colors.success + '15' : colors.live + '15',
+              borderColor: securitySettings.isBiometricEnabled ? colors.success : colors.live
             }}
           >
-            <ShieldCheck size={40} color={securitySettings.is2FAEnabled ? colors.success : colors.live} />
+            <ShieldCheck size={40} color={securitySettings.isBiometricEnabled ? colors.success : colors.live} />
           </View>
           <Text style={{ color: colors.text }} className="font-black mt-4 text-lg italic tracking-tighter text-center">
-              Protection : {securitySettings.is2FAEnabled ? "Maximum" : "Standard"}
+              {t("profile.security.protectionLabel", { status: securitySettings.isBiometricEnabled ? t("profile.security.protectionEnhanced") : t("profile.security.protectionStandard") })}
           </Text>
         </View>
 
@@ -136,21 +119,21 @@ export default function SecurityScreen() {
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
           className="rounded-[32px] p-2 border mb-6 shadow-sm"
         >
-          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">Accès & Biométrie</Text>
-          
-          <SecurityOption 
+          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">{t("profile.security.accessSection")}</Text>
+
+          <SecurityOption
             colors={colors}
-            icon={KeyRound} 
-            label="Mot de passe" 
-            secondary="Modifier via email de sécurité"
+            icon={KeyRound}
+            label={t("profile.security.password.label")}
+            secondary={t("profile.security.password.secondary")}
             onPress={handlePasswordRequest}
           />
-          
-          <SecurityOption 
+
+          <SecurityOption
             colors={colors}
-            icon={Fingerprint} 
-            label="Face ID / Touch ID" 
-            secondary="Connexion rapide et sécurisée"
+            icon={Fingerprint}
+            label={t("profile.security.biometry.label")}
+            secondary={t("profile.security.biometry.secondary")}
             isLast={true}
             rightElement={
               <Switch 
@@ -163,37 +146,13 @@ export default function SecurityScreen() {
           />
         </View>
 
-        {/* Authentification avancée */}
-        <View 
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-          className="rounded-[32px] p-2 border shadow-sm"
-        >
-          <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">Authentification</Text>
-          
-          <SecurityOption 
-            colors={colors}
-            icon={Smartphone} 
-            label="Double facteur (2FA)" 
-            secondary="Vérification par code unique (OTP)"
-            isLast={true}
-            rightElement={
-              <Switch 
-                value={securitySettings.is2FAEnabled} 
-                onValueChange={handleToggle2FA}
-                trackColor={{ false: colors.border, true: colors.live + '80' }}
-                thumbColor={securitySettings.is2FAEnabled ? colors.live : (isDark ? "#444" : "#F4F3F4")}
-              />
-            }
-          />
-        </View>
-
         {/* Note de protection de la vie privée */}
         <View 
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
           className="mt-10 p-6 rounded-[32px] border border-dashed"
         >
           <Text style={{ color: colors.muted }} className="text-[10px] leading-4 text-center italic font-medium">
-            RadioMonoco utilise un cryptage de bout en bout pour protéger vos données de session et vos préférences de diffusion.
+            {t("profile.security.privacyNote")}
           </Text>
         </View>
       </ScrollView>

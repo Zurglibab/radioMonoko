@@ -11,12 +11,14 @@ import { FeaturedStation } from "@/features/home/components/public/FeaturedStati
 import { CommunitySection } from "@/features/home/components/public/CommunitySection";
 import { PublicStationCard } from "@/features/home/components/public/PublicStationCard";
 import { useAuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 /**
  * PublicHome : Écran d'accueil pour les utilisateurs non connectés.
  * Offre un aperçu du catalogue et encourage l'inscription par des CTA subtils.
  */
 export default function PublicHome() {
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
@@ -39,14 +41,14 @@ export default function PublicHome() {
    */
   const promptLogin = (action: string) => {
     Alert.alert(
-      "Rejoignez la communauté",
-      `La consultation est libre, mais vous devez être connecté pour ${action}.`,
+      t('home.publicHome.joinCommunityTitle'),
+      t('home.publicHome.joinCommunityMessage', { action }),
       [
-        { text: "Plus tard", style: "cancel" },
-        { 
-          text: "S'inscrire", 
+        { text: t('home.publicHome.later'), style: "cancel" },
+        {
+          text: t('home.publicHome.register'),
           onPress: () => router.push("/(auth)/register"),
-          style: "default" 
+          style: "default"
         }
       ]
     );
@@ -65,14 +67,20 @@ export default function PublicHome() {
         {/* EXPLORATION : Navigation par genres populaires */}
         <View className="mb-12">
           <Text style={{ color: colors.text }} className="px-6 text-lg font-bold mb-5 italic tracking-tight">
-            Genres populaires
+            {t('home.publicHome.popularGenres')}
           </Text>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 24 }}
           >
-            {['Podcast', 'Journalisme', 'Musique', 'Culture', 'Histoire'].map((genre, i) => (
+            {[
+              t('home.publicHome.genrePodcast'),
+              t('home.publicHome.genreJournalism'),
+              t('home.publicHome.genreMusic'),
+              t('home.publicHome.genreCulture'),
+              t('home.publicHome.genreHistory'),
+            ].map((genre, i) => (
               <TouchableOpacity 
                 key={i} 
                 activeOpacity={0.7}
@@ -96,11 +104,11 @@ export default function PublicHome() {
         {/* CATALOGUE : Grille de stations disponibles en libre accès */}
         <View className="px-6 pb-20">
           <View className="flex-row justify-between items-center mb-8">
-            <Text 
-              style={{ color: colors.text }} 
+            <Text
+              style={{ color: colors.text }}
               className="text-xl font-bold italic tracking-tight"
             >
-              Toutes les ondes
+              {t('home.publicHome.allStations')}
             </Text>
             <TrendingUp size={20} color={colors.muted} />
           </View>
@@ -117,19 +125,19 @@ export default function PublicHome() {
           </View>
 
           {/* CTA FINAL : Incitation à l'inscription pour l'accès complet */}
-          <TouchableOpacity 
-            onPress={() => promptLogin("accéder à l'intégralité du catalogue")}
-            style={{ 
+          <TouchableOpacity
+            onPress={() => promptLogin(t('home.publicHome.actionAccessCatalog'))}
+            style={{
               borderColor: colors.border,
               backgroundColor: colors.surface
             }}
             className="w-full py-6 rounded-[32px] items-center mt-4 border-2 border-dashed shadow-sm"
           >
-            <Text 
-              style={{ color: colors.muted }} 
+            <Text
+              style={{ color: colors.muted }}
               className="font-bold uppercase text-[10px] tracking-widest text-center px-4"
             >
-              Inscrivez-vous pour débloquer tout le contenu
+              {t('home.publicHome.unlockContent')}
             </Text>
           </TouchableOpacity>
         </View>

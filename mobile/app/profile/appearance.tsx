@@ -3,17 +3,19 @@ import { View, Text, ScrollView, TouchableOpacity, Switch, useColorScheme } from
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Moon, Sun, Monitor, LayoutGrid, Check } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 
 /**
  * AppearanceScreen : Gestion de l'identité visuelle de l'app.
- * Permet de basculer entre les modes Sombre/Clair, de choisir une couleur 
- * d'accentuation et de modifier la densité de l'interface (Mode Compact).
+ * Permet de basculer entre les modes Sombre/Clair, de choisir une couleur
+ * d'accentuation, la langue de l'application, et de modifier la densité de l'interface (Mode Compact).
  */
 export default function AppearanceScreen() {
   const router = useRouter();
-  const { appearanceSettings, updateAppearance } = useAuthContext();
+  const { t } = useTranslation();
+  const { appearanceSettings, updateAppearance, languageSettings, updateLanguage } = useAuthContext();
   const systemTheme = useColorScheme();
 
   /**
@@ -53,6 +55,31 @@ export default function AppearanceScreen() {
   };
 
   /**
+   * LanguageCard : Composant interne pour les options de langue (Français/Anglais).
+   */
+  const LanguageCard = ({ lang, label, flag }: { lang: 'fr' | 'en'; label: string; flag: string }) => {
+    const isActive = languageSettings.language === lang;
+    return (
+      <TouchableOpacity
+        onPress={() => updateLanguage(lang)}
+        style={{
+          backgroundColor: isActive ? colors.primary : colors.surface,
+          borderColor: isActive ? colors.primary : colors.border
+        }}
+        className="items-center justify-center p-4 rounded-[24px] w-[48%] border"
+      >
+        <Text className="text-2xl mb-1">{flag}</Text>
+        <Text
+          style={{ color: isActive ? colors.secondary : colors.muted }}
+          className="text-[10px] font-black uppercase mt-1 tracking-widest"
+        >
+          {label}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  /**
    * ColorCircle : Sélecteur de couleur d'accentuation.
    */
   const ColorCircle = ({ color }: { color: string }) => {
@@ -81,29 +108,38 @@ export default function AppearanceScreen() {
           <ChevronLeft size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-          Apparence
+          {t('profile.appearance.title')}
         </Text>
       </View>
 
       <ScrollView className="flex-1 px-6 mt-6" showsVerticalScrollIndicator={false}>
-        
+
         {/* SECTION 1 : THÈME (Mode d'affichage) */}
         <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mb-4">
-          Mode d'affichage
+          {t('profile.appearance.displayMode')}
         </Text>
         <View className="flex-row justify-between mb-10">
-          <ThemeCard mode="light" label="Clair" icon={Sun} />
-          <ThemeCard mode="dark" label="Sombre" icon={Moon} />
-          <ThemeCard mode="system" label="Système" icon={Monitor} />
+          <ThemeCard mode="light" label={t('profile.appearance.light')} icon={Sun} />
+          <ThemeCard mode="dark" label={t('profile.appearance.dark')} icon={Moon} />
+          <ThemeCard mode="system" label={t('profile.appearance.system')} icon={Monitor} />
         </View>
 
-        {/* SECTION 2 : COULEUR D'ACCENT (Identité visuelle) */}
-        <View 
+        {/* SECTION 2 : LANGUE */}
+        <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mb-4">
+          {t('profile.appearance.languageSection')}
+        </Text>
+        <View className="flex-row justify-between mb-10">
+          <LanguageCard lang="fr" label={t('profile.appearance.french')} flag="🇫🇷" />
+          <LanguageCard lang="en" label={t('profile.appearance.english')} flag="🇬🇧" />
+        </View>
+
+        {/* SECTION 3 : COULEUR D'ACCENT (Identité visuelle) */}
+        <View
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
           className="rounded-[32px] p-6 border mb-6"
         >
           <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mb-4">
-            Couleur d'accent
+            {t('profile.appearance.accentColor')}
           </Text>
           <View className="flex-row justify-between">
             <ColorCircle color="#FFFFFF" />
@@ -114,43 +150,43 @@ export default function AppearanceScreen() {
           </View>
         </View>
 
-        {/* SECTION 3 : MISE EN PAGE (Ergonomie) */}
-        <View 
+        {/* SECTION 4 : MISE EN PAGE (Ergonomie) */}
+        <View
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
           className="rounded-[32px] p-2 border"
         >
           <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mt-4 mb-2">
-            Interface
+            {t('profile.appearance.interface')}
           </Text>
           <View className="flex-row items-center py-5 mx-4">
-            <View 
-              style={{ backgroundColor: colors.background }} 
+            <View
+              style={{ backgroundColor: colors.background }}
               className="w-10 h-10 rounded-xl items-center justify-center"
             >
               <LayoutGrid size={20} color={colors.text} />
             </View>
             <View className="flex-1 ml-4">
-              <Text style={{ color: colors.text }} className="font-bold text-sm">Mode Compact</Text>
+              <Text style={{ color: colors.text }} className="font-bold text-sm">{t('profile.appearance.compactMode')}</Text>
               <Text style={{ color: colors.muted }} className="text-[10px] uppercase font-black tracking-tighter">
-                Afficher plus de contenus
+                {t('profile.appearance.compactModeDesc')}
               </Text>
             </View>
-            <Switch 
-              value={appearanceSettings.isCompactMode} 
+            <Switch
+              value={appearanceSettings.isCompactMode}
               onValueChange={(val) => updateAppearance('isCompactMode', val)}
-              trackColor={{ false: colors.border, true: colors.success }} 
+              trackColor={{ false: colors.border, true: colors.success }}
               thumbColor={appearanceSettings.isCompactMode ? "#FFFFFF" : "#F4F3F4"}
             />
           </View>
         </View>
 
         {/* MESSAGE DE CONFIRMATION / PHILOSOPHIE DESIGN */}
-        <View 
+        <View
           style={{ backgroundColor: colors.surface, borderColor: colors.border }}
           className="mt-10 p-6 rounded-[32px] border border-dashed"
         >
           <Text style={{ color: colors.muted }} className="text-[10px] leading-4 text-center italic font-medium">
-            L'apparence s'adapte en temps réel pour une immersion totale dans vos ondes préférées.
+            {t('profile.appearance.philosophy')}
           </Text>
         </View>
       </ScrollView>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, Modal, Pressable, Image, Alert, ActivityIndicator } from "react-native";
 import { Heart, ListPlus, PlusCircle, ScrollText, PlayCircle, CheckCircle2, XCircle, X, ChevronLeft, Star, Globe, Lock, FolderPlus } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { MediaStatus, Station } from "@/types/content";
 import { useCollections } from "@/hooks/collections/useCollections";
@@ -26,6 +27,7 @@ interface MediaActionSheetProps {
  * @returns 
  */
 export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }: MediaActionSheetProps) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { token, appearanceSettings } = useAuthContext();
   
@@ -90,21 +92,21 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
       if (onRefreshData) await onRefreshData();
 
       Alert.alert(
-        "Favoris",
-        !isFavorite ? "Ajouté à vos Titres Likés" : "Retiré de vos Titres Likés"
+        t('library.mediaActionSheet.favoritesTitle'),
+        !isFavorite ? t('library.mediaActionSheet.addedToLiked') : t('library.mediaActionSheet.removedFromLiked')
       );
     } catch (err: any) {
-      Alert.alert("Erreur", err?.message || "Impossible de modifier le favori.");
+      Alert.alert(t('common.error'), err?.message || t('library.mediaActionSheet.favoriteError'));
     } finally {
       setIsFavoriteLoading(false);
     }
   };
 
   const STATUS_MESSAGES: Record<MediaStatus, string> = {
-    'to-listen': "C'est noté ! On garde ça de côté.",
-    'in-progress': `Vous avez commencé "${station.title}"`,
-    'finished': "Bravo ! Une onde de plus à votre palmarès.",
-    'dropped': "L'onde a été mise de côté.",
+    'to-listen': t('library.mediaActionSheet.statusMessages.toListen'),
+    'in-progress': t('library.mediaActionSheet.statusMessages.inProgress', { title: station.title }),
+    'finished': t('library.mediaActionSheet.statusMessages.finished'),
+    'dropped': t('library.mediaActionSheet.statusMessages.dropped'),
   };
 
   const handleStatus = async (status: MediaStatus) => {
@@ -114,11 +116,11 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
       await setStatus(station, status);
       if (onRefreshData) await onRefreshData();
 
-      Alert.alert("Statut", STATUS_MESSAGES[status], [
-        { text: "Génial", onPress: handleClose },
+      Alert.alert(t('library.mediaActionSheet.statusTitle'), STATUS_MESSAGES[status], [
+        { text: t('library.mediaActionSheet.great'), onPress: handleClose },
       ]);
     } catch (err: any) {
-      Alert.alert("Erreur", err?.message || "Impossible de mettre à jour le statut.");
+      Alert.alert(t('common.error'), err?.message || t('library.mediaActionSheet.statusUpdateError'));
     } finally {
       setPendingStatus(null);
     }
@@ -129,11 +131,11 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
     try {
       await addStationToCollection(collectionId, station);
       if (onRefreshData) await onRefreshData();
-      Alert.alert("Collection", `"${station.title}" ajouté à "${collectionName}" !`, [
-        { text: "Parfait", onPress: handleClose },
+      Alert.alert(t('library.mediaActionSheet.collectionTitle'), t('library.mediaActionSheet.addedToCollection', { title: station.title, collectionName }), [
+        { text: t('library.mediaActionSheet.perfect'), onPress: handleClose },
       ]);
     } catch (err: any) {
-      Alert.alert("Erreur", err?.message || "Impossible d'ajouter à la collection.");
+      Alert.alert(t('common.error'), err?.message || t('library.mediaActionSheet.addToCollectionError'));
     } finally {
       setAddingToId(null);
     }
@@ -142,27 +144,27 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
   const handleCreateAndAdd = async (data: CollectionFormData) => {
     try {
       const created = await createCollection(data.name, data.description, data.isPublic);
-      
+
       if (refetchCollections) await refetchCollections();
-      
+
       if (created) {
         setTimeout(async () => {
           try {
             await addStationToCollection(created.id, station);
             if (onRefreshData) await onRefreshData();
             setCreateModalVisible(false);
-            Alert.alert("Collection", `"${station.title}" ajouté à votre nouvelle collection !`, [
-              { text: "Génial", onPress: handleClose },
+            Alert.alert(t('library.mediaActionSheet.collectionTitle'), t('library.mediaActionSheet.addedToNewCollection', { title: station.title }), [
+              { text: t('library.mediaActionSheet.great'), onPress: handleClose },
             ]);
           } catch (itemErr: any) {
             setView('playlists');
             setCreateModalVisible(false);
-            Alert.alert("Collection créée", "La liste est prête, vous pouvez y ajouter le titre manuellement.");
+            Alert.alert(t('library.mediaActionSheet.createdCollectionTitle'), t('library.mediaActionSheet.createdCollectionMessage'));
           }
         }, 200);
       }
     } catch (err: any) {
-      Alert.alert("Erreur", "Impossible de générer la nouvelle collection.");
+      Alert.alert(t('common.error'), t('library.mediaActionSheet.createCollectionError'));
     }
   };
 
@@ -195,7 +197,7 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
         icon={icon}
         label={label}
         highlighted={isCurrent}
-        secondary={isCurrent ? "Statut actuel" : undefined}
+        secondary={isCurrent ? t('library.mediaActionSheet.currentStatus') : undefined}
         disabled={!!pendingStatus}
         trailing={isPending ? <ActivityIndicator size="small" color={colors.primary} /> : null}
         onPress={() => handleStatus(status)}
@@ -222,36 +224,36 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} className="mt-8">
-              <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mb-2">Social & Communauté</Text>
+              <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mb-2">{t('library.mediaActionSheet.socialSection')}</Text>
               <ActionItem
                 icon={<Star size={20} color={colors.primary} />}
-                label="Noter et critiquer"
-                secondary="Partager votre avis avec le réseau"
+                label={t('library.mediaActionSheet.rateAndReview')}
+                secondary={t('library.mediaActionSheet.shareOpinion')}
                 onPress={() => {
                   handleClose();
                   router.push({ pathname: "/library/review/ReviewScreen", params: { id: station.brandId ?? station.id } });
                 }}
               />
-              <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mt-8 mb-2">Favoris & Collections</Text>
+              <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mt-8 mb-2">{t('library.mediaActionSheet.favoritesSection')}</Text>
               <ActionItem
                 icon={<Heart size={20} color={colors.live} fill={isFavorite ? colors.live : 'none'} />}
-                label={isFavorite ? "Retirer des Titres Likés" : "Ajouter aux Titres Likés"}
+                label={isFavorite ? t('library.mediaActionSheet.removeFromLiked') : t('library.mediaActionSheet.addToLiked')}
                 onPress={handleToggleFavorite}
                 disabled={isFavoriteLoading}
                 trailing={isFavoriteLoading ? <ActivityIndicator size="small" color={colors.primary} /> : null}
               />
-              <ActionItem icon={<ListPlus size={20} color={colors.text} />} label="Ajouter à une collection" onPress={() => setView('playlists')} />
-              <ActionItem icon={<PlusCircle size={20} color={colors.text} />} label="Nouvelle collection" onPress={() => setCreateModalVisible(true)} />
-              
-              <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mt-8 mb-2">Ma Collection</Text>
+              <ActionItem icon={<ListPlus size={20} color={colors.text} />} label={t('library.mediaActionSheet.addToCollection')} onPress={() => setView('playlists')} />
+              <ActionItem icon={<PlusCircle size={20} color={colors.text} />} label={t('library.mediaActionSheet.newCollection')} onPress={() => setCreateModalVisible(true)} />
+
+              <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mt-8 mb-2">{t('library.mediaActionSheet.myCollectionSection')}</Text>
               {isStatusLoading && !currentStatus ? (
                 <View className="py-4 items-center"><ActivityIndicator size="small" color={colors.primary} /></View>
               ) : (
                 <>
-                  {renderStatusItem('to-listen', <ScrollText size={20} color={colors.muted} />, "À écouter")}
-                  {renderStatusItem('in-progress', <PlayCircle size={20} color={colors.primary} />, "En cours")}
-                  {renderStatusItem('finished', <CheckCircle2 size={20} color={colors.success} />, "Marquer comme Terminé")}
-                  {renderStatusItem('dropped', <XCircle size={20} color={colors.danger} />, "Abandonner")}
+                  {renderStatusItem('to-listen', <ScrollText size={20} color={colors.muted} />, t('library.mediaActionSheet.statusActions.toListen'))}
+                  {renderStatusItem('in-progress', <PlayCircle size={20} color={colors.primary} />, t('library.mediaActionSheet.statusActions.inProgress'))}
+                  {renderStatusItem('finished', <CheckCircle2 size={20} color={colors.success} />, t('library.mediaActionSheet.statusActions.finished'))}
+                  {renderStatusItem('dropped', <XCircle size={20} color={colors.danger} />, t('library.mediaActionSheet.statusActions.dropped'))}
                 </>
               )}
             </ScrollView>
@@ -262,21 +264,21 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
               <TouchableOpacity onPress={() => setView('main')} style={{ backgroundColor: colors.background, borderColor: colors.border }} className="p-2 rounded-full mr-4 border">
                 <ChevronLeft size={24} color={colors.text} />
               </TouchableOpacity>
-              <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">Choisir une collection</Text>
+              <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">{t('library.mediaActionSheet.chooseCollection')}</Text>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
-              <ActionItem icon={<FolderPlus size={20} color={colors.primary} />} label="Créer une nouvelle collection" textColor={colors.primary} onPress={() => setCreateModalVisible(true)} />
+              <ActionItem icon={<FolderPlus size={20} color={colors.primary} />} label={t('library.mediaActionSheet.createNewCollection')} textColor={colors.primary} onPress={() => setCreateModalVisible(true)} />
               {isCollectionsLoading ? (
                 <ActivityIndicator color={colors.primary} className="mt-8" />
               ) : collections.length === 0 ? (
-                <Text style={{ color: colors.muted }} className="text-xs italic text-center mt-8">Aucune collection. Créez-en une ci-dessus.</Text>
+                <Text style={{ color: colors.muted }} className="text-xs italic text-center mt-8">{t('library.mediaActionSheet.noCollectionsCreateOne')}</Text>
               ) : (
                 collections.map((col) => (
                   <ActionItem
                     key={col.id}
                     icon={col.is_public ? <Globe size={20} color={colors.muted} /> : <Lock size={20} color={colors.muted} />}
                     label={col.name}
-                    secondary={col.description || (col.is_public ? "Publique" : "Privée")}
+                    secondary={col.description || (col.is_public ? t('common.public') : t('common.private'))}
                     disabled={addingToId === col.id}
                     trailing={addingToId === col.id ? <ActivityIndicator size="small" color={colors.primary} /> : null}
                     onPress={() => handleAddToCollection(col.id, col.name)}
@@ -287,7 +289,7 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
           </View>
         )}
       </View>
-      <CollectionFormModal visible={isCreateModalVisible} onClose={() => setCreateModalVisible(false)} onSubmit={handleCreateAndAdd} title="Nouvelle collection" />
+      <CollectionFormModal visible={isCreateModalVisible} onClose={() => setCreateModalVisible(false)} onSubmit={handleCreateAndAdd} title={t('library.mediaActionSheet.newCollection')} />
     </Modal>
   );
 };

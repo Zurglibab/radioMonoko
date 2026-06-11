@@ -7,6 +7,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { MessageSquare, Plus, X, Search } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useConversations, Conversation } from "@/hooks/chat/useConversations";
@@ -14,17 +15,18 @@ import { SocialService } from "@/services/social/social.service";
 import { ChannelService } from "@/services/chat/channel.service";
 import { Friend } from "@/types/social";
 
-function formatTime(dateStr: string): string {
+function formatTime(dateStr: string, language: string): string {
+  const locale = language === "en" ? "en-US" : "fr-FR";
   const date = new Date(dateStr);
   const now = new Date();
   const diffDays = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
 
   if (diffDays < 1) {
-    return date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    return date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   } else if (diffDays < 7) {
-    return date.toLocaleDateString("fr-FR", { weekday: "short" });
+    return date.toLocaleDateString(locale, { weekday: "short" });
   }
-  return date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+  return date.toLocaleDateString(locale, { day: "numeric", month: "short" });
 }
 
 function Avatar({ name, avatar, size = 48, colors }: { name: string; avatar?: string; size?: number; colors: any }) {
@@ -57,6 +59,7 @@ function Avatar({ name, avatar, size = 48, colors }: { name: string; avatar?: st
 }
 
 export default function ChatScreen() {
+  const { t, i18n } = useTranslation();
   const { appearanceSettings, token, user } = useAuthContext();
   const systemTheme = useColorScheme();
   const router = useRouter();
@@ -139,11 +142,11 @@ export default function ChatScreen() {
           {item.otherUsername}
         </Text>
         <Text style={{ color: colors.muted, fontSize: 13, marginTop: 2 }} numberOfLines={1}>
-          {item.lastMessage || "Démarrer la conversation"}
+          {item.lastMessage || t("chat.chatList.startConversation")}
         </Text>
       </View>
       <Text style={{ color: colors.muted, fontSize: 11 }}>
-        {formatTime(item.lastMessageAt)}
+        {formatTime(item.lastMessageAt, i18n.language)}
       </Text>
     </TouchableOpacity>
   );
@@ -164,7 +167,7 @@ export default function ChatScreen() {
         }}
       >
         <Text style={{ color: colors.text, fontSize: 20, fontWeight: "900", fontStyle: "italic" }}>
-          Messages
+          {t("chat.chatList.title")}
         </Text>
         <TouchableOpacity
           onPress={openPicker}
@@ -191,8 +194,8 @@ export default function ChatScreen() {
           <Text
             style={{ color: colors.muted, textAlign: "center", fontSize: 15, lineHeight: 24, fontWeight: "700", fontStyle: "italic", marginTop: 16 }}
           >
-            Aucun message pour l'instant.{"\n"}
-            <Text style={{ color: colors.primary }}>Appuie sur +</Text> pour démarrer une conversation.
+            {t("chat.chatList.emptyTitle")}{"\n"}
+            <Text style={{ color: colors.primary }}>{t("chat.chatList.emptyAction")}</Text> {t("chat.chatList.emptySubtitle")}
           </Text>
         </View>
       ) : (
@@ -232,7 +235,7 @@ export default function ChatScreen() {
             }}
           >
             <Text style={{ color: colors.text, fontSize: 17, fontWeight: "900", fontStyle: "italic" }}>
-              Nouvelle conversation
+              {t("chat.chatList.newConversation")}
             </Text>
             <TouchableOpacity onPress={closePicker} hitSlop={12}>
               <X size={22} color={colors.text} />
@@ -256,7 +259,7 @@ export default function ChatScreen() {
             <TextInput
               value={search}
               onChangeText={setSearch}
-              placeholder="Rechercher un ami..."
+              placeholder={t("chat.chatList.searchFriendPlaceholder")}
               placeholderTextColor={colors.muted}
               style={{
                 flex: 1,
@@ -273,7 +276,7 @@ export default function ChatScreen() {
           ) : filteredFriends.length === 0 ? (
             <View style={{ alignItems: "center", marginTop: 60 }}>
               <Text style={{ color: colors.muted, fontStyle: "italic" }}>
-                {search ? "Aucun résultat" : "Aucun ami pour l'instant"}
+                {search ? t("chat.chatList.noResults") : t("chat.chatList.noFriendsYet")}
               </Text>
             </View>
           ) : (
