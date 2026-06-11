@@ -101,6 +101,44 @@ const block = async (id: string) => {
     }
 };
 
+const getBlocked = async (): Promise<User[]>  => {
+    try {
+        const response = await api.get('/userRelation/blocked');
+        return response.data;
+    } catch (error) {
+        console.error("Erreur lors de la récupération des utilisateurs bloqués:", error);
+        return [];
+    }
+}
+
+const checkIsBlocked = async (id: string): Promise<boolean> => {
+    try {
+        const response = await api.get(`/userRelation/relation/as-follower/${id}`);
+        if (response.data.exists) {
+            return response.data.status === "blocked";
+        }
+        return false;
+
+    } catch (error) {
+        console.error(`Erreur lors de la vérification de l'amitié avec ${id}:`, error);
+        return false;
+    }
+}
+
+const checkImBlocked = async (id: string): Promise<boolean> => {
+    try {
+        const response = await api.get(`/userRelation/relation/as-followed/${id}`);
+        if (response.data.exists) {
+            return response.data.status === "blocked";
+        }
+        return false;
+
+    } catch (error) {
+        console.error(`Erreur lors de la vérification de l'amitié avec ${id}:`, error);
+        return false;
+    }
+}
+
 const checkIsFriend = async (id: string): Promise<boolean> => {
     try {
         const response = await api.get(`/userRelation/is-friend/${id}`);
@@ -122,5 +160,8 @@ export default {
     acceptRequest,
     refuseRequest,
     block,
+    getBlocked,
+    checkIsBlocked,
+    checkImBlocked,
     checkIsFriend,
 };

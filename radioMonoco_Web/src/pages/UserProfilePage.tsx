@@ -9,7 +9,7 @@ import type { User } from "../interfaces/Users.types.ts";
 import type { Collection } from "../interfaces/Collections.types.ts";
 import ReportButton from "../components/utils/ReportButton.tsx";
 import {useTranslation} from "react-i18next";
-import { FiGlobe, FiLock, FiUserPlus, FiCheck } from "react-icons/fi";
+import {FiGlobe, FiLock, FiUserPlus, FiCheck, FiUserCheck, FiUserX} from "react-icons/fi";
 import NotificationsService from "../services/NotificationsService.ts";
 import {Loader} from "../components/utils/Loader.tsx";
 
@@ -54,12 +54,18 @@ const UserProfilePage = () => {
                 setFriends(userFriends);
 
                 if (connectedUser?.id && id !== connectedUser.id) {
-                    const friendStatus = await UserRelationsService.checkIsFriend(id);
-                    setIsFriend(friendStatus);
+                    const blockedStatus = await UserRelationsService.checkIsBlocked(id);
+                    setIsBlocked(blockedStatus);
 
-                    const followingList = await UserRelationsService.getFollowing();
-                    const isFollowing = followingList.some((rel) => rel.id === id);
-                    setFollow(isFollowing);
+                    if (!blockedStatus){
+                        const friendStatus = await UserRelationsService.checkIsFriend(id);
+                        setIsFriend(friendStatus);
+
+                        const followingList = await UserRelationsService.getFollowing();
+                        const isFollowing = followingList.some((rel) => rel.id === id);
+                        setFollow(isFollowing);
+                    }
+
                 }
 
                 const allCollections = await CollectionsService.getAllCollections();
@@ -142,6 +148,27 @@ const UserProfilePage = () => {
         }
     };
 
+    const handleBlockToggle = async () => {
+        if (!id || isBlockLoading) return;
+        if (!isBlocked && !window.confirm("Êtes-vous sûr de vouloir bloquer cet utilisateur ?")) return;
+        setIsBlockLoading(true);
+        try {
+            if (isBlocked) {
+                await UserRelationsService.block(id);
+                setIsBlocked(false);
+            } else {
+                await UserRelationsService.block(id);
+                setIsBlocked(true);
+                setFollow(false);
+                setIsFriend(false);
+            }
+        } catch (err) {
+            alert("Une erreur est survenue lors du blocage.");
+        } finally {
+            setIsBlockLoading(false);
+        }
+    };
+
 
     if (loading) {
         return (
@@ -171,6 +198,7 @@ const UserProfilePage = () => {
             </div>
         );
     }
+
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-white px-6 md:px-12 py-24 relative overflow-hidden">
 
@@ -261,38 +289,57 @@ const UserProfilePage = () => {
 
                         {!isOwnProfile && (
                             <div className="flex gap-3">
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handleFollowToggle}
+                                        disabled={isActionLoading || isBlocked}
+                                        className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold transition shadow-lg min-w-[120px] ${
+                                            isFollow
+                                                ? "bg-neutral-800 hover:bg-neutral-700 text-white"
+                                                : "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20"
+                                        } ${isBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    >
+                                        {isActionLoading ? (
+                                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <>
+                                                {isFollow ? <FiCheck /> : <FiUserPlus />}
+                                                {isFollow ? "Abonné" : "Suivre"}
+                                            </>
+                                        )}
+                                    </button>
+
+                                    {(!isOwnProfile && isFriend && !isBlocked) && (
+                                        <DMButton otherUserId={id!} currentUserId={connectedUser!.id} />
+                                    )}
+                                </div>
+
                                 <button
-                                    onClick={handleFollowToggle}
-                                    disabled={isActionLoading}
-                                    className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold transition shadow-lg min-w-[120px] ${
-                                        isFollow
-                                            ? "bg-neutral-800 hover:bg-neutral-700 text-white"
-                                            : "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20"
-                                    } ${isActionLoading ? "opacity-70 cursor-wait" : ""}`}
+                                    onClick={handleBlockToggle}
+                                    disabled={isBlockLoading}
+                                    className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold transition border ${
+                                        isBlocked
+                                            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+                                            : "border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                                    } ${isBlockLoading ? "opacity-70 cursor-wait" : ""}`}
                                 >
-                                    {isActionLoading ? (
-                                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    {isBlockLoading ? (
+                                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     ) : (
                                         <>
-                                            {isFollow ? <FiCheck /> : <FiUserPlus />}
-                                            {isFollow ? "Abonné" : "Suivre"}
+                                            {isBlocked ? <FiUserCheck /> : <FiUserX />}
+                                            {isBlocked ? "Utilisateur bloqué" : "Bloquer"}
                                         </>
                                     )}
                                 </button>
 
-                                {(!isOwnProfile && isFriend) && id && connectedUser?.id && (
-                                    <DMButton
-                                        otherUserId={id}
-                                        currentUserId={connectedUser.id}
-                                    />
-                                )}
+                                <ReportButton
+                                    type="user"
+                                    targetId={profilUser.id}
+                                    targetLabel={`@${profilUser.username}`}
+                                />
                             </div>
                         )}
-                        <ReportButton
-                            type="user"
-                            targetId={profilUser.id}
-                            targetLabel={`@${profilUser.username}`}
-                        />
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-4 mt-10">
@@ -411,7 +458,7 @@ const UserProfilePage = () => {
                             {friends.map((friend) => (
                                 <div
                                     key={friend.id}
-                                    onClick={() => navigate(`/profile/${friend.id}`)}
+                                    onClick={() => navigate(`/users/${friend.id}`)}
                                     className="cursor-pointer bg-neutral-900/40 border border-white/5 rounded-2xl p-5 hover:border-rose-500/30 transition"
                                 >
                                     <div className="flex items-center gap-4">
