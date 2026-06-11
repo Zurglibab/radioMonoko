@@ -5,9 +5,10 @@ interface FeedListProps {
     items: FeedItem[];
     onUserClick: (userId: string) => void;
     onCollectionClick: (collectionId: string) => void;
+    onContentClick?: (item: FeedItem) => void;
 }
 
-const FeedList = ({items, onUserClick, onCollectionClick,}: FeedListProps) => {
+const FeedList = ({items, onUserClick, onCollectionClick,onContentClick}: FeedListProps) => {
     return (
         <div className="space-y-5">
             {items.map((item) => (
@@ -16,6 +17,7 @@ const FeedList = ({items, onUserClick, onCollectionClick,}: FeedListProps) => {
                     item={item}
                     onUserClick={onUserClick}
                     onCollectionClick={onCollectionClick}
+                    onContentClick={onContentClick}
                 />
             ))}
         </div>
