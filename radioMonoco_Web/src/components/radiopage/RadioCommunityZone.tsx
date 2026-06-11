@@ -28,7 +28,8 @@ export const RadioCommunityZone = ({
     onPostReview: externalOnPostReview,
     onPostReply: externalOnPostReply,
     handleDeleteReview: externalHandleDeleteReview,
-    onLikeInteraction: externalOnLikeInteraction
+    onLikeInteraction: externalOnLikeInteraction,
+    onUpdateReview: externalOnUpdateReview,
 }: RadioCommunityZoneProps) => {
 
     const { t } = useTranslation();
@@ -408,6 +409,7 @@ export const RadioCommunityZone = ({
                                     onPostReply={onPostReply}
                                     onDeleteReview={handleDeleteReview}
                                     onLikeInteraction={handleLikeInteraction}
+                                    onUpdateReview={externalOnUpdateReview}
                                 />
                             ))
                         )}

@@ -2,6 +2,9 @@ import type {ThemeColors} from "./ThemeColors.types.ts";
 import type {User} from "./Users.types.ts";
 import type {ApiDiffusion} from "./Shows.types.ts";
 import type {Brand} from "./Brands.types.ts";
+import type {Review} from "./Reviews.types.ts";
+import type {RefObject} from "react";
+import type {Collection} from "./Collections.types.ts";
 
 export interface RadioCardProps {
     id: string;
@@ -53,9 +56,10 @@ export interface RadioCommunityZoneProps {
     handleRateStation?: (rating: number) => Promise<void>;
     handleDeleteRating?: () => Promise<void>;
     onPostReview?: (text: string) => Promise<void>;
-    onPostReply?: (text: string, parentId: string) => Promise<void>;
+    onPostReply?: (text: string, parentId: string) => Promise<Review | null>;
     handleDeleteReview?: (reviewId: string, parentId?: string) => Promise<void>;
     onLikeInteraction?: (reviewId: string, actionType: "like" | "dislike" | "remove") => Promise<void>;
+    onUpdateReview: (id: string, commentData: { comment: string; }) => Promise<Review | null>
 }
 
 export interface RadioListsSectionProps {
@@ -91,4 +95,20 @@ export interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     user: User;
+}
+
+export interface CollectionMenuProps {
+    theme: string;
+    menuRef: RefObject<HTMLDivElement | null>;
+    isMenuOpen: boolean;
+    setIsMenuOpen: (open: boolean) => void;
+    isInAnyCollection: boolean;
+    collections: Collection[];
+    collectionItemStates: Record<string, boolean>;
+    toggleCollectionItem: (collectionId: string) => void;
+}
+
+export interface EnhancedCommentItemProps extends CommentItemProps {
+    onLikeInteraction: (reviewId: string, actionType: "like" | "dislike" | "remove") => Promise<void>;
+    onUpdateReview: (reviewId: string, commentData: { comment: string; }) => Promise<Review | null>;
 }
