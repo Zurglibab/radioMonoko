@@ -27,6 +27,20 @@ const Feed = () => {
         }
     };
 
+    const handleContentClick = (item: FeedItem) => {
+        if (item.content_type === "radio" && item.content_id) {
+            navigate(`/radio/${item.content_id}`);
+            return;
+        }
+
+        if (item.content_url) {
+            navigate(`/show/${encodeURIComponent(item.content_url)}`);
+            return;
+        }
+
+        console.warn("Contenu sans route exploitable :", item);
+    };
+
     useEffect(() => {
         if (!user) {
             setLoading(false);
@@ -128,7 +142,7 @@ const Feed = () => {
                         </p>
 
                         <button
-                            onClick={() => navigate("/search")}
+                            onClick={() => navigate("/")}
                             className="mt-8 px-6 py-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-semibold transition"
                         >
                             Trouver des utilisateurs
@@ -143,6 +157,7 @@ const Feed = () => {
                         onCollectionClick={(collectionId) =>
                             navigate(`/collections/${collectionId}`)
                         }
+                        onContentClick={handleContentClick}
                     />
                 )}
             </div>
