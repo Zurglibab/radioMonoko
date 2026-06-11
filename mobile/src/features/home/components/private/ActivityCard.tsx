@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { SocialService } from "@/services/social/social.service";
 import { LikeReviewService } from "@/services/reviews/likeReview.service";
 import { NotificationService } from "@/services/notifications/notification.service";
+import { ReportService } from "@/services/reports/report.service";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -87,6 +88,24 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
   };
 
   /**
+   * submitReport : Envoie le signalement de la critique aux administrateurs.
+   */
+  const submitReport = async (reasonKey: 'spam' | 'inappropriate') => {
+    if (!token || !user?.id) return;
+    try {
+      await ReportService.reportReview(token, {
+        reporter_id: user.id,
+        review_id: activity.id,
+        report_type: t(`home.activityCard.reportReasons.${reasonKey}`),
+      });
+      Alert.alert(t('home.activityCard.thanksTitle'), t('home.activityCard.thanksMessage'));
+    } catch (err) {
+      if (__DEV__) console.warn('[ActivityCard] report failed:', err);
+      Alert.alert(t('common.error'), t('home.activityCard.reportError'));
+    }
+  };
+
+  /**
    * handleReport : Système de modération
    * Permet aux utilisateurs de signaler un contenu inapproprié.
    */
@@ -96,23 +115,33 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
       t('home.activityCard.moderationMessage'),
       [
         { text: t('common.cancel'), style: "cancel" },
-        {
-          text: t('common.report'),
-          style: "destructive",
-          onPress: () => Alert.alert(t('home.activityCard.thanksTitle'), t('home.activityCard.thanksMessage'))
-        }
+        { text: t('home.activityCard.reportSpam'), onPress: () => submitReport('spam') },
+        { text: t('home.activityCard.reportInappropriate'), style: "destructive", onPress: () => submitReport('inappropriate') },
       ]
     );
   };
 
   return (
-    <View 
+    <View
       className="p-5 rounded-[24px] border mb-4 shadow-sm"
-      style={{ 
-        backgroundColor: colors.surface, 
-        borderColor: colors.border 
+      style={{
+        backgroundColor: colors.surface,
+        borderColor: colors.border
       }}
     >
+      {/* Badge "Mis en avant" par l'administration */}
+      {activity.featured && (
+        <View
+          style={{ backgroundColor: colors.primary + "22", borderColor: colors.primary }}
+          className="self-start flex-row items-center px-2.5 py-1 rounded-full border mb-3"
+        >
+          <Star size={10} color={colors.primary} fill={colors.primary} />
+          <Text style={{ color: colors.primary }} className="text-[9px] font-black uppercase tracking-widest ml-1.5">
+            {t('home.activityCard.featuredBadge')}
+          </Text>
+        </View>
+      )}
+
       {/* Infos Utilisateur & Action Follow */}
       <View className="flex-row items-center justify-between mb-4">
         <View className="flex-row items-center flex-1">

@@ -68,4 +68,5 @@ export interface SocialActivity {
   likes: number;
   hasLiked?: boolean;
   commentsCount: number;
+  featured?: boolean;
 }

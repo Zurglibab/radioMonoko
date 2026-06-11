@@ -50,8 +50,16 @@
   "activityCard": {
     "moderationTitle": "Moderation",
     "moderationMessage": "Report this content for violating the guidelines?",
+    "reportSpam": "Spam",
+    "reportInappropriate": "Inappropriate content",
+    "reportReasons": {
+      "spam": "Spam",
+      "inappropriate": "Inappropriate content"
+    },
+    "reportError": "Failed to send the report.",
     "thanksTitle": "Thank you",
     "thanksMessage": "The content has been sent to the administrators.",
+    "featuredBadge": "Featured",
     "publishedReviewOn": "Posted a review on ",
     "rated": "Rated ",
     "likeNotification": "{{username}} liked your review of {{media}}",
