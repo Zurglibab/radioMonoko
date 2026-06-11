@@ -34,6 +34,9 @@ export const SocialService = {
   fetchMyFollowing: (token: string): Promise<Friend[]> =>
     apiFetch<Friend[]>("/userRelation/following", { token }),
 
+  fetchMyFollowers: (token: string): Promise<Friend[]> =>
+    apiFetch<Friend[]>("/userRelation/followers", { token }),
+
   fetchUserFriends: (token: string, userId: string): Promise<Friend[]> =>
     apiFetch<Friend[]>(`/userRelation/friends/${userId}`, { token }),
 

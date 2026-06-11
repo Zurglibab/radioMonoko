@@ -54,7 +54,7 @@ export const PrivateHeader = ({ user }: { user: User }) => {
             style={{ color: colors.muted }}
             className="text-[9px] font-black uppercase tracking-[2px]"
           >
-            Radio Monoko
+            Radio Monoco
           </Text>
           <Text
             style={{ color: colors.text }}

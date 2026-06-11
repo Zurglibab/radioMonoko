@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Clock, Users, ChevronRight } from "lucide-react-native";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 
 import { theme } from "@/constants/theme";
 import { User } from "@/types/auth";
@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 
 export default function PrivateHome({ user }: { user: User }) {
   const { t } = useTranslation();
+  const router = useRouter();
   const { appearanceSettings } = useAuthContext();
 
   const isDark = appearanceSettings.themeMode === 'dark';
@@ -120,6 +121,7 @@ export default function PrivateHome({ user }: { user: User }) {
             className="flex-row items-center justify-center p-6 rounded-[32px] mt-4 border-2 border-dashed"
             style={{ borderColor: colors.border, backgroundColor: colors.surface, opacity: 0.8 }}
             activeOpacity={0.7}
+            onPress={() => router.push("/feed")}
           >
             <Text style={{ color: colors.muted }} className="font-black mr-2 uppercase text-[10px] tracking-[2px]">
               {t('home.privateHome.seeFullFeed')}

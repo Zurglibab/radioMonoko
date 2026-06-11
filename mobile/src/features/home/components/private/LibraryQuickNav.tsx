@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useTranslation } from "react-i18next";
@@ -11,16 +12,17 @@ import { useTranslation } from "react-i18next";
  */
 export const LibraryQuickNav = () => {
   const { t } = useTranslation();
+  const router = useRouter();
   const { appearanceSettings } = useAuthContext();
   const isDark = appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   const statuses = [
-    t('home.libraryQuickNav.statusInProgress'),
-    t('home.libraryQuickNav.statusToListen'),
-    t('home.libraryQuickNav.statusFavorites'),
-    t('home.libraryQuickNav.statusArchives'),
-    t('home.libraryQuickNav.statusMixes'),
+    { label: t('home.libraryQuickNav.statusInProgress'), route: "/library/status/in-progress" },
+    { label: t('home.libraryQuickNav.statusToListen'), route: "/library/status/to-listen" },
+    { label: t('home.libraryQuickNav.statusFavorites'), route: "/playlist/liked" },
+    { label: t('home.libraryQuickNav.statusArchives'), route: "/library/status/dropped" },
+    { label: t('home.libraryQuickNav.statusMixes'), route: "/library?tab=Playlists" },
   ];
 
   return (
@@ -34,7 +36,7 @@ export const LibraryQuickNav = () => {
           {t('home.libraryQuickNav.title')}
         </Text>
 
-        <TouchableOpacity activeOpacity={0.6}>
+        <TouchableOpacity activeOpacity={0.6} onPress={() => router.push("/library" as any)}>
           <Text
             style={{ color: colors.muted }}
             className="text-xs font-bold uppercase tracking-widest"
@@ -55,6 +57,7 @@ export const LibraryQuickNav = () => {
           <TouchableOpacity
             key={index}
             activeOpacity={0.8}
+            onPress={() => router.push(status.route as any)}
             className="mr-3 px-6 py-3 rounded-2xl border"
             style={{
               backgroundColor: colors.surface,
@@ -65,7 +68,7 @@ export const LibraryQuickNav = () => {
               style={{ color: colors.text }}
               className="text-xs font-semibold"
             >
-              {status}
+              {status.label}
             </Text>
           </TouchableOpacity>
         ))}

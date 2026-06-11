@@ -20,7 +20,9 @@
     "stats": {
       "waves": "Ondes",
       "playlists": "Playlists",
-      "finished": "Terminés"
+      "finished": "Terminés",
+      "followers": "Abonnés",
+      "following": "Abonnements"
     },
     "accountSection": "Mon Compte",
     "editProfile": {
@@ -120,5 +122,15 @@
   "pendingRequests": {
     "title": "Demandes d'amis",
     "wantsToFollow": "Veut vous suivre"
+  },
+  "connections": {
+    "title": "Mon réseau",
+    "tabs": {
+      "followers": "Abonnés ({{count}})",
+      "following": "Abonnements ({{count}})"
+    },
+    "emptyTitle": "Personne ici",
+    "emptyFollowers": "Vous n'avez pas encore d'abonnés.",
+    "emptyFollowing": "Vous ne suivez personne pour le moment."
   }
 }

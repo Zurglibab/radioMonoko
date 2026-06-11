@@ -1,8 +1,8 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Plus, MoreVertical, Play, ScrollText, PlayCircle, CheckCircle2, XCircle, Globe, Lock } from "lucide-react-native";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { useLibrary } from "@/hooks/home/useLibrary";
@@ -30,7 +30,16 @@ export default function LibraryScreen() {
   const { collections, isLoading: isCollectionsLoading, createCollection, deleteCollection, toggleVisibility, refetch: refetchCollections } = useCollections(true);
   const { playTrack } = usePlayer();
   const router = useRouter();
+  const params = useLocalSearchParams<{ tab?: string | string[] }>();
   const [isModalVisible, setModalVisible] = useState(false);
+
+  // Permet de pré-sélectionner un onglet via l'URL (ex: navigation depuis "Ma Bibliothèque" sur l'accueil)
+  useEffect(() => {
+    const tabParam = Array.isArray(params.tab) ? params.tab[0] : params.tab;
+    if (tabParam && ['Tout', 'Radios', 'Podcasts', 'Playlists'].includes(tabParam)) {
+      setActiveTab(tabParam as any);
+    }
+  }, [params.tab, setActiveTab]);
 
   const lastRefetchAt = useRef<number>(0);
   const REFETCH_TTL = 30_000;

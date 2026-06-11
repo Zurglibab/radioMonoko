@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -8,25 +8,29 @@ import {
 import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useLibrary } from "@/hooks/home/useLibrary";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useAuthContext } from "@/context/AuthContext";
 import { usePendingRequests } from "@/hooks/profile/usePendingRequests";
+import { useSocialStats } from "@/hooks/social/useSocialStats";
 import { PendingRequestsSection } from "@/features/profile/components/PendingRequestsSection";
 import { SettingItem } from "@/features/profile/components/SettingItem";
 
-const StatBox = ({ label, value, colors }: { label: string; value: number | string; colors: any }) => (
-  <View
+const StatBox = ({ label, value, colors, onPress, widthClass = "w-[31%]" }: { label: string; value: number | string; colors: any; onPress?: () => void; widthClass?: string }) => (
+  <TouchableOpacity
+    onPress={onPress}
+    disabled={!onPress}
+    activeOpacity={onPress ? 0.7 : 1}
     style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-    className="items-center justify-center p-5 rounded-[16px] w-[31%] border"
+    className={`items-center justify-center p-5 rounded-[16px] ${widthClass} border`}
   >
     <Text style={{ color: colors.text }} className="text-2xl font-black italic tracking-tighter">{value}</Text>
     <Text style={{ color: colors.muted }} className="text-[8px] uppercase font-black tracking-widest mt-1">{label}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
-  const { user, favorites, playlists, statusItems } = useLibrary();
+  const { user, favorites, playlists, statusItems, refetchFavorites, refetchStatuses, refetchCollections } = useLibrary();
   const { token, logout, appearanceSettings } = useAuthContext();
   const router = useRouter();
   const systemTheme = useColorScheme();
@@ -37,6 +41,25 @@ export default function ProfileScreen() {
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   const { requests, isLoading: pendingLoading, respondingId, accept, refuse } = usePendingRequests(token);
+  const { friendsCount: followingCount, followersCount, isLoadingSocial, refetch: refetchSocial } = useSocialStats(true);
+
+  const lastRefetchAt = useRef<number>(0);
+  const REFETCH_TTL = 30_000;
+
+  useFocusEffect(
+    useCallback(() => {
+      const now = Date.now();
+      const isFirstLoad = lastRefetchAt.current === 0;
+      if (!isFirstLoad && now - lastRefetchAt.current < REFETCH_TTL) return;
+      lastRefetchAt.current = now;
+
+      const silent = !isFirstLoad;
+      refetchFavorites(silent);
+      refetchStatuses(silent);
+      refetchCollections(silent);
+      refetchSocial(silent);
+    }, [refetchFavorites, refetchStatuses, refetchCollections, refetchSocial])
+  );
 
   const memberSince = user?.created_at
     ? new Date(user.created_at).toLocaleDateString(i18n.language === "en" ? "en-US" : "fr-FR", { month: "long", year: "numeric" })
@@ -91,6 +114,23 @@ export default function ProfileScreen() {
           <StatBox colors={colors} label={t("profile.profileTab.stats.waves")} value={favorites.length} />
           <StatBox colors={colors} label={t("profile.profileTab.stats.playlists")} value={playlists.length} />
           <StatBox colors={colors} label={t("profile.profileTab.stats.finished")} value={statusItems.find((i) => i.slug === "finished")?.count ?? 0} />
+        </View>
+
+        <View className="flex-row justify-between mt-3">
+          <StatBox
+            colors={colors}
+            widthClass="w-[48%]"
+            label={t("profile.profileTab.stats.followers")}
+            value={isLoadingSocial ? "..." : followersCount}
+            onPress={() => router.push("/profile/connections?tab=followers" as any)}
+          />
+          <StatBox
+            colors={colors}
+            widthClass="w-[48%]"
+            label={t("profile.profileTab.stats.following")}
+            value={isLoadingSocial ? "..." : followingCount}
+            onPress={() => router.push("/profile/connections?tab=following" as any)}
+          />
         </View>
       </View>
 
