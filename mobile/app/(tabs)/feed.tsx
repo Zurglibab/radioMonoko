@@ -12,6 +12,7 @@ import { useCommunity } from "@/hooks/community/useCommunity";
 import { SocialService } from "@/services/social/social.service";
 import { LikeReviewService } from "@/services/reviews/likeReview.service";
 import { NotificationService } from "@/services/notifications/notification.service";
+import { ReportService } from "@/services/reports/report.service";
 import { SocialActivity } from "@/types/community";
 import { useRouter } from "expo-router";
 
@@ -168,10 +169,37 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
     } catch { setIsFollowing(was); }
   };
 
+  const submitReport = async (reasonKey: 'spam' | 'inappropriate') => {
+    if (!token || !currentUserId) return;
+    try {
+      await ReportService.reportReview(token, {
+        reporter_id: currentUserId,
+        review_id: activity.id,
+        report_type: t(`home.activityCard.reportReasons.${reasonKey}`),
+      });
+      Alert.alert(t('community.feed.reportThanksTitle'), t('community.feed.reportThanksMessage'));
+    } catch (err) {
+      if (__DEV__) console.warn('[FeedCard] report failed:', err);
+      Alert.alert(t('common.error'), t('home.activityCard.reportError'));
+    }
+  };
+
+  const handleReport = () => {
+    Alert.alert(
+      t('home.activityCard.moderationTitle'),
+      t('home.activityCard.moderationMessage'),
+      [
+        { text: t('common.cancel'), style: "cancel" },
+        { text: t('home.activityCard.reportSpam'), onPress: () => submitReport('spam') },
+        { text: t('home.activityCard.reportInappropriate'), style: "destructive", onPress: () => submitReport('inappropriate') },
+      ]
+    );
+  };
+
   const handleMore = () => {
     Alert.alert("", activity.user, [
       { text: t('community.feed.viewProfile'), onPress: () => router.push(`/community/user/${activity.userId}`) },
-      { text: t('common.report'), style: "destructive", onPress: () => Alert.alert(t('community.feed.reportThanksTitle'), t('community.feed.reportThanksMessage')) },
+      { text: t('common.report'), style: "destructive", onPress: handleReport },
       { text: t('common.cancel'), style: "cancel" },
     ]);
   };
@@ -221,6 +249,19 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Badge "Mis en avant" par l'administration */}
+          {activity.featured && (
+            <View
+              style={{ backgroundColor: colors.primary + "22", borderColor: colors.primary }}
+              className="self-start flex-row items-center px-2.5 py-1 rounded-full border mb-2"
+            >
+              <Star size={10} color={colors.primary} fill={colors.primary} />
+              <Text style={{ color: colors.primary }} className="text-[9px] font-black uppercase tracking-widest ml-1.5">
+                {t('home.activityCard.featuredBadge')}
+              </Text>
+            </View>
+          )}
 
           {/* Media name + stars */}
           <Text style={{ color: colors.muted }} className="text-[13px] mb-1">

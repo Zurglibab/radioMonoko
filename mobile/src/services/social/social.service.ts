@@ -3,6 +3,7 @@ import { ReviewService } from "@/services/reviews/review.service";
 import { ContentApiService } from "@/services/content/content-api.service";
 import { UserService } from "@/services/users/user.service";
 import { LikeReviewService, LikeReview } from "@/services/reviews/likeReview.service";
+import { RatingService } from "@/services/ratings/rating.service";
 import { ReviewComment, SocialActivity } from "@/types/community";
 import {
   Friend,
@@ -19,6 +20,11 @@ function toArray<T>(raw: unknown): T[] {
   if (raw && typeof raw === "object" && Array.isArray((raw as any).data))
     return (raw as any).data as T[];
   return [];
+}
+
+// Le backend peut renvoyer le statut "mis en avant"
+function isReviewFeatured(review: any): boolean {
+  return Boolean(review?.featured ?? review?.is_featured);
 }
 
 /**
@@ -76,9 +82,14 @@ export const SocialService = {
   getFeed: async (token: string, currentUserId?: string): Promise<SocialActivity[]> => {
     const allReviewsRaw = await ReviewService.getAll(token);
     const allReviews = toArray<any>(allReviewsRaw);
+    // Les critiques mises en avant par l'admin remontent toujours en tête du flux
     const topLevel = allReviews
       .filter((r: any) => !r.parent_review_id)
-      .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .sort((a: any, b: any) => {
+        const featuredDiff = Number(isReviewFeatured(b)) - Number(isReviewFeatured(a));
+        if (featuredDiff !== 0) return featuredDiff;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      })
       .slice(0, FEED_LIMIT);
 
     if (__DEV__) console.log("[getFeed] allReviews:", allReviews.length, "| topLevel:", topLevel.length);
@@ -98,6 +109,7 @@ export const SocialService = {
     const userMap: Record<string, { username: string; avatar?: string }> = {};
     const likeMap: Record<string, number> = {};
     const hasLikedMap: Record<string, boolean> = {};
+    const ratingMap: Record<string, number> = {};
 
     await Promise.all([
       ...uniqueContentIds.map(async (id: string) => {
@@ -119,6 +131,17 @@ export const SocialService = {
           userMap[id] = { username: "Utilisateur" };
         }
       }),
+      (async () => {
+        // Notes attribuées par les utilisateurs, pour afficher la note avec la critique dans le flux
+        try {
+          const allRatings = await RatingService.getAll(token);
+          for (const rating of allRatings) {
+            ratingMap[`${rating.user_id}_${rating.content_id}`] = rating.average_rating;
+          }
+        } catch {
+          // pas de notation disponible
+        }
+      })(),
     ]);
 
     const LIKE_BATCH = 5;
@@ -163,9 +186,11 @@ export const SocialService = {
         day: "numeric",
         month: "short",
       }),
+      value: ratingMap[`${review.user_id}_${review.content_id}`],
       likes: likeMap[review.id] ?? 0,
       hasLiked: hasLikedMap[review.id] ?? false,
       commentsCount: commentCountMap[review.id] ?? 0,
+      featured: isReviewFeatured(review),
     }));
   },
 

@@ -50,8 +50,16 @@
   "activityCard": {
     "moderationTitle": "Modération",
     "moderationMessage": "Signaler ce contenu pour non-respect de la charte ?",
+    "reportSpam": "Spam",
+    "reportInappropriate": "Contenu inapproprié",
+    "reportReasons": {
+      "spam": "Spam",
+      "inappropriate": "Contenu inapproprié"
+    },
+    "reportError": "Impossible d'envoyer le signalement.",
     "thanksTitle": "Merci",
     "thanksMessage": "Le contenu a été envoyé aux administrateurs.",
+    "featuredBadge": "Coup de cœur",
     "publishedReviewOn": "A publié une critique sur ",
     "rated": "A noté ",
     "likeNotification": "{{username}} a aimé votre critique de {{media}}",

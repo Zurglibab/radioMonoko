@@ -8,6 +8,8 @@ export interface ReviewDTO {
   parent_review_id: string | null;
   comment: string;
   created_at: string;
+  featured?: boolean;
+  is_featured?: boolean;
 }
 
 /**
