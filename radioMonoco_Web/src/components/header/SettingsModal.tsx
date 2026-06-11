@@ -12,7 +12,6 @@ import {
     HiOutlineLockOpen,
     HiOutlineCamera,
     HiOutlineMail,
-    HiOutlineKey,
 } from "react-icons/hi";
 import { useAppearance } from "../../context/AppearanceContext";
 import { useTranslation } from "react-i18next";
@@ -29,6 +28,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
     const { t } = useTranslation();
 
     const [loading, setLoading] = useState(false);
+    const [notifLoading, setNotifLoading] = useState(false);
 
     const [displayName, setDisplayName] = useState(user?.display_name ?? "");
     const [email, setEmail] = useState(user?.email ?? "");
@@ -101,13 +101,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
     };
 
     const handleEmailNotifChange = async (value: boolean) => {
+        setNotifLoading(true);
         try {
             const updatedUser = await UsersService.updateEmailNotifications(value);
             setEmailNotifs(value);
             updateUser(updatedUser);
-        } catch (error) {
+        } catch {
             setEmailNotifs(!value);
             alert(t("settings.updateError"));
+        } finally {
+            setNotifLoading(false);
         }
     };
 
@@ -261,53 +264,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                 </div>
                             )}
 
-                            {activeTab === 'security' && (
-                                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-3 pb-2 border-b border-app-border">
-                                            <HiOutlineKey className="text-xl text-primary" />
-                                            <h3 className="font-bold text-sm">{t("settings.security.changePassword")}</h3>
-                                        </div>
-                                        <div className="space-y-4">
-                                            <div className="space-y-2">
-                                                <label className="text-[11px] font-bold opacity-50 ml-1 block">{t("settings.security.currentPassword")}</label>
-                                                <input type="password" placeholder="••••••••" className="w-full bg-app-text/5 border border-app-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/50" />
-                                            </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <label className="text-[11px] font-bold opacity-50 ml-1 block">{t("settings.security.newPassword")}</label>
-                                                    <input type="password" placeholder="••••••••" className="w-full bg-app-text/5 border border-app-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/50" />
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <label className="text-[11px] font-bold opacity-50 ml-1 block">{t("settings.security.confirmPassword")}</label>
-                                                    <input type="password" placeholder="••••••••" className="w-full bg-app-text/5 border border-app-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/50" />
-                                                </div>
-                                            </div>
-                                            <button className="text-[11px] font-black uppercase tracking-wider text-primary hover:underline cursor-pointer">
-                                                {t("settings.security.updatePasswordButton")}
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-3 pb-2 border-b border-app-border">
-                                            <HiOutlineShieldCheck className="text-xl text-primary" />
-                                            <h3 className="font-bold text-sm">{t("settings.security.advancedSecurity")}</h3>
-                                        </div>
-                                        <div className="flex items-center justify-between p-4 bg-app-text/5 rounded-2xl border border-app-border">
-                                            <div className="space-y-0.5">
-                                                <p className="text-sm font-bold">{t("settings.security.twoFactorAuth")}</p>
-                                                <p className="text-[11px] opacity-50">{t("settings.security.twoFactorDesc")}</p>
-                                            </div>
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input type="checkbox" className="sr-only peer" />
-                                                <div className="w-11 h-6 bg-app-text/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
                             {activeTab === 'notifs' && (
                                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                                     <div className="space-y-4">
@@ -321,10 +277,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                                     <p className="text-[11px] opacity-50">Recevoir des alertes par email.</p>
                                                 </div>
                                             </div>
-                                            <label className="relative inline-flex items-center cursor-pointer">
-                                                <input type="checkbox" checked={emailNotifs} onChange={(e) => handleEmailNotifChange(e.target.checked)} className="sr-only peer" />
-                                                <div className="w-10 h-5 bg-app-text/10 rounded-full peer peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
-                                            </label>
+                                            <div className="relative flex items-center justify-center w-10">
+                                                {notifLoading ? (
+                                                    <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                                ) : (
+                                                    <label className="relative inline-flex items-center cursor-pointer">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={emailNotifs}
+                                                            onChange={(e) => handleEmailNotifChange(e.target.checked)}
+                                                            className="sr-only peer"
+                                                        />
+                                                        <div className="w-10 h-5 bg-app-text/10 rounded-full peer peer-checked:after:translate-x-5 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary peer-focus:ring-2 peer-focus:ring-primary/20"></div>
+                                                    </label>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
