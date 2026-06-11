@@ -1,0 +1,38 @@
+{
+  "collection": {
+    "notFound": "Collection introuvable.",
+    "defaultTitle": "Collection",
+    "removeTitle": "Retirer de la collection",
+    "removeMessage": "Retirer \"{{title}}\" de cette collection ?",
+    "removeConfirm": "Retirer",
+    "itemsCount_one": "{{count}} œuvre",
+    "itemsCount_other": "{{count}} œuvres",
+    "emptyTitle": "Collection vide",
+    "emptyMessage": "Ajoutez des œuvres depuis leur fiche pour les retrouver ici.",
+    "explore": "Explorer",
+    "untitledWork": "Œuvre indisponible",
+    "noteQuote": "« {{note}} »"
+  },
+  "brand": {
+    "notFound": "Station introuvable.",
+    "headerTitle": "Station",
+    "liveAvailable": "Direct disponible",
+    "subStationsCount_one": "{{count}} sous-station",
+    "subStationsCount_other": "{{count}} sous-stations",
+    "nowPlaying": "En cours",
+    "listenLive": "Écouter le direct",
+    "subStations": "Sous-stations"
+  },
+  "playlist": {
+    "likedTitlesName": "Titres Likés",
+    "you": "Vous",
+    "likedDescription": "Toutes vos ondes favorites",
+    "likedItemTitle": "Onde Likée",
+    "savedTitle": "Titre sauvegardé",
+    "unknownUser": "Utilisateur",
+    "by": "Par {{name}}",
+    "tracksCount_one": "{{count}} titre",
+    "tracksCount_other": "{{count}} titres",
+    "startListening": "Lancer l'écoute"
+  }
+}

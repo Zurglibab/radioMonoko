@@ -1,5 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, Image, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 
 interface SocialButtonsProps {
@@ -12,6 +13,8 @@ interface SocialButtonsProps {
  * Propose une alternative rapide à l'inscription classique par email.
  */
 export const SocialButtons = ({ onGooglePress, disabled = false }: SocialButtonsProps) => {
+  const { t } = useTranslation();
+
   // Centralisation des configurations des fournisseurs pour faciliter la maintenance
   const providers = [
     { name: 'google', icon: require("@/assets/images/google-icon.png") },
@@ -40,7 +43,7 @@ export const SocialButtons = ({ onGooglePress, disabled = false }: SocialButtons
             resizeMode="contain" 
           />
           <Text className="sr-only">
-            {`Se connecter avec ${provider.name}`}
+            {t('auth.socialButtons.loginWith', { provider: provider.name })}
           </Text>
         </TouchableOpacity>
       ))}

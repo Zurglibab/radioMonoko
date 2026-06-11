@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 /**
  * LibraryQuickNav : Barre de navigation rapide pour la bibliothèque.
@@ -9,9 +10,18 @@ import { useAuthContext } from "@/context/AuthContext";
  * via un défilement horizontal fluide.
  */
 export const LibraryQuickNav = () => {
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
   const isDark = appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
+
+  const statuses = [
+    t('home.libraryQuickNav.statusInProgress'),
+    t('home.libraryQuickNav.statusToListen'),
+    t('home.libraryQuickNav.statusFavorites'),
+    t('home.libraryQuickNav.statusArchives'),
+    t('home.libraryQuickNav.statusMixes'),
+  ];
 
   return (
     <View className="mb-10">
@@ -21,7 +31,7 @@ export const LibraryQuickNav = () => {
           style={{ color: colors.text }}
           className="text-lg font-bold tracking-tight"
         >
-          Ma Bibliothèque
+          {t('home.libraryQuickNav.title')}
         </Text>
 
         <TouchableOpacity activeOpacity={0.6}>
@@ -29,7 +39,7 @@ export const LibraryQuickNav = () => {
             style={{ color: colors.muted }}
             className="text-xs font-bold uppercase tracking-widest"
           >
-            Gérer
+            {t('home.libraryQuickNav.manage')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -41,7 +51,7 @@ export const LibraryQuickNav = () => {
         className="px-6"
         contentContainerStyle={{ paddingRight: 40 }}
       >
-        {['En cours', 'À écouter', 'Favoris', 'Archives', 'Mes Mixes'].map((status, index) => (
+        {statuses.map((status, index) => (
           <TouchableOpacity
             key={index}
             activeOpacity={0.8}

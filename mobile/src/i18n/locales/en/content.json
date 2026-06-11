@@ -1,0 +1,38 @@
+{
+  "collection": {
+    "notFound": "Collection not found.",
+    "defaultTitle": "Collection",
+    "removeTitle": "Remove from collection",
+    "removeMessage": "Remove \"{{title}}\" from this collection?",
+    "removeConfirm": "Remove",
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
+    "emptyTitle": "Empty collection",
+    "emptyMessage": "Add items from their page to find them here.",
+    "explore": "Explore",
+    "untitledWork": "Item unavailable",
+    "noteQuote": "\"{{note}}\""
+  },
+  "brand": {
+    "notFound": "Station not found.",
+    "headerTitle": "Station",
+    "liveAvailable": "Live available",
+    "subStationsCount_one": "{{count}} sub-station",
+    "subStationsCount_other": "{{count}} sub-stations",
+    "nowPlaying": "Now playing",
+    "listenLive": "Listen live",
+    "subStations": "Sub-stations"
+  },
+  "playlist": {
+    "likedTitlesName": "Liked Titles",
+    "you": "You",
+    "likedDescription": "All your favorite waves",
+    "likedItemTitle": "Liked Wave",
+    "savedTitle": "Saved title",
+    "unknownUser": "User",
+    "by": "By {{name}}",
+    "tracksCount_one": "{{count}} title",
+    "tracksCount_other": "{{count}} titles",
+    "startListening": "Start listening"
+  }
+}

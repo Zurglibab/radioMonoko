@@ -1,0 +1,33 @@
+{
+  "searchBar": {
+    "placeholder": "Stations, émissions, listes, curateurs..."
+  },
+  "searchDefaultView": {
+    "recentSearches": "Recherches récentes",
+    "clear": "Effacer",
+    "exploreGenres": "Explorer les genres",
+    "genres": {
+      "jazz": "Jazz",
+      "rock": "Rock",
+      "classical": "Classique",
+      "news": "Infos",
+      "techno": "Techno",
+      "vocal": "Vocal"
+    }
+  },
+  "searchResultsView": {
+    "contentTypeLabels": {
+      "show": "Émission",
+      "diffusion": "Diffusion",
+      "live": "Direct",
+      "podcast": "Podcast",
+      "article": "Article",
+      "other": "Contenu"
+    },
+    "stationsSection": "Stations & Ondes",
+    "showsSection": "Émissions & Diffusions",
+    "publicCollectionsSection": "Listes publiques",
+    "communitySection": "Communauté",
+    "emptyState": "Aucune onde captée sur cette fréquence..."
+  }
+}

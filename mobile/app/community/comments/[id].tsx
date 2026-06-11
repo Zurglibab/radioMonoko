@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, Send, X, Heart, MessageSquare, Trash2 } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
@@ -22,6 +23,7 @@ import { ReviewComment } from "@/types/community";
  * @returns 
  */
 export default function CommentsScreen() {
+  const { t } = useTranslation();
   const { id, targetCommentId } = useLocalSearchParams<{ id: string; targetCommentId?: string }>();
   const router = useRouter();
   const { appearanceSettings, token, user } = useAuthContext();
@@ -118,7 +120,7 @@ export default function CommentsScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => setReplyingTo(comment)}>
-                <Text style={{ color: colors.primary }} className="text-xs font-semibold">Répondre</Text>
+                <Text style={{ color: colors.primary }} className="text-xs font-semibold">{t('community.comments.reply')}</Text>
               </TouchableOpacity>
 
               {isMine && (
@@ -148,7 +150,7 @@ export default function CommentsScreen() {
             <ChevronLeft color={colors.text} size={22} />
           </TouchableOpacity>
           <Text style={{ color: colors.text }} className="text-[17px] font-bold">
-            {isThreadView ? "Fil" : "Post"}
+            {isThreadView ? t('community.comments.headerThread') : t('community.comments.headerPost')}
           </Text>
         </View>
       </View>
@@ -182,7 +184,7 @@ export default function CommentsScreen() {
             <View className="flex-row items-center gap-x-5 py-3 border-t border-b" style={{ borderColor: colors.border }}>
               <View className="flex-row items-center">
                 <MessageSquare size={16} color={colors.muted} />
-                <Text style={{ color: colors.muted }} className="text-sm ml-1.5">{comments.length} réponses</Text>
+                <Text style={{ color: colors.muted }} className="text-sm ml-1.5">{t('community.comments.replies', { count: comments.length })}</Text>
               </View>
             </View>
           </View>
@@ -194,7 +196,7 @@ export default function CommentsScreen() {
             <CommentRow comment={focusedComment} isParent />
             <View className="px-4 py-2">
               <View style={{ backgroundColor: colors.border }} className="w-[2px] h-4 ml-5" />
-              <Text style={{ color: colors.muted }} className="text-xs font-bold uppercase tracking-widest ml-5 mt-1">Réponses</Text>
+              <Text style={{ color: colors.muted }} className="text-xs font-bold uppercase tracking-widest ml-5 mt-1">{t('community.comments.repliesSectionTitle')}</Text>
             </View>
           </>
         )}
@@ -207,7 +209,7 @@ export default function CommentsScreen() {
         ) : comments.length === 0 ? (
           <View className="py-16 items-center px-8">
             <Text style={{ color: colors.muted }} className="text-center text-[15px]">
-              {isThreadView ? "Aucune réponse pour l'instant." : "Soyez le premier à commenter."}
+              {isThreadView ? t('community.comments.emptyThread') : t('community.comments.emptyComments')}
             </Text>
           </View>
         ) : (
@@ -226,7 +228,7 @@ export default function CommentsScreen() {
             style={{ borderBottomWidth: 1, borderColor: colors.border, backgroundColor: colors.surface }}
           >
             <Text style={{ color: colors.muted }} className="flex-1 text-xs">
-              Réponse à{" "}
+              {t('community.comments.replyingTo')}{" "}
               <Text style={{ color: colors.primary }} className="font-semibold">@{replyingTo.username}</Text>
             </Text>
             <TouchableOpacity onPress={() => setReplyingTo(null)} hitSlop={12}>
@@ -252,7 +254,7 @@ export default function CommentsScreen() {
               ref={inputRef}
               value={newComment}
               onChangeText={setNewComment}
-              placeholder={replyingTo ? `Répondre à @${replyingTo.username}...` : "Votre réponse..."}
+              placeholder={replyingTo ? t('community.comments.replyPlaceholder', { username: replyingTo.username }) : t('community.comments.commentPlaceholder')}
               placeholderTextColor={colors.muted}
               style={{ color: colors.text, fontSize: 15 }}
               multiline

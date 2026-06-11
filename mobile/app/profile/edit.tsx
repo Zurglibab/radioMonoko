@@ -1,138 +1,140 @@
 import React, { useState, useMemo } from "react";
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  TextInput, 
-  Image, 
-  Alert, 
-  KeyboardAvoidingView, 
-  Platform, 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   useColorScheme
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Camera, Check, Info, RotateCcw } from "lucide-react-native";
+import { ChevronLeft, Camera, Check, Info, RotateCcw, Globe, Lock } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useLibrary } from "@/hooks/home/useLibrary";
 import { useAuthContext } from "@/context/AuthContext";
 
 /**
  * EditProfileScreen : Formulaire d'édition du compte utilisateur.
- * Gère le changement d'avatar, de pseudonyme (avec cooldown) et d'email.
+ * Champs alignés sur PUT /user/me : display_name, bio, website, avatar, privacy.
+ * Le pseudo unique (username) et l'email ne sont pas modifiables via cette route.
  */
 export default function EditProfileScreen() {
   const router = useRouter();
-  const { user, updateProfile, checkUsernameCooldown } = useLibrary();
+  const { t } = useTranslation();
+  const { user, updateProfile, checkDisplayNameCooldown } = useLibrary();
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
-  /**
-   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
-   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
-   * Détection du thème (Priorité Dark)
-   */
-  const isDark = appearanceSettings.themeMode === 'system' 
-    ? systemTheme === 'dark' 
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? systemTheme === 'dark'
     : appearanceSettings.themeMode === 'dark';
-    
+
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   // États locaux pour gérer les champs du formulaire
-  const [username, setUsername] = useState(user?.username || "");
-  const [email, setEmail] = useState(user?.email || "");
+  const initialDisplayName = user?.display_name || user?.username || "";
+  const [displayName, setDisplayName] = useState(initialDisplayName);
+  const [bio, setBio] = useState(user?.bio || "");
+  const [website, setWebsite] = useState(user?.website || "");
+  const [privacy, setPrivacy] = useState<'public' | 'private'>(user?.privacy || 'public');
   const [avatar, setAvatar] = useState(user?.avatar || null);
-  
-  // Vérification des contraintes de changement de nom
-  const cooldown = useMemo(() => checkUsernameCooldown(), [user]);
+  const [isSaving, setIsSaving] = useState(false);
 
-  /**
-   * pickImage : Utilise expo-image-picker pour sélectionner une nouvelle photo.
-   */
+  // Vérification des contraintes de changement de nom affiché
+  const cooldown = useMemo(() => checkDisplayNameCooldown(), [user]);
+
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert("Permission refusée", "L'accès aux photos est nécessaire.");
+      Alert.alert(t("profile.editProfile.permissionDeniedTitle"), t("profile.editProfile.permissionDeniedMessage"));
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'], // On ne veut que des photos
-      allowsEditing: true,    // Crop carré forcé
+      mediaTypes: ['images'],
+      allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.7,           // Optimisation du poids de l'image
+      quality: 0.7,
     });
 
     if (!result.canceled) {
       setAvatar(result.assets[0].uri);
     }
   };
-  
-  /**
-   * hasChanged : Logique de détection de modification.
-   * Compare l'état local avec l'état initial du store.
-   */
+
   const hasChanged = useMemo(() => {
-    const nameChanged = username.trim() !== (user?.username || "");
-    const emailChanged = email.trim() !== (user?.email || "");
+    const nameChanged = displayName.trim() !== initialDisplayName;
+    const bioChanged = bio.trim() !== (user?.bio || "");
+    const websiteChanged = website.trim() !== (user?.website || "");
     const avatarChanged = avatar !== (user?.avatar || null);
-    return nameChanged || emailChanged || avatarChanged;
-  }, [username, email, avatar, user]);
+    const privacyChanged = privacy !== (user?.privacy || 'public');
+    return nameChanged || bioChanged || websiteChanged || avatarChanged || privacyChanged;
+  }, [displayName, bio, website, avatar, privacy, user, initialDisplayName]);
 
   /**
-   * Validation du pseudonyme :
-   * Doit être différent de l'actuel
-   * Doit faire au moins 3 caractères
-   * Doit respecter le cooldown de changement (7 jours)
-   * Si le pseudonyme est verrouillé par le cooldown, on affiche un message d'attente.
+   * Validation du nom affiché :
+   * Doit faire au moins 3 caractères et respecter le cooldown de changement (14 jours).
+   * Le cooldown ne s'applique que si un nom affiché personnalisé existe déjà :
+   * la toute première personnalisation (ex: comptes créés via OAuth, sans display_name)
+   * ne doit jamais être bloquée par lastUsernameChange.
    */
-  const isPseudoValid = username.trim().length >= 3;
-  const isPseudoLockedByCooldown = username.trim() !== user?.username && !cooldown.allowed;
-  
-  // Le bouton est désactivé si rien n'a changé OU si les règles ne sont pas respectées
-  const isSaveDisabled = !hasChanged || !isPseudoValid || isPseudoLockedByCooldown;
+  const isNameValid = displayName.trim().length >= 3;
+  const isNameLockedByCooldown = !!user?.display_name && displayName.trim() !== initialDisplayName && !cooldown.allowed;
 
-  /**
-   * handleSave : Enregistre les modifications et ferme l'écran.
-   */
+  const isSaveDisabled = !hasChanged || !isNameValid || isNameLockedByCooldown || isSaving;
+
   const handleSave = async () => {
     if (isSaveDisabled) return;
-    await updateProfile(username.trim(), email.trim(), avatar || undefined);
-    router.back();
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        display_name: displayName.trim(),
+        bio: bio.trim(),
+        website: website.trim(),
+        avatar: avatar || undefined,
+        privacy,
+      });
+      router.back();
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-      {/* KeyboardAvoidingView : Évite que le clavier ne cache les inputs sur iOS */}
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
-        
-        {/* Header : Navigation retour */}
+
         <View className="flex-row items-center px-6 py-4">
-          <TouchableOpacity 
-            onPress={() => router.back()} 
+          <TouchableOpacity
+            onPress={() => router.back()}
             style={{ backgroundColor: colors.surface, borderColor: colors.border }}
             className="p-2 rounded-full mr-4 border"
           >
             <ChevronLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-            Édition Profil
+            {t("profile.editProfile.headerTitle")}
           </Text>
         </View>
 
         <ScrollView className="flex-1 px-6 mt-6" showsVerticalScrollIndicator={false}>
-          
+
           {/* Image de profil avec badge caméra */}
           <View className="items-center mb-10">
             <TouchableOpacity activeOpacity={0.9} onPress={pickImage} className="relative">
-              <Image 
-                source={{ uri: avatar || `https://ui-avatars.com/api/?name=${username}&background=333&color=fff` }} 
+              <Image
+                source={{ uri: avatar || `https://ui-avatars.com/api/?name=${displayName}&background=333&color=fff` }}
                 style={{ borderColor: colors.border, backgroundColor: colors.surface }}
                 className="w-32 h-32 rounded-[40px] border-2"
               />
-              <View 
+              <View
                 style={{ backgroundColor: colors.primary, borderColor: colors.background }}
                 className="absolute bottom-0 right-0 p-2.5 rounded-full border-4"
               >
@@ -140,54 +142,70 @@ export default function EditProfileScreen() {
               </View>
             </TouchableOpacity>
 
-            {/* Permet d'annuler le changement d'image avant sauvegarde */}
-            {avatar !== user?.avatar && (
-              <TouchableOpacity 
-                onPress={() => setAvatar(user?.avatar || null)} 
+            {avatar !== (user?.avatar || null) && (
+              <TouchableOpacity
+                onPress={() => setAvatar(user?.avatar || null)}
                 style={{ backgroundColor: colors.surface, borderColor: colors.border }}
                 className="mt-4 flex-row items-center px-4 py-2 rounded-full border"
               >
                 <RotateCcw size={12} color={colors.muted} />
                 <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest ml-2">
-                  Annuler la photo
+                  {t("profile.editProfile.cancelPhoto")}
                 </Text>
               </TouchableOpacity>
             )}
           </View>
 
-          {/* Formulaire - Pseudonyme */}
+          {/* Nom affiché */}
           <View className="mb-6">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
-              Pseudonyme
+              {t("profile.editProfile.displayNameLabel")}
             </Text>
             <TextInput
-              value={username}
-              onChangeText={setUsername}
+              value={displayName}
+              onChangeText={setDisplayName}
+              placeholder={user?.username}
               placeholderTextColor={colors.muted}
               style={{ color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }}
               className="w-full px-5 py-4 rounded-2xl border font-bold text-sm"
-              autoCapitalize="none"
             />
-            {/* Alerte Cooldown */}
-            {isPseudoLockedByCooldown && (
+            {isNameLockedByCooldown && (
               <View className="flex-row items-center mt-2 px-1">
                 <Info size={12} color={colors.danger} />
                 <Text style={{ color: colors.danger }} className="text-[10px] ml-1 font-bold italic">
-                  Disponible dans {cooldown.remainingDays} jours.
+                  {t("profile.editProfile.cooldownMessage", { days: cooldown.remainingDays })}
                 </Text>
               </View>
             )}
           </View>
 
-          {/* Formulaire - Email */}
-          <View className="mb-10">
+          {/* Bio */}
+          <View className="mb-6">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
-              Email
+              {t("profile.editProfile.bioLabel")}
             </Text>
             <TextInput
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
+              value={bio}
+              onChangeText={setBio}
+              placeholder={t("profile.editProfile.bioPlaceholder")}
+              placeholderTextColor={colors.muted}
+              multiline
+              numberOfLines={3}
+              style={{ color: colors.text, backgroundColor: colors.surface, borderColor: colors.border, minHeight: 90, textAlignVertical: 'top' }}
+              className="w-full px-5 py-4 rounded-2xl border font-medium text-sm"
+            />
+          </View>
+
+          {/* Site web */}
+          <View className="mb-6">
+            <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
+              {t("profile.editProfile.websiteLabel")}
+            </Text>
+            <TextInput
+              value={website}
+              onChangeText={setWebsite}
+              placeholder={t("profile.editProfile.websitePlaceholder")}
+              keyboardType="url"
               autoCapitalize="none"
               placeholderTextColor={colors.muted}
               style={{ color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }}
@@ -195,12 +213,53 @@ export default function EditProfileScreen() {
             />
           </View>
 
-          {/* Bouton de sauvegarde : Grisé si pas de changement ou erreur */}
-          <TouchableOpacity 
+          {/* Confidentialité du profil */}
+          <View className="mb-10">
+            <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
+              {t("profile.editProfile.privacyLabel")}
+            </Text>
+            <View className="flex-row" style={{ gap: 12 }}>
+              <TouchableOpacity
+                onPress={() => setPrivacy('public')}
+                style={{
+                  backgroundColor: privacy === 'public' ? colors.primary : colors.surface,
+                  borderColor: privacy === 'public' ? colors.primary : colors.border
+                }}
+                className="flex-1 flex-row items-center justify-center py-4 rounded-2xl border"
+              >
+                <Globe size={16} color={privacy === 'public' ? colors.secondary : colors.muted} />
+                <Text
+                  style={{ color: privacy === 'public' ? colors.secondary : colors.muted }}
+                  className="text-[11px] font-black uppercase tracking-widest ml-2"
+                >
+                  {t("common.public")}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setPrivacy('private')}
+                style={{
+                  backgroundColor: privacy === 'private' ? colors.primary : colors.surface,
+                  borderColor: privacy === 'private' ? colors.primary : colors.border
+                }}
+                className="flex-1 flex-row items-center justify-center py-4 rounded-2xl border"
+              >
+                <Lock size={16} color={privacy === 'private' ? colors.secondary : colors.muted} />
+                <Text
+                  style={{ color: privacy === 'private' ? colors.secondary : colors.muted }}
+                  className="text-[11px] font-black uppercase tracking-widest ml-2"
+                >
+                  {t("common.private")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Bouton de sauvegarde */}
+          <TouchableOpacity
             onPress={handleSave}
             disabled={isSaveDisabled}
             activeOpacity={0.8}
-            style={{ 
+            style={{
               backgroundColor: isSaveDisabled ? colors.surface : colors.primary,
               opacity: isSaveDisabled ? 0.5 : 1,
               borderColor: colors.border,
@@ -211,21 +270,21 @@ export default function EditProfileScreen() {
             {!isSaveDisabled && (
               <Check size={18} color={colors.secondary} style={{ marginRight: 8 }} />
             )}
-            <Text 
-              style={{ color: isSaveDisabled ? colors.muted : colors.secondary }} 
+            <Text
+              style={{ color: isSaveDisabled ? colors.muted : colors.secondary }}
               className="font-black uppercase tracking-[2px] text-[11px]"
             >
-              {hasChanged ? "Mettre à jour" : "Aucun changement"}
+              {hasChanged ? t("profile.editProfile.saveButton") : t("profile.editProfile.noChanges")}
             </Text>
           </TouchableOpacity>
 
           {/* Note de sécurité */}
-          <View 
+          <View
             style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-            className="mt-8 p-6 rounded-[32px] border border-dashed"
+            className="mt-8 mb-10 p-6 rounded-[32px] border border-dashed"
           >
              <Text style={{ color: colors.muted }} className="text-[10px] text-center leading-4">
-              La modification du pseudonyme impacte votre identité sur <Text style={{ color: colors.text }} className="font-bold">RadioMonoco</Text>.
+              {t("profile.editProfile.securityNotePrefix")}<Text style={{ color: colors.text }} className="font-bold">@{user?.username}</Text>{t("profile.editProfile.securityNoteSuffix")}
             </Text>
           </View>
 

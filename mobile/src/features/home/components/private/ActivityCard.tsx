@@ -8,13 +8,15 @@ import { useRouter } from "expo-router";
 import { SocialService } from "@/services/social/social.service";
 import { LikeReviewService } from "@/services/reviews/likeReview.service";
 import { NotificationService } from "@/services/notifications/notification.service";
+import { useTranslation } from "react-i18next";
 
 /**
  * ActivityCard : Composant central du fil d'actualité.
- * Affiche les interactions sociales, permet de liker, commenter 
+ * Affiche les interactions sociales, permet de liker, commenter
  * et suivre l'utilisateur directement depuis le flux.
  */
 export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { token, user, appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
@@ -52,7 +54,10 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
           NotificationService.create(token, {
             user_id: activity.userId,
             type: 'like',
-            message: `${user.username ?? 'Quelqu\'un'} a aimé votre critique de ${activity.targetMedia}`,
+            message: t('home.activityCard.likeNotification', {
+              username: user.username ?? t('home.activityCard.someone'),
+              media: activity.targetMedia,
+            }),
             is_read: false,
           }).catch(() => {});
         }
@@ -87,14 +92,14 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
    */
   const handleReport = () => {
     Alert.alert(
-      "Modération", 
-      "Signaler ce contenu pour non-respect de la charte ?",
+      t('home.activityCard.moderationTitle'),
+      t('home.activityCard.moderationMessage'),
       [
-        { text: "Annuler", style: "cancel" },
-        { 
-          text: "Signaler", 
-          style: "destructive", 
-          onPress: () => Alert.alert("Merci", "Le contenu a été envoyé aux administrateurs.") 
+        { text: t('common.cancel'), style: "cancel" },
+        {
+          text: t('common.report'),
+          style: "destructive",
+          onPress: () => Alert.alert(t('home.activityCard.thanksTitle'), t('home.activityCard.thanksMessage'))
         }
       ]
     );
@@ -159,7 +164,7 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
       {/* Action sur le média */}
       <View className="mb-4">
         <Text style={{ color: colors.muted }} className="text-[13px] leading-4 mb-2">
-           {activity.type === 'REVIEW' ? 'A publié une critique sur ' : 'A noté '}
+           {activity.type === 'REVIEW' ? t('home.activityCard.publishedReviewOn') : t('home.activityCard.rated')}
            <Text style={{ color: colors.text }} className="font-bold italic">
              {activity.targetMedia}
            </Text>
@@ -216,7 +221,7 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         >
           <MessageSquare size={16} color={colors.muted} />
           <Text style={{ color: colors.muted }} className="text-xs ml-2 font-black uppercase tracking-tighter">
-            {activity.commentsCount} avis
+            {t('home.activityCard.reviewsCount', { count: activity.commentsCount })}
           </Text>
         </TouchableOpacity>
       </View>

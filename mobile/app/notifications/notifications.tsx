@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Bell, Heart, MessageSquare, UserPlus, Sparkles, CheckCheck } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useNotificationContext } from "@/context/NotificationContext";
@@ -16,6 +17,7 @@ import { NotificationType } from "@/types/content";
  */
 export default function NotificationsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
@@ -62,7 +64,7 @@ export default function NotificationsScreen() {
             <ChevronLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-            Alertes
+            {t('notifications.screen.title')}
           </Text>
         </View>
 
@@ -71,7 +73,7 @@ export default function NotificationsScreen() {
           <TouchableOpacity onPress={markAllAsRead} className="flex-row items-center active:opacity-50">
             <CheckCheck size={16} color={colors.muted} />
             <Text style={{ color: colors.muted }} className="ml-2 text-[10px] font-black uppercase tracking-widest">
-              Tout lire
+              {t('notifications.screen.markAllRead')}
             </Text>
           </TouchableOpacity>
         )}
@@ -91,7 +93,7 @@ export default function NotificationsScreen() {
           <View className="items-center mt-20">
             <Bell size={48} color={colors.border} />
             <Text style={{ color: colors.muted }} className="mt-4 font-bold italic">
-              Aucune notification pour le moment
+              {t('notifications.screen.emptyState')}
             </Text>
           </View>
         ) : (

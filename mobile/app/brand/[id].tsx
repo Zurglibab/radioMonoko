@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Radio, Waves, Play, Pause, MoreHorizontal } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { BrandService } from "@/services/brand/brand.service";
@@ -41,6 +42,7 @@ const InitialAvatar = ({ title, size = 64, colors }: { title: string; size?: num
 };
 
 export default function BrandDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { appearanceSettings } = useAuthContext();
@@ -63,9 +65,9 @@ export default function BrandDetailScreen() {
     setIsLoading(true);
     BrandService.fetchBrandById(id)
       .then(setBrand)
-      .catch(() => setError("Station introuvable."))
+      .catch(() => setError(t('content.brand.notFound')))
       .finally(() => setIsLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   if (isLoading) {
     return (
@@ -83,7 +85,7 @@ export default function BrandDetailScreen() {
         </TouchableOpacity>
         <View className="flex-1 items-center justify-center px-8">
           <Text style={{ color: colors.muted }} className="text-center font-bold">
-            {error ?? "Station introuvable."}
+            {error ?? t('content.brand.notFound')}
           </Text>
         </View>
       </SafeAreaView>
@@ -116,7 +118,7 @@ export default function BrandDetailScreen() {
           <ChevronLeft color={colors.text} size={20} />
         </TouchableOpacity>
         <Text style={{ color: colors.text }} className="text-lg font-black italic ml-4 tracking-tighter">
-          Station
+          {t('content.brand.headerTitle')}
         </Text>
       </View>
 
@@ -143,7 +145,7 @@ export default function BrandDetailScreen() {
                 className="flex-row items-center px-3 py-1 rounded-full border">
                 <Waves size={10} color={colors.primary} />
                 <Text style={{ color: colors.primary }} className="text-[9px] font-black ml-1 uppercase tracking-wider">
-                  Direct disponible
+                  {t('content.brand.liveAvailable')}
                 </Text>
               </View>
             ) : null}
@@ -152,7 +154,7 @@ export default function BrandDetailScreen() {
                 className="flex-row items-center px-3 py-1 rounded-full border">
                 <Radio size={10} color={colors.muted} />
                 <Text style={{ color: colors.muted }} className="text-[9px] font-black ml-1 uppercase tracking-wider">
-                  {subStations.length} sous-station{subStations.length > 1 ? "s" : ""}
+                  {t('content.brand.subStationsCount', { count: subStations.length })}
                 </Text>
               </View>
             ) : null}
@@ -179,7 +181,7 @@ export default function BrandDetailScreen() {
                   <Play size={14} color={colors.background} fill={colors.background} />
                 )}
                 <Text style={{ color: colors.background }} className="font-black uppercase text-xs ml-2 tracking-widest">
-                  {isBrandPlaying ? "En cours" : "Écouter le direct"}
+                  {isBrandPlaying ? t('content.brand.nowPlaying') : t('content.brand.listenLive')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -197,7 +199,7 @@ export default function BrandDetailScreen() {
         {subStations.length > 0 && (
           <View className="px-6 mb-10">
             <Text style={{ color: colors.text }} className="text-[10px] font-black uppercase tracking-[3px] mb-5">
-              Sous-stations
+              {t('content.brand.subStations')}
             </Text>
             {subStations.map((wr) => {
               const wrStation = mapWebRadioToStation(wr, brand);

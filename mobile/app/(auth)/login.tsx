@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ScrollView, TouchableOpacity, Text, View, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { theme } from "@/constants/theme";
 import { AuthInput } from "@/features/auth/components/AuthInput";
@@ -16,7 +17,8 @@ import { useAuth } from "@/hooks/auth/useAuth";
  */
 export default function LoginScreen() {
   const router = useRouter();
-  
+  const { t } = useTranslation();
+
   // J'extrait les états et méthodes nécessaires depuis notre hook d'authentification
   const { login, loginWithGoogle, isLoading, error } = useAuth();
   
@@ -41,9 +43,9 @@ export default function LoginScreen() {
         keyboardShouldPersistTaps="handled"
       >
         {/* En-tête de page */}
-        <AuthHeader 
-          title="Bon retour." 
-          subtitle="Entrez vos identifiants pour accéder à l'onde RadioMonoco." 
+        <AuthHeader
+          title={t('auth.login.title')}
+          subtitle={t('auth.login.subtitle')}
         />
 
         {/* Feedback d'erreur*/}
@@ -57,18 +59,18 @@ export default function LoginScreen() {
 
         {/* Formulaire de saisie */}
         <View className="mb-2">
-          <AuthInput 
-            label="Email" 
-            placeholder="utilisateur@example.com" 
-            value={email} 
+          <AuthInput
+            label={t('auth.login.emailLabel')}
+            placeholder={t('auth.login.emailPlaceholder')}
+            value={email}
             onChangeText={setEmail}
           />
-          <AuthInput 
-            label="Mot de passe" 
-            placeholder="••••••••" 
+          <AuthInput
+            label={t('auth.login.passwordLabel')}
+            placeholder={t('auth.login.passwordPlaceholder')}
             isPassword // Masque la saisie
-            value={password} 
-            onChangeText={setPassword} 
+            value={password}
+            onChangeText={setPassword}
           />
         </View>
 
@@ -78,11 +80,11 @@ export default function LoginScreen() {
           activeOpacity={0.7}
           className="items-end mb-10"
         >
-          <Text 
-            style={{ color: theme.dark.colors.muted }} 
+          <Text
+            style={{ color: theme.dark.colors.muted }}
             className="text-sm font-semibold"
           >
-            Mot de passe oublié ?
+            {t('auth.login.forgotPassword')}
           </Text>
         </TouchableOpacity>
 
@@ -99,11 +101,11 @@ export default function LoginScreen() {
           {isLoading ? (
             <ActivityIndicator color={theme.dark.colors.secondary} />
           ) : (
-            <Text 
-              style={{ color: theme.dark.colors.secondary }} 
+            <Text
+              style={{ color: theme.dark.colors.secondary }}
               className="font-bold text-lg uppercase tracking-widest"
             >
-              Se connecter
+              {t('auth.login.submitButton')}
             </Text>
           )}
         </TouchableOpacity>
@@ -117,13 +119,13 @@ export default function LoginScreen() {
 
         {/* Navigation vers l'inscription */}
         <View className="flex-row justify-center mt-12 mb-6">
-          <Text style={{ color: theme.dark.colors.muted }}>Nouveau sur RadioMonoco ? </Text>
+          <Text style={{ color: theme.dark.colors.muted }}>{t('auth.login.noAccount')}</Text>
           <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
-            <Text 
-               style={{ color: theme.dark.colors.text }} 
+            <Text
+               style={{ color: theme.dark.colors.text }}
                className="font-bold underline"
             >
-              S'inscrire
+              {t('auth.login.registerLink')}
             </Text>
           </TouchableOpacity>
         </View>

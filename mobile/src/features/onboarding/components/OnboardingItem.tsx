@@ -1,6 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React, { memo } from "react";
 import { ImageBackground, Text, useWindowDimensions, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/constants/theme";
 import { OnboardingSlideModel } from "../data/slides";
@@ -15,6 +16,8 @@ type Props = {
  * Utilise SafeAreaView et les tokens du thème pour une cohérence parfaite.
  */
 function OnboardingItem({ item }: Props) {
+  const { t } = useTranslation();
+
   // Récupération des dimensions pour assurer un affichage plein écran strict
   const { width, height } = useWindowDimensions();
 
@@ -49,22 +52,22 @@ function OnboardingItem({ item }: Props) {
           >
             <View>
               {/* Titre de la slide - Couleur fixe blanche pour le contraste sur image */}
-              <Text 
+              <Text
                 className="text-5xl font-bold tracking-tighter text-white uppercase"
                 style={{ lineHeight: 48 }}
               >
-                {item.title}
+                {t(`onboarding.slides.${item.id}.title`)}
               </Text>
 
               {/* Séparateur visuel utilisant le texte du thème ou blanc */}
               <View className="h-1 w-12 bg-white my-6" />
 
               {/* Description textuelle utilisant la couleur de texte du thème dark */}
-              <Text 
+              <Text
                 style={{ color: theme.dark.colors.text }}
                 className="text-lg font-light leading-6 opacity-80"
               >
-                {item.description}
+                {t(`onboarding.slides.${item.id}.description`)}
               </Text>
             </View>
           </SafeAreaView>

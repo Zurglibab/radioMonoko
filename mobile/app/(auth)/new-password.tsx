@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ScrollView, TouchableOpacity, Text, View, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { AuthHeader } from "@/features/auth/components/AuthHeader";
 import { AuthInput } from "@/features/auth/components/AuthInput";
@@ -13,7 +14,8 @@ import { AuthService } from "@/services/auth/auth.service";
  */
 export default function NewPasswordScreen() {
   const router = useRouter();
-  
+  const { t } = useTranslation();
+
   // États pour les champs de saisie et la gestion du chargement
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,7 +28,7 @@ export default function NewPasswordScreen() {
   const handleReset = async () => {
     // Sécurité de vérification de correspondance des champs
     if (password !== confirmPassword) {
-      Alert.alert("Erreur", "Les mots de passe ne correspondent pas.");
+      Alert.alert(t('auth.newPassword.mismatchAlertTitle'), t('auth.newPassword.mismatchAlertMessage'));
       return;
     }
 
@@ -34,12 +36,12 @@ export default function NewPasswordScreen() {
     try {
       // Appel du service pour mettre à jour le mot de passe en base
       await AuthService.resetPassword(password);
-      
+
       // J'utilise replace au lieu de push pour vider l'historique de navigation
       // et empêcher l'utilisateur de revenir en arrière sur ce flux terminé.
       router.replace("/(auth)/login");
     } catch (e) {
-      Alert.alert("Désolé", "Une erreur est survenue lors de la réinitialisation.");
+      Alert.alert(t('auth.newPassword.errorAlertTitle'), t('auth.newPassword.errorAlertMessage'));
     } finally {
       setIsLoading(false);
     }
@@ -52,25 +54,25 @@ export default function NewPasswordScreen() {
         contentContainerStyle={{ paddingTop: 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        <AuthHeader 
-          title="Nouveau mot de passe" 
-          subtitle="Créez un mot de passe robuste pour sécuriser votre accès." 
+        <AuthHeader
+          title={t('auth.newPassword.title')}
+          subtitle={t('auth.newPassword.subtitle')}
         />
 
         <View className="mb-6">
-          <AuthInput 
-            label="Nouveau mot de passe" 
-            placeholder="••••••••" 
-            isPassword 
-            value={password} 
-            onChangeText={setPassword} 
+          <AuthInput
+            label={t('auth.newPassword.passwordLabel')}
+            placeholder={t('auth.newPassword.passwordPlaceholder')}
+            isPassword
+            value={password}
+            onChangeText={setPassword}
           />
-          <AuthInput 
-            label="Confirmer le mot de passe" 
-            placeholder="••••••••" 
-            isPassword 
-            value={confirmPassword} 
-            onChangeText={setConfirmPassword} 
+          <AuthInput
+            label={t('auth.newPassword.confirmPasswordLabel')}
+            placeholder={t('auth.newPassword.confirmPasswordPlaceholder')}
+            isPassword
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
           />
         </View>
 
@@ -87,11 +89,11 @@ export default function NewPasswordScreen() {
           {isLoading ? (
             <ActivityIndicator color={theme.dark.colors.secondary} />
           ) : (
-            <Text 
-              style={{ color: theme.dark.colors.secondary }} 
+            <Text
+              style={{ color: theme.dark.colors.secondary }}
               className="font-bold uppercase tracking-widest text-lg"
             >
-              Réinitialiser
+              {t('auth.newPassword.submitButton')}
             </Text>
           )}
         </TouchableOpacity>

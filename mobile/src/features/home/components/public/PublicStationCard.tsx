@@ -4,6 +4,7 @@ import { Play, Pause } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { Station } from "@/types/content";
 import { useAuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface StationCardProps {
   item: Station;
@@ -18,6 +19,7 @@ interface StationCardProps {
  * Affiche la pochette, le badge de live conditionnel et les métadonnées.
  */
 export const PublicStationCard = ({ item, onPress, onLongPress, onPlayPress, isPlaying = false }: StationCardProps) => {
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
   const isDark = appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
@@ -47,7 +49,7 @@ export const PublicStationCard = ({ item, onPress, onLongPress, onPlayPress, isP
               style={{ color: colors.live }}
               className="text-[8px] font-black uppercase tracking-tighter"
             >
-              Direct
+              {t('home.publicStationCard.live')}
             </Text>
           </View>
         )}

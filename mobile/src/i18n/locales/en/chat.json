@@ -1,0 +1,19 @@
+{
+  "chatList": {
+    "title": "Messages",
+    "startConversation": "Start the conversation",
+    "emptyTitle": "No messages yet.",
+    "emptyAction": "Tap +",
+    "emptySubtitle": "to start a conversation.",
+    "newConversation": "New conversation",
+    "searchFriendPlaceholder": "Search for a friend...",
+    "noResults": "No results",
+    "noFriendsYet": "No friends yet"
+  },
+  "channel": {
+    "defaultTitle": "Conversation",
+    "messageAlertTitle": "Message",
+    "sayHello": "Say hello!",
+    "inputPlaceholder": "Message..."
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "appearance": {
+    "title": "Appearance",
+    "displayMode": "Display mode",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "languageSection": "Language",
+    "french": "French",
+    "english": "English",
+    "accentColor": "Accent color",
+    "interface": "Interface",
+    "compactMode": "Compact mode",
+    "compactModeDesc": "Show more content",
+    "philosophy": "Appearance adapts in real time for total immersion in your favorite waves."
+  },
+  "profileTab": {
+    "title": "Me",
+    "memberSince": "Radio Monoco • Member since {{date}}",
+    "stats": {
+      "waves": "Waves",
+      "playlists": "Playlists",
+      "finished": "Finished"
+    },
+    "accountSection": "My Account",
+    "editProfile": {
+      "label": "Edit profile",
+      "secondary": "Username, Bio, Photo"
+    },
+    "security": {
+      "label": "Security",
+      "secondary": "Password, Biometrics"
+    },
+    "experienceSection": "Experience",
+    "appearance": {
+      "label": "Appearance",
+      "secondary": "Themes, Icons"
+    },
+    "supportSection": "Support",
+    "support": {
+      "label": "Support",
+      "secondary": "Contact, Reports"
+    },
+    "legal": {
+      "label": "My data",
+      "secondary": "GDPR export"
+    },
+    "logout": "Log out",
+    "logoutConfirmTitle": "Log out",
+    "logoutConfirmMessage": "Do you really want to leave Radio Monoco?"
+  },
+  "editProfile": {
+    "headerTitle": "Edit Profile",
+    "permissionDeniedTitle": "Permission denied",
+    "permissionDeniedMessage": "Access to photos is required.",
+    "cancelPhoto": "Cancel photo",
+    "displayNameLabel": "Display name",
+    "cooldownMessage": "Available in {{days}} days.",
+    "bioLabel": "Bio",
+    "bioPlaceholder": "Tell us about yourself...",
+    "websiteLabel": "Website",
+    "websitePlaceholder": "https://...",
+    "privacyLabel": "Privacy",
+    "saveButton": "Update",
+    "noChanges": "No changes",
+    "securityNotePrefix": "The username (",
+    "securityNoteSuffix": ") and email cannot be changed from this screen."
+  },
+  "security": {
+    "headerTitle": "Security",
+    "protectionLabel": "Protection: {{status}}",
+    "protectionEnhanced": "Enhanced",
+    "protectionStandard": "Standard",
+    "accessSection": "Access & Biometrics",
+    "password": {
+      "label": "Password",
+      "secondary": "Change via security email"
+    },
+    "biometry": {
+      "label": "Face ID / Touch ID",
+      "secondary": "Fast and secure sign-in"
+    },
+    "unavailableTitle": "Unavailable",
+    "unavailableMessage": "Your device does not support biometrics or no profile is enrolled.",
+    "confirmIdentityPrompt": "Confirm your identity for RadioMonoko",
+    "fallbackLabel": "Use device passcode",
+    "biometryEnabledTitle": "Success",
+    "biometryEnabledMessage": "Biometrics enabled for your next sign-ins.",
+    "changePasswordTitle": "Change password",
+    "changePasswordMessage": "We will send a secure verification code to: {{email}}",
+    "sendCode": "Send code",
+    "privacyNote": "RadioMonoco uses end-to-end encryption to protect your session data and broadcast preferences."
+  },
+  "legal": {
+    "headerTitle": "My data",
+    "portabilitySection": "Portability",
+    "exportArchiveTitle": "Export Archive",
+    "exportArchiveDesc": "Download your entire RadioMonoco activity (history, preferences, metadata).",
+    "generateArchiveButton": "Generate archive",
+    "shareDialogTitle": "Export of my RadioMonoko data",
+    "exportReadyTitle": "Export ready",
+    "exportReadyMessage": "Your archive has been saved: {{uri}}",
+    "errorTitle": "Error",
+    "errorMessage": "Unable to generate the export. Please try again later.",
+    "footer": "Radio Monoco v1.0.0 • 2026"
+  },
+  "support": {
+    "headerTitle": "Support",
+    "needHelpSection": "Need help?",
+    "email": {
+      "label": "Send an email",
+      "secondary": "Reply within 24h"
+    },
+    "bug": {
+      "label": "Report a bug",
+      "secondary": "Help us improve"
+    },
+    "footer": "RadioMonoco Support v1.0"
+  },
+  "pendingRequests": {
+    "title": "Friend requests",
+    "wantsToFollow": "Wants to follow you"
+  }
+}

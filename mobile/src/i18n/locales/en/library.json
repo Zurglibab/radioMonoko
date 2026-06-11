@@ -1,0 +1,155 @@
+{
+  "library": {
+    "title": "My Radio",
+    "tabs": {
+      "all": "All",
+      "radios": "Radios",
+      "podcasts": "Podcasts",
+      "playlists": "Playlists"
+    },
+    "errorCreateCollection": "Unable to create the collection.",
+    "manageCollection": "Manage collection",
+    "makePrivate": "Make private 🔒",
+    "makePublic": "Make public 🌍",
+    "myCollection": "My Collection",
+    "ondesCount_one": "{{count}} wave",
+    "ondesCount_other": "{{count}} waves",
+    "yourCreations": "Your Creations",
+    "likedTitles": "Liked Titles",
+    "wave": "Wave",
+    "podcast": "Podcast",
+    "radioFrance": "Radio France",
+    "playlistTitlesCount_one": "Playlist • {{count}} title",
+    "playlistTitlesCount_other": "Playlist • {{count}} titles",
+    "loadingCollections": "Loading your collections...",
+    "noCollections": "No collections yet. Tap + to create one.",
+    "noDescription": "No description",
+    "saved": "Saved",
+    "newCollection": "New collection"
+  },
+  "reviewScreen": {
+    "noMediaSelected": "No media selected.",
+    "loadMediaError": "Unable to load this media.",
+    "ratingRequiredTitle": "Rating required",
+    "ratingRequiredMessage": "Please give at least one star.",
+    "reviewTooShortTitle": "Review too short",
+    "reviewTooShortMessage": "Tell us a bit more about your listening experience.",
+    "publishedTitle": "Review published",
+    "publishedMessage": "Your review has been broadcast on the airwaves! 🎙️",
+    "great": "Great",
+    "publishError": "Unable to publish the review.",
+    "ratingLabels": {
+      "disappointing": "Disappointing",
+      "notBad": "Not bad",
+      "veryGood": "Very good",
+      "excellent": "Excellent",
+      "masterpiece": "Masterpiece"
+    },
+    "headerTitle": "Review",
+    "mediaNotFound": "Media not found.",
+    "radioFallback": "Radio",
+    "alreadyRated": "You already rated this work {{rating}}/5. Your rating will be updated.",
+    "rateTheWave": "Rate the wave",
+    "chooseIntensity": "Choose your intensity",
+    "ratingWithLabel": "{{rating}}/5 - {{label}}",
+    "yourOpinion": "Your opinion",
+    "commentPlaceholder": "This radio reminds me of...",
+    "publishReview": "Publish my review",
+    "visibilityNotice": "Your review will be visible to the entire RadioMonoco community."
+  },
+  "statusScreen": {
+    "unknownStatus": "Unknown status",
+    "noItems": "No work with this status yet."
+  },
+  "collectionFormModal": {
+    "defaultTitle": "New collection",
+    "nameTooShort": "The name must contain at least 2 characters.",
+    "nameLabel": "Name",
+    "namePlaceholder": "E.g.: My jazz gems",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "What is this collection for?",
+    "visibilityLabel": "Visibility",
+    "createButton": "Create collection"
+  },
+  "mediaActionSheet": {
+    "favoritesTitle": "Favorites",
+    "addedToLiked": "Added to your Liked Titles",
+    "removedFromLiked": "Removed from your Liked Titles",
+    "favoriteError": "Unable to update the favorite.",
+    "statusMessages": {
+      "toListen": "Got it! We'll keep that aside.",
+      "inProgress": "You started \"{{title}}\"",
+      "finished": "Well done! One more wave added to your achievements.",
+      "dropped": "The wave has been set aside."
+    },
+    "statusTitle": "Status",
+    "statusUpdateError": "Unable to update the status.",
+    "great": "Great",
+    "collectionTitle": "Collection",
+    "addedToCollection": "\"{{title}}\" added to \"{{collectionName}}\"!",
+    "perfect": "Perfect",
+    "addToCollectionError": "Unable to add to the collection.",
+    "addedToNewCollection": "\"{{title}}\" added to your new collection!",
+    "createdCollectionTitle": "Collection created",
+    "createdCollectionMessage": "The list is ready, you can add the title to it manually.",
+    "createCollectionError": "Unable to generate the new collection.",
+    "currentStatus": "Current status",
+    "socialSection": "Social & Community",
+    "rateAndReview": "Rate and review",
+    "shareOpinion": "Share your opinion with the network",
+    "favoritesSection": "Favorites & Collections",
+    "removeFromLiked": "Remove from Liked Titles",
+    "addToLiked": "Add to Liked Titles",
+    "addToCollection": "Add to a collection",
+    "newCollection": "New collection",
+    "myCollectionSection": "My Collection",
+    "statusActions": {
+      "toListen": "To listen",
+      "inProgress": "In progress",
+      "finished": "Mark as Finished",
+      "dropped": "Drop"
+    },
+    "chooseCollection": "Choose a collection",
+    "createNewCollection": "Create a new collection",
+    "noCollectionsCreateOne": "No collections yet. Create one above."
+  },
+  "playlistActionSheet": {
+    "shareMessage": "Check out my playlist \"{{name}}\" on RadioMonoco!",
+    "visibilityError": "Unable to update the visibility.",
+    "renameTitle": "Rename playlist",
+    "renameMessage": "Enter the new name",
+    "renameError": "Unable to rename the playlist.",
+    "deleteTitle": "Delete playlist",
+    "deleteMessage": "This action is permanent.",
+    "deleteError": "Unable to delete the playlist.",
+    "titlesCount_one": "{{count}} title",
+    "titlesCount_other": "{{count}} titles",
+    "communitySection": "Community",
+    "sendToFriend": "Send to a friend",
+    "makePrivate": "Make private",
+    "makePublic": "Make public",
+    "visibleByYouOnly": "Only visible to you",
+    "visibleByCommunity": "Visible to the entire community",
+    "settingsSection": "Settings",
+    "editName": "Edit name",
+    "deletePermanently": "Delete permanently"
+  },
+  "status": {
+    "toListen": {
+      "displayName": "To listen",
+      "description": "The waves you want to explore."
+    },
+    "inProgress": {
+      "displayName": "In progress",
+      "description": "What you're currently listening to."
+    },
+    "finished": {
+      "displayName": "Finished",
+      "description": "Your completed listens."
+    },
+    "dropped": {
+      "displayName": "Dropped",
+      "description": "The waves you set aside."
+    }
+  }
+}

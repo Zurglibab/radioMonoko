@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Alert } from "react-native";
 import { Station } from "@/types/content";
+import { UpdateUserPayload } from "@/types/auth";
 import { useAuthContext } from "@/context/AuthContext";
 import { useFavorites } from "@/hooks/favorites/useFavorites";
 import { useMyStatuses } from "@/hooks/content/useMyStatuses";
@@ -48,7 +49,7 @@ export const useLibrary = () => {
     }
   };
 
-  const checkUsernameCooldown = () => {
+  const checkDisplayNameCooldown = () => {
     if (!authUser?.lastUsernameChange) return { allowed: true, remainingDays: 0 };
     const lastChange = new Date(authUser.lastUsernameChange).getTime();
     const now = Date.now();
@@ -60,13 +61,10 @@ export const useLibrary = () => {
     return { allowed: true, remainingDays: 0 };
   };
 
-  const updateProfile = async (newDisplayName: string, _newEmail: string, newAvatar?: string) => {
+  const updateProfile = async (payload: UpdateUserPayload) => {
     if (!authUser) return;
     try {
-      await authUpdateProfile({
-        display_name: newDisplayName,
-        avatar: newAvatar,
-      });
+      await authUpdateProfile(payload);
       Alert.alert("Succès", "Profil mis à jour !");
     } catch (err: any) {
       Alert.alert("Erreur", err?.message || "Impossible de mettre à jour le profil.");
@@ -92,7 +90,7 @@ export const useLibrary = () => {
     user: authUser,
     logout: authLogout,
     updateProfile,
-    checkUsernameCooldown,
+    checkDisplayNameCooldown,
     activeTab,
     setActiveTab,
 

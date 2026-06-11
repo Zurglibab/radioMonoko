@@ -2,16 +2,10 @@ import React, { createContext, useState, useEffect, useContext, useCallback } fr
 import * as SecureStore from 'expo-secure-store';
 import { User, UpdateUserPayload } from '@/types/auth';
 import { AuthService } from '@/services/auth/auth.service';
+import i18n, { SupportedLanguage, getDeviceLanguage, LANGUAGE_STORAGE_KEY } from '@/i18n';
 
 interface SecuritySettings {
-  is2FAEnabled: boolean;
   isBiometricEnabled: boolean;
-}
-
-interface NotificationSettings {
-  pushDirect: boolean;
-  pushPodcasts: boolean;
-  pushSecurity: boolean;
 }
 
 interface AppearanceSettings {
@@ -20,21 +14,25 @@ interface AppearanceSettings {
   isCompactMode: boolean;
 }
 
+interface LanguageSettings {
+  language: SupportedLanguage;
+}
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   securitySettings: SecuritySettings;
-  notificationSettings: NotificationSettings;
   appearanceSettings: AppearanceSettings;
+  languageSettings: LanguageSettings;
   login: (userToken: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateProfile: (payload: UpdateUserPayload) => Promise<void>;
   updateSecurity: (key: keyof SecuritySettings, value: boolean) => Promise<void>;
-  updateNotifications: (key: keyof NotificationSettings, value: boolean) => Promise<void>;
   updateAppearance: (key: keyof AppearanceSettings, value: string | boolean) => Promise<void>;
+  updateLanguage: (lang: SupportedLanguage) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -58,14 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   const [securitySettings, setSecuritySettings] = useState<SecuritySettings>({
-    is2FAEnabled: false,
     isBiometricEnabled: false,
-  });
-
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
-    pushDirect: true,
-    pushPodcasts: true,
-    pushSecurity: true,
   });
 
   const [appearanceSettings, setAppearanceSettings] = useState<AppearanceSettings>({
@@ -74,16 +65,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isCompactMode: false,
   });
 
+  const [languageSettings, setLanguageSettings] = useState<LanguageSettings>({
+    language: getDeviceLanguage(),
+  });
+
   /**
-   * Récupère à la volée les préférences (apparence, sécurité, notifications) stockées sur l'appareil.
+   * Récupère à la volée les préférences (apparence, sécurité) stockées sur l'appareil.
    * Échec silencieux : on garde les valeurs par défaut si la lecture échoue.
    */
   const loadLocalSettings = useCallback(async () => {
     try {
-      const [storedSecurity, storedNotifs, storedAppearance] = await Promise.all([
+      const [storedSecurity, storedAppearance, storedLanguage] = await Promise.all([
         SecureStore.getItemAsync('security_settings'),
-        SecureStore.getItemAsync('notification_settings'),
         SecureStore.getItemAsync('appearance_settings'),
+        SecureStore.getItemAsync(LANGUAGE_STORAGE_KEY),
       ]);
 
       const parseSafe = <T,>(raw: string | null): T | null => {
@@ -91,11 +86,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         catch { return null; }
       };
       const sec = parseSafe<SecuritySettings>(storedSecurity);
-      const notifs = parseSafe<NotificationSettings>(storedNotifs);
       const appearance = parseSafe<AppearanceSettings>(storedAppearance);
+      const language = parseSafe<LanguageSettings>(storedLanguage);
       if (sec) setSecuritySettings(sec);
-      if (notifs) setNotificationSettings(notifs);
       if (appearance) setAppearanceSettings(appearance);
+      if (language) {
+        setLanguageSettings(language);
+        if (i18n.language !== language.language) {
+          await i18n.changeLanguage(language.language);
+        }
+      }
     } catch (e) {
       if (__DEV__) console.warn("[AuthContext] Impossible de charger les préférences locales :", e);
     }
@@ -186,22 +186,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token, logout]);
 
   /**
-   * Persistance locale des réglages de sécurité (2FA, Biométrie).
+   * Persistance locale des réglages de sécurité (Biométrie).
    */
   const updateSecurity = useCallback(async (key: keyof SecuritySettings, value: boolean) => {
     const newSettings = { ...securitySettings, [key]: value };
     setSecuritySettings(newSettings);
     await SecureStore.setItemAsync('security_settings', JSON.stringify(newSettings));
   }, [securitySettings]);
-
-  /**
-   * Persistance locale des préférences de réception des notifications push.
-   */
-  const updateNotifications = useCallback(async (key: keyof NotificationSettings, value: boolean) => {
-    const newSettings = { ...notificationSettings, [key]: value };
-    setNotificationSettings(newSettings);
-    await SecureStore.setItemAsync('notification_settings', JSON.stringify(newSettings));
-  }, [notificationSettings]);
 
   /**
    * Persistance locale instantanée des réglages graphiques (thèmes, couleurs).
@@ -212,6 +203,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.setItemAsync('appearance_settings', JSON.stringify(newSettings));
   }, [appearanceSettings]);
 
+  /**
+   * Changement de langue : met à jour i18next (re-rendu immédiat des écrans)
+   * puis persiste la préférence sur l'appareil.
+   */
+  const updateLanguage = useCallback(async (lang: SupportedLanguage) => {
+    const newSettings: LanguageSettings = { language: lang };
+    setLanguageSettings(newSettings);
+    await i18n.changeLanguage(lang);
+    await SecureStore.setItemAsync(LANGUAGE_STORAGE_KEY, JSON.stringify(newSettings));
+  }, []);
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -219,15 +221,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isAuthenticated: !!user,
       isLoading,
       securitySettings,
-      notificationSettings,
       appearanceSettings,
+      languageSettings,
       login,
       logout,
       refreshProfile,
       updateProfile,
       updateSecurity,
-      updateNotifications,
       updateAppearance,
+      updateLanguage,
     }}>
       {children}
     </AuthContext.Provider>

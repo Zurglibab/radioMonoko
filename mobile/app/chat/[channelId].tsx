@@ -7,18 +7,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, Send } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useChat, ChatMessage } from "@/hooks/chat/useChat";
 
-function formatMsgTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleTimeString("fr-FR", {
+function formatMsgTime(dateStr: string, language: string): string {
+  const locale = language === "en" ? "en-US" : "fr-FR";
+  return new Date(dateStr).toLocaleTimeString(locale, {
     hour: "2-digit",
     minute: "2-digit",
   });
 }
 
 export default function ChatConversationScreen() {
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { channelId, username } = useLocalSearchParams<{
     channelId: string;
@@ -55,16 +58,16 @@ export default function ChatConversationScreen() {
   const handleLongPress = useCallback(
     (msg: ChatMessage) => {
       if (!msg.isMine || msg.isOptimistic) return;
-      Alert.alert("Message", undefined, [
+      Alert.alert(t("chat.channel.messageAlertTitle"), undefined, [
         {
-          text: "Supprimer",
+          text: t("common.delete"),
           style: "destructive",
           onPress: () => deleteMessage(msg.id),
         },
-        { text: "Annuler", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
       ]);
     },
-    [deleteMessage]
+    [deleteMessage, t]
   );
 
   const renderMessage = useCallback(
@@ -117,12 +120,12 @@ export default function ChatConversationScreen() {
             key="time"
             style={{ color: colors.muted, fontSize: 10, marginTop: 2, marginHorizontal: 4 }}
           >
-            {formatMsgTime(item.timestamp)}
+            {formatMsgTime(item.timestamp, i18n.language)}
           </Text>
         </TouchableOpacity>
       );
     },
-    [messages, colors, handleLongPress]
+    [messages, colors, handleLongPress, i18n.language]
   );
 
   return (
@@ -156,7 +159,7 @@ export default function ChatConversationScreen() {
           style={{ color: colors.text, fontSize: 17, fontWeight: "900", fontStyle: "italic", flex: 1 }}
           numberOfLines={1}
         >
-          {username ?? "Conversation"}
+          {username ?? t("chat.channel.defaultTitle")}
         </Text>
       </View>
 
@@ -181,7 +184,7 @@ export default function ChatConversationScreen() {
             ListEmptyComponent={
               <View style={{ flex: 1, alignItems: "center", justifyContent: "center", marginTop: 80 }}>
                 <Text style={{ color: colors.muted, fontStyle: "italic", fontSize: 14 }}>
-                  Dis bonjour !
+                  {t("chat.channel.sayHello")}
                 </Text>
               </View>
             }
@@ -203,7 +206,7 @@ export default function ChatConversationScreen() {
           <TextInput
             value={input}
             onChangeText={setInput}
-            placeholder="Message..."
+            placeholder={t("chat.channel.inputPlaceholder")}
             placeholderTextColor={colors.muted}
             multiline
             maxLength={1000}

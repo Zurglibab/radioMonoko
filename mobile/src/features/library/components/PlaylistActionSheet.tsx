@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Modal, Pressable, ScrollView, Alert, Share, useColorScheme } from "react-native";
 import { Share2, Trash2, Globe, Edit3, X, Lock } from "lucide-react-native";
+import { useTranslation } from "react-i18next";
 import { theme } from "@/constants/theme";
 import { Playlist } from "@/types/content";
 import { CollectionService } from "@/services/collections/collection.service";
@@ -15,6 +16,7 @@ interface PlaylistActionSheetProps {
 }
 
 export const PlaylistActionSheet = ({ isVisible, onClose, playlist, onUpdate }: PlaylistActionSheetProps) => {
+  const { t } = useTranslation();
   const { appearanceSettings, token } = useAuthContext();
   const systemTheme = useColorScheme();
 
@@ -28,7 +30,7 @@ export const PlaylistActionSheet = ({ isVisible, onClose, playlist, onUpdate }: 
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Découvre ma playlist "${playlist.name}" sur RadioMonoko !`,
+        message: t('library.playlistActionSheet.shareMessage', { name: playlist.name }),
       });
       onClose();
     } catch {}
@@ -41,25 +43,25 @@ export const PlaylistActionSheet = ({ isVisible, onClose, playlist, onUpdate }: 
       onUpdate?.({ isPublic: !playlist.isPublic });
       onClose();
     } catch {
-      Alert.alert("Erreur", "Impossible de modifier la visibilité.");
+      Alert.alert(t('common.error'), t('library.playlistActionSheet.visibilityError'));
     }
   };
 
   const handleRename = () => {
     Alert.prompt(
-      "Renommer la playlist",
-      "Entrez le nouveau nom",
+      t('library.playlistActionSheet.renameTitle'),
+      t('library.playlistActionSheet.renameMessage'),
       [
-        { text: "Annuler", style: "cancel" },
+        { text: t('common.cancel'), style: "cancel" },
         {
-          text: "Enregistrer",
+          text: t('common.save'),
           onPress: async (name?: string) => {
             if (!name?.trim() || !token) return;
             try {
               await CollectionService.update(token, playlist.id, { name: name.trim() });
               onUpdate?.({ name: name.trim() });
             } catch {
-              Alert.alert("Erreur", "Impossible de renommer la playlist.");
+              Alert.alert(t('common.error'), t('library.playlistActionSheet.renameError'));
             }
             onClose();
           },
@@ -72,12 +74,12 @@ export const PlaylistActionSheet = ({ isVisible, onClose, playlist, onUpdate }: 
 
   const handleDelete = () => {
     Alert.alert(
-      "Supprimer la playlist",
-      "Cette action est définitive.",
+      t('library.playlistActionSheet.deleteTitle'),
+      t('library.playlistActionSheet.deleteMessage'),
       [
-        { text: "Annuler", style: "cancel" },
+        { text: t('common.cancel'), style: "cancel" },
         {
-          text: "Supprimer",
+          text: t('common.delete'),
           style: "destructive",
           onPress: async () => {
             if (!token) return;
@@ -86,7 +88,7 @@ export const PlaylistActionSheet = ({ isVisible, onClose, playlist, onUpdate }: 
               onClose();
               router.back();
             } catch {
-              Alert.alert("Erreur", "Impossible de supprimer la playlist.");
+              Alert.alert(t('common.error'), t('library.playlistActionSheet.deleteError'));
             }
           },
         },
@@ -130,7 +132,7 @@ export const PlaylistActionSheet = ({ isVisible, onClose, playlist, onUpdate }: 
             </Text>
             <View className="flex-row items-center mt-1">
               <Text style={{ color: colors.muted }} className="text-[10px] font-bold uppercase mr-2">
-                {playlist.items.length} titres
+                {t('library.playlistActionSheet.titlesCount', { count: playlist.items.length })}
               </Text>
               {playlist.isPublic ? (
                 <Globe size={10} color={colors.primary} />
@@ -149,32 +151,32 @@ export const PlaylistActionSheet = ({ isVisible, onClose, playlist, onUpdate }: 
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2">Communauté</Text>
+          <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2">{t('library.playlistActionSheet.communitySection')}</Text>
 
           <ActionItem
             icon={<Share2 size={20} color={colors.text} />}
-            label="Envoyer à un ami"
+            label={t('library.playlistActionSheet.sendToFriend')}
             onPress={handleShare}
           />
 
           <ActionItem
             icon={playlist.isPublic ? <Lock size={20} color={colors.text} /> : <Globe size={20} color={colors.primary} />}
-            label={playlist.isPublic ? "Passer en privé" : "Passer en public"}
-            secondary={playlist.isPublic ? "Visible uniquement par vous" : "Visible par toute la communauté"}
+            label={playlist.isPublic ? t('library.playlistActionSheet.makePrivate') : t('library.playlistActionSheet.makePublic')}
+            secondary={playlist.isPublic ? t('library.playlistActionSheet.visibleByYouOnly') : t('library.playlistActionSheet.visibleByCommunity')}
             onPress={handleToggleVisibility}
           />
 
-          <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mt-8 mb-2">Paramètres</Text>
-          
-          <ActionItem 
-            icon={<Edit3 size={20} color={colors.text} />} 
-            label="Modifier le nom" 
-            onPress={handleRename} 
+          <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mt-8 mb-2">{t('library.playlistActionSheet.settingsSection')}</Text>
+
+          <ActionItem
+            icon={<Edit3 size={20} color={colors.text} />}
+            label={t('library.playlistActionSheet.editName')}
+            onPress={handleRename}
           />
-          
-          <ActionItem 
-            icon={<Trash2 size={20} color={colors.danger} />} 
-            label="Supprimer définitivement" 
+
+          <ActionItem
+            icon={<Trash2 size={20} color={colors.danger} />}
+            label={t('library.playlistActionSheet.deletePermanently')}
             textColor={colors.danger}
             onPress={handleDelete}
           />

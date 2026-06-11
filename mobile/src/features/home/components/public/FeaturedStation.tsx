@@ -6,6 +6,7 @@ import { theme } from "@/constants/theme";
 import { usePlayer } from "@/context/PlayerContext";
 import { Station } from "@/types/content";
 import { useAuthContext } from "@/context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 /**
  * FeaturedStation : Composant de mise en avant (Hero Card).
@@ -13,6 +14,7 @@ import { useAuthContext } from "@/context/AuthContext";
  * @param station : Objet Station complet issu du typage centralisé.
  */
 export const FeaturedStation = ({ station }: { station: Station }) => {
+  const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
   const isDark = appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
@@ -46,7 +48,7 @@ export const FeaturedStation = ({ station }: { station: Station }) => {
                 style={{ backgroundColor: colors.live }} 
                 className="px-3 py-1 rounded-full shadow-lg"
               >
-                <Text className="text-white text-[10px] font-black italic">LIVE</Text>
+                <Text className="text-white text-[10px] font-black italic">{t('home.featuredStation.live')}</Text>
               </View>
             )}
             <Text 
@@ -69,7 +71,7 @@ export const FeaturedStation = ({ station }: { station: Station }) => {
           <View className="flex-row items-center bg-white/10 self-start px-4 py-2 rounded-2xl border border-white/5">
             <PlayCircle size={18} color="white" fill="rgba(255,255,255,0.2)" />
             <Text className="text-white ml-3 font-bold text-xs">
-              {station.listenersCount?.toLocaleString() || "0"} auditeurs
+              {t('home.featuredStation.listenersCount', { count: station.listenersCount || 0 })}
             </Text>
           </View>
         </LinearGradient>

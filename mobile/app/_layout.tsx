@@ -6,12 +6,13 @@ import { NotificationProvider, useNotificationContext } from "@/context/Notifica
 import { PlayerProvider } from "@/context/PlayerContext";
 import React, { useEffect, useRef } from "react";
 import "../global.css";
+import "../src/i18n";
+import { useTranslation } from "react-i18next";
 import { MiniPlayer } from "@/features/player/components/MiniPlayer";
 import { useColorScheme, Alert } from "react-native";
 
-// Composant invisible qui déclenche une alerte pour chaque nouvelle notification non lue et fraîche.
-// Le Set shownIds évite de réafficher la même alerte à chaque re-render.
 function NotificationWatcher() {
+  const { t } = useTranslation();
   const { notifications } = useNotificationContext();
   const { user, token } = useAuthContext();
   const shownIds = useRef<Set<string>>(new Set());
@@ -26,13 +27,13 @@ function NotificationWatcher() {
 
       shownIds.current.add(notif.id);
       Alert.alert(
-        "Nouvelle notification",
+        t('notifications.watcher.newNotificationTitle'),
         notif.message,
-        [{ text: "Fermer", style: "cancel" }]
+        [{ text: t('common.close'), style: "cancel" }]
       );
       break; // une alerte à la fois pour ne pas spammer
     }
-  }, [notifications, token, user?.id]);
+  }, [notifications, token, user?.id, t]);
 
   return null;
 }

@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Send, Star, Disc3 } from "lucide-react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import { useTranslation } from "react-i18next";
 
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
@@ -28,6 +29,7 @@ import { Station } from "@/types/content";
  * et il peut la modifier.
  */
 export default function ReviewScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const { appearanceSettings } = useAuthContext();
@@ -74,7 +76,7 @@ export default function ReviewScreen() {
    */
   useEffect(() => {
     if (!id) {
-      setStationError("Aucun média sélectionné.");
+      setStationError(t('library.reviewScreen.noMediaSelected'));
       setIsStationLoading(false);
       return;
     }
@@ -86,32 +88,32 @@ export default function ReviewScreen() {
       })
       .catch(err => {
         if (__DEV__) console.warn("[ReviewScreen]", err?.message);
-        setStationError("Impossible de charger ce média.");
+        setStationError(t('library.reviewScreen.loadMediaError'));
       })
       .finally(() => setIsStationLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   /**
    * handlePublish : Validation puis publication via le hook.
    */
   const handlePublish = async () => {
     if (rating === 0) {
-      Alert.alert("Note requise", "Veuillez attribuer au moins une étoile.");
+      Alert.alert(t('library.reviewScreen.ratingRequiredTitle'), t('library.reviewScreen.ratingRequiredMessage'));
       return;
     }
     if (comment.trim().length < 5) {
-      Alert.alert("Critique trop courte", "Dites-en un peu plus sur votre écoute.");
+      Alert.alert(t('library.reviewScreen.reviewTooShortTitle'), t('library.reviewScreen.reviewTooShortMessage'));
       return;
     }
     try {
       await submit(rating, comment);
       Alert.alert(
-        "Critique publiée",
-        "Votre critique a été diffusée sur l'onde ! 🎙️",
-        [{ text: "Génial", onPress: () => router.back() }]
+        t('library.reviewScreen.publishedTitle'),
+        t('library.reviewScreen.publishedMessage'),
+        [{ text: t('library.reviewScreen.great'), onPress: () => router.back() }]
       );
     } catch (err: any) {
-      Alert.alert("Erreur", err?.message || "Impossible de publier la critique.");
+      Alert.alert(t('common.error'), err?.message || t('library.reviewScreen.publishError'));
     }
   };
 
@@ -119,9 +121,16 @@ export default function ReviewScreen() {
    * ratingLabel : Traduction sémantique de la note.
    */
   const ratingLabel = useMemo(() => {
-    const labels = ["", "Décevant", "Pas mal", "Très bon", "Excellent", "Chef-d'œuvre"];
+    const labels = [
+      "",
+      t('library.reviewScreen.ratingLabels.disappointing'),
+      t('library.reviewScreen.ratingLabels.notBad'),
+      t('library.reviewScreen.ratingLabels.veryGood'),
+      t('library.reviewScreen.ratingLabels.excellent'),
+      t('library.reviewScreen.ratingLabels.masterpiece'),
+    ];
     return labels[rating];
-  }, [rating]);
+  }, [rating, t]);
 
   // Chargement combiné : station + note existante
   const isInitializing = isStationLoading || isLoadingExisting;
@@ -142,7 +151,7 @@ export default function ReviewScreen() {
             <ChevronLeft size={24} color={colors.text} />
           </TouchableOpacity>
           <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-            Critique
+            {t('library.reviewScreen.headerTitle')}
           </Text>
           <View className="w-10" />
         </View>
@@ -154,7 +163,7 @@ export default function ReviewScreen() {
         ) : stationError || !station ? (
           <View className="flex-1 justify-center items-center px-10">
             <Text style={{ color: colors.muted }} className="text-sm italic text-center">
-              {stationError || "Média introuvable."}
+              {stationError || t('library.reviewScreen.mediaNotFound')}
             </Text>
           </View>
         ) : (
@@ -179,7 +188,7 @@ export default function ReviewScreen() {
                   {station.title}
                 </Text>
                 <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest" numberOfLines={1}>
-                  {station.baseline || "Radio"}
+                  {station.baseline || t('library.reviewScreen.radioFallback')}
                 </Text>
               </View>
             </View>
@@ -192,7 +201,7 @@ export default function ReviewScreen() {
               >
                 <Star size={14} color={colors.primary} fill={colors.primary} />
                 <Text style={{ color: colors.muted }} className="text-xs ml-2 italic">
-                  Vous avez déjà noté cette œuvre {initialRating}/5. Votre note sera mise à jour.
+                  {t('library.reviewScreen.alreadyRated', { rating: initialRating })}
                 </Text>
               </View>
             )}
@@ -200,7 +209,7 @@ export default function ReviewScreen() {
             {/* Système d'étoiles interactif */}
             <View className="items-center mb-10">
               <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[3px] mb-4">
-                Note l'onde
+                {t('library.reviewScreen.rateTheWave')}
               </Text>
               <View className="flex-row gap-x-3">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -218,18 +227,18 @@ export default function ReviewScreen() {
                 ))}
               </View>
               <Text style={{ color: colors.text }} className="mt-4 font-bold italic opacity-60">
-                {rating === 0 ? "Choisis ton intensité" : `${rating}/5 - ${ratingLabel}`}
+                {rating === 0 ? t('library.reviewScreen.chooseIntensity') : t('library.reviewScreen.ratingWithLabel', { rating, label: ratingLabel })}
               </Text>
             </View>
 
             {/* Saisie libre de l'avis */}
             <View className="mb-8">
               <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[3px] ml-1 mb-2">
-                Ton avis
+                {t('library.reviewScreen.yourOpinion')}
               </Text>
               <TextInput
                 multiline
-                placeholder="Cette radio me rappelle..."
+                placeholder={t('library.reviewScreen.commentPlaceholder')}
                 placeholderTextColor={colors.muted}
                 value={comment}
                 onChangeText={setComment}
@@ -259,14 +268,14 @@ export default function ReviewScreen() {
                 <>
                   <Send size={18} color={colors.secondary} />
                   <Text style={{ color: colors.secondary }} className="font-black uppercase tracking-[2px] text-xs ml-2">
-                    Diffuser ma critique
+                    {t('library.reviewScreen.publishReview')}
                   </Text>
                 </>
               )}
             </TouchableOpacity>
 
             <Text style={{ color: colors.muted }} className="text-[10px] text-center mt-6 italic">
-              Ta critique sera visible par toute la communauté RadioMonoko.
+              {t('library.reviewScreen.visibilityNotice')}
             </Text>
           </ScrollView>
         )}

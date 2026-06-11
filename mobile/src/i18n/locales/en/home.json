@@ -1,0 +1,74 @@
+{
+  "privateHome": {
+    "statListened": "Listened",
+    "statFollowing": "Following",
+    "todaysDiscoveries": "Today's discoveries",
+    "loadStationsError": "Unable to load live stations.",
+    "networkActivity": "Network activity",
+    "seeFullFeed": "See full feed"
+  },
+  "publicHome": {
+    "joinCommunityTitle": "Join the community",
+    "joinCommunityMessage": "Browsing is free, but you need to be logged in to {{action}}.",
+    "later": "Later",
+    "register": "Sign up",
+    "popularGenres": "Popular genres",
+    "genrePodcast": "Podcast",
+    "genreJournalism": "Journalism",
+    "genreMusic": "Music",
+    "genreCulture": "Culture",
+    "genreHistory": "History",
+    "allStations": "All stations",
+    "unlockContent": "Sign up to unlock all content",
+    "actionAccessCatalog": "access the full catalog"
+  },
+  "privateHeader": {
+    "greeting": "Hi, {{username}}",
+    "defaultUsername": "user"
+  },
+  "homeHeader": {
+    "title": "Discover",
+    "subtitle": "The world at your fingertips"
+  },
+  "libraryQuickNav": {
+    "title": "My Library",
+    "manage": "Manage",
+    "statusInProgress": "In progress",
+    "statusToListen": "To listen",
+    "statusFavorites": "Favorites",
+    "statusArchives": "Archives",
+    "statusMixes": "My Mixes"
+  },
+  "mediaSocialInfo": {
+    "listeningAlone": " is listening to this station.",
+    "listeningWithOthers_one": " and {{count}} other friend is listening.",
+    "listeningWithOthers_other": " and {{count}} other friends are listening."
+  },
+  "mediaSuggestion": {
+    "live": "Live: {{song}}"
+  },
+  "activityCard": {
+    "moderationTitle": "Moderation",
+    "moderationMessage": "Report this content for violating the guidelines?",
+    "thanksTitle": "Thank you",
+    "thanksMessage": "The content has been sent to the administrators.",
+    "publishedReviewOn": "Posted a review on ",
+    "rated": "Rated ",
+    "likeNotification": "{{username}} liked your review of {{media}}",
+    "someone": "Someone",
+    "reviewsCount_one": "{{count}} review",
+    "reviewsCount_other": "{{count}} reviews"
+  },
+  "communitySection": {
+    "title": "Community",
+    "followUsersAction": "follow users"
+  },
+  "featuredStation": {
+    "live": "LIVE",
+    "listenersCount_one": "{{count}} listener",
+    "listenersCount_other": "{{count}} listeners"
+  },
+  "publicStationCard": {
+    "live": "Live"
+  }
+}
