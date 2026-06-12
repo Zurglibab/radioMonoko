@@ -240,7 +240,8 @@ i18n
                         appearance: {
                             theme: "Thème de l'application",
                             darkMode: "Mode Sombre",
-                            lightMode: "Mode Clair"
+                            lightMode: "Mode Clair",
+                            language: "Langue de l'application"
                         },
                         saveChanges: "Enregistrer les modifications"
                     },
@@ -762,7 +763,8 @@ i18n
                         appearance: {
                             theme: "Application Theme",
                             darkMode: "Dark Mode",
-                            lightMode: "Light Mode"
+                            lightMode: "Light Mode",
+                            language: "Application Language"
                         },
                         saveChanges: "Save Changes"
                     },
@@ -1289,7 +1291,8 @@ i18n
                         appearance: {
                             theme: "Tema de la Aplicación",
                             darkMode: "Modo Oscuro",
-                            lightMode: "Modo Claro"
+                            lightMode: "Modo Claro",
+                            language: "Idioma de la aplicación"
                         },
                         saveChanges: "Guardar Cambios"
                     },

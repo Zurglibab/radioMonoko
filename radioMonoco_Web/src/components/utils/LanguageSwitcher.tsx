@@ -34,23 +34,23 @@ const LanguageSwitcher = () => {
             <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 bg-neutral-900/60 border border-white/10 hover:border-white/20 rounded-full px-3 py-2 transition"
+                className="flex items-center gap-1.5 md:gap-2 h-9 md:h-10 rounded-full px-3 transition-all duration-300 hover:bg-app-text/10 active:scale-95 cursor-pointer"
             >
-                <FiGlobe className="text-neutral-400" />
+                <FiGlobe className="text-app-text text-lg" />
                 <FiChevronDown
-                    className={`text-neutral-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`text-app-text text-sm transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
                 />
             </button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 bg-neutral-900 border border-white/10 rounded-xl shadow-lg overflow-hidden z-50 animate-in fade-in">
+                <div className="absolute right-0 top-12 w-36 bg-app-card border border-app-border rounded-xl shadow-xl overflow-hidden z-60 animate-in fade-in zoom-in-95 duration-150">
                     <button
                         type="button"
                         onClick={() => changeLanguage("fr")}
-                        className={`w-full px-4 py-2 text-sm font-semibold transition flex items-center gap-2 ${
-                            currentLanguage === "fr" 
-                                ? "bg-rose-600/20 text-rose-500" 
-                                : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                        className={`w-full px-4 py-2.5 text-sm font-semibold transition-colors flex items-center gap-2 cursor-pointer ${
+                            currentLanguage === "fr"
+                                ? "bg-primary/10 text-primary"
+                                : "text-app-text/70 hover:bg-app-text/5 hover:text-app-text"
                         }`}
                     >
                         🇫🇷 Français
@@ -59,10 +59,10 @@ const LanguageSwitcher = () => {
                     <button
                         type="button"
                         onClick={() => changeLanguage("en")}
-                        className={`w-full px-4 py-2 text-sm font-semibold transition flex items-center gap-2 ${
-                            currentLanguage === "en" 
-                                ? "bg-rose-600/20 text-rose-500" 
-                                : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                        className={`w-full px-4 py-2.5 text-sm font-semibold transition-colors flex items-center gap-2 cursor-pointer ${
+                            currentLanguage === "en"
+                                ? "bg-primary/10 text-primary"
+                                : "text-app-text/70 hover:bg-app-text/5 hover:text-app-text"
                         }`}
                     >
                         🇬🇧 English
@@ -71,10 +71,10 @@ const LanguageSwitcher = () => {
                     <button
                         type="button"
                         onClick={() => changeLanguage("es")}
-                        className={`w-full px-4 py-2 text-sm font-semibold transition flex items-center gap-2 ${
-                            currentLanguage === "es" 
-                                ? "bg-rose-600/20 text-rose-500" 
-                                : "text-neutral-400 hover:bg-neutral-800 hover:text-white"
+                        className={`w-full px-4 py-2.5 text-sm font-semibold transition-colors flex items-center gap-2 cursor-pointer ${
+                            currentLanguage === "es"
+                                ? "bg-primary/10 text-primary"
+                                : "text-app-text/70 hover:bg-app-text/5 hover:text-app-text"
                         }`}
                     >
                         🇪🇸 Español
@@ -84,4 +84,5 @@ const LanguageSwitcher = () => {
         </div>
     );
 };
+
 export default LanguageSwitcher;
