@@ -15,39 +15,29 @@ import { ChevronLeft, Send, Star, Disc3 } from "lucide-react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { theme } from "@/constants/theme";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { BrandService } from "@/services/brand/brand.service";
 import { useReviewForm } from "@/hooks/reviews/useReviewForm";
 import { Brand } from "@/types/brand";
 import { Station } from "@/types/content";
 
-/**
- * ReviewScreen : Écran de rédaction de critique et de notation.
- * Permet à l'utilisateur de noter une station (1 à 5 étoiles) et de rédiger un commentaire.
- * Si l'utilisateur a déjà noté cette station, sa note précédente est pré-remplie
- * et il peut la modifier.
- */
 export default function ReviewScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { appearanceSettings } = useAuthContext();
+  const colors = useThemeColors();
 
-  // Chargement de la station via l'API
   const [station, setStation] = useState<Brand | null>(null);
   const [isStationLoading, setIsStationLoading] = useState(true);
   const [stationError, setStationError] = useState<string | null>(null);
 
-  // États du formulaire
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
-  // Adaptation Brand → Station pour le hook (qui attend une Station)
   const stationForHook = useMemo<Station | null>(() => {
     if (!station) return null;
     return {
-      id: station.id,                // api_id de la Brand
+      id: station.id,
       title: station.title,
       artist: "",
       description: station.description || "",
@@ -58,22 +48,12 @@ export default function ReviewScreen() {
     };
   }, [station]);
 
-  // Hook qui orchestre rating + review en parallèle
   const { initialRating, isLoadingExisting, isSubmitting, submit } = useReviewForm(stationForHook);
 
-  // Pré-remplit le rating si l'utilisateur a déjà noté cette œuvre
   useEffect(() => {
     if (initialRating > 0) setRating(initialRating);
   }, [initialRating]);
 
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? true
-    : appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-
-  /**
-   * Charge les infos de la station depuis l'API au montage.
-   */
   useEffect(() => {
     if (!id) {
       setStationError(t('library.reviewScreen.noMediaSelected'));
@@ -93,9 +73,6 @@ export default function ReviewScreen() {
       .finally(() => setIsStationLoading(false));
   }, [id, t]);
 
-  /**
-   * handlePublish : Validation puis publication via le hook.
-   */
   const handlePublish = async () => {
     if (rating === 0) {
       Alert.alert(t('library.reviewScreen.ratingRequiredTitle'), t('library.reviewScreen.ratingRequiredMessage'));
@@ -117,9 +94,6 @@ export default function ReviewScreen() {
     }
   };
 
-  /**
-   * ratingLabel : Traduction sémantique de la note.
-   */
   const ratingLabel = useMemo(() => {
     const labels = [
       "",
@@ -132,7 +106,6 @@ export default function ReviewScreen() {
     return labels[rating];
   }, [rating, t]);
 
-  // Chargement combiné : station + note existante
   const isInitializing = isStationLoading || isLoadingExisting;
 
   return (
@@ -141,7 +114,6 @@ export default function ReviewScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        {/* Header */}
         <View className="flex-row items-center justify-between px-6 py-4">
           <TouchableOpacity
             onPress={() => router.back()}
@@ -172,7 +144,6 @@ export default function ReviewScreen() {
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 40 }}
           >
-            {/* Rappel du média concerné */}
             <View
               className="flex-row items-center mt-6 mb-10 p-4 rounded-[16px] border border-dashed"
               style={{ borderColor: colors.border }}
@@ -193,7 +164,6 @@ export default function ReviewScreen() {
               </View>
             </View>
 
-            {/* Indicateur si l'utilisateur modifie sa note */}
             {initialRating > 0 && (
               <View
                 style={{ backgroundColor: colors.surface, borderColor: colors.border }}
@@ -206,7 +176,6 @@ export default function ReviewScreen() {
               </View>
             )}
 
-            {/* Système d'étoiles interactif */}
             <View className="items-center mb-10">
               <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[3px] mb-4">
                 {t('library.reviewScreen.rateTheWave')}
@@ -231,7 +200,6 @@ export default function ReviewScreen() {
               </Text>
             </View>
 
-            {/* Saisie libre de l'avis */}
             <View className="mb-8">
               <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[3px] ml-1 mb-2">
                 {t('library.reviewScreen.yourOpinion')}
@@ -252,7 +220,6 @@ export default function ReviewScreen() {
               />
             </View>
 
-            {/* Diffusion */}
             <TouchableOpacity
               onPress={handlePublish}
               disabled={isSubmitting}

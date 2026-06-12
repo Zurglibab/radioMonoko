@@ -4,7 +4,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Clock, Users, ChevronRight } from "lucide-react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 
-import { theme } from "@/constants/theme";
 import { User } from "@/types/auth";
 import { useMyStatuses } from "@/hooks/content/useMyStatuses";
 import { useBrands } from "@/hooks/home/useBrands";
@@ -15,17 +14,14 @@ import { ActivityCard } from "@/features/home/components/private/ActivityCard";
 import { MediaSuggestion } from "@/features/home/components/private/MediaSuggestion";
 import { PrivateHeader } from "@/features/home/components/private/PrivateHeader";
 import { LibraryQuickNav } from "@/features/home/components/private/LibraryQuickNav";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useTranslation } from "react-i18next";
 
 export default function PrivateHome({ user }: { user: User }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { appearanceSettings } = useAuthContext();
+  const colors = useThemeColors();
 
-  const isDark = appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-  
   const { statusCounts, isLoading: isStatusesLoading, refetch: refetchStatuses } = useMyStatuses(true);
   const { brands, isLoading: isBrandsLoading, error: brandsError, refetch: refetchBrands } = useBrands(true);
   const { friendsCount, isLoadingSocial, refetch: refetchSocial } = useSocialStats(true);
@@ -71,16 +67,12 @@ export default function PrivateHome({ user }: { user: User }) {
       <PrivateHeader user={user} />
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        
-        {/* Statistiques du tableau de bord */}
         <View className="flex-row gap-x-4 px-6 mb-10">
           {stats.map(s => <StatCard key={s.id} {...s} />)}
         </View>
 
-        {/* Navigation rapide */}
         <LibraryQuickNav />
 
-        {/* Suggestions du jour */}
         <View className="mb-10">
           <Text style={{ color: colors.text }} className="text-xl font-black px-6 mb-6 italic tracking-tighter">
             {t('home.privateHome.todaysDiscoveries')}
@@ -105,7 +97,6 @@ export default function PrivateHome({ user }: { user: User }) {
           )}
         </View>
 
-        {/* Fil d'activité */}
         <View className="px-6 mb-4">
           <View className="flex-row justify-between items-end mb-6">
             <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">

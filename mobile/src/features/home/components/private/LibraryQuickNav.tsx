@@ -1,21 +1,13 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { theme } from "@/constants/theme";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useTranslation } from "react-i18next";
 
-/**
- * LibraryQuickNav : Barre de navigation rapide pour la bibliothèque.
- * Permet de basculer entre différentes catégories ou états de lecture
- * via un défilement horizontal fluide.
- */
 export const LibraryQuickNav = () => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { appearanceSettings } = useAuthContext();
-  const isDark = appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
 
   const statuses = [
     { label: t('home.libraryQuickNav.statusInProgress'), route: "/library/status/in-progress" },
@@ -27,7 +19,6 @@ export const LibraryQuickNav = () => {
 
   return (
     <View className="mb-10">
-      {/* Affichage du titre de la section */}
       <View className="flex-row justify-between items-center px-6 mb-4">
         <Text
           style={{ color: colors.text }}
@@ -46,7 +37,6 @@ export const LibraryQuickNav = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Liste des catégories */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import {
-  View, Text, FlatList, TouchableOpacity, Image,
+  View, Text, FlatList, TouchableOpacity,
   ActivityIndicator, RefreshControl,
   Modal, TextInput,
 } from "react-native";
@@ -15,49 +15,8 @@ import { SocialService } from "@/services/social/social.service";
 import { ChannelService } from "@/services/chat/channel.service";
 import { Friend } from "@/types/social";
 import { GuestAccessPrompt } from "@/features/shared/GuestAccessPrompt";
-
-function formatTime(dateStr: string, language: string): string {
-  const locale = language === "en" ? "en-US" : "fr-FR";
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffDays = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
-
-  if (diffDays < 1) {
-    return date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
-  } else if (diffDays < 7) {
-    return date.toLocaleDateString(locale, { weekday: "short" });
-  }
-  return date.toLocaleDateString(locale, { day: "numeric", month: "short" });
-}
-
-function Avatar({ name, avatar, size = 48, colors }: { name: string; avatar?: string; size?: number; colors: any }) {
-  if (avatar) {
-    return (
-      <Image
-        source={{ uri: avatar }}
-        style={{ width: size, height: size, borderRadius: size / 2 }}
-      />
-    );
-  }
-  return (
-    <View
-      style={{
-        width: size,
-        height: size,
-        borderRadius: size / 2,
-        backgroundColor: colors.surface,
-        borderWidth: 1,
-        borderColor: colors.border,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Text style={{ color: colors.text, fontWeight: "900", fontSize: size * 0.35, textTransform: "uppercase" }}>
-        {name[0]}
-      </Text>
-    </View>
-  );
-}
+import { Avatar } from "@/features/shared/Avatar";
+import { formatRelativeTime } from "@/utils/dateFormat";
 
 export default function ChatScreen() {
   const { t, i18n } = useTranslation();
@@ -152,7 +111,7 @@ export default function ChatScreen() {
         </Text>
       </View>
       <Text style={{ color: colors.muted, fontSize: 11 }}>
-        {formatTime(item.lastMessageAt, i18n.language)}
+        {formatRelativeTime(item.lastMessageAt, i18n.language)}
       </Text>
     </TouchableOpacity>
   );
