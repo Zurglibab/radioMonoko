@@ -23,6 +23,11 @@
   "unavailable": "Non renseigné",
   "error": "Une erreur est survenue.",
   "logout": "Se déconnecter",
+  "guestAccess": {
+    "register": "Créer un compte",
+    "login": "Se connecter",
+    "manageStationAction": "gérer cette onde"
+  },
   "nav": {
     "home": "Accueil",
     "feed": "Flux",

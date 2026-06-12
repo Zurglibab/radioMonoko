@@ -14,6 +14,7 @@ import { useConversations, Conversation } from "@/hooks/chat/useConversations";
 import { SocialService } from "@/services/social/social.service";
 import { ChannelService } from "@/services/chat/channel.service";
 import { Friend } from "@/types/social";
+import { GuestAccessPrompt } from "@/features/shared/GuestAccessPrompt";
 
 function formatTime(dateStr: string, language: string): string {
   const locale = language === "en" ? "en-US" : "fr-FR";
@@ -118,6 +119,18 @@ export default function ChatScreen() {
         ((f as any).display_name ?? "").toLowerCase().includes(search.toLowerCase())
       )
     : friends;
+
+  // La messagerie nécessite un compte
+  if (!token || !user) {
+    return (
+      <GuestAccessPrompt
+        icon={MessageSquare}
+        title={t('chat.chatList.guestTitle')}
+        message={t('chat.chatList.guestMessage')}
+        colors={colors}
+      />
+    );
+  }
 
   const renderConversation = ({ item }: { item: Conversation }) => (
     <TouchableOpacity

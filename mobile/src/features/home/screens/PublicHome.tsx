@@ -1,16 +1,16 @@
 import React from "react";
-import { ScrollView, View, Text, TouchableOpacity, Alert, useColorScheme } from "react-native";
+import { ScrollView, View, Text, TouchableOpacity, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TrendingUp } from "lucide-react-native";
 import { useRouter } from "expo-router";
-
 import { theme } from "@/constants/theme";
+import { usePlayer } from "@/context/PlayerContext";
 import { useHome } from "@/hooks/home/useHome";
 import { HomeHeader } from "@/features/home/components/public/HomeHeader";
 import { FeaturedStation } from "@/features/home/components/public/FeaturedStation";
-import { CommunitySection } from "@/features/home/components/public/CommunitySection";
 import { PublicStationCard } from "@/features/home/components/public/PublicStationCard";
 import { useAuthContext } from "@/context/AuthContext";
+import { usePromptLogin } from "@/features/shared/usePromptLogin";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -34,37 +34,20 @@ export default function PublicHome() {
   const colors = isDark ? theme.dark.colors : theme.light.colors;
   const { stations } = useHome();
   const router = useRouter();
-
-  /**
-   * Action restreinte :
-   * Affiche une alerte pour inviter l'utilisateur à créer un compte.
-   */
-  const promptLogin = (action: string) => {
-    Alert.alert(
-      t('home.publicHome.joinCommunityTitle'),
-      t('home.publicHome.joinCommunityMessage', { action }),
-      [
-        { text: t('home.publicHome.later'), style: "cancel" },
-        {
-          text: t('home.publicHome.register'),
-          onPress: () => router.push("/(auth)/register"),
-          style: "default"
-        }
-      ]
-    );
-  };
+  const { playTrack } = usePlayer();
+  const promptLogin = usePromptLogin();
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        
-        {/* EN-TÊTE : Logo et actions de bienvenue */}
-        <HomeHeader />
+      {/* Logo et actions de bienvenue */}
+      <HomeHeader />
 
-        {/* À LA UNE : Mise en avant de la station phare du moment */}
+      <ScrollView showsVerticalScrollIndicator={false}>
+
+        {/* Mise en avant de la station phare du moment */}
         {stations.length > 0 && <FeaturedStation station={stations[0]} />}
 
-        {/* EXPLORATION : Navigation par genres populaires */}
+        {/* Navigation par genres populaires */}
         <View className="mb-12">
           <Text style={{ color: colors.text }} className="px-6 text-lg font-bold mb-5 italic tracking-tight">
             {t('home.publicHome.popularGenres')}
@@ -81,12 +64,13 @@ export default function PublicHome() {
               t('home.publicHome.genreCulture'),
               t('home.publicHome.genreHistory'),
             ].map((genre, i) => (
-              <TouchableOpacity 
-                key={i} 
+              <TouchableOpacity
+                key={i}
                 activeOpacity={0.7}
-                style={{ 
-                  backgroundColor: colors.surface, 
-                  borderColor: colors.border 
+                onPress={() => router.push({ pathname: "/(tabs)/search", params: { q: genre } })}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border
                 }}
                 className="mr-3 px-6 py-4 rounded-3xl border shadow-sm"
               >
@@ -98,10 +82,7 @@ export default function PublicHome() {
           </ScrollView>
         </View>
 
-        {/* COMMUNAUTÉ : Section interactive invitant à l'échange */}
-        <CommunitySection onPrompt={promptLogin} />
-
-        {/* CATALOGUE : Grille de stations disponibles en libre accès */}
+        {/* Grille de stations disponibles en libre accès */}
         <View className="px-6 pb-20">
           <View className="flex-row justify-between items-center mb-8">
             <Text
@@ -114,17 +95,17 @@ export default function PublicHome() {
           </View>
           
           <View className="flex-row flex-wrap justify-between">
-            {/* On exclut la première station (déjà en Featured) */}
+            {/* On exclut la première station */}
             {stations.slice(1, 5).map((item) => (
-              <PublicStationCard 
-                key={item.id} 
-                item={item} 
-                onPress={() => {/* Navigation vers le lecteur */}} 
+              <PublicStationCard
+                key={item.id}
+                item={item}
+                onPress={(station) => playTrack(station)}
               />
             ))}
           </View>
 
-          {/* CTA FINAL : Incitation à l'inscription pour l'accès complet */}
+          {/* Incitation à l'inscription pour l'accès complet */}
           <TouchableOpacity
             onPress={() => promptLogin(t('home.publicHome.actionAccessCatalog'))}
             style={{

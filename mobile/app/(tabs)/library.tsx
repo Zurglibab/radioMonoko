@@ -1,20 +1,19 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Plus, MoreVertical, Play, ScrollText, PlayCircle, CheckCircle2, XCircle, Globe, Lock } from "lucide-react-native";
+import { Plus, MoreVertical, Play, ScrollText, PlayCircle, CheckCircle2, XCircle, Globe, Lock, Library } from "lucide-react-native";
 import { useRouter, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
-
 import { useLibrary } from "@/hooks/home/useLibrary";
 import { useCollections } from "@/hooks/collections/useCollections";
 import { usePlayer } from "@/context/PlayerContext";
 import { useThemeColors } from "@/utils/useThemeColors";
 import { useSanitizedStation } from "@/utils/useSanitizedStation";
 import { MediaRowItem } from "@/features/shared/MediaRowItem";
+import { GuestAccessPrompt } from "@/features/shared/GuestAccessPrompt";
 import { PlaylistCover } from "@/features/home/components/private/PlaylistCover";
 import { CollectionFormModal, CollectionFormData } from "@/features/library/components/CollectionFormModal";
 
-// Mappe un frontStatus vers la clé de traduction correspondante dans library.status
 const STATUS_KEY_MAP: Record<string, string> = {
   'to-listen': 'toListen',
   'in-progress': 'inProgress',
@@ -26,14 +25,13 @@ export default function LibraryScreen() {
   const { t } = useTranslation();
   const colors = useThemeColors();
   const { sanitizeStationId } = useSanitizedStation();
-  const { activeTab, setActiveTab, favorites, isFavoritesLoading, statusItems, statuses, isStatusesLoading, refetchStatuses, refetchFavorites } = useLibrary();
+  const { token, user, activeTab, setActiveTab, favorites, isFavoritesLoading, statusItems, statuses, isStatusesLoading, refetchStatuses, refetchFavorites } = useLibrary();
   const { collections, isLoading: isCollectionsLoading, createCollection, deleteCollection, toggleVisibility, refetch: refetchCollections } = useCollections(true);
   const { playTrack } = usePlayer();
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string | string[] }>();
   const [isModalVisible, setModalVisible] = useState(false);
 
-  // Permet de pré-sélectionner un onglet via l'URL (ex: navigation depuis "Ma Bibliothèque" sur l'accueil)
   useEffect(() => {
     const tabParam = Array.isArray(params.tab) ? params.tab[0] : params.tab;
     if (tabParam && ['Tout', 'Radios', 'Podcasts', 'Playlists'].includes(tabParam)) {
@@ -58,14 +56,13 @@ export default function LibraryScreen() {
     }, [refetchStatuses, refetchFavorites, refetchCollections])
   );
 
-  // Filtrage des œuvres trackées par type pour la section "Enregistrés"
   const displayedTracked = statuses.filter(s => {
     if (activeTab === "Tout") return true;
     const isPodcast = s.content.content_type === "podcast";
     return activeTab === "Radios" ? !isPodcast : isPodcast;
   });
 
-  // Labels traduits affichés pour chaque onglet (les valeurs internes restent inchangées)
+  // Labels traduits affichés pour chaque onglet
   const TAB_LABELS: Record<string, string> = {
     'Tout': t('library.library.tabs.all'),
     'Radios': t('library.library.tabs.radios'),
@@ -119,6 +116,18 @@ export default function LibraryScreen() {
     }
   };
 
+  // La bibliothèque est propre à un compte
+  if (!token || !user) {
+    return (
+      <GuestAccessPrompt
+        icon={Library}
+        title={t('library.library.guestTitle')}
+        message={t('library.library.guestMessage')}
+        colors={colors}
+      />
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
       {/* Header */}
@@ -162,7 +171,7 @@ export default function LibraryScreen() {
           </View>
         )}
 
-        {/* Vos Créations (Playlists + Favoris) */}
+        {/* Vos Créations */}
         {(activeTab === 'Tout' || activeTab === 'Playlists') && (
           <View className="mb-10">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">{t('library.library.yourCreations')}</Text>

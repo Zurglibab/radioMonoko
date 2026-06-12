@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { Heart, MessageSquare, UserPlus, UserCheck, MoreVertical, Star, PenLine } from "lucide-react-native";
+import { Heart, MessageSquare, UserPlus, UserCheck, MoreVertical, Star, PenLine, Newspaper } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useCommunity } from "@/hooks/community/useCommunity";
@@ -15,6 +15,7 @@ import { NotificationService } from "@/services/notifications/notification.servi
 import { ReportService } from "@/services/reports/report.service";
 import { SocialActivity } from "@/types/community";
 import { useRouter } from "expo-router";
+import { GuestAccessPrompt } from "@/features/shared/GuestAccessPrompt";
 
 export default function FeedScreen() {
   const { t } = useTranslation();
@@ -35,6 +36,18 @@ export default function FeedScreen() {
     await refetch();
     setRefreshing(false);
   }, [refetch]);
+
+  // Le flux communautaire nécessite un compte
+  if (!token || !user) {
+    return (
+      <GuestAccessPrompt
+        icon={Newspaper}
+        title={t('community.feed.guestTitle')}
+        message={t('community.feed.guestMessage')}
+        colors={colors}
+      />
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ScrollView, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useLocalSearchParams } from "expo-router";
 import { theme } from "@/constants/theme";
 import { useSearch } from "@/hooks/home/useSearch";
 import { useAuthContext } from "@/context/AuthContext";
@@ -10,19 +11,32 @@ import { Station } from "@/types/content";
 import { SearchBar } from "@/features/search/components/SearchBar";
 import { SearchDefaultView } from "@/features/search/components/SearchDefaultView";
 import { SearchResultsView } from "@/features/search/components/SearchResultsView";
+import { usePromptLogin } from "@/features/shared/usePromptLogin";
+import { useTranslation } from "react-i18next";
 
 export default function SearchScreen() {
+  const { t } = useTranslation();
   const {
     query, setQuery,
     stations, users, contents, publicCollections,
     isSearching, history, addToHistory, clearHistory,
   } = useSearch();
-  const { appearanceSettings } = useAuthContext();
+  const { appearanceSettings, token, user } = useAuthContext();
   const systemTheme = useColorScheme();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
+  const promptLogin = usePromptLogin();
+  const params = useLocalSearchParams<{ q?: string }>();
 
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [isSheetVisible, setIsSheetVisible] = useState(false);
+
+  useEffect(() => {
+    const q = Array.isArray(params.q) ? params.q[0] : params.q;
+    if (q) {
+      setQuery(q);
+      addToHistory(q);
+    }
+  }, [params.q, setQuery, addToHistory]);
 
   const isDark = appearanceSettings.themeMode === "system"
     ? systemTheme === "dark"
@@ -54,7 +68,15 @@ export default function SearchScreen() {
             currentTrack={currentTrack}
             isPlaying={isPlaying}
             onPlayPress={(s) => playTrack(s)}
-            onLongPress={(s) => { setSelectedStation(s); setIsSheetVisible(true); }}
+            onLongPress={(s) => {
+              // Gérer une onde (favoris, statut, collections) nécessite un compte
+              if (!token || !user) {
+                promptLogin(t('common.guestAccess.manageStationAction'));
+                return;
+              }
+              setSelectedStation(s);
+              setIsSheetVisible(true);
+            }}
             colors={colors}
           />
         )}

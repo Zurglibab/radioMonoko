@@ -23,6 +23,11 @@
   "unavailable": "Not provided",
   "error": "An error occurred.",
   "logout": "Log out",
+  "guestAccess": {
+    "register": "Create an account",
+    "login": "Log in",
+    "manageStationAction": "manage this station"
+  },
   "nav": {
     "home": "Home",
     "feed": "Feed",

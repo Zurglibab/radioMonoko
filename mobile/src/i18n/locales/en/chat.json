@@ -8,7 +8,9 @@
     "newConversation": "New conversation",
     "searchFriendPlaceholder": "Search for a friend...",
     "noResults": "No results",
-    "noFriendsYet": "No friends yet"
+    "noFriendsYet": "No friends yet",
+    "guestTitle": "Chat with friends",
+    "guestMessage": "Log in to send messages to other users."
   },
   "channel": {
     "defaultTitle": "Conversation",

@@ -8,7 +8,9 @@
     "newConversation": "Nouvelle conversation",
     "searchFriendPlaceholder": "Rechercher un ami...",
     "noResults": "Aucun résultat",
-    "noFriendsYet": "Aucun ami pour l'instant"
+    "noFriendsYet": "Aucun ami pour l'instant",
+    "guestTitle": "Discute avec tes amis",
+    "guestMessage": "Connecte-toi pour envoyer des messages à d'autres utilisateurs."
   },
   "channel": {
     "defaultTitle": "Conversation",

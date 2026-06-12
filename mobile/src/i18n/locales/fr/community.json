@@ -32,7 +32,9 @@
     "reportThanksTitle": "Merci",
     "reportThanksMessage": "Contenu signalé aux administrateurs.",
     "following": "Suivi",
-    "reviewOf": "Critique de"
+    "reviewOf": "Critique de",
+    "guestTitle": "Rejoins la communauté",
+    "guestMessage": "Connecte-toi pour voir les critiques et discussions des autres auditeurs."
   },
   "mutualFriends": {
     "title": "Amis en commun"

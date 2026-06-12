@@ -15,6 +15,7 @@ import { Station } from "@/types/content";
 import { usePlayer } from "@/context/PlayerContext";
 import { mapBrandToStation, mapWebRadioToStation } from "@/utils/mappers/brand.mapper";
 import { MediaActionSheet } from "@/features/library/components/MediaActionSheet";
+import { usePromptLogin } from "@/features/shared/usePromptLogin";
 
 const InitialAvatar = ({ title, size = 64, colors }: { title: string; size?: number; colors: any }) => {
   const initials = title
@@ -45,9 +46,10 @@ export default function BrandDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { appearanceSettings } = useAuthContext();
+  const { appearanceSettings, token, user } = useAuthContext();
   const systemTheme = useColorScheme();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
+  const promptLogin = usePromptLogin();
 
   const isDark = appearanceSettings.themeMode === "system"
     ? systemTheme === "dark"
@@ -101,6 +103,11 @@ export default function BrandDetailScreen() {
   const isBrandPlaying = currentTrack?.id === brandStation.id && isPlaying;
 
   const openSheet = (station: Station) => {
+    // Gérer une onde (favoris, statut, collections) nécessite un compte
+    if (!token || !user) {
+      promptLogin(t('common.guestAccess.manageStationAction'));
+      return;
+    }
     setSelectedStation(station);
     setIsSheetVisible(true);
   };

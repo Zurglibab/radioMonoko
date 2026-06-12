@@ -16,6 +16,8 @@
   },
   "profileTab": {
     "title": "Moi",
+    "guestTitle": "Crée ton profil",
+    "guestMessage": "Connecte-toi pour gérer ton compte, ton apparence et tes préférences.",
     "memberSince": "Radio Monoco • Membre depuis {{date}}",
     "stats": {
       "waves": "Ondes",

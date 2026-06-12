@@ -67,10 +67,6 @@
     "reviewsCount_one": "{{count}} avis",
     "reviewsCount_other": "{{count}} avis"
   },
-  "communitySection": {
-    "title": "Communauté",
-    "followUsersAction": "suivre des utilisateurs"
-  },
   "featuredStation": {
     "live": "LIVE",
     "listenersCount_one": "{{count}} auditeur",

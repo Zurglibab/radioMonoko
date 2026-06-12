@@ -14,6 +14,7 @@ import { usePendingRequests } from "@/hooks/profile/usePendingRequests";
 import { useSocialStats } from "@/hooks/social/useSocialStats";
 import { PendingRequestsSection } from "@/features/profile/components/PendingRequestsSection";
 import { SettingItem } from "@/features/profile/components/SettingItem";
+import { GuestAccessPrompt } from "@/features/shared/GuestAccessPrompt";
 
 const StatBox = ({ label, value, colors, onPress, widthClass = "w-[31%]" }: { label: string; value: number | string; colors: any; onPress?: () => void; widthClass?: string }) => (
   <TouchableOpacity
@@ -72,7 +73,17 @@ export default function ProfileScreen() {
     ]);
   };
 
-  if (!user) return null;
+  // Le profil est propre à un compte
+  if (!user) {
+    return (
+      <GuestAccessPrompt
+        icon={User}
+        title={t('profile.profileTab.guestTitle')}
+        message={t('profile.profileTab.guestMessage')}
+        colors={colors}
+      />
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
