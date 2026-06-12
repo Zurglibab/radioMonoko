@@ -1,14 +1,7 @@
 import { EnrichedStatus } from "@/hooks/content/useMyStatuses";
 import { ContentFavorite } from "@/types/favorite";
 
-/**
- * ContentService : Service de logique métier autour des contenus, combinant statuts et favoris.
- */
 export const ContentService = {
-  /**
-   * computeUserStats : Calcule les métriques globales du Dashboard depuis
-   * les vraies données utilisateur (statuts + favoris).
-   */
   computeUserStats: (
     statuses: EnrichedStatus[],
     favorites: ContentFavorite[]
