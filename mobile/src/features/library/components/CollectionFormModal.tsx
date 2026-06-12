@@ -64,8 +64,8 @@ export const CollectionFormModal = ({
     try {
       await onSubmit({ name: trimmedName, description: description.trim(), isPublic });
       onClose();
-    } catch (err: any) {
-      setError(err?.message || t('common.error'));
+    } catch {
+      setError(t('common.error'));
     } finally {
       setIsSubmitting(false);
     }

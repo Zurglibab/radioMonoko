@@ -6,13 +6,6 @@ const avatarUrl = (title: string) => {
   return `https://ui-avatars.com/api/?name=${clean}&background=1A1A1A&color=FFFFFF&length=3&bold=true&uppercase=true&font-size=0.4`;
 };
 
-/**
- * mapBrandToStation : Mappe une marque (Brand) en une station (Station) pour l'affichage dans l'application.
- * Les champs de la marque sont utilisés pour remplir les informations de la station, avec des valeurs par défaut si nécessaire.
- * Le streamUrl est défini uniquement si la marque a un liveStream actif, sinon il est omis pour éviter les erreurs de lecture.
- * @param brand 
- * @returns 
- */
 export const mapBrandToStation = (brand: Brand): Station => ({
   id: brand.id,
   title: brand.title || "Station inconnue",
@@ -25,14 +18,6 @@ export const mapBrandToStation = (brand: Brand): Station => ({
   streamUrl: brand.liveStream || undefined,
 });
 
-/**
- * mapWebRadioToStation : WebRadio secondaire, Station sans streamUrl (car souvent non fonctionnel), mais avec les infos de la marque parente pour l'affichage.
- * Le streamUrl est volontairement omis pour éviter les erreurs de lecture, mais la catégorie est enrichie avec le titre de la marque parente.
- * Les autres champs sont mappés de manière similaire à la marque principale, avec des valeurs par défaut si nécessaire.
- * @param webRadio 
- * @param parent 
- * @returns 
- */
 export const mapWebRadioToStation = (webRadio: WebRadio, parent: Brand): Station => ({
   id: webRadio.id,
   title: webRadio.title || "Station inconnue",
@@ -45,3 +30,14 @@ export const mapWebRadioToStation = (webRadio: WebRadio, parent: Brand): Station
   streamUrl: webRadio.liveStream || undefined,
   brandId: parent.id,
 });
+
+export const flattenBrandsToStations = (brands: Brand[]): Station[] => {
+  const stations: Station[] = [];
+  for (const brand of brands) {
+    if (brand.liveStream) stations.push(mapBrandToStation(brand));
+    for (const wr of brand.webRadios ?? []) {
+      stations.push(mapWebRadioToStation(wr, brand));
+    }
+  }
+  return stations;
+};

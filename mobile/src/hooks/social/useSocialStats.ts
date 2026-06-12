@@ -2,12 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { SocialService } from "@/services/social/social.service";
 
-/**
- * useSocialStats : Hook personnalisé pour récupérer les statistiques sociales de l'utilisateur connecté, comme le nombre d'abonnements et d'abonnés.
- * Il gère le chargement des données, les erreurs d'authentification (en forçant la déconnexion si la session est expirée), et fournit une fonction de rafraîchissement des données.
- * @param skipInitialFetch 
- * @returns 
- */
 export const useSocialStats = (skipInitialFetch = false) => {
   const { token, isAuthenticated, isLoading: isAuthLoading, logout } = useAuthContext();
   const [friendsCount, setFriendsCount] = useState<number>(0);
@@ -35,7 +29,6 @@ export const useSocialStats = (skipInitialFetch = false) => {
         await logout();
         return;
       }
-      if (__DEV__) console.warn("[useSocialStats] Erreur de chargement :", error?.message);
       setFriendsCount(0);
       setFollowersCount(0);
     } finally {

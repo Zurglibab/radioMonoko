@@ -31,8 +31,7 @@ export default function CollectionDetailScreen() {
     setIsHeaderLoading(true);
     CollectionService.getById(token, collectionId)
       .then(col => { setCollection(col); setHeaderError(null); })
-      .catch(err => {
-        if (__DEV__) console.warn("[CollectionDetail] header", err?.message);
+      .catch(() => {
         setHeaderError(t('content.collection.notFound'));
       })
       .finally(() => setIsHeaderLoading(false));

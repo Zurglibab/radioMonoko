@@ -50,8 +50,7 @@ export const useMyStatuses = (skipInitialFetch = false) => {
 
       setStatuses(enriched);
       setError(null);
-    } catch (err: any) {
-      if (__DEV__) console.warn("[useMyStatuses] load error:", err?.message);
+    } catch {
       if (!silent) setError("Impossible de charger votre bibliothèque.");
     } finally {
       if (!silent) setIsLoading(false);

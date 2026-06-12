@@ -75,8 +75,6 @@ export const SocialService = {
       })
       .slice(0, FEED_LIMIT);
 
-    if (__DEV__) console.log("[getFeed] allReviews:", allReviews.length, "| topLevel:", topLevel.length);
-
     if (topLevel.length === 0) return [];
 
     const commentCountMap: Record<string, number> = {};

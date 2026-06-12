@@ -33,16 +33,6 @@ export const RatingService = {
       { token, method: 'PUT', body: payload }
     ),
 
-  remove: (
-    token: string,
-    contentId: string,
-    userId: string
-  ): Promise<void> =>
-    apiFetch<void>(
-      `/ratingContent/content/${contentId}/user/${userId}`,
-      { token, method: 'DELETE' }
-    ),
-
   saveRating: async (
     token: string,
     contentId: string,

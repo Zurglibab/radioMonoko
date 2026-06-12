@@ -41,7 +41,7 @@ export const useConversations = () => {
           let otherAvatar: string | undefined;
           try {
             const profile = await UserService.getById(token, otherMember.user_id);
-            otherUsername = profile.display_name ?? profile.username;
+            otherUsername = profile.display_name ?? profile.username ?? "Utilisateur";
             otherAvatar = profile.avatar;
           } catch {}
 
@@ -67,8 +67,7 @@ export const useConversations = () => {
               new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
           )
       );
-    } catch (err) {
-      if (__DEV__) console.warn("[useConversations]", err);
+    } catch {
     } finally {
       if (!silent) setIsLoading(false);
     }

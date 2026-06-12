@@ -38,8 +38,7 @@ export default function UserProfileScreen() {
       const channelId = await ChannelService.getOrCreateDM(token, currentUser.id, id);
       const displayName = state.profile?.display_name ?? state.profile?.username ?? t('community.userProfile.defaultConversationName');
       router.push(`/chat/${channelId}?username=${encodeURIComponent(displayName)}` as any);
-    } catch (err) {
-      if (__DEV__) console.warn("[UserProfile] getOrCreateDM failed:", err);
+    } catch {
     } finally {
       setIsChatLoading(false);
     }
@@ -69,7 +68,7 @@ export default function UserProfileScreen() {
   }
 
   const { profile, mutualFriends, targetFriendsCount, collections, isFollowing } = state;
-  const displayName = profile.display_name ?? profile.username;
+  const displayName = profile.display_name ?? profile.username ?? "Utilisateur";
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
@@ -108,7 +107,7 @@ export default function UserProfileScreen() {
           </Text>
           {profile.display_name && (
             <Text style={{ color: colors.muted }} className="text-xs font-bold mt-1">
-              @{profile.username}
+              @{profile.username ?? "Utilisateur"}
             </Text>
           )}
 

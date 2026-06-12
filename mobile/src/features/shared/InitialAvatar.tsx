@@ -2,13 +2,13 @@ import React from "react";
 import { View, Text } from "react-native";
 
 interface InitialAvatarProps {
-  name: string;
+  name: string | null | undefined;
   size?: number;
   colors: any;
 }
 
 export const InitialAvatar = ({ name, size = 80, colors }: InitialAvatarProps) => {
-  const initials = name
+  const initials = (name ?? "")
     .split(/[\s_.-]+/)
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? "")

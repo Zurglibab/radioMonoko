@@ -56,11 +56,10 @@ export default function ChatScreen() {
     setStartingChat(friend.id);
     try {
       const channelId = await ChannelService.getOrCreateDM(token, user.id, friend.id);
-      const name = (friend as any).display_name ?? friend.username;
+      const name = (friend as any).display_name ?? friend.username ?? "Utilisateur";
       closePicker();
       router.push(`/chat/${channelId}?username=${encodeURIComponent(name)}` as any);
-    } catch (err) {
-      if (__DEV__) console.warn("[ChatScreen] startChat failed:", err);
+    } catch {
     } finally {
       setStartingChat(null);
     }
@@ -68,7 +67,7 @@ export default function ChatScreen() {
 
   const filteredFriends = search.trim()
     ? friends.filter(f =>
-        f.username.toLowerCase().includes(search.toLowerCase()) ||
+        (f.username ?? "").toLowerCase().includes(search.toLowerCase()) ||
         ((f as any).display_name ?? "").toLowerCase().includes(search.toLowerCase())
       )
     : friends;
@@ -244,7 +243,7 @@ export default function ChatScreen() {
               data={filteredFriends}
               keyExtractor={item => item.id}
               renderItem={({ item }) => {
-                const displayName = (item as any).display_name ?? item.username;
+                const displayName = (item as any).display_name ?? item.username ?? "Utilisateur";
                 const isLoading = startingChat === item.id;
                 return (
                   <TouchableOpacity
@@ -266,7 +265,7 @@ export default function ChatScreen() {
                         {displayName}
                       </Text>
                       {(item as any).display_name && (
-                        <Text style={{ color: colors.muted, fontSize: 12 }}>@{item.username}</Text>
+                        <Text style={{ color: colors.muted, fontSize: 12 }}>@{item.username ?? "Utilisateur"}</Text>
                       )}
                     </View>
                     {isLoading && <ActivityIndicator size="small" color={colors.primary} />}

@@ -31,7 +31,7 @@ export const useChat = (channelId: string) => {
       if (usernameCache.current[userId]) return usernameCache.current[userId];
       try {
         const profile = await UserService.getById(token!, userId);
-        const name = profile.display_name ?? profile.username;
+        const name = profile.display_name ?? profile.username ?? "Utilisateur";
         usernameCache.current[userId] = name;
         return name;
       } catch {
@@ -73,7 +73,6 @@ export const useChat = (channelId: string) => {
           return [...mapped, ...optimistics];
         });
       } catch (err: any) {
-        if (__DEV__) console.warn("[useChat] load failed:", err);
         if (err?.message === "HTTP 429") triggerGlobalBackoff();
       } finally {
         if (!silent) setIsLoading(false);
@@ -115,16 +114,13 @@ export const useChat = (channelId: string) => {
           content.trim(),
           user.id
         );
-        // Remove optimistic first, then reload to get real message from server
         setMessages(prev => prev.filter(m => m.id !== optimisticId));
         if (sent?.id) {
-          // Update with confirmed message directly if backend returned it
           setMessages(prev => [
             ...prev,
             { ...optimistic, id: sent.id, isOptimistic: false },
           ]);
         } else {
-          // Backend didn't return the full message — reload
           load(true);
         }
       } catch {

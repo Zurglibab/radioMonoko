@@ -96,9 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           await i18n.changeLanguage(language.language);
         }
       }
-    } catch (e) {
-      if (__DEV__) console.warn("[AuthContext] Impossible de charger les préférences locales :", e);
-    }
+    } catch {}
   }, []);
 
   /**
@@ -109,9 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     try {
       await SecureStore.deleteItemAsync('user_token');
-    } catch (error) {
-      if (__DEV__) console.warn("[AuthContext] Erreur lors de la suppression du token :", error);
-    }
+    } catch {}
   }, []);
 
   /**
@@ -132,8 +128,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setToken(storedToken);
         setUser(dbUser);
       } catch (error: any) {
-        if (__DEV__) console.warn("[AuthContext] Session initiale non restaurée :", error?.message);
-        // Token corrompu ou expiré : on purge pour repartir d'un état propre
         if (isSessionError(error)) {
           await SecureStore.deleteItemAsync('user_token').catch(() => {});
         }

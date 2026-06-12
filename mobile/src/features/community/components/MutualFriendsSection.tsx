@@ -32,11 +32,11 @@ export const MutualFriendsSection = ({ friends, colors }: MutualFriendsSectionPr
             className="items-center justify-center mr-3"
           >
             <Text style={{ color: colors.primary, fontWeight: "900", fontSize: 13 }}>
-              {f.username[0]?.toUpperCase() ?? "?"}
+              {f.username?.[0]?.toUpperCase() ?? "?"}
             </Text>
           </View>
           <Text style={{ color: colors.text }} className="font-bold text-sm">
-            {f.username}
+            {f.username ?? "Utilisateur"}
           </Text>
         </TouchableOpacity>
       ))}

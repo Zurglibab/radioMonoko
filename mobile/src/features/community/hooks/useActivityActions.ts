@@ -50,8 +50,7 @@ export const useActivityActions = (activity: SocialActivity) => {
           }).catch(() => {});
         }
       }
-    } catch (err) {
-      if (__DEV__) console.warn('[useActivityActions] like failed:', err);
+    } catch {
       setIsLiked(wasLiked);
       setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
     } finally {
@@ -83,8 +82,7 @@ export const useActivityActions = (activity: SocialActivity) => {
         report_type: t(`home.activityCard.reportReasons.${reasonKey}`),
       });
       Alert.alert(t('home.activityCard.thanksTitle'), t('home.activityCard.thanksMessage'));
-    } catch (err) {
-      if (__DEV__) console.warn('[useActivityActions] report failed:', err);
+    } catch {
       Alert.alert(t('common.error'), t('home.activityCard.reportError'));
     }
   };

@@ -47,8 +47,7 @@ export const useFavorites = (skipInitialFetch = false) => {
       });
       setFavorites(enriched);
       setError(null);
-    } catch (err: any) {
-      if (__DEV__) console.warn("[useFavorites] load échoué :", err?.message);
+    } catch {
       if (!silent) setError("Impossible de charger vos favoris.");
     } finally {
       if (!silent) setIsLoading(false);

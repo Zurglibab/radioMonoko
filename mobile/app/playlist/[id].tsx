@@ -106,9 +106,7 @@ export default function PlaylistDetailScreen() {
           });
         }
       })
-      .catch(err => {
-        if (__DEV__) console.warn("[PlaylistDetail] Error loading playlist:", err?.message);
-      })
+      .catch(() => {})
       .finally(() => { if (isMounted) setIsPlaylistLoading(false); });
 
     return () => { isMounted = false; };
@@ -144,8 +142,7 @@ export default function PlaylistDetailScreen() {
           })
           .filter((s): s is Station => s !== null);
         if (isMounted) setDynamicItems(mapped);
-      } catch (err: any) {
-        console.warn("[PlaylistDetail] Error loading tracks:", err?.message);
+      } catch {
       } finally {
         if (isMounted) setIsItemsLoading(false);
       }

@@ -17,8 +17,7 @@ export default function WelcomeScreen() {
     try {
       await logout();
       router.replace("/(tabs)/home");
-    } catch (error) {
-      console.error("Erreur lors de l'accès invité", error);
+    } catch {
       router.replace("/(tabs)/home");
     }
   };

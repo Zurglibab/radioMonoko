@@ -8,25 +8,7 @@ import { ContentApiService } from "@/services/content/content-api.service";
 import { CollectionService } from "@/services/collections/collection.service";
 import { UnifiedSearchResults, WebRadioWithBrand } from "@/types/search";
 
-/**
- * SearchService : Service centralisé pour gérer les différentes recherches dans l'application.
- * Il fournit des méthodes pour rechercher des marques, des utilisateurs, des contenus et des collections publiques.
- * La méthode principale searchUnified lance toutes les recherches en parallèle et agrège les résultats.
- * Les recherches de contenus et de collections publiques sont effectuées localement à partir du cache backend pour une réactivité maximale.
- * Les recherches de marques et d'utilisateurs font appel au backend pour garantir des résultats à jour.
- */
 export const SearchService = {
-  /**
-   * searchUnified : Lance une recherche unifiée sur les marques, les utilisateurs, les contenus et les collections publiques.
-   * Les résultats sont filtrés et agrégés pour fournir une expérience de recherche fluide et rapide.
-   * Les marques et les utilisateurs sont recherchés via des appels API, tandis que les contenus et les collections publiques sont filtrés localement à partir du cache backend.
-   * Les web radios sont également filtrées localement à partir du cache des marques pour inclure les sous-éléments correspondants.
-   * En cas d'erreur dans une catégorie, elle est simplement ignorée pour ne pas impacter les autres résultats.
-   * @param token 
-   * @param query 
-   * @param allBrandsCache 
-   * @returns 
-   */
   searchUnified: async (
     token: string,
     query: string,
@@ -59,14 +41,6 @@ export const SearchService = {
     return UserService.search(token, query);
   },
 
-  /**
-   * searchContents : Filtre les contenus à partir du cache local pour une réactivité maximale.
-   * Les contenus sont filtrés en fonction de la présence de la requête dans le titre ou la description.
-   * En cas d'erreur lors du chargement du cache, une liste vide est retournée pour ne pas impacter les autres résultats.
-   * @param token 
-   * @param query 
-   * @returns 
-   */
   searchContents: async (token: string, query: string): Promise<ContentDTO[]> => {
     if (!token) return [];
     const all = await ContentApiService.getAll(token);
@@ -78,12 +52,6 @@ export const SearchService = {
     );
   },
 
-  /**
-   * searchPublicCollections : Filtre les listes publiques de la communauté.
-   * @param token 
-   * @param query 
-   * @returns 
-   */
   searchPublicCollections: async (token: string, query: string): Promise<CollectionDTO[]> => {
     if (!token) return [];
     const all = await CollectionService.getAll(token);
@@ -96,14 +64,6 @@ export const SearchService = {
     );
   },
 
-  /**
-   * filterWebRadios : Filtre les web radios à partir du cache des marques pour inclure les sous-éléments correspondants.
-   * Les web radios sont filtrées en fonction de la présence de la requête dans le titre ou la description.
-   * En cas d'erreur lors du chargement du cache, une liste vide est retournée pour ne pas impacter les autres résultats.
-   * @param allBrands 
-   * @param query 
-   * @returns 
-   */
   filterWebRadios: (allBrands: Brand[], query: string): WebRadioWithBrand[] => {
     const lower = query.toLowerCase();
     const results: WebRadioWithBrand[] = [];

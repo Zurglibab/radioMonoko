@@ -117,8 +117,7 @@ export const useComments = (
           if (updatedFocused) setFocusedComment(updatedFocused);
         }
       }
-    } catch (err) {
-      if (__DEV__) console.warn("[useComments] load failed:", err);
+    } catch {
       setIsLoading(false);
     }
   }, [token, activityId, targetCommentId, currentUserId]);

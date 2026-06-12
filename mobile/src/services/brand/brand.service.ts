@@ -1,16 +1,7 @@
 import { apiFetch } from "@/utils/apiFetch";
-import { 
-  Brand, 
-  ApiEnvelope, 
-  BrandStatsCount, 
-  BrandRefreshResult 
-} from "@/types/brand";
+import { Brand, ApiEnvelope } from "@/types/brand";
 
 export const BrandService = {
-  /**
-   * fetchAllBrands : GET /api/brands
-   * Récupère la liste complète des stations principales.
-   */
   fetchAllBrands: async (): Promise<Brand[]> => {
     try {
       const response = await apiFetch<ApiEnvelope<Brand[]>>('/api/brands');
@@ -20,9 +11,6 @@ export const BrandService = {
     }
   },
 
-  /**
-   * fetchBrandById : GET /api/brands/{id}
-   */
   fetchBrandById: async (id: string): Promise<Brand> => {
     try {
       const response = await apiFetch<ApiEnvelope<Brand>>(`/api/brands/${id}`);
@@ -32,53 +20,11 @@ export const BrandService = {
     }
   },
 
-  /**
-   * searchByTitle : GET /api/brands/search/{title}
-   * Recherche les radios principales dont le titre matche.
-   */
   searchByTitle: async (token: string, title: string): Promise<Brand[]> => {
     const resp = await apiFetch<{ success: boolean; data: Brand[] }>(
       `/api/brands/search/${encodeURIComponent(title)}`,
       { token }
     );
     return resp.data || [];
-  },
-
-  /**
-   * refreshCache : POST /api/brands/refresh
-   */
-  refreshCache: async (): Promise<BrandRefreshResult> => {
-    try {
-      const response = await apiFetch<ApiEnvelope<BrandRefreshResult>>(
-        '/api/brands/refresh',
-        { method: 'POST' }
-      );
-      return response.data;
-    } catch {
-      throw new Error("Impossible de rafraîchir le cache des marques.");
-    }
-  },
-
-  /**
-   * getCacheCount : GET /api/brands/stats/count
-   */
-  getCacheCount: async (): Promise<BrandStatsCount> => {
-    try {
-      const response = await apiFetch<ApiEnvelope<BrandStatsCount>>('/api/brands/stats/count');
-      return response.data;
-    } catch {
-      throw new Error("Impossible de récupérer les statistiques du cache.");
-    }
-  },
-
-  /**
-   * clearCache : DELETE /api/brands/cache
-   */
-  clearCache: async (): Promise<void> => {
-    try {
-      await apiFetch<ApiEnvelope<void>>('/api/brands/cache', { method: 'DELETE' });
-    } catch {
-      throw new Error("Impossible de vider le cache des marques.");
-    }
   },
 };

@@ -88,8 +88,8 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
         t('library.mediaActionSheet.favoritesTitle'),
         !isFavorite ? t('library.mediaActionSheet.addedToLiked') : t('library.mediaActionSheet.removedFromLiked')
       );
-    } catch (err: any) {
-      Alert.alert(t('common.error'), err?.message || t('library.mediaActionSheet.favoriteError'));
+    } catch {
+      Alert.alert(t('common.error'), t('library.mediaActionSheet.favoriteError'));
     } finally {
       setIsFavoriteLoading(false);
     }
@@ -112,8 +112,8 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
       Alert.alert(t('library.mediaActionSheet.statusTitle'), STATUS_MESSAGES[status], [
         { text: t('library.mediaActionSheet.great'), onPress: handleClose },
       ]);
-    } catch (err: any) {
-      Alert.alert(t('common.error'), err?.message || t('library.mediaActionSheet.statusUpdateError'));
+    } catch {
+      Alert.alert(t('common.error'), t('library.mediaActionSheet.statusUpdateError'));
     } finally {
       setPendingStatus(null);
     }
@@ -127,8 +127,8 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
       Alert.alert(t('library.mediaActionSheet.collectionTitle'), t('library.mediaActionSheet.addedToCollection', { title: station.title, collectionName }), [
         { text: t('library.mediaActionSheet.perfect'), onPress: handleClose },
       ]);
-    } catch (err: any) {
-      Alert.alert(t('common.error'), err?.message || t('library.mediaActionSheet.addToCollectionError'));
+    } catch {
+      Alert.alert(t('common.error'), t('library.mediaActionSheet.addToCollectionError'));
     } finally {
       setAddingToId(null);
     }
@@ -149,14 +149,14 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
             Alert.alert(t('library.mediaActionSheet.collectionTitle'), t('library.mediaActionSheet.addedToNewCollection', { title: station.title }), [
               { text: t('library.mediaActionSheet.great'), onPress: handleClose },
             ]);
-          } catch (itemErr: any) {
+          } catch {
             setView('playlists');
             setCreateModalVisible(false);
             Alert.alert(t('library.mediaActionSheet.createdCollectionTitle'), t('library.mediaActionSheet.createdCollectionMessage'));
           }
         }, 200);
       }
-    } catch (err: any) {
+    } catch {
       Alert.alert(t('common.error'), t('library.mediaActionSheet.createCollectionError'));
     }
   };
