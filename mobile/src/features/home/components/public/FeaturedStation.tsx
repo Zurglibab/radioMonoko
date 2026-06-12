@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Image, useColorScheme } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { PlayCircle } from "lucide-react-native";
 import { theme } from "@/constants/theme";
@@ -16,7 +16,10 @@ import { useTranslation } from "react-i18next";
 export const FeaturedStation = ({ station }: { station: Station }) => {
   const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
-  const isDark = appearanceSettings.themeMode === 'dark';
+  const systemTheme = useColorScheme();
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? systemTheme === 'dark'
+    : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
   // Accès direct au lecteur global pour lancer la station
   const { playTrack } = usePlayer();
@@ -41,7 +44,7 @@ export const FeaturedStation = ({ station }: { station: Station }) => {
           colors={['transparent', 'rgba(0,0,0,0.9)']} 
           className="absolute inset-0 p-8 justify-end"
         >
-          {/* Information : Badge Live conditionnel et catégorie */}
+          {/* Badge Live conditionnel et catégorie */}
           <View className="flex-row items-center mb-4">
             {station.isLive && (
               <View 
@@ -59,7 +62,6 @@ export const FeaturedStation = ({ station }: { station: Station }) => {
             </Text>
           </View>
 
-          {/* Titre : Grande typographie italique pour le dynamisme */}
           <Text 
             style={{ color: colors.text }}
             className="text-4xl font-black mb-4 leading-[38px] tracking-tighter italic"
@@ -67,7 +69,7 @@ export const FeaturedStation = ({ station }: { station: Station }) => {
             {station.title}
           </Text>
 
-          {/* Statistiques : Preuve sociale avec effet de transparence */}
+          {/* Preuve sociale avec effet de transparence */}
           <View className="flex-row items-center bg-white/10 self-start px-4 py-2 rounded-2xl border border-white/5">
             <PlayCircle size={18} color="white" fill="rgba(255,255,255,0.2)" />
             <Text className="text-white ml-3 font-bold text-xs">

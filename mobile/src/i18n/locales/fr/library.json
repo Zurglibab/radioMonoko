@@ -1,6 +1,8 @@
 {
   "library": {
     "title": "Ma Radio",
+    "guestTitle": "Ta bibliothèque t'attend",
+    "guestMessage": "Connecte-toi pour retrouver tes ondes likées, tes statuts et tes playlists.",
     "tabs": {
       "all": "Tout",
       "radios": "Radios",

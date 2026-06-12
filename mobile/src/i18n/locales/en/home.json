@@ -67,10 +67,6 @@
     "reviewsCount_one": "{{count}} review",
     "reviewsCount_other": "{{count}} reviews"
   },
-  "communitySection": {
-    "title": "Community",
-    "followUsersAction": "follow users"
-  },
   "featuredStation": {
     "live": "LIVE",
     "listenersCount_one": "{{count}} listener",

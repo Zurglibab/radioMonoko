@@ -16,6 +16,8 @@
   },
   "profileTab": {
     "title": "Me",
+    "guestTitle": "Create your profile",
+    "guestMessage": "Log in to manage your account, appearance and preferences.",
     "memberSince": "Radio Monoco • Member since {{date}}",
     "stats": {
       "waves": "Waves",

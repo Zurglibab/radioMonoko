@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
 import { Search } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { useRouter } from "expo-router";
@@ -15,12 +15,15 @@ export const HomeHeader = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { appearanceSettings } = useAuthContext();
-  const isDark = appearanceSettings.themeMode === 'dark';
+  const systemTheme = useColorScheme();
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? systemTheme === 'dark'
+    : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
   
   return (
     <View className="flex-row justify-between items-center px-6 pt-4 mb-8">
-      {/* Appel à l'action : "Découvrir" */}
+      {/* Découvrir */}
       <View>
         <Text
           style={{ color: colors.text }}

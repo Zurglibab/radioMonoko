@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, useColorScheme } from "react-native";
 import { Play, Pause } from "lucide-react-native";
 import { theme } from "@/constants/theme";
 import { Station } from "@/types/content";
@@ -21,7 +21,10 @@ interface StationCardProps {
 export const PublicStationCard = ({ item, onPress, onLongPress, onPlayPress, isPlaying = false }: StationCardProps) => {
   const { t } = useTranslation();
   const { appearanceSettings } = useAuthContext();
-  const isDark = appearanceSettings.themeMode === 'dark';
+  const systemTheme = useColorScheme();
+  const isDark = appearanceSettings.themeMode === 'system'
+    ? systemTheme === 'dark'
+    : appearanceSettings.themeMode === 'dark';
   const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   return (

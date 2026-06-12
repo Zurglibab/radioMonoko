@@ -1,6 +1,8 @@
 {
   "library": {
     "title": "My Radio",
+    "guestTitle": "Your library is waiting",
+    "guestMessage": "Log in to find your liked waves, statuses and playlists.",
     "tabs": {
       "all": "All",
       "radios": "Radios",

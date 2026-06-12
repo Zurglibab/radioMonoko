@@ -32,7 +32,9 @@
     "reportThanksTitle": "Thank you",
     "reportThanksMessage": "Content reported to administrators.",
     "following": "Following",
-    "reviewOf": "Review of"
+    "reviewOf": "Review of",
+    "guestTitle": "Join the community",
+    "guestMessage": "Log in to see reviews and discussions from other listeners."
   },
   "mutualFriends": {
     "title": "Mutual friends"
