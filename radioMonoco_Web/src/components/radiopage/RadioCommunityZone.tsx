@@ -396,22 +396,21 @@ export const RadioCommunityZone = ({
                         <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-thin">
                             {comments.length === 0 ? (
                                 <p className={`text-xs italic py-8 text-center ${theme === 'dark' ? 'opacity-40' : 'text-neutral-400'}`}>{t("radio.noComments")}</p>
-                            ) : ( !isLoggedIn && (
-                                    comments.map((c) => (
-                                        <CommentItem
-                                            key={c.id}
-                                            comment={c}
-                                            usersCache={usersCache}
-                                            currentUser={currentUser}
-                                            isLoggedIn={isLoggedIn}
-                                            theme={theme}
-                                            onPostReply={onPostReply}
-                                            onDeleteReview={handleDeleteReview}
-                                            onLikeInteraction={handleLikeInteraction}
-                                            onUpdateReview={externalOnUpdateReview}
-                                        />
-                                    ))
-                                )
+                            ) : (
+                                comments.map((c) => (
+                                    <CommentItem
+                                        key={c.id}
+                                        comment={c}
+                                        usersCache={usersCache}
+                                        currentUser={currentUser}
+                                        isLoggedIn={isLoggedIn}
+                                        theme={theme}
+                                        onPostReply={onPostReply}
+                                        onDeleteReview={handleDeleteReview}
+                                        onLikeInteraction={handleLikeInteraction}
+                                        onUpdateReview={externalOnUpdateReview}
+                                    />
+                                ))
                             )}
                         </div>
                     )}
