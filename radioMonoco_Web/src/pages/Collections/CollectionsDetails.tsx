@@ -11,6 +11,7 @@ import {useAuth} from "../../context/AuthContext.tsx";
 import SearchService from "../../services/SearchService.ts";
 import {useTranslation} from "react-i18next";
 import BrandsService from "../../services/BrandsService.ts";
+import {useAppearance} from "../../context/AppearanceContext.tsx";
 
 const CollectionsDetails = () => {
     const { id } = useParams()
@@ -23,6 +24,7 @@ const CollectionsDetails = () => {
     const navigate = useNavigate()
     const isOwner = user?.id === collection?.user_id
     const {t} = useTranslation();
+    const {theme} = useAppearance();
 
     type CollectionTarget = { type: "show" | "radio" | "unknown"; path?: string; }
 
@@ -152,26 +154,30 @@ const CollectionsDetails = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-                <p className="text-white">{t("collections.loadingSingle")}</p>
+            <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-app-bg text-app-text" : "bg-neutral-50 text-neutral-800"}`}>
+                <p>{t("collections.loadingSingle")}</p>
             </div>
         );
     }
     if (error || !collection) {
         return (
-            <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-                <p className="text-white">{error || t("collections.errors.notFound")}</p>
+            <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-app-bg text-app-text" : "bg-neutral-50 text-neutral-800"}`}>
+                <p>{error || t("collections.errors.notFound")}</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] px-6 md:px-12 py-24">
+        <div className={`min-h-screen px-6 md:px-12 py-24 ${theme === "dark" ? "bg-app-bg text-app-text" : "bg-neutral-50 text-neutral-800"}`}>
 
             <div className="flex items-center gap-4 mb-8">
                 <button
                     onClick={() => navigate('/collections')}
-                    className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
+                    className={`flex items-center gap-2 px-3 py-2 rounded-full transition ${
+                        theme === "dark"
+                            ? "bg-neutral-800 hover:bg-neutral-700 text-white"
+                            : "bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-200 shadow-sm"
+                    }`}
             >
                     {t("collections.details.back")}
                 </button>
@@ -184,11 +190,11 @@ const CollectionsDetails = () => {
                         <p className="uppercase tracking-[0.2em] text-neutral-500 text-xs font-bold mb-3">
                             {t("collections.details.label")}
                         </p>
-                        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight">
+                        <h1 className={`text-5xl md:text-7xl font-black tracking-tight ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                             {collection.name}
                         </h1>
 
-                        <p className="text-neutral-400 mt-6 max-w-2xl">
+                        <p className={`mt-6 max-w-2xl ${theme === "dark" ? "text-neutral-400" : "text-neutral-600"}`}>
                             {collection.description || t("collections.noDescription")}
                         </p>
 
@@ -206,14 +212,18 @@ const CollectionsDetails = () => {
                     </div>
                 </div>
             </div>
-            <div className="bg-neutral-900/40 border border-white/5 rounded-3xl p-8">
-                <h2 className="text-2xl font-bold text-white mb-6">
+            <div className={`rounded-3xl p-8 border ${
+                theme === "dark"
+                    ? "bg-neutral-900/40 border-white/5"
+                    : "bg-white border-neutral-200 shadow-sm"
+            }`}>
+                <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                     {t("collections.details.content")}
                 </h2>
 
                 {items.length === 0 ? (
                     <div className="text-center py-12">
-                        <p className="text-white font-semibold text-lg">
+                        <p className={`font-semibold text-lg ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                             {t("collections.details.empty")}
                         </p>
 
@@ -240,10 +250,14 @@ const CollectionsDetails = () => {
                                         navigate(content.url);
                                     }
                                 }}
-                                className="bg-neutral-800 rounded-xl p-4 flex justify-between items-center cursor-pointer hover:bg-neutral-700 transition"
+                                className={`rounded-xl p-4 flex justify-between items-center cursor-pointer transition border ${
+                                    theme === "dark"
+                                        ? "bg-neutral-800 border-white/5 hover:bg-neutral-700"
+                                        : "bg-neutral-50 border-neutral-200 hover:bg-neutral-100"
+                                }`}
                             >
                                 <div>
-                                    <p className="text-white font-semibold">
+                                    <p className={`font-semibold ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                                         {contentDetails[item.content_id]?.title || item.content_id}
                                     </p>
                                     <p className="text-neutral-500 text-sm">

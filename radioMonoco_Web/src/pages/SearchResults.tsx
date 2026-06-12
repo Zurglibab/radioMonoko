@@ -41,7 +41,7 @@ const SearchResults = () => {
                     ← {t("common.back")}
                 </button>
             </div>
-            <h1 className="text-4xl font-black text-app-text mb-8">
+            <h1 className={`text-4xl font-black mb-8 ${theme === "dark" ? "text-app-text" : "text-neutral-900"}`}>
                 {t("searchPage.title")}
                 <span className="text-rose-500 ml-3">
                     {query}
@@ -64,7 +64,7 @@ const SearchResults = () => {
                         {t("searchPage.users")}
                     </h2>
                     {results.users.length === 0 ? (
-                        <p className="text-neutral-500">
+                        <p className="text-app-text text-neutral-500">
                             {t("searchPage.noUsers")}
                         </p>
                     ) : (
@@ -135,7 +135,7 @@ const SearchResults = () => {
                                             {collection.name}
                                         </h3>
 
-                                        <p className="text-neutral-500 text-sm mt-2 line-clamp-3">
+                                        <p className={`text-sm mt-2 line-clamp-3 ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
                                             {collection.description || "Aucune description"}
                                         </p>
 

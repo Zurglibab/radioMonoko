@@ -8,6 +8,7 @@ import CreateCollection from "./CreateCollections.tsx";
 import ModifyCollections from "./ModifyCollections.tsx";
 import DeleteCollection from "./DeleteCollections.tsx";
 import {useTranslation} from "react-i18next";
+import {useAppearance} from "../../context/AppearanceContext.tsx";
 
 
 const Collections = () => {
@@ -26,6 +27,7 @@ const Collections = () => {
     const [recentCollection, setRecentCollection] = useState<Collection[]>([]);
     const navigate = useNavigate();
     const {t} = useTranslation();
+    const {theme} = useAppearance();
 
     useEffect(() => {
 
@@ -103,7 +105,7 @@ const Collections = () => {
     };
 
     return (
-        <div className="flex min-h-screen bg-[#0a0a0a]">
+        <div className={`flex min-h-screen ${theme === "dark" ? "bg-app-bg text-app-text" : "bg-neutral-50 text-neutral-800"}`}>
 
             <div className="flex-1 px-6 md:px-12 py-24 relative overflow-hidden">
 
@@ -116,7 +118,7 @@ const Collections = () => {
 
                     <div className="flex items-center justify-between mb-12">
                         <div>
-                            <h1 className="text-4xl md:text-6xl font-black text-white tracking-tight">
+                            <h1 className={`text-4xl md:text-6xl font-black tracking-tight ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                                 {t("collections.title")}
                             </h1>
                         </div>
@@ -135,7 +137,7 @@ const Collections = () => {
                     )}
 
                     <div>
-                        <h2 className="text-2xl font-bold text-white mb-6">
+                        <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                             {t("collections.myCollections")}
                         </h2>
 
@@ -144,13 +146,17 @@ const Collections = () => {
                                 <div
                                     key={item.id}
                                     onClick={() => navigate(`/collections/${item.id}`)}
-                                    className="cursor-pointer bg-neutral-900/40 border border-white/5 rounded-2xl p-5 hover:border-rose-500/30 transition"
+                                    className={`cursor-pointer rounded-2xl p-5 border transition hover:border-rose-500/40 ${
+                                        theme === "dark"
+                                            ? "bg-neutral-900/40 border-white/5 hover:bg-neutral-900/70"
+                                            : "bg-white border-neutral-200 shadow-sm hover:bg-neutral-50"
+                                    }`}
                                 >
-                                    <h3 className="text-white font-semibold">
+                                    <h3 className={`font-semibold ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                                         {item.name}
                                     </h3>
 
-                                    <p className="text-neutral-500 text-sm mt-2">
+                                    <p className={`text-sm mt-2 ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
                                         {item.description || t("collections.noDescription")}
                                     </p>
 
@@ -189,7 +195,7 @@ const Collections = () => {
                     </div>
 
                     <div className="mt-20">
-                        <h2 className="text-2xl font-bold text-white mb-6">
+                        <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                             {t("collections.publicCollections")}
                         </h2>
 
@@ -202,11 +208,11 @@ const Collections = () => {
                                     }
                                     className="cursor-pointer bg-neutral-900/40 border border-white/5 rounded-2xl p-5 hover:border-rose-500/30 transition"
                                 >
-                                    <h3 className="text-white font-semibold">
+                                    <h3 className={`font-semibold ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                                         {collection.name}
                                     </h3>
 
-                                    <p className="text-neutral-500 text-sm mt-2">
+                                    <p className={`text-sm mt-2 ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
                                         {collection.description}
                                     </p>
                                 </div>
@@ -214,7 +220,7 @@ const Collections = () => {
                         </div>
                     </div>
                     <div className="mt-20">
-                        <h2 className="text-2xl font-bold text-white mb-6">
+                        <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                             {t("collections.latestCreated")}
                         </h2>
 
@@ -222,10 +228,14 @@ const Collections = () => {
                             {recentCollection.map((collection) => (
                                 <div
                                     key={collection.id}
-                                    className="bg-neutral-900/40 border border-white/5 rounded-xl p-4 flex justify-between items-center"
+                                    className={`rounded-xl p-4 flex justify-between items-center border ${
+                                        theme === "dark"
+                                            ? "bg-neutral-900/40 border-white/5"
+                                            : "bg-white border-neutral-200 shadow-sm"
+                                    }`}
                                 >
                                     <div>
-                                        <p className="text-white font-semibold">
+                                        <p className="text-app-text font-semibold">
                                             {collection.name}
                                         </p>
                                         <p className="text-neutral-500 text-sm">
@@ -247,26 +257,34 @@ const Collections = () => {
                         </div>
                     </div>
                     <div className="mt-20">
-                        <h2 className="text-2xl font-bold text-white mb-6">
+                        <h2 className={`text-2xl font-bold mb-6 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                             {t("collections.stats")}
                         </h2>
 
                         <div className="grid md:grid-cols-3 gap-4">
-                            <div className="bg-neutral-900/40 p-6 rounded-xl">
+                            <div className={`p-6 rounded-xl border ${
+                                theme === "dark"
+                                    ? "bg-neutral-900/40 border-white/5"
+                                    : "bg-white border-neutral-200 shadow-sm"
+                            }`}>
                                 <p className="text-neutral-400 text-sm">
                                     {t("collections.myCollections")}
                                 </p>
 
-                                <p className="text-3xl font-bold text-white">
+                                <p className={`text-3xl font-bold ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                                     {collections.length}
                                 </p>
                             </div>
 
-                            <div className="bg-neutral-900/40 p-6 rounded-xl">
+                            <div className={`p-6 rounded-xl border ${
+                                theme === "dark"
+                                    ? "bg-neutral-900/40 border-white/5"
+                                    : "bg-white border-neutral-200 shadow-sm"
+                            }`}>
                                 <p className="text-neutral-400 text-sm">
                                     {t("collections.publicCollections")}
                                 </p>
-                                <p className="text-3xl font-bold text-white">
+                                <p className={`text-3xl font-bold ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                                     {
                                         collections.filter(
                                             (c) => c.is_public
@@ -274,12 +292,16 @@ const Collections = () => {
                                     }
                                 </p>
                             </div>
-                            <div className="bg-neutral-900/40 p-6 rounded-xl">
+                            <div className={`p-6 rounded-xl border ${
+                                theme === "dark"
+                                    ? "bg-neutral-900/40 border-white/5"
+                                    : "bg-white border-neutral-200 shadow-sm"
+                            }`}>
                                 <p className="text-neutral-400 text-sm">
                                     {t("collections.privateCollections")}
                                 </p>
 
-                                <p className="text-3xl font-bold text-white">
+                                <p className={`text-3xl font-bold ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
                                     {
                                         collections.filter(
                                             (c) => !c.is_public
