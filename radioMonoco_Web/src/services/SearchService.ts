@@ -9,7 +9,6 @@ const SHOW_STATIONS = [
     "FRANCEINTER",
     "FRANCECULTURE",
     "FRANCEMUSIQUE",
-    //"FIP",
     "MOUV"
 ];
 

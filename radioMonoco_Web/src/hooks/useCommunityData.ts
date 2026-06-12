@@ -7,12 +7,7 @@ import contentService from "../services/ContentsService";
 import { cached } from "../services/ApiCacheService";
 import type { User } from "../interfaces/Users.types";
 import type { Review } from "../interfaces/Reviews.types";
-
-interface UseCommunityDataOptions {
-    externalId: string | null | undefined;
-    currentUserId: string | null | undefined;
-    isLoggedIn: boolean;
-}
+import type {UseCommunityDataOptions} from "../interfaces/UseCommunity.types.ts";
 
 export const useCommunityData = ({ externalId, currentUserId, isLoggedIn }: UseCommunityDataOptions) => {
     const [dbContentId, setDbContentId]     = useState<string | null>(null);

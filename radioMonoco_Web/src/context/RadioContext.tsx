@@ -1,24 +1,5 @@
 import { createContext, useContext, useState, useRef, useEffect, type ReactNode } from "react";
-
-export interface Radio {
-    name: string;
-    desc: string;
-    img: string;
-    currentShow: string;
-    host: string;
-    streamUrl?: string;
-}
-
-interface RadioContextType {
-    isPlaying: boolean;
-    setIsPlaying: (playing: boolean) => void;
-    currentRadio: Radio | null;
-    setCurrentRadio: (radio: Radio | null) => void;
-    playRadio: (radio: Radio) => void;
-    volume: number;
-    setVolume: (v: number) => void;
-    toggleMute: () => void;
-}
+import type {Radio, RadioContextType} from "../interfaces/Radios.types.ts";
 
 const RadioContext = createContext<RadioContextType | undefined>(undefined);
 

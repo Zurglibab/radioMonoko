@@ -1,17 +1,13 @@
 import api from "./Api";
 
-// Helper function to transform API response (Array of likes) into structured like data
 const transformLikesData = (apiResponse: any, currentUserId?: string | null): { likesCount: number; dislikesCount: number; userChoice: string | null } => {
     let likesCount = 0;
     let dislikesCount = 0;
     let userChoice = null;
 
     if (Array.isArray(apiResponse)) {
-        // API returns an array of like records
         likesCount = apiResponse.filter((item: any) => item.is_like === true).length;
         dislikesCount = apiResponse.filter((item: any) => item.is_like === false).length;
-
-        // Find current user's choice
         if (currentUserId) {
             const userLike = apiResponse.find((item: any) => item.user_id === currentUserId);
             if (userLike) {
@@ -24,7 +20,6 @@ const transformLikesData = (apiResponse: any, currentUserId?: string | null): { 
         dislikesCount = apiResponse?.dislikes ?? apiResponse?.dislikesCount ?? apiResponse?.dislikes_count ?? 0;
         userChoice = apiResponse?.userChoice ?? apiResponse?.user_choice ?? null;
     }
-
     return { likesCount, dislikesCount, userChoice };
 };
 

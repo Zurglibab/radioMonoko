@@ -32,9 +32,3 @@ export async function cached<T>(key: string, fn: () => Promise<T>, ttl = 300_000
     cache.set(key, { timestamp: now, promise });
     return promise;
 }
-
-export function clearCache(key?: string) {
-    if (key) cache.delete(key);
-    else cache.clear();
-}
-

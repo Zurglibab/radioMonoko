@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import AdminService from "../../services/AdminService.ts";
 import type { ReportReview, ReportUser } from "../../interfaces/Report.types.ts";
 
-import type { Review } from "../../interfaces/Review.types.ts";
+import type { Review } from "../../interfaces/Reviews.types.ts";
 import { useNavigate } from "react-router-dom";
 import {useTranslation} from "react-i18next";
 import type {User} from "../../interfaces/Users.types.ts";

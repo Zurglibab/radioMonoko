@@ -31,8 +31,6 @@ const RadioPage = () => {
     const [diffusions, setDiffusions] = useState<ApiDiffusion[]>([]);
     const [loading, setLoading]       = useState(true);
 
-    // ── Données de la radio ───────────────────────────────────────────────────
-
     useEffect(() => {
         if (!station) return;
         let isMounted = true;
@@ -79,8 +77,6 @@ const RadioPage = () => {
         return () => { isMounted = false; };
     }, [station]);
 
-    // ── Hooks partagés ────────────────────────────────────────────────────────
-
     const community = useCommunityData({
         externalId: brand?.id,
         currentUserId: currentUser?.id,
@@ -92,8 +88,6 @@ const RadioPage = () => {
         currentUserId: currentUser?.id,
         isLoggedIn,
     });
-
-    // ── Render ────────────────────────────────────────────────────────────────
 
     if (loading) {
         return (

@@ -62,7 +62,6 @@ export const FriendsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
                     <button onClick={onClose} className="opacity-50 hover:opacity-100 transition"><HiOutlineX /></button>
                 </div>
 
-                {/* CHANGEMENT ICI : grid-cols-5 au lieu de grid-cols-4 */}
                 <div className={`grid grid-cols-5 gap-1 p-1 rounded-2xl mb-6 ${isDark ? 'bg-white/5' : 'bg-neutral-100'}`}>
                     <TabButton active={activeTab === 'friends'} onClick={() => setActiveTab('friends')} label={t("friendsModal.tabs.friends", { count: friends.length })} isDark={isDark} />
                     <TabButton active={activeTab === 'following'} onClick={() => setActiveTab('following')} label={t("friendsModal.tabs.following", { count: following.length })} isDark={isDark} />

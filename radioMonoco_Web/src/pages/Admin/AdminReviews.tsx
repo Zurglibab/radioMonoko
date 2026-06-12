@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AdminService from "../../services/AdminService.ts";
-import type { Review } from "../../interfaces/Review.types.ts";
+import type { Review } from "../../interfaces/Reviews.types.ts";
 import { useNavigate } from "react-router-dom";
 import {useTranslation} from "react-i18next";
 

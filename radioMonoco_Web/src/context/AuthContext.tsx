@@ -3,15 +3,7 @@ import type { ReactNode } from 'react';
 import authService from "../services/AuthService.ts";
 import api from "../services/Api.ts";
 import type { User } from "../interfaces/Users.types.ts";
-
-interface AuthContextType {
-    user: User | null;
-    login: (email: string, password: string) => Promise<void>;
-    register: (email: string, username: string, password: string) => Promise<void>;
-    logout: () => void;
-    updateUser: (user: User | null) => void;
-    loginWithGoogleToken: (googleToken: string) => Promise<void>;
-}
+import type {AuthContextType} from "../interfaces/AuthContext.types.ts";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -64,7 +56,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
     };
 
-    // 3. Implémentation compatible avec User | null
     const updateUser = (updatedUser: User | null) => {
         if (updatedUser) {
             localStorage.setItem('user', JSON.stringify(updatedUser));

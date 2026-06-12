@@ -11,6 +11,3 @@ export interface Brand {
     webRadios?: Brand[];
     localRadios?: Brand[];
 }
-
-export type CreateBrandInput = Omit<Brand, 'id' | 'createdAt' | 'updatedAt' | 'webRadios' | 'localRadios'>;
-export type UpdateBrandInput = Partial<CreateBrandInput>;

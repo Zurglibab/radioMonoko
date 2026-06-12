@@ -1,7 +1,7 @@
 import api from "./Api";
 import type { User } from "../interfaces/Users.types.ts";
 import type { ReportReview, ReportUser, Report } from "../interfaces/Report.types";
-import type { Review } from "../interfaces/Review.types";
+import type { Review } from "../interfaces/Reviews.types";
 
 const extractArray = <T>(response: any): T[] => {
     const payload = response?.data?.data ?? response?.data ?? response;

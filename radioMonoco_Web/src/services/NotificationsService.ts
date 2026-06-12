@@ -1,19 +1,5 @@
 import api from "./Api";
-
-export interface Notification {
-    id: string;
-    userId: string;
-    message: string;
-    read: boolean;
-    createdAt: string;
-}
-
-export interface NotificationCreate {
-    user_id: string;
-    type: string;
-    message: string;
-    is_read?: boolean;
-}
+import type {NotificationCreate} from "../interfaces/Notifications.types.ts";
 
 const createNotification = async (data: NotificationCreate) => {
     try {

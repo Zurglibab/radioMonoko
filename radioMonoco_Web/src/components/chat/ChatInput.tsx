@@ -1,12 +1,12 @@
 import { useState } from "react";
 import type { ChatInputProps } from "../../interfaces/Props.types.ts";
 import { DEFAULT_THEME } from "../../assets/themes/DefaultTheme.ts";
-import { useAppearance } from "../../context/AppearanceContext.tsx"; // Import du hook
+import { useAppearance } from "../../context/AppearanceContext.tsx";
 import { useTranslation } from "react-i18next";
 
 export const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
     const [text, setText] = useState('');
-    const { theme } = useAppearance(); // Récupération du mode actuel
+    const { theme } = useAppearance();
     const { t } = useTranslation();
 
     return (

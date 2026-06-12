@@ -59,7 +59,6 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                     {t("collections.createModal.subtitle")}
                 </p>
 
-                {/* nom */}
                 <div className="mb-5">
                     <label className="text-sm text-neutral-400 mb-2 block">
                         {t("collections.createModal.nameLabel")}
@@ -74,7 +73,6 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                     />
                 </div>
 
-                {/* description */}
                 <div className="mb-5">
                     <label className="text-sm text-neutral-400 mb-2 block">
                         {t("collections.createModal.descLabel")}
@@ -88,7 +86,6 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                     />
                 </div>
 
-                {/* public/private */}
                 <button
                     onClick={() => setIsPublic(!isPublic)}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition ${
@@ -110,7 +107,6 @@ const CreateCollection = ({ isOpen, onClose, onSubmit,}:CreateCollectionProps) =
                     </div>
                 </button>
 
-                {/* actions */}
                 <div className="flex justify-end gap-3 mt-8">
 
                     <button

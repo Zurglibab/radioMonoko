@@ -1,17 +1,6 @@
 import api from "./Api.ts";
+import type {AuthResponse, GoogleAuthResponse} from "../interfaces/AuthResponse.types.ts";
 
-interface AuthResponse{
-    token: string;
-}
-
-interface GoogleAuthResponse {
-    success: boolean;
-    token: string;
-    user?: {
-        id: string;
-        email: string;
-    };
-}
 
 const register = async (email: string, username:string, password: string): Promise<AuthResponse> => {
     const response = await api.post("/user/register", { email, username, password});

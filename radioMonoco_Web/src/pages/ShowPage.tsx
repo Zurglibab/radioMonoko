@@ -29,8 +29,6 @@ const ShowPage = () => {
     const location = useLocation();
     const fallbackShow = location.state?.show as ApiShow | undefined;
 
-    // ── Données de l'émission ─────────────────────────────────────────────────
-
     useEffect(() => {
         if (!id) return;
         let isMounted = true;
@@ -64,8 +62,6 @@ const ShowPage = () => {
         return () => { isMounted = false; };
     }, [id, fallbackShow]);
 
-    // ── Hooks partagés ────────────────────────────────────────────────────────
-
     const community = useCommunityData({
         externalId: show?.id,
         currentUserId,
@@ -77,8 +73,6 @@ const ShowPage = () => {
         currentUserId,
         isLoggedIn,
     });
-
-    // ── Render ────────────────────────────────────────────────────────────────
 
     if (loading) {
         return (

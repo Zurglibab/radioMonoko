@@ -69,7 +69,6 @@ const GlobalPlayer: React.FC = () => {
         `}>
             <div className="w-full h-full flex items-center justify-between gap-2 md:gap-4">
 
-                {/* BLOC GAUCHE : Image et Texte */}
                 <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
                     <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl overflow-hidden shadow-lg shrink-0 relative border ${isDark ? "border-white/5" : "border-black/5"}`}>
                         {isPlaying && (
@@ -105,7 +104,6 @@ const GlobalPlayer: React.FC = () => {
                     </div>
                 </div>
 
-                {/* BLOC DROIT : Contrôle de volume et Lecture */}
                 <div className="flex items-center gap-3 md:gap-6 shrink-0">
 
                     <div className="flex items-center gap-1.5 md:gap-2">
@@ -169,7 +167,6 @@ const GlobalPlayer: React.FC = () => {
                     transition: opacity 0.2s;
                 }
 
-                /* Mobile : Thumb toujours visible et un peu plus grand pour le tactile */
                 @media (max-width: 767px) {
                     input[type=range]::-webkit-slider-thumb {
                         height: 12px;
@@ -184,7 +181,6 @@ const GlobalPlayer: React.FC = () => {
                     }
                 }
 
-                /* Desktop : Thumb discret qui apparaît au hover */
                 @media (min-width: 768px) {
                     input[type=range]::-webkit-slider-thumb {
                         height: 12px;

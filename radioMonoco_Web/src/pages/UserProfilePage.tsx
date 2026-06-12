@@ -21,7 +21,6 @@ const UserProfilePage = () => {
     const [profilUser, setProfilUser] = useState<User | null>(null);
     const [collections, setCollections] = useState<Collection[]>([]);
 
-    // Nouveaux states pour les followers et following
     const [followers, setFollowers] = useState<User[]>([]);
     const [following, setFollowing] = useState<User[]>([]);
 

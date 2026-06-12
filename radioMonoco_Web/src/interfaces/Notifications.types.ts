@@ -14,3 +14,10 @@ export interface AppNotification {
     timestamp: string;
     type: 'like' | 'dislike' | 'reply' | 'system';
 }
+
+export interface NotificationCreate {
+    user_id: string;
+    type: string;
+    message: string;
+    is_read?: boolean;
+}
