@@ -14,10 +14,6 @@ export interface EnrichedStatus {
   updatedAt: string;
 }
 
-/**
- * useMyStatuses : Récupère la bibliothèque de l'utilisateur avec le décompte des statuts.
- * @param skipInitialFetch Si true, désactive le fetch automatique au montage pour éviter les conflits.
- */
 export const useMyStatuses = (skipInitialFetch = false) => {
   const { token, user, isLoading: isAuthLoading } = useAuthContext();
   const [statuses, setStatuses] = useState<EnrichedStatus[]>([]);
@@ -55,7 +51,7 @@ export const useMyStatuses = (skipInitialFetch = false) => {
       setStatuses(enriched);
       setError(null);
     } catch (err: any) {
-      console.warn("[useMyStatuses] load error:", err?.message);
+      if (__DEV__) console.warn("[useMyStatuses] load error:", err?.message);
       if (!silent) setError("Impossible de charger votre bibliothèque.");
     } finally {
       if (!silent) setIsLoading(false);
