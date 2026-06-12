@@ -195,7 +195,6 @@ const NavBar = () => {
         previewResults.shows.length > 0;
 
     const IconCircleStyle = "flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-full transition-all duration-300 cursor-pointer active:scale-95 hover:bg-app-text/10 group";
-
     return (
         <>
             <nav className="fixed top-0 left-0 right-0 h-14 md:h-16 flex items-center justify-between px-4 md:px-12 bg-app-bg/80 backdrop-blur-xl border-b border-app-border z-50 transition-colors duration-500">
@@ -207,10 +206,10 @@ const NavBar = () => {
                     {(
                         <div
                             ref={searchContainerRef}
-                            className={`flex items-center h-9 md:h-10 rounded-full transition-all duration-300
+                            className={`relative flex items-center h-9 md:h-10 rounded-full transition-all duration-500
                             ${isSearchOpen
-                                ? "absolute left-4 right-4 top-1/2 -translate-y-1/2 z-50 bg-app-text/10 backdrop-blur-md md:backdrop-blur-none px-3 border border-app-border shadow-lg md:relative md:inset-auto md:translate-y-0 md:w-96"
-                                : "relative w-10 bg-transparent border-transparent z-10"}
+                                ? "bg-app-text/10 px-3 w-64 md:w-96 border border-app-border shadow-lg"
+                                : "w-10 bg-transparent border-transparent"}
                                 `}
                         >
                             <button
@@ -257,7 +256,7 @@ const NavBar = () => {
                             )}
 
                             {isSearchOpen && searchQuery.trim().length >= 2 && (
-                                <div className="absolute top-full left-0 mt-3 w-full md:w-[430px] bg-app-bg border border-app-border rounded-2xl shadow-2xl overflow-hidden z-[80]">
+                                <div className="absolute top-full left-0 mt-3 w-[320px] md:w-[430px] bg-app-bg border border-app-border rounded-2xl shadow-2xl overflow-hidden z-[80]">
 
                                     <div className="px-4 py-3 border-b border-app-border text-app-text flex items-center justify-between">
                                         <p className="text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
@@ -421,9 +420,7 @@ const NavBar = () => {
                 </div>
 
                 <div className="flex items-center gap-2 md:gap-3">
-                    <div className="hidden md:block">
-                        <LanguageSwitcher />
-                    </div>
+                    <LanguageSwitcher />
                     <button
                         onClick={toggleTheme}
                         className={`${IconCircleStyle}`}

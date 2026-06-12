@@ -73,7 +73,7 @@ const SearchResults = () => {
     const hasActiveFilters = !!genre || !!year || !!author;
 
     return (
-        <div className={`min-h-screen transition-colors duration-300 px-4 sm:px-6 md:px-10 py-20 md:py-24 ${theme === 'dark' ? 'bg-app-bg text-app-text' : 'bg-neutral-50 text-neutral-800'}`}>
+        <div className={`min-h-screen transition-colors duration-300 px-10 py-24 ${theme === 'dark' ? 'bg-app-bg text-app-text' : 'bg-neutral-50 text-neutral-800'}`}>
             <div className="flex items-center gap-4 mb-8">
                 <button
                     onClick={() => navigate('/')}

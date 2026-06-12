@@ -6,13 +6,11 @@ import GlobalPlayer from "./GlobalPlayer.tsx";
 import { ChatManager } from "../chat/ChatManager.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
 import { useRadio } from "../../context/RadioContext";
-import { useAppearance } from "../../context/AppearanceContext.tsx";
 
 const Layout = () => {
     const [isVisible, setIsVisible] = useState(false);
     const { currentRadio } = useRadio();
     const { user } = useAuth();
-    const { theme } = useAppearance();
 
     useEffect(() => {
         const toggleVisibility = () => {
@@ -27,7 +25,7 @@ const Layout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-app-bg text-app-text transition-colors duration-500 relative">
+        <div className="min-h-screen bg-neutral-950 text-white relative">
             <Header />
 
             <main className="w-full">
@@ -41,18 +39,21 @@ const Layout = () => {
             <button
                 onClick={scrollToTop}
                 className={`
-                    fixed right-6 z-50 flex items-center justify-center w-12 h-12 rounded-full shadow-xl transition-all duration-300 ease-in-out hover:scale-105 active:scale-95
-                    ${theme === 'dark' ? 'bg-neutral-900 text-white' : 'bg-white text-neutral-900 border border-neutral-200'}
-                    hover:text-rose-500
-                    bottom-20 ${currentRadio ? "md:bottom-40" : ""}
+                    fixed left-8 p-4 z-50 rounded-full shadow-2xl transition-all duration-500 ease-in-out
+                    bg-neutral-900 text-white border border-neutral-800
+                    ${currentRadio ? "bottom-36" : "bottom-8"}
                     ${isVisible
-                    ? "opacity-100 translate-y-0 pointer-events-auto cursor-pointer"
-                    : "opacity-0 translate-y-10 pointer-events-none"
+                    ? "opacity-100 translate-y-0 scale-100 cursor-pointer"
+                    : "opacity-0 translate-y-10 scale-50 pointer-events-none"
                 }
+                    hover:bg-white hover:text-black hover:border-white
+                    hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]
+                    hover:-translate-y-2
+                    active:scale-90
                 `}
                 aria-label="Back to top"
             >
-                <FaArrowUp size={16} className="transition-transform duration-300" />
+                <FaArrowUp size={20} className="transition-transform duration-300 group-hover:scale-110" />
             </button>
         </div>
     );

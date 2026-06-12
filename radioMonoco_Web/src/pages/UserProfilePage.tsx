@@ -14,29 +14,26 @@ import NotificationsService from "../services/NotificationsService.ts";
 import {Loader} from "../components/utils/Loader.tsx";
 import {useAppearance} from "../context/AppearanceContext.tsx";
 
+
 const UserProfilePage = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { user: connectedUser } = useAuth();
     const [profilUser, setProfilUser] = useState<User | null>(null);
     const [collections, setCollections] = useState<Collection[]>([]);
-
-    // Nouveaux states pour les followers et following
-    const [followers, setFollowers] = useState<User[]>([]);
-    const [following, setFollowing] = useState<User[]>([]);
-
     const [isFriend, setIsFriend] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const {t} = useTranslation();
     const [isFollow, setFollow] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const [friends, setFriends] = useState<User[]>([]);
     const [isBlocked, setIsBlocked] = useState(false);
     const [isBlockLoading, setIsBlockLoading] = useState(false);
 
     const isOwnProfile = connectedUser?.id === profilUser?.id;
     const isPrivateProfil = profilUser?.privacy === "private";
-    const {theme} = useAppearance();
+    const {theme} = useAppearance()
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -55,16 +52,8 @@ const UserProfilePage = () => {
                 }
                 setProfilUser(userData);
 
-                try {
-                    const [followersData, followingData] = await Promise.all([
-                        UserRelationsService.getFollowers(),
-                        UserRelationsService.getFollowing()
-                    ]);
-                    setFollowers(followersData || []);
-                    setFollowing(followingData || []);
-                } catch (e) {
-                    console.error("Erreur récupération relations :", e);
-                }
+                const userFriends = await UserRelationsService.getFriendsById(id);
+                setFriends(userFriends);
 
                 if (connectedUser?.id && id !== connectedUser.id) {
                     const blockedStatus = await UserRelationsService.checkIsBlocked(id);
@@ -78,6 +67,7 @@ const UserProfilePage = () => {
                         const isFollowing = followingList.some((rel) => rel.id === id);
                         setFollow(isFollowing);
                     }
+
                 }
 
                 const allCollections = await CollectionsService.getAllCollections();
@@ -181,6 +171,7 @@ const UserProfilePage = () => {
         }
     };
 
+
     if (loading) {
         return (
             <div className={`min-h-screen flex items-center justify-center ${
@@ -246,25 +237,25 @@ const UserProfilePage = () => {
 
                     <div className="flex flex-col md:flex-row md:items-center gap-8">
 
-                        <div className={`w-32 h-32 md:w-40 md:h-40 shrink-0 rounded-full bg-gradient-to-br from-rose-500/40 to-blue-500/30 border flex items-center justify-center overflow-hidden mx-auto md:mx-0 ${
+                        <div className={`w-32 h-32 rounded-full bg-gradient-to-br from-rose-500/40 to-blue-500/30 border flex items-center justify-center overflow-hidden ${
                             theme === "dark" ? "border-white/10" : "border-neutral-200"
                         }`}>
                             {profilUser.avatar ? (
                                 <img
                                     src={profilUser.avatar}
-                                    alt={profilUser.username || "User"}
+                                    alt={profilUser.username}
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <span className="text-5xl md:text-6xl font-black text-white">
+                                <span className="text-5xl font-black text-white">
                                     {profilUser.username?.charAt(0)?.toUpperCase() || "U"}
                                 </span>
                             )}
                         </div>
 
-                        <div className="flex-1 text-center md:text-left">
+                        <div className="flex-1">
 
-                            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-3">
+                            <div className="flex flex-wrap items-center gap-3 mb-3">
                                 <p className="uppercase tracking-[0.2em] text-neutral-500 text-xs font-bold">
                                     {t("userProfile.title")}
                                 </p>
@@ -283,22 +274,22 @@ const UserProfilePage = () => {
                                 </span>
                             </div>
 
-                            <h1 className="text-4xl md:text-6xl font-black tracking-tight break-words">
-                                {profilUser.display_name || profilUser.username || t("userProfile.unknownUser", "Utilisateur inconnu")}
+                            <h1 className="text-4xl md:text-6xl font-black tracking-tight">
+                                {profilUser.display_name || profilUser.username}
                             </h1>
 
                             <p className={theme === "dark" ? "text-neutral-500 mt-2" : "text-neutral-600 mt-2"}>
-                                @{profilUser.username || "unknown"}
+                                @{profilUser.username}
                             </p>
 
                             {isPrivateProfil && !isOwnProfile ? (
-                                <p className={`mt-5 max-w-2xl mx-auto md:mx-0 ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
+                                <p className={`mt-5 max-w-2xl ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
                                     {t("userProfile.privateProfileNotice")}
                                 </p>
                             ) : (
                                 <>
                                     {profilUser.bio && (
-                                        <p className={`mt-5 max-w-2xl mx-auto md:mx-0 ${theme === "dark" ? "text-neutral-300" : "text-neutral-700"}`}>
+                                        <p className={`mt-5 max-w-2xl ${theme === "dark" ? "text-neutral-300" : "text-neutral-700"}`}>
                                             {profilUser.bio}
                                         </p>
                                     )}
@@ -318,38 +309,38 @@ const UserProfilePage = () => {
                         </div>
 
                         {!isOwnProfile && (
-                            <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 mt-6 md:mt-0 w-full md:w-auto">
-                                <button
-                                    onClick={handleFollowToggle}
-                                    disabled={isActionLoading || isBlocked}
-                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 text-sm md:text-base rounded-full font-semibold transition shadow-lg min-w-[120px] ${
-                                        isFollow
-                                            ? theme === "dark"
-                                                ? "bg-neutral-800 hover:bg-neutral-700 text-white"
-                                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-200"
-                                            : "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20"
-                                    } ${isBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
-                                >
-                                    {isActionLoading ? (
-                                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    ) : (
-                                        <>
-                                            {isFollow ? <FiCheck /> : <FiUserPlus />}
-                                            <span className="whitespace-nowrap">{isFollow ? t("userProfile.following") : t("userProfile.follow")}</span>
-                                        </>
-                                    )}
-                                </button>
+                            <div className="flex gap-3">
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handleFollowToggle}
+                                        disabled={isActionLoading || isBlocked}
+                                        className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold transition shadow-lg min-w-[120px] ${
+                                            isFollow
+                                                ? theme === "dark"
+                                                    ? "bg-neutral-800 hover:bg-neutral-700 text-white"
+                                                    : "bg-neutral-100 hover:bg-neutral-200 text-neutral-800 border border-neutral-200"
+                                                : "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20"
+                                        } ${isBlocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    >
+                                        {isActionLoading ? (
+                                            <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        ) : (
+                                            <>
+                                                {isFollow ? <FiCheck /> : <FiUserPlus />}
+                                                {isFollow ? t("userProfile.following") : t("userProfile.follow")}
+                                            </>
+                                        )}
+                                    </button>
 
-                                {(!isOwnProfile && isFriend && !isBlocked) && (
-                                    <div className="flex-1 sm:flex-none flex min-w-[120px]">
+                                    {(!isOwnProfile && isFriend && !isBlocked) && (
                                         <DMButton otherUserId={id!} currentUserId={connectedUser!.id} />
-                                    </div>
-                                )}
+                                    )}
+                                </div>
 
                                 <button
                                     onClick={handleBlockToggle}
                                     disabled={isBlockLoading}
-                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 md:px-5 md:py-3 text-sm md:text-base rounded-full font-semibold transition border min-w-[120px] ${
+                                    className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full font-semibold transition border ${
                                         isBlocked
                                             ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
                                             : "border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500/20"
@@ -360,24 +351,22 @@ const UserProfilePage = () => {
                                     ) : (
                                         <>
                                             {isBlocked ? <FiUserCheck /> : <FiUserX />}
-                                            <span className="whitespace-nowrap">{isBlocked ? t("userProfile.blockedUser") : t("userProfile.block")}</span>
+                                            {isBlocked ? t("userProfile.blockedUser") : t("userProfile.block")}
                                         </>
                                     )}
                                 </button>
 
-                                <div className="flex items-center justify-center shrink-0">
-                                    <ReportButton
-                                        type="user"
-                                        targetId={profilUser.id}
-                                        targetLabel={`@${profilUser.username || profilUser.id}`}
-                                    />
-                                </div>
+                                <ReportButton
+                                    type="user"
+                                    targetId={profilUser.id}
+                                    targetLabel={`@${profilUser.username}`}
+                                />
                             </div>
                         )}
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10">
-                        <div className={`rounded-2xl p-5 border text-center md:text-left ${
+                    <div className="grid md:grid-cols-3 gap-4 mt-10">
+                        <div className={`rounded-2xl p-5 border ${
                             theme === "dark"
                                 ? "bg-black/20 border-white/5"
                                 : "bg-neutral-50 border-neutral-200"
@@ -390,7 +379,7 @@ const UserProfilePage = () => {
                             </p>
                         </div>
 
-                        <div className={`rounded-2xl p-5 border text-center md:text-left ${
+                        <div className={`rounded-2xl p-5 border ${
                             theme === "dark"
                                 ? "bg-black/20 border-white/5"
                                 : "bg-neutral-50 border-neutral-200"
@@ -403,39 +392,26 @@ const UserProfilePage = () => {
                             </p>
                         </div>
 
-                        <div className={`rounded-2xl p-5 border text-center md:text-left ${
+                        <div className={`rounded-2xl p-5 border ${
                             theme === "dark"
                                 ? "bg-black/20 border-white/5"
                                 : "bg-neutral-50 border-neutral-200"
                         }`}>
                             <p className={`text-sm ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
-                                {t("userProfile.followers", "Abonnés")}
+                                {t("userProfile.friends")}
                             </p>
                             <p className="text-3xl font-black mt-2">
-                                {followers.length}
-                            </p>
-                        </div>
-
-                        <div className={`rounded-2xl p-5 border text-center md:text-left ${
-                            theme === "dark"
-                                ? "bg-black/20 border-white/5"
-                                : "bg-neutral-50 border-neutral-200"
-                        }`}>
-                            <p className={`text-sm ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
-                                {t("userProfile.following", "Abonnements")}
-                            </p>
-                            <p className="text-3xl font-black mt-2">
-                                {following.length}
+                                {friends.length}
                             </p>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <h2 className="text-2xl font-bold mb-6 text-center md:text-left">
+                    <h2 className="text-2xl font-bold mb-6">
                         {t("userProfile.collectionsOf")}{" "}
                         <span className="text-rose-500">
-                            {profilUser.username || t("userProfile.unknownUser", "Utilisateur inconnu")}
+                            {profilUser.username}
                         </span>
                     </h2>
 
@@ -450,7 +426,7 @@ const UserProfilePage = () => {
                             </p>
                         </div>
                     ) : (
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+                        <div className="grid md:grid-cols-3 gap-6">
                             {collections.map((collection) => {
                                 const isLocked = !collection.is_public && !isOwnProfile;
 
@@ -514,26 +490,26 @@ const UserProfilePage = () => {
                 </div>
 
                 <div className="mt-12">
-                    <h2 className="text-2xl font-bold mb-6 text-center md:text-left">
-                        {t("userProfile.followers", "Abonnés de")} <span className="text-rose-500">{profilUser.username || t("userProfile.unknownUser", "Utilisateur inconnu")}</span>
+                    <h2 className="text-2xl font-bold mb-6">
+                        {t("userProfile.friendsOf")} <span className="text-rose-500">{profilUser.username}</span>
                     </h2>
 
-                    {followers.length === 0 ? (
+                    {friends.length === 0 ? (
                         <div className={`rounded-2xl p-8 text-center border ${
                             theme === "dark"
                                 ? "bg-neutral-900/40 border-white/5"
                                 : "bg-white border-neutral-200 shadow-sm"
                         }`}>
                             <p className={theme === "dark" ? "text-neutral-400" : "text-neutral-600"}>
-                                {t("userProfile.noFollowers", "Aucun abonné pour le moment.")}
+                                {t("userProfile.noFriends")}
                             </p>
                         </div>
                     ) : (
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                            {followers.map((user) => (
+                        <div className="grid md:grid-cols-3 gap-6">
+                            {friends.map((friend) => (
                                 <div
-                                    key={user.id}
-                                    onClick={() => navigate(`/users/${user.id}`)}
+                                    key={friend.id}
+                                    onClick={() => navigate(`/users/${friend.id}`)}
                                     className={`cursor-pointer rounded-2xl p-5 border transition ${
                                         theme === "dark"
                                             ? "bg-neutral-900/40 border-white/5 hover:border-rose-500/30 hover:bg-neutral-900/70"
@@ -541,83 +517,26 @@ const UserProfilePage = () => {
                                     }`}
                                 >
                                     <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-rose-500/40 to-blue-500/30 overflow-hidden flex items-center justify-center">
-                                            {user.avatar ? (
+                                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-rose-500/40 to-blue-500/30 overflow-hidden flex items-center justify-center">
+                                            {friend.avatar ? (
                                                 <img
-                                                    src={user.avatar}
-                                                    alt={user.username || "User"}
+                                                    src={friend.avatar}
+                                                    alt={friend.username}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
                                                 <span className="text-xl font-bold">
-                                                    {user.username?.charAt(0)?.toUpperCase() || "U"}
+                                                    {friend.username.charAt(0).toUpperCase()}
                                                 </span>
                                             )}
                                         </div>
 
-                                        <div className="min-w-0">
-                                            <h3 className={`font-bold truncate ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
-                                                {user.display_name || user.username || t("userProfile.unknownUser", "Utilisateur inconnu")}
+                                        <div>
+                                            <h3 className={`font-bold ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
+                                                {friend.display_name || friend.username}
                                             </h3>
-                                            <p className="text-sm text-neutral-500 truncate">
-                                                @{user.username || "unknown"}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="mt-12">
-                    <h2 className="text-2xl font-bold mb-6 text-center md:text-left">
-                        {t("userProfile.followingOf", "Abonnements de")} <span className="text-rose-500">{profilUser.username || t("userProfile.unknownUser", "Utilisateur inconnu")}</span>
-                    </h2>
-
-                    {following.length === 0 ? (
-                        <div className={`rounded-2xl p-8 text-center border ${
-                            theme === "dark"
-                                ? "bg-neutral-900/40 border-white/5"
-                                : "bg-white border-neutral-200 shadow-sm"
-                        }`}>
-                            <p className={theme === "dark" ? "text-neutral-400" : "text-neutral-600"}>
-                                {t("userProfile.noFollowing", "Ne suit personne pour le moment.")}
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-                            {following.map((user) => (
-                                <div
-                                    key={user.id}
-                                    onClick={() => navigate(`/users/${user.id}`)}
-                                    className={`cursor-pointer rounded-2xl p-5 border transition ${
-                                        theme === "dark"
-                                            ? "bg-neutral-900/40 border-white/5 hover:border-rose-500/30 hover:bg-neutral-900/70"
-                                            : "bg-white border-neutral-200 hover:border-rose-400/50 hover:bg-neutral-50 shadow-sm"
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-14 h-14 shrink-0 rounded-full bg-gradient-to-br from-rose-500/40 to-blue-500/30 overflow-hidden flex items-center justify-center">
-                                            {user.avatar ? (
-                                                <img
-                                                    src={user.avatar}
-                                                    alt={user.username || "User"}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <span className="text-xl font-bold">
-                                                    {user.username?.charAt(0)?.toUpperCase() || "U"}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className="min-w-0">
-                                            <h3 className={`font-bold truncate ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
-                                                {user.display_name || user.username || t("userProfile.unknownUser", "Utilisateur inconnu")}
-                                            </h3>
-                                            <p className="text-sm text-neutral-500 truncate">
-                                                @{user.username || "unknown"}
+                                            <p className="text-sm text-neutral-500">
+                                                @{friend.username}
                                             </p>
                                         </div>
                                     </div>

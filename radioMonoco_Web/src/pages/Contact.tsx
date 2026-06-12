@@ -59,7 +59,7 @@ const Contact = () => {
     };
 
     return (
-        <div className="min-h-screen pt-32 pb-24 px-4 md:px-12 max-w-6xl mx-auto flex flex-col items-center transition-colors duration-700">
+        <div className="min-h-screen pt-32 pb-24 px-6 md:px-12 max-w-6xl mx-auto flex flex-col items-center transition-colors duration-700">
             <div className="text-center mb-16">
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 uppercase tracking-widest text-primary drop-shadow-sm">
                     {t("contact.title")}
@@ -70,7 +70,7 @@ const Contact = () => {
             </div>
 
             <div className="flex flex-col lg:flex-row gap-12 w-full">
-                <div className={`flex-1 p-6 md:p-10 rounded-3xl transition-all duration-500 ${theme === 'dark' ? 'bg-app-bg/50 border border-neutral-800' : 'bg-white shadow-xl shadow-neutral-200/50'}`}>
+                <div className={`flex-1 p-10 rounded-3xl transition-all duration-500 ${theme === 'dark' ? 'bg-app-bg/50 border border-neutral-800' : 'bg-white shadow-xl shadow-neutral-200/50'}`}>
                     <h2 className={`text-2xl font-bold mb-8 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{t("contact.formTitle")}</h2>
 
                     {isSubmitted && (

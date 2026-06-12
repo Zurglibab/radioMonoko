@@ -56,22 +56,17 @@ const GlobalPlayer: React.FC = () => {
 
     return (
         <div className={`
-            fixed z-[45] bottom-5 md:bottom-12 
-            left-3 right-20 md:left-1/2 md:right-auto md:-translate-x-1/2 
-            w-auto md:w-[90%] max-w-4xl 
-            h-14 md:h-24 
-            backdrop-blur-3xl border rounded-2xl md:rounded-[2.5rem] shadow-2xl 
-            px-3 md:px-8 flex items-center 
+            fixed bottom-12 left-1/2 -translate-x-1/2 w-[90%] max-w-4xl h-24 
+            backdrop-blur-3xl border rounded-[2.5rem] z-50 shadow-2xl px-8 flex items-center 
             animate-in fade-in slide-in-from-bottom-4 duration-500
             ${isDark
             ? "bg-[#1a1a1a]/80 border-white/10 shadow-black/50"
             : "bg-white/80 border-black/5 shadow-black/10"}
         `}>
-            <div className="w-full h-full flex items-center justify-between gap-2 md:gap-4">
+            <div className="w-full flex items-center justify-between">
 
-                {/* BLOC GAUCHE : Image et Texte */}
-                <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
-                    <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl overflow-hidden shadow-lg shrink-0 relative border ${isDark ? "border-white/5" : "border-black/5"}`}>
+                <div className="flex items-center gap-4 w-1/3 min-w-0">
+                    <div className={`w-12 h-12 rounded-2xl overflow-hidden shadow-lg shrink-0 relative border ${isDark ? "border-white/5" : "border-black/5"}`}>
                         {isPlaying && (
                             <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] bg-gradient-to-t from-black/50 to-transparent flex items-center justify-center">
                                 <AudioVisualiser
@@ -83,37 +78,49 @@ const GlobalPlayer: React.FC = () => {
                         )}
                     </div>
 
-                    <div className="min-w-0 flex-1 select-none">
+                    <div className="hidden sm:block min-w-0 flex-1 select-none">
                         <div ref={containerRef} className="w-full overflow-hidden relative">
                             <div className={`inline-block whitespace-nowrap ${isOverflowing ? "animate-marquee" : ""}`}>
                                 <p
                                     ref={textRef}
-                                    className={`text-xs md:text-sm font-semibold ${isOverflowing ? "pr-8 md:pr-12 inline-block" : "truncate"} ${isDark ? "text-white" : "text-neutral-900"}`}
+                                    className={`text-sm font-semibold ${isOverflowing ? "pr-12 inline-block" : "truncate"} ${isDark ? "text-white" : "text-neutral-900"}`}
                                 >
                                     {currentRadio.currentShow}
                                 </p>
                                 {isOverflowing && (
-                                    <p className={`text-xs md:text-sm font-semibold pr-8 md:pr-12 inline-block ${isDark ? "text-white" : "text-neutral-900"}`}>
+                                    <p className={`text-sm font-semibold pr-12 inline-block ${isDark ? "text-white" : "text-neutral-900"}`}>
                                         {currentRadio.currentShow}
                                     </p>
                                 )}
                             </div>
                         </div>
-                        <p className="text-[9px] md:text-[10px] text-rose-600 font-bold uppercase tracking-widest mt-[1px]">
+                        <p className="text-[10px] text-rose-600 font-bold uppercase tracking-widest mt-0.5">
                             {isPlaying ? (isPodcastStream ? t("radio.playingEpisode") : t("radio.live")) : t("radio.pause")}
                         </p>
                     </div>
                 </div>
 
-                {/* BLOC DROIT : Contrôle de volume et Lecture */}
-                <div className="flex items-center gap-3 md:gap-6 shrink-0">
+                {/* BLOC CENTRAL */}
+                <div className="flex items-center">
+                    <button
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        className={`
+                            w-14 h-14 rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-xl active:scale-95 cursor-pointer
+                            ${isDark ? "bg-white text-black" : "bg-neutral-900 text-white"}
+                        `}
+                    >
+                        {isPlaying ? <HiOutlinePause className="text-2xl" /> : <HiOutlinePlay className="text-2xl ml-0.5" />}
+                    </button>
+                </div>
 
-                    <div className="flex items-center gap-1.5 md:gap-2">
-                        <button onClick={toggleMute} className="focus:outline-none cursor-pointer shrink-0">
+                {/* BLOC DROIT */}
+                <div className="hidden md:flex items-center justify-end w-1/3 gap-4">
+                    <div className="flex items-center py-2">
+                        <button onClick={toggleMute} className="focus:outline-none cursor-pointer mr-2">
                             {volume === 0 ? (
-                                <HiOutlineVolumeOff className="text-rose-600 text-lg md:text-xl" />
+                                <HiOutlineVolumeOff className="text-rose-600 text-xl" />
                             ) : (
-                                <HiOutlineVolumeUp className={`${isDark ? "text-neutral-400 hover:text-white" : "text-neutral-500 hover:text-black"} text-lg md:text-xl transition-colors`} />
+                                <HiOutlineVolumeUp className={`${isDark ? "text-neutral-400 hover:text-white" : "text-neutral-500 hover:text-black"} text-xl transition-colors`} />
                             )}
                         </button>
                         <input
@@ -124,22 +131,12 @@ const GlobalPlayer: React.FC = () => {
                             onMouseEnter={() => setIsHoveringSlider(true)}
                             onMouseLeave={() => setIsHoveringSlider(false)}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVolume(parseInt(e.target.value))}
-                            className={`w-12 sm:w-16 md:w-24 h-1 rounded-full appearance-none cursor-pointer transition-all ${isDark ? "bg-neutral-700" : "bg-neutral-300"}`}
+                            className={`w-20 md:w-24 h-1 rounded-full appearance-none cursor-pointer transition-all ${isDark ? "bg-neutral-700" : "bg-neutral-300"}`}
                             style={{
                                 background: `linear-gradient(to right, #ec003f ${volume}%, ${isDark ? '#404040' : '#d4d4d4'} ${volume}%)`,
                             }}
                         />
                     </div>
-
-                    <button
-                        onClick={() => setIsPlaying(!isPlaying)}
-                        className={`
-                            w-9 h-9 md:w-14 md:h-14 rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-xl active:scale-95 cursor-pointer shrink-0
-                            ${isDark ? "bg-white text-black" : "bg-neutral-900 text-white"}
-                        `}
-                    >
-                        {isPlaying ? <HiOutlinePause className="text-base md:text-2xl" /> : <HiOutlinePlay className="text-base md:text-2xl ml-0.5 md:ml-1" />}
-                    </button>
                 </div>
             </div>
 
@@ -154,48 +151,24 @@ const GlobalPlayer: React.FC = () => {
                 .animate-marquee:hover {
                     animation-play-state: paused;
                 }
-                
                 input[type=range]::-webkit-slider-thumb {
                     appearance: none;
+                    height: 12px;
+                    width: 12px;
                     border-radius: 50%;
                     background: ${isDark ? 'white' : '#1a1a1a'};
+                    opacity: ${isHoveringSlider ? 1 : 0};
                     transition: opacity 0.2s, transform 0.2s;
                     margin-top: -4px;
                 }
                 input[type=range]::-moz-range-thumb {
+                    height: 12px;
+                    width: 12px;
                     border-radius: 50%;
                     background: ${isDark ? 'white' : '#1a1a1a'};
                     border: none;
+                    opacity: ${isHoveringSlider ? 1 : 0};
                     transition: opacity 0.2s;
-                }
-
-                /* Mobile : Thumb toujours visible et un peu plus grand pour le tactile */
-                @media (max-width: 767px) {
-                    input[type=range]::-webkit-slider-thumb {
-                        height: 12px;
-                        width: 12px;
-                        opacity: 1;
-                        margin-top: -5px;
-                    }
-                    input[type=range]::-moz-range-thumb {
-                        height: 12px;
-                        width: 12px;
-                        opacity: 1;
-                    }
-                }
-
-                /* Desktop : Thumb discret qui apparaît au hover */
-                @media (min-width: 768px) {
-                    input[type=range]::-webkit-slider-thumb {
-                        height: 12px;
-                        width: 12px;
-                        opacity: ${isHoveringSlider ? 1 : 0};
-                    }
-                    input[type=range]::-moz-range-thumb {
-                        height: 12px;
-                        width: 12px;
-                        opacity: ${isHoveringSlider ? 1 : 0};
-                    }
                 }
             `}</style>
         </div>
