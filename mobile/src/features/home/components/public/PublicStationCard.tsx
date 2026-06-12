@@ -1,9 +1,8 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, useColorScheme } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Play, Pause } from "lucide-react-native";
-import { theme } from "@/constants/theme";
 import { Station } from "@/types/content";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useTranslation } from "react-i18next";
 
 interface StationCardProps {
@@ -20,12 +19,7 @@ interface StationCardProps {
  */
 export const PublicStationCard = ({ item, onPress, onLongPress, onPlayPress, isPlaying = false }: StationCardProps) => {
   const { t } = useTranslation();
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
 
   return (
     <TouchableOpacity

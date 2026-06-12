@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
-  useColorScheme, ActivityIndicator,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Radio, Waves, Play, Pause, MoreHorizontal } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useAuthContext } from "@/context/AuthContext";
 import { BrandService } from "@/services/brand/brand.service";
 import { Brand } from "@/types/brand";
@@ -16,45 +16,16 @@ import { usePlayer } from "@/context/PlayerContext";
 import { mapBrandToStation, mapWebRadioToStation } from "@/utils/mappers/brand.mapper";
 import { MediaActionSheet } from "@/features/library/components/MediaActionSheet";
 import { usePromptLogin } from "@/features/shared/usePromptLogin";
-
-const InitialAvatar = ({ title, size = 64, colors }: { title: string; size?: number; colors: any }) => {
-  const initials = title
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? "")
-    .join("");
-  return (
-    <View
-      style={{
-        width: size, height: size,
-        borderRadius: size * 0.35,
-        backgroundColor: colors.primary + "22",
-        borderColor: colors.primary + "44",
-        borderWidth: 1,
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Text style={{ color: colors.primary, fontSize: size * 0.35, fontWeight: "900" }}>
-        {initials || "R"}
-      </Text>
-    </View>
-  );
-};
+import { InitialAvatar } from "@/features/shared/InitialAvatar";
 
 export default function BrandDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const { appearanceSettings, token, user } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const { token, user } = useAuthContext();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const promptLogin = usePromptLogin();
-
-  const isDark = appearanceSettings.themeMode === "system"
-    ? systemTheme === "dark"
-    : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
 
   const [brand, setBrand] = useState<Brand | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,7 +104,7 @@ export default function BrandDetailScreen() {
 
         {/* Hero */}
         <View className="px-6 mt-2 mb-8 items-center">
-          <InitialAvatar title={brand.title} size={96} colors={colors} />
+          <InitialAvatar name={brand.title} size={96} colors={colors} />
 
           <Text style={{ color: colors.text }} className="text-2xl font-black mt-5 tracking-tighter text-center">
             {brand.title}
@@ -217,7 +188,7 @@ export default function BrandDetailScreen() {
                   style={{ backgroundColor: colors.surface, borderColor: colors.border }}
                   className="flex-row items-center p-4 rounded-2xl border mb-3 shadow-sm"
                 >
-                  <InitialAvatar title={wr.title} size={44} colors={colors} />
+                  <InitialAvatar name={wr.title} size={44} colors={colors} />
                   <View className="flex-1 ml-4">
                     <Text style={{ color: colors.text }} className="font-bold text-sm" numberOfLines={1}>
                       {wr.title}

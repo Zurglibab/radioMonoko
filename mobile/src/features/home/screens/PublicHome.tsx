@@ -1,15 +1,14 @@
 import React from "react";
-import { ScrollView, View, Text, TouchableOpacity, useColorScheme } from "react-native";
+import { ScrollView, View, Text, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TrendingUp } from "lucide-react-native";
 import { useRouter } from "expo-router";
-import { theme } from "@/constants/theme";
 import { usePlayer } from "@/context/PlayerContext";
 import { useHome } from "@/hooks/home/useHome";
 import { HomeHeader } from "@/features/home/components/public/HomeHeader";
 import { FeaturedStation } from "@/features/home/components/public/FeaturedStation";
 import { PublicStationCard } from "@/features/home/components/public/PublicStationCard";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { usePromptLogin } from "@/features/shared/usePromptLogin";
 import { useTranslation } from "react-i18next";
 
@@ -19,19 +18,7 @@ import { useTranslation } from "react-i18next";
  */
 export default function PublicHome() {
   const { t } = useTranslation();
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-
-  /**
-   * Gestion du thème dynamique : On choisit les couleurs à appliquer selon la préférence de l'utilisateur
-   * et le thème du système. Cela permet une expérience cohérente et personnalisée.
-   * Détection du thème (Priorité Dark)
-   */
-  const isDark = appearanceSettings.themeMode === 'system' 
-    ? systemTheme === 'dark' 
-    : appearanceSettings.themeMode === 'dark';
-        
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
   const { stations } = useHome();
   const router = useRouter();
   const { playTrack } = usePlayer();

@@ -2,19 +2,17 @@ import React from "react";
 import { View, Text } from "react-native";
 
 interface InitialAvatarProps {
-  username: string;
+  name: string;
   size?: number;
   colors: any;
 }
 
 /**
- * Affiche un avatar circulaire avec les initiales de l'utilisateur, 
- * utilisé comme fallback lorsque l'image de profil n'est pas disponible.
- * @param param0 
- * @returns 
+ * Affiche un avatar circulaire avec les initiales d'un nom (utilisateur, station, marque...),
+ * utilisé comme fallback lorsque l'image associée n'est pas disponible.
  */
-export const InitialAvatar = ({ username, size = 80, colors }: InitialAvatarProps) => {
-  const initials = username
+export const InitialAvatar = ({ name, size = 80, colors }: InitialAvatarProps) => {
+  const initials = name
     .split(/[\s_.-]+/)
     .slice(0, 2)
     .map((w) => w[0]?.toUpperCase() ?? "")

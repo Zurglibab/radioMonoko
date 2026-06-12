@@ -1,11 +1,10 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, useColorScheme } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { PlayCircle } from "lucide-react-native";
-import { theme } from "@/constants/theme";
 import { usePlayer } from "@/context/PlayerContext";
 import { Station } from "@/types/content";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -15,13 +14,7 @@ import { useTranslation } from "react-i18next";
  */
 export const FeaturedStation = ({ station }: { station: Station }) => {
   const { t } = useTranslation();
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-  // Accès direct au lecteur global pour lancer la station
+  const colors = useThemeColors();
   const { playTrack } = usePlayer();
   
   return (

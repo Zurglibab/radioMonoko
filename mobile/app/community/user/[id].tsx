@@ -8,7 +8,7 @@ import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useUserProfile } from "@/hooks/community/useUserProfile";
 import { ChannelService } from "@/services/chat/channel.service";
-import { InitialAvatar } from "@/features/community/components/InitialAvatar";
+import { InitialAvatar } from "@/features/shared/InitialAvatar";
 import { UserPlaylistsSection } from "@/features/community/components/UserPlaylistsSection";
 import { MutualFriendsSection } from "@/features/community/components/MutualFriendsSection";
 
@@ -108,7 +108,7 @@ export default function UserProfileScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="px-6 items-center mt-4">
 
-          <InitialAvatar username={profile.username} size={88} colors={colors} />
+          <InitialAvatar name={profile.username} size={88} colors={colors} />
 
           <Text style={{ color: colors.text }} className="text-2xl font-black mt-5 tracking-tighter">
             {displayName}

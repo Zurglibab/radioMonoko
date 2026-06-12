@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { ScrollView, useColorScheme } from "react-native";
+import { ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams } from "expo-router";
-import { theme } from "@/constants/theme";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useSearch } from "@/hooks/home/useSearch";
 import { useAuthContext } from "@/context/AuthContext";
 import { usePlayer } from "@/context/PlayerContext";
@@ -21,8 +21,7 @@ export default function SearchScreen() {
     stations, users, contents, publicCollections,
     isSearching, history, addToHistory, clearHistory,
   } = useSearch();
-  const { appearanceSettings, token, user } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const { token, user } = useAuthContext();
   const { playTrack, currentTrack, isPlaying } = usePlayer();
   const promptLogin = usePromptLogin();
   const params = useLocalSearchParams<{ q?: string }>();
@@ -38,10 +37,7 @@ export default function SearchScreen() {
     }
   }, [params.q, setQuery, addToHistory]);
 
-  const isDark = appearanceSettings.themeMode === "system"
-    ? systemTheme === "dark"
-    : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
