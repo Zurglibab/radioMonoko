@@ -4,22 +4,12 @@ import { CollectionService } from "@/services/collections/collection.service";
 import { ContentApiService } from "@/services/content/content-api.service";
 import { CollectionItem } from "@/types/collection";
 
-/**
- * useCollectionItems : Hook de chargement des items d'une collection, avec enrichissement des données de contenu.
- * Ce hook est utilisé pour afficher les éléments d'une collection (ex: "À écouter") avec les informations complètes du contenu (titre, image, etc.) nécessaires à l'affichage dans la bibliothèque.
- * Il gère le chargement des items de la collection, puis fait des requêtes parallèles pour récupérer les données de chaque contenu associé à ces items.
- * Il gère également la suppression d'un item de la collection, avec une approche optimiste (mise à jour immédiate de l'UI) et un rollback en cas d'erreur.
- */
 export const useCollectionItems = (collectionId: string | null) => {
   const { token } = useAuthContext();
   const [items, setItems] = useState<CollectionItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Charge les items de la collection et les enrichit en parallèle.
-   * Un content manquant (404) n'empêche pas l'affichage des autres items.
-   */
   const load = useCallback(async () => {
     if (!token || !collectionId) {
       setItems([]);
@@ -36,7 +26,7 @@ export const useCollectionItems = (collectionId: string | null) => {
           try {
             content = await ContentApiService.getById(token, item.content_id);
           } catch {
-            content = null; // content supprimé ou inaccessible
+            content = null;
           }
           return {
             collectionId: item.collection_id,
@@ -64,9 +54,6 @@ export const useCollectionItems = (collectionId: string | null) => {
     load();
   }, [load]);
 
-  /**
-   * removeItem : retire une œuvre de la collection (optimiste avec rollback).
-   */
   const removeItem = useCallback(async (contentId: string) => {
     if (!token || !collectionId) return;
     const previous = items;
