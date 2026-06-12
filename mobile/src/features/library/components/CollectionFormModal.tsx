@@ -11,13 +11,8 @@ import {
 } from "react-native";
 import { X, Globe, Lock } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
-import { useAuthContext } from "@/context/AuthContext";
-import { useColorScheme } from "react-native";
+import { useThemeColors } from "@/utils/useThemeColors";
 
-/**
- * Données saisies dans le formulaire de collection.
- */
 export interface CollectionFormData {
   name: string;
   description: string;
@@ -28,17 +23,10 @@ interface CollectionFormModalProps {
   visible: boolean;
   onClose: () => void;
   onSubmit: (data: CollectionFormData) => Promise<void>;
-  /** Valeurs initiales (mode édition). Si absent, mode création. */
   initialData?: Partial<CollectionFormData>;
-  /** Titre affiché en haut de la modale. */
   title?: string;
 }
 
-/**
- * CollectionFormModal : Modale de création / édition d'une collection.
- * Capture les trois champs requis par le barème : nom, description et confidentialité.
- * Réutilisable pour la création (sans initialData) et l'édition (avec initialData).
- */
 export const CollectionFormModal = ({
   visible,
   onClose,
@@ -47,12 +35,7 @@ export const CollectionFormModal = ({
   title,
 }: CollectionFormModalProps) => {
   const { t } = useTranslation();
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
   const modalTitle = title ?? t('library.collectionFormModal.defaultTitle');
 
   const [name, setName] = useState("");
@@ -61,7 +44,6 @@ export const CollectionFormModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Réinitialise / pré-remplit le formulaire à chaque ouverture
   useEffect(() => {
     if (visible) {
       setName(initialData?.name ?? "");
@@ -100,7 +82,6 @@ export const CollectionFormModal = ({
           style={{ backgroundColor: colors.background, borderColor: colors.border }}
           className="rounded-t-[40px] border-t border-x px-6 pt-6 pb-10"
         >
-          {/* Header */}
           <View className="flex-row justify-between items-center mb-8">
             <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
               {modalTitle}
@@ -114,7 +95,6 @@ export const CollectionFormModal = ({
             </TouchableOpacity>
           </View>
 
-          {/* Champ Nom */}
           <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
             {t('library.collectionFormModal.nameLabel')}
           </Text>
@@ -127,7 +107,6 @@ export const CollectionFormModal = ({
             className="w-full px-5 py-4 rounded-2xl border mb-5 font-medium"
           />
 
-          {/* Champ Description */}
           <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
             {t('library.collectionFormModal.descriptionLabel')}
           </Text>
@@ -147,7 +126,6 @@ export const CollectionFormModal = ({
             className="w-full px-5 py-4 rounded-2xl border mb-5 font-medium"
           />
 
-          {/* Toggle Confidentialité */}
           <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
             {t('library.collectionFormModal.visibilityLabel')}
           </Text>
@@ -187,14 +165,12 @@ export const CollectionFormModal = ({
             </TouchableOpacity>
           </View>
 
-          {/* Message d'erreur */}
           {error && (
             <Text style={{ color: colors.danger }} className="text-xs font-bold mb-4 text-center">
               {error}
             </Text>
           )}
 
-          {/* Bouton de validation */}
           <TouchableOpacity
             onPress={handleSubmit}
             disabled={isSubmitting}

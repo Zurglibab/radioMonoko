@@ -11,7 +11,6 @@ import { MediaRowItem } from "@/features/shared/MediaRowItem";
 import { MediaStatus } from "@/types/content";
 import { findStatusMeta } from "@/constants/library-status";
 
-// Mappe un frontStatus vers la clé de traduction correspondante dans library.status
 const STATUS_KEY_MAP: Record<string, string> = {
   'to-listen': 'toListen',
   'in-progress': 'inProgress',
