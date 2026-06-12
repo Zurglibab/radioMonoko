@@ -6,6 +6,7 @@ import { HiOutlineChatBubbleLeftRight, HiXMark } from 'react-icons/hi2';
 import { useUserCache } from '../../hooks/useUserCache';
 import { DEFAULT_THEME } from "../../assets/themes/DefaultTheme.ts";
 import { useAppearance } from "../../context/AppearanceContext.tsx";
+import { useTranslation } from "react-i18next";
 
 export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
     const [channels, setChannels] = useState<Channel[]>([]);
@@ -16,6 +17,7 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
 
     const { getPseudo } = useUserCache();
     const { theme } = useAppearance();
+    const { t } = useTranslation();
 
     useEffect(() => {
         ChatService.listChannels().then(setChannels).catch(console.error);
@@ -41,7 +43,7 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
                 const name = await getPseudo(otherUserId);
                 setChannelNames(prev => ({ ...prev, [c.id]: name }));
             } else {
-                setChannelNames(prev => ({ ...prev, [c.id]: c.type || "Salon" }));
+                setChannelNames(prev => ({ ...prev, [c.id]: c.type || t("chat.room") }));
             }
         });
     }, [channels, currentUserId, getPseudo]);
@@ -58,7 +60,7 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
                 <div className="pointer-events-auto mb-2 shadow-2xl z-[70]">
                     <ChatContainer
                         channelId={activeChannelId}
-                        channelName={channelNames[activeChannelId] || "Chargement..."}
+                        channelName={channelNames[activeChannelId] || t("chat.loading")}
                         currentUserId={currentUserId}
                         onBack={() => { setActiveChannelId(null); setShowMenu(true); }}
                         onCloseAll={() => { setIsOpen(false); setActiveChannelId(null); setShowMenu(false); }}
@@ -72,7 +74,7 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
 
                     <div className="flex justify-between items-center px-3 py-2 shrink-0">
                         <p className={`text-xs font-bold uppercase tracking-wider ${theme === 'dark' ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                            Conversations
+                            {t("chat.conversations")}
                         </p>
                         <button onClick={toggleChat} className={`${theme === 'dark' ? 'text-neutral-500 hover:text-white' : 'text-neutral-400 hover:text-neutral-900'}`}>
                             <HiXMark size={16}/>
@@ -88,7 +90,7 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
                                 ${DEFAULT_THEME.bgHover}
                                 ${theme === 'dark' ? 'text-neutral-300' : 'text-neutral-700'}`}
                             >
-                                {channelNames[c.id] || "Chargement..."}
+                                {channelNames[c.id] || t("chat.loading")}
                             </button>
                         ))}
                     </div>

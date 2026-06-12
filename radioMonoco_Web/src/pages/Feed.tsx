@@ -6,6 +6,7 @@ import {useNavigate} from "react-router-dom";
 import {useAuth} from "../context/AuthContext.tsx";
 import { FiRefreshCw, FiUsers } from "react-icons/fi";
 import {useAppearance} from "../context/AppearanceContext.tsx";
+import {useTranslation} from "react-i18next";
 
 const Feed = () => {
     const navigate = useNavigate();
@@ -13,7 +14,8 @@ const Feed = () => {
     const [items, setItems] = useState<FeedItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const {theme} = useAppearance()
+    const {theme} = useAppearance();
+    const { t } = useTranslation();
 
     const fetchFeed = async () => {
         try {
@@ -23,7 +25,7 @@ const Feed = () => {
             setItems(data);
         } catch (err) {
             console.error("Erreur lors du chargement du flux", err);
-            setError("Impossible de charger le fil d'actualité");
+            setError(t("feed.errorLoad"));
         } finally {
             setLoading(false);
         }
@@ -64,18 +66,18 @@ const Feed = () => {
                     <FiUsers className="text-rose-400 mx-auto mb-4" size={36} />
 
                     <h1 className="text-3xl font-black mb-3">
-                        Fil d’actualité
+                        {t("feed.title")}
                     </h1>
 
                     <p className={`mb-6 ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
-                        Connecte-toi pour voir les activités des utilisateurs que tu suis.
+                        {t("feed.loginPrompt")}
                     </p>
 
                     <button
                         onClick={() => navigate("/login")}
                         className="px-6 py-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-semibold transition"
                     >
-                        Se connecter
+                        {t("common.login") || t("nav.login") || "Se connecter"}
                     </button>
                 </div>
             </div>
@@ -101,22 +103,22 @@ const Feed = () => {
                                 : "bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-200 shadow-sm"
                         }`}
                     >
-                        ← Retour
+                        ← {t("common.back")}
                     </button>
                 </div>
 
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
                     <div>
                         <p className="uppercase tracking-[0.2em] text-neutral-500 text-xs font-bold mb-3">
-                            Social
+                            {t("feed.social")}
                         </p>
 
                         <h1 className="text-5xl md:text-6xl font-black tracking-tight">
-                            Fil d’actualité
+                            {t("feed.title")}
                         </h1>
 
                         <p className={`mt-4 max-w-2xl ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
-                            Retrouve les dernières critiques, likes et ajouts aux collections des utilisateurs que tu suis.
+                            {t("feed.description")}
                         </p>
                     </div>
 
@@ -130,7 +132,7 @@ const Feed = () => {
                         }`}
                     >
                         <FiRefreshCw className={loading ? "animate-spin" : ""} />
-                        Actualiser
+                        {t("feed.refresh")}
                     </button>
                 </div>
 
@@ -157,19 +159,18 @@ const Feed = () => {
                         <FiUsers className={`${theme === "dark" ? "text-neutral-600" : "text-neutral-400"} mx-auto mb-5`} size={42} />
 
                         <h2 className="text-2xl font-bold mb-3">
-                            Aucun événement pour le moment
+                            {t("feed.emptyTitle")}
                         </h2>
 
                         <p className={`max-w-xl mx-auto ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
-                            Ton feed se remplira lorsque les utilisateurs que tu suis publieront des critiques,
-                            aimeront des contenus ou ajouteront des émissions à leurs collections publiques.
+                            {t("feed.emptyDesc")}
                         </p>
 
                         <button
                             onClick={() => navigate("/")}
                             className="mt-8 px-6 py-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white font-semibold transition"
                         >
-                            Trouver des utilisateurs
+                            {t("feed.findUsers")}
                         </button>
                     </div>
                 )}

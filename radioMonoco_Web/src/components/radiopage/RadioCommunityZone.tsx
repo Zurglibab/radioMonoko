@@ -330,7 +330,7 @@ export const RadioCommunityZone = ({
     return (
         <section className={`grid grid-cols-1 lg:grid-cols-12 gap-16 border-t pt-16 ${theme === 'dark' ? 'border-white/5' : 'border-neutral-200'}`}>
             <div className="lg:col-span-4 space-y-6">
-                <h3 className={`text-xs font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>Notes de la communauté</h3>
+                <h3 className={`text-xs font-black uppercase tracking-[0.2em] ${theme === 'dark' ? 'opacity-30' : 'text-neutral-400'}`}>{t("radio.communityNotes")}</h3>
                 <div className="flex items-baseline gap-4">
                     <span className={`text-7xl font-black tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-neutral-900'}`}>
                         {currentAverage > 0 ? Number(currentAverage).toFixed(1) : "0.0"}

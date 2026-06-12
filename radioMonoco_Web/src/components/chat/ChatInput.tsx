@@ -2,10 +2,12 @@ import { useState } from "react";
 import type { ChatInputProps } from "../../interfaces/Props.types.ts";
 import { DEFAULT_THEME } from "../../assets/themes/DefaultTheme.ts";
 import { useAppearance } from "../../context/AppearanceContext.tsx"; // Import du hook
+import { useTranslation } from "react-i18next";
 
 export const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
     const [text, setText] = useState('');
     const { theme } = useAppearance(); // Récupération du mode actuel
+    const { t } = useTranslation();
 
     return (
         <div className={`p-3 border-t flex items-center gap-2 transition-colors
@@ -17,7 +19,7 @@ export const ChatInput = ({ onSend, disabled = false }: ChatInputProps) => {
                     ? 'bg-neutral-800 text-neutral-100'
                     : 'bg-neutral-100 text-neutral-900 border border-neutral-200'}
                 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                placeholder={disabled ? "Envoi en cours..." : "Envoyer un message..."}
+                placeholder={disabled ? t("chat.sendingInput") : t("chat.sendPlaceholder")}
                 value={text}
                 disabled={disabled}
                 onChange={(e) => setText(e.target.value)}

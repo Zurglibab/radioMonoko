@@ -4,12 +4,14 @@ import { HiOutlineVolumeOff, HiOutlineVolumeUp } from "react-icons/hi";
 import { useRadio } from "../../context/RadioContext.tsx";
 import AudioVisualiser from "./AudioVisualiser.tsx";
 import { useAppearance } from "../../context/AppearanceContext.tsx";
+import { useTranslation } from "react-i18next";
 
 const GlobalPlayer: React.FC = () => {
     const { isPlaying, setIsPlaying, currentRadio, setCurrentRadio, volume, setVolume, toggleMute } = useRadio();
     const [isHoveringSlider, setIsHoveringSlider] = useState(false);
     const [isOverflowing, setIsOverflowing] = useState(false);
     const { theme } = useAppearance();
+    const { t } = useTranslation();
 
     const containerRef = useRef<HTMLDivElement>(null);
     const textRef = useRef<HTMLParagraphElement>(null);
@@ -93,7 +95,7 @@ const GlobalPlayer: React.FC = () => {
                             </div>
                         </div>
                         <p className="text-[10px] text-rose-600 font-bold uppercase tracking-widest mt-0.5">
-                            {isPlaying ? (isPodcastStream ? "Lecture Épisode" : "En Direct") : "Pause"}
+                            {isPlaying ? (isPodcastStream ? t("radio.playingEpisode") : t("radio.live")) : t("radio.pause")}
                         </p>
                     </div>
                 </div>

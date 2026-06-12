@@ -104,7 +104,7 @@ const SearchResults = () => {
                                 theme === "dark" ? "text-neutral-500" : "text-neutral-600"
                             }`}
                         >
-                            Genre
+                            {t("searchPage.filters.genre")}
                         </label>
 
                         <input
@@ -114,7 +114,7 @@ const SearchResults = () => {
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") applyFilters();
                             }}
-                            placeholder="ex : culture, musique, humour..."
+                            placeholder={t("searchPage.filters.genrePlaceholder")}
                             className={`w-full rounded-xl px-4 py-3 outline-none border transition ${
                                 theme === "dark"
                                     ? "bg-neutral-950/60 border-white/5 text-white placeholder:text-neutral-600 focus:border-rose-500/50"
@@ -129,7 +129,7 @@ const SearchResults = () => {
                                 theme === "dark" ? "text-neutral-500" : "text-neutral-600"
                             }`}
                         >
-                            Année
+                            {t("searchPage.filters.year")}
                         </label>
 
                         <input
@@ -139,7 +139,7 @@ const SearchResults = () => {
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") applyFilters();
                             }}
-                            placeholder="ex : 2024"
+                            placeholder={t("searchPage.filters.yearPlaceholder")}
                             className={`w-full rounded-xl px-4 py-3 outline-none border transition ${
                                 theme === "dark"
                                     ? "bg-neutral-950/60 border-white/5 text-white placeholder:text-neutral-600 focus:border-rose-500/50"
@@ -154,7 +154,7 @@ const SearchResults = () => {
                                 theme === "dark" ? "text-neutral-500" : "text-neutral-600"
                             }`}
                         >
-                            Auteur
+                            {t("searchPage.filters.author")}
                         </label>
 
                         <input
@@ -164,7 +164,7 @@ const SearchResults = () => {
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") applyFilters();
                             }}
-                            placeholder="ex : journaliste, invité, chroniqueur..."
+                            placeholder={t("searchPage.filters.authorPlaceholder")}
                             className={`w-full rounded-xl px-4 py-3 outline-none border transition ${
                                 theme === "dark"
                                     ? "bg-neutral-950/60 border-white/5 text-white placeholder:text-neutral-600 focus:border-rose-500/50"
@@ -179,7 +179,7 @@ const SearchResults = () => {
                             onClick={applyFilters}
                             className="px-5 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold transition"
                         >
-                            Filtrer
+                            {t("searchPage.filters.filterBtn")}
                         </button>
 
                         {hasActiveFilters && (
@@ -192,7 +192,7 @@ const SearchResults = () => {
                                         : "bg-white hover:bg-neutral-100 text-neutral-800 border-neutral-200"
                                 }`}
                             >
-                                Réinitialiser
+                                {t("searchPage.filters.resetBtn")}
                             </button>
                         )}
                     </div>
@@ -202,19 +202,19 @@ const SearchResults = () => {
                     <div className="flex flex-wrap gap-2 mt-5">
                         {genre && (
                             <span className="text-xs px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                Genre : {genre}
+                                {t("searchPage.filters.genre")} : {genre}
                             </span>
                         )}
 
                         {year && (
                             <span className="text-xs px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                Année : {year}
+                                {t("searchPage.filters.year")} : {year}
                             </span>
                         )}
 
                         {author && (
                             <span className="text-xs px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                                Auteur : {author}
+                                {t("searchPage.filters.author")} : {author}
                             </span>
                         )}
                     </div>
@@ -228,7 +228,7 @@ const SearchResults = () => {
             ${theme === 'dark' ? 'border-white' : 'border-rose-500'}`}
                     />
                     <p className={`font-medium animate-pulse ${theme === 'dark' ? 'text-white' : 'text-neutral-600'}`}>
-                        Recherche en cours...
+                        {t("searchPage.loading")}
                     </p>
                 </div>
             )}
@@ -287,12 +287,12 @@ const SearchResults = () => {
 
                     <div className="mt-12">
                         <h2 className={`text-2xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-neutral-900"}`}>
-                            Collections
+                            {t("searchPage.collections")}
                         </h2>
 
                         {results.collections.length === 0 ? (
                             <p className="text-neutral-500">
-                                Aucune collection trouvée
+                                {t("searchPage.noCollections")}
                             </p>
                         ) : (
                             <div className="grid md:grid-cols-3 gap-4">
@@ -311,11 +311,11 @@ const SearchResults = () => {
                                         </h3>
 
                                         <p className={`text-sm mt-2 line-clamp-3 ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
-                                            {collection.description || "Aucune description"}
+                                            {collection.description || t("searchPage.noDescription")}
                                         </p>
 
                                         <span className="text-xs text-rose-400 mt-3 inline-block">
-                                            Voir la collection →
+                                            {t("searchPage.viewCollection")}
                                         </span>
                                     </div>
                                 ))}
@@ -334,7 +334,7 @@ const SearchResults = () => {
                         {results.shows.length === 0 ? (
                             <p className={theme === "dark" ? "text-neutral-500" : "text-neutral-600"}>
                                 {hasActiveFilters
-                                    ? "Aucune émission ne correspond aux filtres sélectionnés."
+                                    ? t("searchPage.noShowsFilter")
                                     : t("searchPage.noShows")}
                             </p>
                         ) : (
