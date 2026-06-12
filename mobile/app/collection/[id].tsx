@@ -1,39 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, useColorScheme, ActivityIndicator, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Globe, Lock, Trash2, Disc3, Music2, FolderOpen } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useCollectionItems } from "@/hooks/collections/useCollectionItems";
 import { CollectionService } from "@/services/collections/collection.service";
 import { CollectionDTO } from "@/types/collection";
 
-/**
- * CollectionDetailScreen : Affiche le contenu d'une collection personnalisée.
- * - En-tête : nom, description, badge visibilité, compteur
- * - Liste des œuvres avec note utilisateur et bouton retrait
- */
 export default function CollectionDetailScreen() {
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const collectionId = id as string;
   const router = useRouter();
-  const { token, appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const { token } = useAuthContext();
+  const colors = useThemeColors();
 
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-
-  // Items enrichis via le helper réutilisable
   const { items, isLoading: isItemsLoading, error: itemsError, removeItem } =
     useCollectionItems(collectionId);
 
-  // En-tête de la collection : récupéré séparément (titre, description, visibilité)
   const [collection, setCollection] = useState<CollectionDTO | null>(null);
   const [isHeaderLoading, setIsHeaderLoading] = useState(true);
   const [headerError, setHeaderError] = useState<string | null>(null);
@@ -66,7 +54,6 @@ export default function CollectionDetailScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-      {/* Header navigation */}
       <View className="flex-row items-center px-6 py-4">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -92,7 +79,6 @@ export default function CollectionDetailScreen() {
           </View>
         ) : (
           <>
-            {/* En-tête : description + visibilité + compteur */}
             {collection && (
               <View className="px-6 mb-8">
                 {collection.description ? (
@@ -120,7 +106,6 @@ export default function CollectionDetailScreen() {
               </View>
             )}
 
-            {/* Liste des œuvres */}
             {items.length === 0 ? (
               <View className="items-center mt-16 px-10">
                 <View

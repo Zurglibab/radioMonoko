@@ -9,14 +9,6 @@ const validateLoginForm = (email: string, password: string): string | null => {
   return null;
 };
 
-/**
- * 
- * useAuth : Hook personnalisé pour gérer l'authentification des utilisateurs.
- * Il gère la validation du formulaire de connexion, l'appel au service d'authentification pour obtenir un token,
- * la mise à jour du contexte global d'authentification, et la navigation vers l'écran d'accueil après une connexion réussie.
- * Il intègre également l'option de connexion via Google OAuth en utilisant le hook useGoogleAuth.
- * @returns Un objet contenant les fonctions de connexion (email/mot de passe et Google), les états de chargement et d'erreur.
- */
 export const useAuth = () => {
   const [isFormLoading, setIsFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
