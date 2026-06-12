@@ -161,7 +161,7 @@ const AdminReports = () => {
                 </button>
             </div>
 
-            <h1 className="text-4xl font-black text-white mb-8">
+            <h1 className="text-4xl font-black app-text mb-8">
                 {t("admin.reports")}
             </h1>
 
@@ -190,7 +190,7 @@ const AdminReports = () => {
             </div>
 
             {loading && (
-                <p className="text-neutral-400">{t("admin.loadingReports")}</p>
+                <p className="text-neutral-400 text-app-text">{t("admin.loadingReports")}</p>
             )}
 
             {error && (
@@ -201,7 +201,7 @@ const AdminReports = () => {
                 <div className="space-y-4">
                     {reviewReports.length === 0 ? (
                         <div className="bg-neutral-900/40 border border-white/5 rounded-2xl p-8 text-center">
-                            <p className="text-white font-semibold">
+                            <p className="text-app-text font-semibold">
                                 {t("admin.noReviewReports")}
                             </p>
                             <p className="text-neutral-500 mt-2">
@@ -233,9 +233,9 @@ const AdminReports = () => {
                                                 </span>
                                             </div>
 
-                                            <p className="text-neutral-400 text-sm mb-2">
+                                            <p className="text-neutral-400 text-app-text text-sm mb-2">
                                                 {t("admin.reportType")}
-                                                <span className="text-white font-semibold ml-2">
+                                                <span className="text-app-text font-semibold ml-2">
                                                     {report.report_type}
                                                 </span>
                                             </p>
@@ -250,7 +250,7 @@ const AdminReports = () => {
                                                 <p className="text-neutral-500 text-xs mb-2">
                                                     {t("admin.concernedReview")}
                                                 </p>
-                                                <p className="text-white">
+                                                <p className="text-app-text">
                                                     {getReviewText(review)}
                                                 </p>
                                             </div>
@@ -260,7 +260,7 @@ const AdminReports = () => {
                                                     <p className="text-neutral-500 text-xs">
                                                         {t("admin.reviewAuthor")}
                                                     </p>
-                                                    <p className="text-white text-sm mt-1">
+                                                    <p className="text-app-text text-sm mt-1">
                                                         {author
                                                             ? `@${author.username}`
                                                             : review?.user_id || "Inconnu"}
@@ -271,7 +271,7 @@ const AdminReports = () => {
                                                     <p className="text-neutral-500 text-xs">
                                                         {t("admin.reportedBy")}
                                                     </p>
-                                                    <p className="text-white text-sm mt-1">
+                                                    <p className="text-app-text text-sm mt-1">
                                                         {reporter
                                                             ? `@${reporter.username}`
                                                             : report.reporter_id}
@@ -283,14 +283,14 @@ const AdminReports = () => {
                                         <div className="flex flex-wrap md:flex-col gap-3">
                                             <button
                                                 onClick={() => handleDeleteReview(report.review_id)}
-                                                className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white text-sm"
+                                                className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-app-text text-sm"
                                             >
                                                 {t("admin.deleteReview")}
                                             </button>
 
                                             <button
                                                 onClick={() => handleClearReviewReports(report.review_id)}
-                                                className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-xl text-white text-sm"
+                                                className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-xl text-app-text text-sm"
                                             >
                                                 {t("admin.clearReports")}
                                             </button>
@@ -314,7 +314,7 @@ const AdminReports = () => {
                 <div className="space-y-4">
                     {userReports.length === 0 ? (
                         <div className="bg-neutral-900/40 border border-white/5 rounded-2xl p-8 text-center">
-                            <p className="text-white font-semibold">
+                            <p className="text-app-text font-semibold">
                                 {t("admin.noUserReports")}
                             </p>
                             <p className="text-neutral-500 mt-2">
@@ -345,7 +345,7 @@ const AdminReports = () => {
 
                                             <p className="text-neutral-400 text-sm mb-2">
                                                 {t("admin.reportType")}
-                                                <span className="text-white font-semibold ml-2">
+                                                <span className="text-app-text font-semibold ml-2">
                                                     {report.report_type}
                                                 </span>
                                             </p>
@@ -361,7 +361,7 @@ const AdminReports = () => {
                                                     <p className="text-neutral-500 text-xs">
                                                         {t("admin.concernedUser")}
                                                     </p>
-                                                    <p className="text-white text-sm mt-1">
+                                                    <p className="text-app-text text-sm mt-1">
                                                         {reportedUser
                                                             ? `@${reportedUser.username}`
                                                             : report.reported_user_id}
@@ -377,7 +377,7 @@ const AdminReports = () => {
                                                     <p className="text-neutral-500 text-xs">
                                                         {t("admin.reportedBy")}
                                                     </p>
-                                                    <p className="text-white text-sm mt-1">
+                                                    <p className="text-app-text text-sm mt-1">
                                                         {reporter ? `@${reporter.username}` : report.reporter_id}
                                                     </p>
                                                 </div>
@@ -387,21 +387,21 @@ const AdminReports = () => {
                                         <div className="flex flex-wrap md:flex-col gap-3">
                                             <button
                                                 onClick={() => navigate(`/users/${report.reported_user_id}`)}
-                                                className="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl text-white text-sm"
+                                                className="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl text-app-text text-sm"
                                             >
                                                 {t("admin.viewProfile")}
                                             </button>
 
                                             <button
                                                 onClick={() => handleBanUser(report.reported_user_id)}
-                                                className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white text-sm"
+                                                className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-app-text text-sm"
                                             >
                                                 {t("admin.ban")}
                                             </button>
 
                                             <button
                                                 onClick={() => handleClearUserReports(report.reported_user_id)}
-                                                className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-xl text-white text-sm"
+                                                className="bg-neutral-700 hover:bg-neutral-600 px-4 py-2 rounded-xl text-app-text text-sm"
                                             >
                                                 {t("admin.clearReports")}
                                             </button>

@@ -41,29 +41,29 @@ const AdminDashboard = () => {
                 </button>
             </div>
 
-            <h1 className="text-5xl font-black text-white mb-10">
+            <h1 className="text-5xl font-black text-app-text mb-10">
                 {t("admin.dashboard")}
             </h1>
 
             <div className="grid md:grid-cols-4 gap-6">
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-                    <p className="text-neutral-400">{t("admin.reports")}</p>
-                    <p className="text-4xl font-bold text-white mt-2">{reportCount}</p>
+                    <p className="text-app-text-neutral-400">{t("admin.reports")}</p>
+                    <p className="text-4xl font-bold text-app-text mt-2">{reportCount}</p>
                 </div>
 
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-                    <p className="text-neutral-400">{t("admin.users")}</p>
-                    <p className="text-4xl font-bold text-white mt-2">{userCount}</p>
+                    <p className="text-app-text-neutral-400">{t("admin.users")}</p>
+                    <p className="text-4xl font-bold text-app-text mt-2">{userCount}</p>
                 </div>
 
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-                    <p className="text-neutral-400">{t("admin.reviews")}</p>
-                    <p className="text-4xl font-bold text-white mt-2">{reviewCount}</p>
+                    <p className="text-app-text-neutral-400">{t("admin.reviews")}</p>
+                    <p className="text-4xl font-bold text-app-text mt-2">{reviewCount}</p>
                 </div>
 
                 <div className="bg-neutral-900/40 backdrop-blur-xl rounded-3xl p-6 border border-white/5">
-                    <p className="text-neutral-400">{t("admin.connectedAdmin")}</p>
-                    <p className="text-xl text-white mt-2">{user?.username}</p>
+                    <p className="text-app-text-neutral-400">{t("admin.connectedAdmin")}</p>
+                    <p className="text-xl text-app-text mt-2">{user?.username}</p>
                 </div>
             </div>
 
@@ -72,8 +72,8 @@ const AdminDashboard = () => {
                     onClick={() => navigate("/admin/users")}
                     className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
                 >
-                    <h2 className="text-white font-bold text-xl">{t("admin.manageUsers")}</h2>
-                    <p className="text-neutral-500 mt-2">
+                    <h2 className="text-app-text  font-bold text-xl">{t("admin.manageUsers")}</h2>
+                    <p className="text-app-text-neutral-500 mt-2">
                         {t("admin.manageUsersText")}
                     </p>
                 </div>
@@ -82,8 +82,8 @@ const AdminDashboard = () => {
                     onClick={() => navigate("/admin/reports")}
                     className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
                 >
-                    <h2 className="text-white font-bold text-xl">{t("admin.manageReports")}</h2>
-                    <p className="text-neutral-500 mt-2">
+                    <h2 className="text-app-text  font-bold text-xl">{t("admin.manageReports")}</h2>
+                    <p className="text-app-text-neutral-500 mt-2">
                         {t("admin.manageReportsText")}
                     </p>
                 </div>
@@ -92,8 +92,8 @@ const AdminDashboard = () => {
                     onClick={() => navigate("/admin/reviews")}
                     className="cursor-pointer bg-neutral-900/40 p-6 rounded-3xl border border-white/5 hover:border-rose-500 transition"
                 >
-                    <h2 className="text-white font-bold text-xl">{t("admin.manageReviews")}</h2>
-                    <p className="text-neutral-500 mt-2">
+                    <h2 className="text-app-text font-bold text-xl">{t("admin.manageReviews")}</h2>
+                    <p className="text-app-text-neutral-500 mt-2">
                         {t("admin.manageReviewsText")}
                     </p>
                 </div>
