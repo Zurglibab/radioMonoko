@@ -1,38 +1,29 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import {
   View, Text, ScrollView, TextInput, TouchableOpacity,
-  ActivityIndicator, useColorScheme, KeyboardAvoidingView, Platform, Image,
+  ActivityIndicator, KeyboardAvoidingView, Platform, Image,
 } from "react-native";
 import { useLocalSearchParams, useRouter, useFocusEffect } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, Send, X, Heart, MessageSquare, Trash2 } from "lucide-react-native";
-import { theme } from "@/constants/theme";
+import { ChevronLeft, Send, X, MessageSquare } from "lucide-react-native";
 import { useAuthContext } from "@/context/AuthContext";
 import { useComments } from "@/hooks/community/useComments";
 import { ReviewService } from "@/services/reviews/review.service";
 import { ReviewDTO } from "@/types/review";
 import { UserService } from "@/services/users/user.service";
-import { ReviewComment } from "@/types/community";
+import { useThemeColors } from "@/utils/useThemeColors";
+import { getAvatarFallbackUrl } from "@/utils/avatarFallback";
+import { CommentRow } from "@/features/community/components/CommentRow";
 
-/**
- * CommentsScreen : Écran de gestion des commentaires d'une critique.
- * Affiche la critique originale, le parent et la liste des commentaires associés.
- * Permet de répondre à un commentaire spécifique, de liker, et de supprimer ses propres commentaires.
- * Gère également l'affichage d'un thread de réponses ciblé lorsqu'on accède à un commentaire précis.
- * @returns 
- */
 export default function CommentsScreen() {
   const { t } = useTranslation();
   const { id, targetCommentId } = useLocalSearchParams<{ id: string; targetCommentId?: string }>();
   const router = useRouter();
-  const { appearanceSettings, token, user } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const { token, user } = useAuthContext();
+  const colors = useThemeColors();
   const inputRef = useRef<TextInput>(null);
   const scrollRef = useRef<ScrollView>(null);
-
-  const isDark = appearanceSettings.themeMode === "system" ? systemTheme === "dark" : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   const insets = useSafeAreaInsets();
 
@@ -55,9 +46,9 @@ export default function CommentsScreen() {
           const profile = await UserService.getById(token, review.user_id);
           setParentAuthor(profile.display_name ?? profile.username);
           setParentAvatar(profile.avatar);
-        } catch { /* ignore */ }
+        } catch {}
       })
-      .catch(() => { /* not blocking */ });
+      .catch(() => {});
   }, [token, id]));
 
   useEffect(() => { if (replyingTo) inputRef.current?.focus(); }, [replyingTo]);
@@ -68,80 +59,11 @@ export default function CommentsScreen() {
     setNewComment("");
   };
 
-  const CommentRow = ({ comment, isParent = false }: { comment: ReviewComment; isParent?: boolean }) => {
-    const isMine = comment.userId === currentUserId;
-    return (
-      <View>
-        <View className="flex-row px-4 py-3">
-          {/* Avatar */}
-          <TouchableOpacity onPress={() => router.push(`/community/user/${comment.userId}` as any)} className="mr-3 mt-0.5">
-            <Image
-              source={{ uri: comment.avatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.username)}&background=333&color=fff` }}
-              className="w-10 h-10 rounded-full"
-            />
-          </TouchableOpacity>
-
-          <View className="flex-1">
-            {/* Name + timestamp */}
-            <View className="flex-row items-center flex-wrap mb-1">
-              <TouchableOpacity onPress={() => router.push(`/community/user/${comment.userId}` as any)}>
-                <Text style={{ color: colors.text }} className="font-bold text-[15px] mr-2">{comment.username}</Text>
-              </TouchableOpacity>
-              {comment.replyTo && (
-                <Text style={{ color: colors.primary }} className="text-xs font-semibold mr-2">@{comment.replyTo}</Text>
-              )}
-              <Text style={{ color: colors.muted }} className="text-xs">{comment.timestamp}</Text>
-            </View>
-
-            {/* Text */}
-            <Text style={{ color: colors.text }} className="text-[15px] leading-[22px] mb-3">{comment.text}</Text>
-
-            {/* Actions */}
-            <View className="flex-row items-center gap-x-6">
-              <TouchableOpacity
-                className="flex-row items-center"
-                onPress={() => router.push({ pathname: `/community/comments/${id}`, params: { targetCommentId: comment.id } } as any)}
-              >
-                <MessageSquare size={16} color={colors.muted} />
-                {(comment.repliesCount ?? 0) > 0 && (
-                  <Text style={{ color: colors.muted }} className="text-xs ml-1.5">{comment.repliesCount}</Text>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity className="flex-row items-center" onPress={() => toggleLikeComment(comment.id)}>
-                <Heart
-                  size={16}
-                  color={comment.hasLiked ? "#e11d48" : colors.muted}
-                  fill={comment.hasLiked ? "#e11d48" : "transparent"}
-                />
-                {comment.likes > 0 && (
-                  <Text style={{ color: comment.hasLiked ? "#e11d48" : colors.muted }} className="text-xs ml-1.5">{comment.likes}</Text>
-                )}
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => setReplyingTo(comment)}>
-                <Text style={{ color: colors.primary }} className="text-xs font-semibold">{t('community.comments.reply')}</Text>
-              </TouchableOpacity>
-
-              {isMine && (
-                <TouchableOpacity onPress={() => deleteMyComment(comment.id)}>
-                  <Trash2 size={14} color={colors.muted} />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-        </View>
-        <View style={{ height: 1, backgroundColor: colors.border, marginLeft: 60 }} />
-      </View>
-    );
-  };
-
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      {/* Header */}
       <View
         style={{ paddingTop: insets.top, borderBottomWidth: 1, borderColor: colors.border }}
       >
@@ -155,7 +77,6 @@ export default function CommentsScreen() {
         </View>
       </View>
 
-      {/* Contenu scrollable */}
       <ScrollView
         ref={scrollRef}
         style={{ flex: 1 }}
@@ -163,12 +84,11 @@ export default function CommentsScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="interactive"
       >
-        {/* Commentaire parent */}
         {!isThreadView && parentReview && (
           <View className="px-4 pt-4 pb-3">
             <View className="flex-row mb-3">
               <Image
-                source={{ uri: parentAvatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(parentAuthor)}&background=333&color=fff` }}
+                source={{ uri: parentAvatar ?? getAvatarFallbackUrl(parentAuthor) }}
                 className="w-11 h-11 rounded-full mr-3"
               />
               <View className="flex-1 justify-center">
@@ -190,10 +110,17 @@ export default function CommentsScreen() {
           </View>
         )}
 
-        {/* Thread parent */}
         {isThreadView && focusedComment && (
           <>
-            <CommentRow comment={focusedComment} isParent />
+            <CommentRow
+              comment={focusedComment}
+              colors={colors}
+              currentUserId={currentUserId}
+              onOpenThread={() => router.push({ pathname: `/community/comments/${id}`, params: { targetCommentId: focusedComment.id } } as any)}
+              onLike={() => toggleLikeComment(focusedComment.id)}
+              onReply={() => setReplyingTo(focusedComment)}
+              onDelete={() => deleteMyComment(focusedComment.id)}
+            />
             <View className="px-4 py-2">
               <View style={{ backgroundColor: colors.border }} className="w-[2px] h-4 ml-5" />
               <Text style={{ color: colors.muted }} className="text-xs font-bold uppercase tracking-widest ml-5 mt-1">{t('community.comments.repliesSectionTitle')}</Text>
@@ -201,7 +128,6 @@ export default function CommentsScreen() {
           </>
         )}
 
-        {/* Comments list */}
         {isLoading ? (
           <View className="py-16 items-center">
             <ActivityIndicator color={colors.primary} />
@@ -213,15 +139,24 @@ export default function CommentsScreen() {
             </Text>
           </View>
         ) : (
-          comments.map(c => <CommentRow key={c.id} comment={c} />)
+          comments.map(c => (
+            <CommentRow
+              key={c.id}
+              comment={c}
+              colors={colors}
+              currentUserId={currentUserId}
+              onOpenThread={() => router.push({ pathname: `/community/comments/${id}`, params: { targetCommentId: c.id } } as any)}
+              onLike={() => toggleLikeComment(c.id)}
+              onReply={() => setReplyingTo(c)}
+              onDelete={() => deleteMyComment(c.id)}
+            />
+          ))
         )}
 
         <View className="h-4" />
       </ScrollView>
 
-      {/* Zone fixe en bas */}
       <View style={{ backgroundColor: colors.background, borderTopWidth: 1, borderColor: colors.border }}>
-        {/* Reply indicator */}
         {replyingTo && (
           <View
             className="flex-row items-center px-4 py-2"
@@ -237,13 +172,12 @@ export default function CommentsScreen() {
           </View>
         )}
 
-        {/* Input bar + safe area bottom */}
         <View
           style={{ paddingBottom: insets.bottom > 0 ? insets.bottom : 8 }}
           className="flex-row items-end px-3 pt-2 gap-x-2"
         >
           <Image
-            source={{ uri: user?.avatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username ?? 'Me')}&background=333&color=fff` }}
+            source={{ uri: user?.avatar ?? getAvatarFallbackUrl(user?.username ?? 'Me') }}
             className="w-8 h-8 rounded-full mb-1"
           />
           <View

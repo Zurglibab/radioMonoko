@@ -10,12 +10,6 @@ interface UserPlaylistsSectionProps {
   colors: any;
 }
 
-/**
- * Affiche une section listant les playlists créées par un utilisateur de la communauté,
- * avec un accès rapide à chacune d'elles. Gère également le cas où l'utilisateur n'a créé aucune playlist.
- * @param param0 
- * @returns 
- */
 export const UserPlaylistsSection = ({ collections, colors }: UserPlaylistsSectionProps) => {
   const router = useRouter();
   const { t } = useTranslation();

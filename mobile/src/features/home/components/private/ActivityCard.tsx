@@ -1,125 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Alert, useColorScheme, Image } from "react-native";
+import React from "react";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Star, Heart, MessageSquare, MoreVertical, UserPlus, UserCheck } from "lucide-react-native";
-import { theme } from "@/constants/theme";
-import { useAuthContext } from "@/context/AuthContext";
 import { SocialActivity } from "@/types/community";
 import { useRouter } from "expo-router";
-import { SocialService } from "@/services/social/social.service";
-import { LikeReviewService } from "@/services/reviews/likeReview.service";
-import { NotificationService } from "@/services/notifications/notification.service";
-import { ReportService } from "@/services/reports/report.service";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useTranslation } from "react-i18next";
+import { useActivityActions } from "@/features/community/hooks/useActivityActions";
 
-/**
- * ActivityCard : Composant central du fil d'actualité.
- * Affiche les interactions sociales, permet de liker, commenter
- * et suivre l'utilisateur directement depuis le flux.
- */
 export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { token, user, appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-
-  const [isLiked, setIsLiked] = useState(activity.hasLiked ?? false);
-  const [likesCount, setLikesCount] = useState(activity.likes);
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
-
-  useEffect(() => {
-    if (!isLiking) {
-      setLikesCount(activity.likes);
-      setIsLiked(activity.hasLiked ?? false);
-    }
-  }, [activity.likes, activity.hasLiked]);
-
-  const handleLike = async () => {
-    if (!token || !user?.id || isLiking) return;
-    setIsLiking(true);
-    const wasLiked = isLiked;
-    setIsLiked(!wasLiked);
-    setLikesCount(prev => wasLiked ? prev - 1 : prev + 1);
-    try {
-      if (wasLiked) {
-        await LikeReviewService.remove(token, activity.id, user.id);
-      } else {
-        await LikeReviewService.upsert(token, activity.id, user.id, true);
-        if (activity.userId !== user.id) {
-          NotificationService.create(token, {
-            user_id: activity.userId,
-            type: 'like',
-            message: t('home.activityCard.likeNotification', {
-              username: user.username ?? t('home.activityCard.someone'),
-              media: activity.targetMedia,
-            }),
-            is_read: false,
-          }).catch(() => {});
-        }
-      }
-    } catch (err) {
-      if (__DEV__) console.warn('[ActivityCard] like failed:', err);
-      setIsLiked(wasLiked);
-      setLikesCount(prev => wasLiked ? prev + 1 : prev - 1);
-    } finally {
-      setIsLiking(false);
-    }
-  };
-
-  const handleFollow = async () => {
-    if (!token) return;
-    const wasFollowing = isFollowing;
-    setIsFollowing(!wasFollowing);
-    try {
-      if (wasFollowing) {
-        await SocialService.unfollowUser(token, activity.userId);
-      } else {
-        await SocialService.followUser(token, activity.userId);
-      }
-    } catch {
-      setIsFollowing(wasFollowing);
-    }
-  };
-
-  /**
-   * submitReport : Envoie le signalement de la critique aux administrateurs.
-   */
-  const submitReport = async (reasonKey: 'spam' | 'inappropriate') => {
-    if (!token || !user?.id) return;
-    try {
-      await ReportService.reportReview(token, {
-        reporter_id: user.id,
-        review_id: activity.id,
-        report_type: t(`home.activityCard.reportReasons.${reasonKey}`),
-      });
-      Alert.alert(t('home.activityCard.thanksTitle'), t('home.activityCard.thanksMessage'));
-    } catch (err) {
-      if (__DEV__) console.warn('[ActivityCard] report failed:', err);
-      Alert.alert(t('common.error'), t('home.activityCard.reportError'));
-    }
-  };
-
-  /**
-   * handleReport : Système de modération
-   * Permet aux utilisateurs de signaler un contenu inapproprié.
-   */
-  const handleReport = () => {
-    Alert.alert(
-      t('home.activityCard.moderationTitle'),
-      t('home.activityCard.moderationMessage'),
-      [
-        { text: t('common.cancel'), style: "cancel" },
-        { text: t('home.activityCard.reportSpam'), onPress: () => submitReport('spam') },
-        { text: t('home.activityCard.reportInappropriate'), style: "destructive", onPress: () => submitReport('inappropriate') },
-      ]
-    );
-  };
+  const colors = useThemeColors();
+  const { isLiked, likesCount, isFollowing, isLiking, handleLike, handleFollow, handleReport } = useActivityActions(activity);
 
   return (
     <View
@@ -129,7 +21,6 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         borderColor: colors.border
       }}
     >
-      {/* Badge "Mis en avant" par l'administration */}
       {activity.featured && (
         <View
           style={{ backgroundColor: colors.primary + "22", borderColor: colors.primary }}
@@ -142,11 +33,9 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         </View>
       )}
 
-      {/* Infos Utilisateur & Action Follow */}
       <View className="flex-row items-center justify-between mb-4">
         <View className="flex-row items-center flex-1">
-          {/* Avatar ou Initiale */}
-          <View 
+          <View
             style={{ backgroundColor: colors.background, borderColor: colors.border }}
             className="w-10 h-10 rounded-full items-center justify-center mr-3 border overflow-hidden"
           >
@@ -169,8 +58,7 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
           </View>
         </View>
 
-        {/* Bouton Follow */}
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={handleFollow}
           className="mr-3 px-3 py-1.5 rounded-full border"
           style={{ 
@@ -190,7 +78,6 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Action sur le média */}
       <View className="mb-4">
         <Text style={{ color: colors.muted }} className="text-[13px] leading-4 mb-2">
            {activity.type === 'REVIEW' ? t('home.activityCard.publishedReviewOn') : t('home.activityCard.rated')}
@@ -199,7 +86,6 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
            </Text>
         </Text>
 
-        {/* Note si applicable */}
         {(activity.type === 'RATING' || activity.value) && (
           <View className="flex-row mb-2">
             {[1, 2, 3, 4, 5].map(i => (
@@ -214,19 +100,17 @@ export const ActivityCard = ({ activity }: { activity: SocialActivity }) => {
           </View>
         )}
 
-        {/* Texte de la critique */}
         {activity.text && (
           <Text 
             style={{ color: colors.text }} 
             className="text-[14px] leading-5 opacity-90 italic"
           >
-            "{activity.text}"
+            &ldquo;{activity.text}&rdquo;
           </Text>
         )}
       </View>
       
-      {/* Interactions (Likes & Commentaires) */}
-      <View 
+      <View
         className="flex-row gap-x-6 pt-4 border-t" 
         style={{ borderColor: colors.border }}
       >

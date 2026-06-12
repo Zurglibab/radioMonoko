@@ -7,10 +7,6 @@ interface InitialAvatarProps {
   colors: any;
 }
 
-/**
- * Affiche un avatar circulaire avec les initiales d'un nom (utilisateur, station, marque...),
- * utilisé comme fallback lorsque l'image associée n'est pas disponible.
- */
 export const InitialAvatar = ({ name, size = 80, colors }: InitialAvatarProps) => {
   const initials = name
     .split(/[\s_.-]+/)

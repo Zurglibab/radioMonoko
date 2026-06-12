@@ -13,7 +13,6 @@ export const PlaylistCover = ({
 }) => {
   const validItems = items.filter(i => !!i.imageUrl);
 
-  // Fallback initiales via ui-avatars (même style que le carousel)
   if (validItems.length === 0) {
     const label = name ?? "♪";
     const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(label)}&background=1A1A1A&color=FFFFFF&length=2&bold=true&uppercase=true&font-size=0.4`;

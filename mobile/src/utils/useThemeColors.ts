@@ -2,13 +2,16 @@ import { useColorScheme } from "react-native";
 import { useAuthContext } from "@/context/AuthContext";
 import { theme } from "@/constants/theme";
 
-export const useThemeColors = () => {
+export const useIsDarkMode = () => {
   const { appearanceSettings } = useAuthContext();
   const systemTheme = useColorScheme();
 
-  const isDark = appearanceSettings.themeMode === 'system'
+  return appearanceSettings.themeMode === 'system'
     ? systemTheme === 'dark'
     : appearanceSettings.themeMode === 'dark';
+};
 
+export const useThemeColors = () => {
+  const isDark = useIsDarkMode();
   return isDark ? theme.dark.colors : theme.light.colors;
 };

@@ -9,12 +9,6 @@ interface MutualFriendsSectionProps {
   colors: any;
 }
 
-/**
- * Affiche une section listant les amis en commun avec un utilisateur de la communauté,
- * avec un accès rapide à leur profil. Affiche jusqu'à 5 amis en commun, et gère le cas où il n'y en a aucun.
- * @param param0 
- * @returns 
- */
 export const MutualFriendsSection = ({ friends, colors }: MutualFriendsSectionProps) => {
   const router = useRouter();
   const { t } = useTranslation();

@@ -1,28 +1,23 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, useColorScheme, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, UserPlus, UserCheck, Users, ListMusic, MoreVertical, MessageSquare } from "lucide-react-native";
-import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
 import { useUserProfile } from "@/hooks/community/useUserProfile";
 import { ChannelService } from "@/services/chat/channel.service";
 import { InitialAvatar } from "@/features/shared/InitialAvatar";
 import { UserPlaylistsSection } from "@/features/community/components/UserPlaylistsSection";
 import { MutualFriendsSection } from "@/features/community/components/MutualFriendsSection";
+import { useThemeColors } from "@/utils/useThemeColors";
 
 export default function UserProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { appearanceSettings, token, user: currentUser } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const { token, user: currentUser } = useAuthContext();
+  const colors = useThemeColors();
   const [isChatLoading, setIsChatLoading] = useState(false);
-
-  const isDark = appearanceSettings.themeMode === "system"
-    ? systemTheme === "dark"
-    : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   const {
     id,
@@ -78,8 +73,6 @@ export default function UserProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-
-      {/* Header */}
       <View className="flex-row items-center justify-between px-6 py-4">
         <TouchableOpacity
           onPress={() => router.back()}
@@ -119,7 +112,6 @@ export default function UserProfileScreen() {
             </Text>
           )}
 
-          {/* Compteurs */}
           <View
             style={{ backgroundColor: colors.surface, borderColor: colors.border }}
             className="flex-row mt-6 rounded-2xl border overflow-hidden"
@@ -144,7 +136,6 @@ export default function UserProfileScreen() {
             ))}
           </View>
 
-          {/* Boutons Suivre + Message */}
           {!isOwnProfile && (
             <View className="flex-row mt-5 gap-x-3 w-full">
               <TouchableOpacity

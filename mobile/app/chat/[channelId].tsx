@@ -2,23 +2,15 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, FlatList,
   KeyboardAvoidingView, Platform, ActivityIndicator,
-  useColorScheme, Alert,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, Send } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useChat, ChatMessage } from "@/hooks/chat/useChat";
-
-function formatMsgTime(dateStr: string, language: string): string {
-  const locale = language === "en" ? "en-US" : "fr-FR";
-  return new Date(dateStr).toLocaleTimeString(locale, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+import { formatMessageTime } from "@/utils/dateFormat";
 
 export default function ChatConversationScreen() {
   const { t, i18n } = useTranslation();
@@ -28,14 +20,7 @@ export default function ChatConversationScreen() {
     username?: string;
   }>();
 
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-
-  const isDark =
-    appearanceSettings.themeMode === "system"
-      ? systemTheme === "dark"
-      : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
 
   const { messages, isLoading, isSending, sendMessage, deleteMessage } = useChat(channelId);
 
@@ -120,7 +105,7 @@ export default function ChatConversationScreen() {
             key="time"
             style={{ color: colors.muted, fontSize: 10, marginTop: 2, marginHorizontal: 4 }}
           >
-            {formatMsgTime(item.timestamp, i18n.language)}
+            {formatMessageTime(item.timestamp, i18n.language)}
           </Text>
         </TouchableOpacity>
       );
@@ -130,8 +115,6 @@ export default function ChatConversationScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-
-      {/* Header */}
       <View
         style={{
           flexDirection: "row",
@@ -191,7 +174,6 @@ export default function ChatConversationScreen() {
           />
         )}
 
-        {/* Input bar */}
         <View
           style={{
             flexDirection: "row",
