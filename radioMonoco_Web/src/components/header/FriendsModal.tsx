@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { HiOutlineX, HiOutlineUserGroup, HiOutlineCheck } from "react-icons/hi";
 import { useAppearance } from "../../context/AppearanceContext";
 import UserRelationsService from "../../services/UserRelationsService";
@@ -7,6 +8,7 @@ import type { User } from "../../interfaces/Users.types.ts";
 
 export const FriendsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
     const { theme } = useAppearance();
+    const { t } = useTranslation();
 
     const [friends, setFriends] = useState<User[]>([]);
     const [pending, setPending] = useState<User[]>([]);
@@ -55,29 +57,29 @@ export const FriendsModal = ({ isOpen, onClose }: { isOpen: boolean, onClose: ()
             <div className={`${bgClass} w-full max-w-2xl rounded-[2rem] p-8 shadow-2xl border ${isDark ? 'border-white/10' : 'border-neutral-200'}`}>
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-lg font-black flex items-center gap-2 uppercase tracking-tight">
-                        <HiOutlineUserGroup className="text-rose-500" /> Mes amis
+                        <HiOutlineUserGroup className="text-rose-500" /> {t("friendsModal.title")}
                     </h2>
                     <button onClick={onClose} className="opacity-50 hover:opacity-100 transition"><HiOutlineX /></button>
                 </div>
 
                 {/* CHANGEMENT ICI : grid-cols-5 au lieu de grid-cols-4 */}
                 <div className={`grid grid-cols-5 gap-1 p-1 rounded-2xl mb-6 ${isDark ? 'bg-white/5' : 'bg-neutral-100'}`}>
-                    <TabButton active={activeTab === 'friends'} onClick={() => setActiveTab('friends')} label={`Amis (${friends.length})`} isDark={isDark} />
-                    <TabButton active={activeTab === 'following'} onClick={() => setActiveTab('following')} label={`Suivis (${following.length})`} isDark={isDark} />
-                    <TabButton active={activeTab === 'followers'} onClick={() => setActiveTab('followers')} label={`Abonnés (${followers.length})`} isDark={isDark} />
-                    <TabButton active={activeTab === 'pending'} onClick={() => setActiveTab('pending')} label={`Attente (${pending.length})`} isDark={isDark} />
-                    <TabButton active={activeTab === 'blocked'} onClick={() => setActiveTab('blocked')} label={`Bloqués (${blocked.length})`} isDark={isDark} />
+                    <TabButton active={activeTab === 'friends'} onClick={() => setActiveTab('friends')} label={t("friendsModal.tabs.friends", { count: friends.length })} isDark={isDark} />
+                    <TabButton active={activeTab === 'following'} onClick={() => setActiveTab('following')} label={t("friendsModal.tabs.following", { count: following.length })} isDark={isDark} />
+                    <TabButton active={activeTab === 'followers'} onClick={() => setActiveTab('followers')} label={t("friendsModal.tabs.followers", { count: followers.length })} isDark={isDark} />
+                    <TabButton active={activeTab === 'pending'} onClick={() => setActiveTab('pending')} label={t("friendsModal.tabs.pending", { count: pending.length })} isDark={isDark} />
+                    <TabButton active={activeTab === 'blocked'} onClick={() => setActiveTab('blocked')} label={t("friendsModal.tabs.blocked", { count: blocked.length })} isDark={isDark} />
                 </div>
 
                 <div className="min-h-[300px] max-h-[60vh] overflow-y-auto pr-2">
                     {isLoading ? (
-                        <div className="text-center mt-20 text-sm opacity-50">Chargement en cours...</div>
+                        <div className="text-center mt-20 text-sm opacity-50">{t("friendsModal.loading")}</div>
                     ) : (
                         <List
                             items={currentList}
                             isRequest={activeTab === 'pending'}
                             isBlocked={activeTab === 'blocked'}
-                            emptyText="Aucun utilisateur dans cette catégorie."
+                            emptyText={t("friendsModal.empty")}
                             isDark={isDark}
                             onClose={onClose}
                             onUpdate={refreshData}
@@ -104,6 +106,7 @@ const TabButton = ({ active, onClick, label, isDark }: any) => (
 
 const List = ({ items, isRequest, isBlocked, emptyText, isDark, onClose, onUpdate }: any) => {
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const handleAction = async (e: React.MouseEvent, action: 'accept' | 'decline' | 'unblock', userId: string) => {
         e.stopPropagation();
@@ -131,7 +134,7 @@ const List = ({ items, isRequest, isBlocked, emptyText, isDark, onClose, onUpdat
                             </>
                         )}
                         {isBlocked && (
-                            <button onClick={(e) => handleAction(e, 'unblock', u.id)} className="text-[10px] font-bold px-3 py-1 bg-emerald-500/20 text-emerald-500 rounded-lg harmonies-hover">Débloquer</button>
+                            <button onClick={(e) => handleAction(e, 'unblock', u.id)} className="text-[10px] font-bold px-3 py-1 bg-emerald-500/20 text-emerald-500 rounded-lg harmonies-hover">{t("friendsModal.unblock")}</button>
                         )}
                     </div>
                 </div>

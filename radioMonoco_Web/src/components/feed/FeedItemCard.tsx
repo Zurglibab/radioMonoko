@@ -6,6 +6,7 @@ import {
     FiBookOpen,
     FiStar,
 } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 
 interface FeedItemCardProps {
     item: FeedItem;
@@ -13,22 +14,6 @@ interface FeedItemCardProps {
     onCollectionClick: (collectionId: string) => void;
     onContentClick?: (item: FeedItem) => void;
 }
-
-const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const diff = Date.now() - date.getTime();
-
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return "À l’instant";
-    if (minutes < 60) return `Il y a ${minutes} min`;
-    if (hours < 24) return `Il y a ${hours} h`;
-    if (days < 7) return `Il y a ${days} j`;
-
-    return date.toLocaleDateString("fr-FR");
-};
 
 const getIcon = (type: FeedItem["type"]) => {
     switch (type) {
@@ -47,111 +32,129 @@ const getIcon = (type: FeedItem["type"]) => {
     }
 };
 
-const getActionText = (item: FeedItem) => {
-    const contentTitle = item.content_title || "un contenu";
-    const collectionName = item.collection_name || "une collection";
-
-    const rating =
-        item.rating ??
-        (
-            item.note !== null &&
-            item.note !== undefined &&
-            !Number.isNaN(Number(item.note))
-                ? Number(item.note)
-                : null
-        );
-
-    switch (item.type) {
-        case "collection_item_added":
-            return (
-                <>
-                    a ajouté{" "}
-                    <span className="text-rose-400 font-semibold">
-                        {contentTitle}
-                    </span>{" "}
-                    à{" "}
-                    <span className="text-rose-400 font-semibold">
-                        {collectionName}
-                    </span>
-                </>
-            );
-
-        case "content_liked":
-            return (
-                <>
-                    a aimé{" "}
-                    <span className="text-rose-400 font-semibold">
-                        {contentTitle}
-                    </span>
-                </>
-            );
-
-        case "comment_posted":
-            return (
-                <>
-                    a publié une critique sur{" "}
-                    <span className="text-rose-400 font-semibold">
-                        {contentTitle}
-                    </span>
-                    {rating ? ` avec la note ${rating}/5` : ""}
-                </>
-            );
-
-        case "review_liked":
-            return <>a aimé une critique</>;
-
-        case "review_created":
-            return (
-                <>
-                    a publié une critique sur{" "}
-                    <span className="text-rose-400 font-semibold">
-                        {contentTitle}
-                    </span>
-                </>
-            );
-
-        case "rating_created":
-            return (
-                <>
-                    a noté{" "}
-                    <span className="text-rose-400 font-semibold">
-                        {contentTitle}
-                    </span>{" "}
-                    {rating ? `${rating}/5` : ""}
-                </>
-            );
-
-        default:
-            return <>a réalisé une activité</>;
-    }
-};
-
-const getCardLabel = (type: FeedItem["type"]) => {
-    switch (type) {
-        case "content_liked":
-            return "Like sur un contenu";
-        case "review_liked":
-            return "Like sur une critique";
-        case "comment_posted":
-        case "review_created":
-            return "Nouvelle critique";
-        case "rating_created":
-            return "Nouvelle note";
-        default:
-            return "Activité récente";
-    }
-};
-
 const FeedItemCard = ({
                           item,
                           onUserClick,
                           onCollectionClick,
                           onContentClick,
                       }: FeedItemCardProps) => {
+    const { t } = useTranslation();
+
+    const formatTimeAgo = (dateString: string) => {
+        const date = new Date(dateString);
+        const diff = Date.now() - date.getTime();
+
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (minutes < 1) return t("feed.time.justNow");
+        if (minutes < 60) return t("feed.time.minutesAgo", { count: minutes });
+        if (hours < 24) return t("feed.time.hoursAgo", { count: hours });
+        if (days < 7) return t("feed.time.daysAgo", { count: days });
+
+        return date.toLocaleDateString();
+    };
+
+    const getActionText = (item: FeedItem) => {
+        const contentTitle = item.content_title || t("feed.content.default");
+        const collectionName = item.collection_name || t("feed.collection.default");
+
+        const rating =
+            item.rating ??
+            (
+                item.note !== null &&
+                item.note !== undefined &&
+                !Number.isNaN(Number(item.note))
+                    ? Number(item.note)
+                    : null
+            );
+
+        switch (item.type) {
+            case "collection_item_added":
+                return (
+                    <>
+                        {t("feed.actions.addedToCollection")}{" "}
+                        <span className="text-rose-400 font-semibold">
+                            {contentTitle}
+                        </span>{" "}
+                        {t("feed.actions.to")}{" "}
+                        <span className="text-rose-400 font-semibold">
+                            {collectionName}
+                        </span>
+                    </>
+                );
+
+            case "content_liked":
+                return (
+                    <>
+                        {t("feed.actions.likedContent")}{" "}
+                        <span className="text-rose-400 font-semibold">
+                            {contentTitle}
+                        </span>
+                    </>
+                );
+
+            case "comment_posted":
+                return (
+                    <>
+                        {t("feed.actions.postedReview")}{" "}
+                        <span className="text-rose-400 font-semibold">
+                            {contentTitle}
+                        </span>
+                        {rating ? ` ${t("feed.actions.withRating")} ${rating}/5` : ""}
+                    </>
+                );
+
+            case "review_liked":
+                return <>{t("feed.actions.likedReview")}</>;
+
+            case "review_created":
+                return (
+                    <>
+                        {t("feed.actions.postedReview")}{" "}
+                        <span className="text-rose-400 font-semibold">
+                            {contentTitle}
+                        </span>
+                    </>
+                );
+
+            case "rating_created":
+                return (
+                    <>
+                        {t("feed.actions.ratedContent")}{" "}
+                        <span className="text-rose-400 font-semibold">
+                            {contentTitle}
+                        </span>{" "}
+                        {rating ? `${rating}/5` : ""}
+                    </>
+                );
+
+            default:
+                return <>{t("feed.actions.defaultActivity")}</>;
+        }
+    };
+
+    const getCardLabel = (type: FeedItem["type"]) => {
+        switch (type) {
+            case "content_liked":
+                return t("feed.labels.contentLiked");
+            case "review_liked":
+                return t("feed.labels.reviewLiked");
+            case "comment_posted":
+            case "review_created":
+                return t("feed.labels.newReview");
+            case "rating_created":
+                return t("feed.labels.newRating");
+            default:
+                return t("feed.labels.recentActivity");
+        }
+    };
+
     const actorName =
         item.actor_display_name ||
         item.actor_username ||
-        "Utilisateur";
+        t("feed.user");
 
     const actorInitial = actorName.charAt(0).toUpperCase();
 
@@ -231,7 +234,7 @@ const FeedItemCard = ({
                         {(item.content_title || item.content_id) && (
                             <div>
                                 <p className="text-white font-semibold">
-                                    {item.content_title || "Contenu sans titre"}
+                                    {item.content_title || t("feed.untitledContent")}
                                 </p>
                             </div>
                         )}
@@ -249,7 +252,7 @@ const FeedItemCard = ({
                                 className="mt-3 inline-flex items-center gap-2 text-sm text-rose-400 hover:text-rose-300 transition"
                             >
                                 <FiBookOpen />
-                                Collection : {item.collection_name || "Voir la collection"}
+                                {t("feed.collectionLabel")} {item.collection_name || t("feed.viewCollection")}
                             </button>
                         )}
                         {item.comment && (
@@ -259,7 +262,7 @@ const FeedItemCard = ({
                         )}
                         {rating && item.type !== "rating_created" && (
                             <p className="text-neutral-500 text-sm mt-3">
-                                Note : {rating}/5
+                                {t("feed.ratingLabel")} {rating}/5
                             </p>
                         )}
                     </div>

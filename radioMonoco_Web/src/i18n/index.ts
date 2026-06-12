@@ -40,6 +40,17 @@ i18n
                         rights: "© 2026 RadioMonoco - Tous droits réservés",
                     },
 
+                    chat: {
+                        noMessages: "Aucun message pour le moment.",
+                        sending: "Envoi...",
+                        sendingInput: "Envoi en cours...",
+                        failed: "Échec",
+                        sendPlaceholder: "Envoyer un message...",
+                        room: "Salon",
+                        loading: "Chargement...",
+                        conversations: "Conversations"
+                    },
+
                     nav: {
                         home: "Accueil",
                         search: "Recherche",
@@ -155,6 +166,8 @@ i18n
                         digital: "Digital",
                         studio: "Studio",
                         streamAvailableOnDemand: "Flux disponible à la demande.",
+                        playingEpisode: "Lecture Épisode",
+                        communityNotes: "Notes de la communauté",
                         audienceRating: "Audience Rating",
                         votes: "votes",
                         vote: "vote",
@@ -197,7 +210,11 @@ i18n
                             bioPlaceholder: "Raconte-nous quelque chose...",
                             visibility: "Visibilité",
                             public: "Public",
-                            private: "Privé"
+                            private: "Privé",
+                            dataManagement: "Gestion des données",
+                            exportData: "Exporter mes données",
+                            exportDesc: "Télécharger une copie de vos données personnelles",
+                            exportBtn: "Exporter"
                         },
                         security: {
                             changePassword: "Changer le mot de passe",
@@ -216,7 +233,9 @@ i18n
                             directMessages: "Messages directs",
                             directMessagesDesc: "Notifications de chat privé",
                             logins: "Connexions",
-                            loginsDesc: "Alertes de sécurité par email"
+                            loginsDesc: "Alertes de sécurité par email",
+                            emailNotifs: "Notifications par email",
+                            emailNotifsDesc: "Recevoir un résumé de l'activité"
                         },
                         appearance: {
                             theme: "Thème de l'application",
@@ -246,7 +265,18 @@ i18n
                         collectionLabel: "Collection",
                         noDescription: "Aucune description",
                         lockedPrivateCollection: "Collection privée verrouillée",
-                        viewCollection: "Voir la collection →"
+                        viewCollection: "Voir la collection →",
+                        someone: "Quelqu'un",
+                        startedFollowing: "a commencé à vous suivre.",
+                        errorOccurred: "Une erreur est survenue.",
+                        confirmBlock: "Voulez-vous vraiment bloquer cet utilisateur ?",
+                        errorBlocking: "Erreur lors du blocage.",
+                        following: "Abonné",
+                        blockedUser: "Bloqué",
+                        block: "Bloquer",
+                        friends: "Amis",
+                        friendsOf: "Amis de",
+                        noFriends: "Aucun ami pour le moment."
                     },
 
                     navBar: {
@@ -274,6 +304,16 @@ i18n
                         auth: {
                             login: "Connexion",
                             register: "S'inscrire"
+                        },
+                        searchPopup: {
+                            advancedSearch: "Recherche avancée",
+                            noResults: "Aucun résultat",
+                            viewFullSearch: "Voir la recherche complète",
+                            users: "Utilisateurs",
+                            shows: "Émissions",
+                            collections: "Collections",
+                            noDescription: "Aucune description",
+                            viewAllResults: "Voir tous les résultats pour \"{{query}}\""
                         }
                     },
 
@@ -426,6 +466,66 @@ i18n
                         active: "Actif",
                         unban: "Débannir",
                     },
+
+                    feed: {
+                        title: "Fil d’actualité",
+                        loginPrompt: "Connecte-toi pour voir les activités des utilisateurs que tu suis.",
+                        social: "Social",
+                        description: "Retrouve les dernières critiques, likes et ajouts aux collections des utilisateurs que tu suis.",
+                        refresh: "Actualiser",
+                        emptyTitle: "Aucun événement pour le moment",
+                        emptyDesc: "Ton feed se remplira lorsque les utilisateurs que tu suis publieront des critiques, aimeront des contenus ou ajouteront des émissions à leurs collections publiques.",
+                        findUsers: "Trouver des utilisateurs",
+                        errorLoad: "Impossible de charger le fil d'actualité",
+                        time: {
+                            justNow: "À l’instant",
+                            minutesAgo: "Il y a {{count}} min",
+                            hoursAgo: "Il y a {{count}} h",
+                            daysAgo: "Il y a {{count}} j",
+                        },
+                        content: {
+                            default: "un contenu"
+                        },
+                        collection: {
+                            default: "une collection"
+                        },
+                        actions: {
+                            addedToCollection: "a ajouté",
+                            to: "à",
+                            likedContent: "a aimé",
+                            postedReview: "a publié une critique sur",
+                            withRating: "avec la note",
+                            likedReview: "a aimé une critique",
+                            ratedContent: "a noté",
+                            defaultActivity: "a réalisé une activité"
+                        },
+                        labels: {
+                            contentLiked: "Like sur un contenu",
+                            reviewLiked: "Like sur une critique",
+                            newReview: "Nouvelle critique",
+                            newRating: "Nouvelle note",
+                            recentActivity: "Activité récente"
+                        },
+                        user: "Utilisateur",
+                        untitledContent: "Contenu sans titre",
+                        collectionLabel: "Collection :",
+                        viewCollection: "Voir la collection",
+                        ratingLabel: "Note :"
+                    },
+
+                    friendsModal: {
+                        title: "Mes amis",
+                        tabs: {
+                            friends: "Amis ({{count}})",
+                            following: "Suivis ({{count}})",
+                            followers: "Abonnés ({{count}})",
+                            pending: "Attente ({{count}})",
+                            blocked: "Bloqués ({{count}})"
+                        },
+                        loading: "Chargement en cours...",
+                        empty: "Aucun utilisateur dans cette catégorie.",
+                        unblock: "Débloquer"
+                    }
                 },
             },
 
@@ -447,6 +547,30 @@ i18n
                         seeMore: "See more",
                         unavailable: "Not provided",
                         confirmDelete: "Are you sure you want to delete this item?",
+                    },
+
+                    homePage: {
+                        noStations: "No stations available.",
+                        live: "Live",
+                        listenNationalLive: "Listen to national live",
+                        listenLiveButton: "LISTEN LIVE",
+                    },
+
+                    footer: {
+                        about: "About",
+                        contact: "Contact",
+                        rights: "© 2026 RadioMonoco - All rights reserved",
+                    },
+
+                    chat: {
+                        noMessages: "No messages yet.",
+                        sending: "Sending...",
+                        sendingInput: "Sending...",
+                        failed: "Failed",
+                        sendPlaceholder: "Send a message...",
+                        room: "Room",
+                        loading: "Loading...",
+                        conversations: "Conversations"
                     },
 
                     nav: {
@@ -564,6 +688,8 @@ i18n
                         digital: "Digital",
                         studio: "Studio",
                         streamAvailableOnDemand: "Stream available on demand.",
+                        playingEpisode: "Playing Episode",
+                        communityNotes: "Community Notes",
                         audienceRating: "Audience Rating",
                         votes: "votes",
                         vote: "vote",
@@ -606,7 +732,11 @@ i18n
                             bioPlaceholder: "Tell us something about yourself...",
                             visibility: "Visibility",
                             public: "Public",
-                            private: "Private"
+                            private: "Private",
+                            dataManagement: "Data Management",
+                            exportData: "Export my data",
+                            exportDesc: "Download a copy of your personal data",
+                            exportBtn: "Export"
                         },
                         security: {
                             changePassword: "Change Password",
@@ -625,7 +755,9 @@ i18n
                             directMessages: "Direct Messages",
                             directMessagesDesc: "Private chat notifications",
                             logins: "Logins",
-                            loginsDesc: "Email security alerts"
+                            loginsDesc: "Email security alerts",
+                            emailNotifs: "Email notifications",
+                            emailNotifsDesc: "Receive an activity summary"
                         },
                         appearance: {
                             theme: "Application Theme",
@@ -655,7 +787,18 @@ i18n
                         collectionLabel: "Collection",
                         noDescription: "No description",
                         lockedPrivateCollection: "Locked private collection",
-                        viewCollection: "View collection →"
+                        viewCollection: "View collection →",
+                        someone: "Someone",
+                        startedFollowing: "started following you.",
+                        errorOccurred: "An error occurred.",
+                        confirmBlock: "Are you sure you want to block this user?",
+                        errorBlocking: "Error blocking user.",
+                        following: "Following",
+                        blockedUser: "Blocked",
+                        block: "Block",
+                        friends: "Friends",
+                        friendsOf: "Friends of",
+                        noFriends: "No friends yet."
                     },
 
                     navBar: {
@@ -683,6 +826,16 @@ i18n
                         auth: {
                             login: "Login",
                             register: "Register"
+                        },
+                        searchPopup: {
+                            advancedSearch: "Advanced Search",
+                            noResults: "No results",
+                            viewFullSearch: "View full search",
+                            users: "Users",
+                            shows: "Shows",
+                            collections: "Collections",
+                            noDescription: "No description",
+                            viewAllResults: "View all results for \"{{query}}\""
                         }
                     },
 
@@ -835,6 +988,593 @@ i18n
                         active: "Active",
                         unban: "Unban",
                     },
+
+                    feed: {
+                        title: "News Feed",
+                        loginPrompt: "Log in to see the activities of the users you follow.",
+                        social: "Social",
+                        description: "Find the latest reviews, likes, and collection additions from users you follow.",
+                        refresh: "Refresh",
+                        emptyTitle: "No events at the moment",
+                        emptyDesc: "Your feed will fill up when users you follow post reviews, like content, or add shows to their public collections.",
+                        findUsers: "Find users",
+                        errorLoad: "Unable to load the news feed",
+                        time: {
+                            justNow: "Just now",
+                            minutesAgo: "{{count}} min ago",
+                            hoursAgo: "{{count}} h ago",
+                            daysAgo: "{{count}} d ago",
+                        },
+                        content: {
+                            default: "a content"
+                        },
+                        collection: {
+                            default: "a collection"
+                        },
+                        actions: {
+                            addedToCollection: "added",
+                            to: "to",
+                            likedContent: "liked",
+                            postedReview: "posted a review on",
+                            withRating: "with rating",
+                            likedReview: "liked a review",
+                            ratedContent: "rated",
+                            defaultActivity: "performed an activity"
+                        },
+                        labels: {
+                            contentLiked: "Content liked",
+                            reviewLiked: "Review liked",
+                            newReview: "New review",
+                            newRating: "New rating",
+                            recentActivity: "Recent activity"
+                        },
+                        user: "User",
+                        untitledContent: "Untitled content",
+                        collectionLabel: "Collection:",
+                        viewCollection: "View collection",
+                        ratingLabel: "Rating:"
+                    },
+
+                    friendsModal: {
+                        title: "My friends",
+                        tabs: {
+                            friends: "Friends ({{count}})",
+                            following: "Following ({{count}})",
+                            followers: "Followers ({{count}})",
+                            pending: "Pending ({{count}})",
+                            blocked: "Blocked ({{count}})"
+                        },
+                        loading: "Loading...",
+                        empty: "No users in this category.",
+                        unblock: "Unblock"
+                    }
+                },
+            },
+
+            es: {
+                translation: {
+                    common: {
+                        back: "Atrás",
+                        loading: "Cargando...",
+                        search: "Buscar",
+                        create: "Crear",
+                        edit: "Editar",
+                        delete: "Eliminar",
+                        cancel: "Cancelar",
+                        save: "Guardar",
+                        public: "Público",
+                        private: "Privado",
+                        follow: "Seguir",
+                        report: "Reportar",
+                        seeMore: "Ver más",
+                        unavailable: "No especificado",
+                        confirmDelete: "¿Estás seguro de que deseas eliminar este elemento?",
+                    },
+
+                    homePage: {
+                        noStations: "No hay emisoras disponibles.",
+                        live: "En directo",
+                        listenNationalLive: "Escuchar el directo nacional",
+                        listenLiveButton: "ESCUCHAR EL DIRECTO",
+                    },
+
+                    footer: {
+                        about: "Acerca de",
+                        contact: "Contacto",
+                        rights: "© 2026 RadioMonoco - Todos los derechos reservados",
+                    },
+
+                    chat: {
+                        noMessages: "No hay mensajes por el momento.",
+                        sending: "Enviando...",
+                        sendingInput: "Enviando...",
+                        failed: "Fallido",
+                        sendPlaceholder: "Enviar un mensaje...",
+                        room: "Sala",
+                        loading: "Cargando...",
+                        conversations: "Conversaciones"
+                    },
+
+                    nav: {
+                        home: "Inicio",
+                        search: "Búsqueda",
+                        collections: "Colecciones",
+                        admin: "Admin",
+                        login: "Conexión",
+                        logout: "Desconexión",
+                        profile: "Perfil",
+                        language: "Idioma",
+                    },
+
+                    auth: {
+                        missingGoogleToken: "Falta el token de Google.",
+                        googleLoginFailed: "Fallo en la conexión de Google",
+                        googleLoginError: "La conexión con Google ha fallado.",
+                        errorOccurred: "se ha producido un error",
+                        loginTitle: "Conexión",
+                        email: "Correo electrónico",
+                        password: "Contraseña",
+                        bannedAccount: "Su cuenta ha sido bloqueada.",
+                        accessDenied: "Acceso Denegado",
+                        bannedDescription: "Su cuenta ha sido suspendida por un administrador por violar nuestras reglas comunitarias.",
+                        loginButton: "Conectarse",
+                        or: "o",
+                        continueWithGoogle: "Continuar con Google",
+                        noAccount: "¿No tienes una cuenta?",
+                        registerLink: "Regístrate",
+                        passwordsDoNotMatch: "Las contraseñas no coinciden",
+                        registerTitle: "Inscripción",
+                        usernamePlaceholder: "Nombre de usuario",
+                        confirmPassword: "Confirmar contraseña",
+                        createAccount: "Crear cuenta",
+                        alreadyMember: "¿Ya eres miembro?",
+                        loginLink: "Conectarse"
+                    },
+
+                    about: {
+                        title: "Sobre nosotros",
+                        intro: "RadioMonoco es su nueva plataforma dedicada a descubrir y escuchar las mejores estaciones de radio. Nuestro objetivo es ofrecerle una experiencia fluida, intuitiva y sin interrupciones, esté donde esté.",
+                        radiosTitle: "Emisoras de Radio France",
+                        radiosDesc: "Escuche en directo todas las emisoras de Radio France. Una calidad de transmisión excepcional para no perderse nada de la actualidad y la cultura.",
+                        showsTitle: "Programas de Radio France",
+                        showsDesc: "Encuentre sus programas y podcasts favoritos de Radio France para volver a escuchar. Explore un catálogo rico y variado a su propio ritmo.",
+                        collectionsTitle: "Sus colecciones",
+                        collectionsDesc: "Cree, organice y gestione sus propias colecciones de podcasts y programas para encontrarlos fácilmente con un solo clic.",
+                        messagingTitle: "Mensajería con amigos",
+                        messagingDesc: "Manténgase en contacto con sus seres queridos a través de nuestro sistema de mensajería integrado. Comparta y debata sobre sus programas favoritos directamente en la plataforma.",
+                        readyTitle: "¿Listo para empezar a escuchar?",
+                        readyDesc: "Únase a nuestra comunidad y comparta varios programas con sus amigos.",
+                        discover: "Descubrir radios",
+                    },
+
+                    contact: {
+                        alertErrorForm: "Error al enviar el formulario. Por favor, compruebe el ID de Formspree.",
+                        alertErrorNetwork: "Error de red. Por favor, inténtelo de nuevo.",
+                        title: "Contáctenos",
+                        description: "¿Una pregunta, una sugerencia o un problema técnico? No dude en enviarnos un mensaje. Nuestro equipo le responderá lo antes posible.",
+                        formTitle: "Envíenos un mensaje",
+                        successMessage: "Su mensaje ha sido enviado con éxito. ¡Nos pondremos en contacto con usted pronto!",
+                        name: "Nombre",
+                        namePlaceholder: "Su nombre completo",
+                        email: "Correo electrónico",
+                        emailPlaceholder: "su.correo@ejemplo.com",
+                        subject: "Asunto",
+                        subjectPlaceholder: "¿De qué se trata?",
+                        message: "Mensaje",
+                        messagePlaceholder: "Su mensaje...",
+                        sendButton: "Enviar mensaje",
+                    },
+
+                    searchPage: {
+                        title: "Resultados para:",
+                        loading: "Búsqueda en curso...",
+                        users: "Usuarios",
+                        noUsers: "Ningún usuario encontrado",
+                        collections: "Colecciones",
+                        noCollections: "Ninguna colección encontrada",
+                        shows: "Programas",
+                        noShows: "Ningún programa encontrado",
+                        publicProfile: "Perfil público",
+                        privateProfile: "Perfil privado",
+                        viewProfile: "Ver el perfil →",
+                        viewShow: "Ver el programa →",
+                        noDescription: "Ninguna descripción disponible",
+                    },
+
+                    radio: {
+                        aboutShow: "Acerca del programa",
+                        noDescription: "Ninguna descripción disponible.",
+                        save: "Guardar",
+                        myCollections: "Mis Colecciones",
+                        noCollection: "Ninguna colección creada",
+                        newCollection: "+ Nueva colección",
+                        communityLoading: "Conectando al servidor comunitario...",
+                        showNotFound: "Programa no encontrado",
+                        showNotFoundText: "Este programa no está disponible en este momento o se ha producido un error de servidor.",
+                        liveShow: "Programa en directo",
+                        listenNationalLive: "Escuchar el directo nacional",
+                        host: "Presentador",
+                        live: "En directo",
+                        pause: "Pausar",
+                        listenLive: "Escuchar el directo",
+                        podcastsAndRecentShows: "Podcasts & Programas Recientes",
+                        episodes: "Episodios",
+                        showAvailableReplay: "Programa disponible para volver a escuchar.",
+                        webRadios: "Web Radios",
+                        stations: "Estaciones",
+                        regionalStations: "Emisoras Regionales",
+                        podcast: "Podcast",
+                        webRadio: "Web Radio",
+                        localRadio: "Radio Local",
+                        digital: "Digital",
+                        studio: "Estudio",
+                        streamAvailableOnDemand: "Transmisión disponible bajo demanda.",
+                        playingEpisode: "Reproduciendo Episodio",
+                        communityNotes: "Notas de la comunidad",
+                        audienceRating: "Clasificación de Audiencia",
+                        votes: "votos",
+                        vote: "voto",
+                        deleteRating: "Eliminar mi calificación",
+                        loginToRate: "Se requiere iniciar sesión para calificar",
+                        ratingSaved: "Calificación guardada (clic para editar)",
+                        clickToRate: "Clic para calificar esta emisora",
+                        comments: "Comentarios",
+                        joinAudience: "Regístrate para unirte a la sala de oyentes.",
+                        loadingLounge: "Cargando la sala...",
+                        noComments: "No hay comentarios aún. ¡Sé el primero en dar tu opinión!",
+                        writeMessage: "Escribe un mensaje público en esta sala...",
+                        listener: "Oyente",
+                        anonymous: "Anónimo",
+                        you: "Tú",
+                        recently: "Recientemente",
+                        reply: "Responder",
+                        userReview: "Reseña del usuario",
+                        replyTo: "Responder a {{name}}...",
+                        userReply: "Respuesta del usuario",
+                        notifLike: "le ha gustado tu comentario: \"{{preview}}...\"",
+                        notifDislike: "ha reaccionado negativamente a tu comentario: \"{{preview}}...\"",
+                        notifReply: "ha respondido a tu comentario: \"{{preview}}...\""
+                    },
+
+                    settings: {
+                        updateError: "Error al actualizar.",
+                        title: "Configuración",
+                        tabs: {
+                            profile: "Perfil",
+                            security: "Seguridad",
+                            notifs: "Notificaciones",
+                            appearance: "Apariencia"
+                        },
+                        profile: {
+                            usernameDesc: "Este nombre se mostrará en su perfil y comentarios.",
+                            emailDesc: "Nunca compartiremos tu correo electrónico con nadie.",
+                            website: "Sitio web",
+                            websiteDesc: "Enlace a tu portafolio, blog o redes sociales.",
+                            bio: "Biografía",
+                            bioDesc: "Escribe algo interesante sobre ti."
+                        },
+                        security: {
+                            passwordDesc: "Te enviaremos un correo electrónico para confirmar el cambio de contraseña.",
+                            currentPassword: "Contraseña actual",
+                            newPassword: "Nueva contraseña",
+                            confirmPassword: "Confirmar nueva contraseña",
+                            updatePasswordButton: "Actualizar contraseña",
+                            privacy: "Privacidad",
+                            publicAccount: "Cuenta pública",
+                            publicAccountDesc: "Cualquiera puede ver tu perfil y tus colecciones públicas.",
+                            privateAccount: "Cuenta privada",
+                            privateAccountDesc: "Solo tus amigos pueden ver tu perfil completo y tus colecciones.",
+                            dataManagement: "Gestión de Datos",
+                            exportData: "Exportar Mis Datos",
+                            exportDataDesc: "Descargar una copia de tus datos personales.",
+                            exportButton: "Exportar Datos",
+                            deleteAccount: "Eliminar Cuenta",
+                            deleteAccountDesc: "Eliminar permanentemente tu cuenta y todos sus datos asociados.",
+                            deleteAccountButton: "Eliminar Cuenta",
+                            advancedSecurity: "Seguridad Avanzada",
+                            twoFactorAuth: "Autenticación de Dos Factores (2FA)",
+                            twoFactorDesc: "Asegura tu cuenta con un código móvil."
+                        },
+                        notifs: {
+                            activityAlerts: "Alertas de Actividad",
+                            newFollowers: "Nuevos Seguidores",
+                            newFollowersDesc: "Cuando alguien te sigue",
+                            directMessages: "Mensajes Directos",
+                            directMessagesDesc: "Notificaciones de chat privado",
+                            logins: "Inicios de sesión",
+                            loginsDesc: "Alertas de seguridad de correo electrónico",
+                            emailNotifs: "Notificaciones por correo electrónico",
+                            emailNotifsDesc: "Recibe un resumen de actividad"
+                        },
+                        appearance: {
+                            theme: "Tema de la Aplicación",
+                            darkMode: "Modo Oscuro",
+                            lightMode: "Modo Claro"
+                        },
+                        saveChanges: "Guardar Cambios"
+                    },
+
+                    userProfile: {
+                        missingUserId: "ID de usuario faltante.",
+                        userNotFound: "Usuario no encontrado.",
+                        loadError: "No se puede cargar el perfil del usuario",
+                        privateCollectionAlert: "Esta colección es privada, no puedes acceder a ella.",
+                        followFeatureComingSoon: "La función de seguir estará disponible pronto.",
+                        loading: "Cargando el perfil...",
+                        backToSearch: "Volver a la búsqueda",
+                        title: "Perfil del usuario",
+                        privateProfileNotice: "Este perfil es privado. Solo se muestra la información pública y colecciones públicas.",
+                        follow: "Seguir",
+                        displayedCollections: "Colecciones Mostradas",
+                        publicCollections: "Colecciones Públicas",
+                        memberSince: "Miembro desde",
+                        notProvided: "No especificado",
+                        collectionsOf: "Colecciones de",
+                        noVisibleCollections: "No hay colecciones visibles para este usuario.",
+                        collectionLabel: "Colección",
+                        noDescription: "Sin descripción",
+                        lockedPrivateCollection: "Colección privada bloqueada",
+                        viewCollection: "Ver colección →",
+                        someone: "Alguien",
+                        startedFollowing: "comenzó a seguirte.",
+                        errorOccurred: "Ocurrió un error.",
+                        confirmBlock: "¿Estás seguro de que quieres bloquear a este usuario?",
+                        errorBlocking: "Error al bloquear al usuario.",
+                        following: "Siguiendo",
+                        blockedUser: "Bloqueado",
+                        block: "Bloquear",
+                        friends: "Amigos",
+                        friendsOf: "Amigos de",
+                        noFriends: "Aún no tienes amigos."
+                    },
+
+                    navBar: {
+                        menu: {
+                            home: "Inicio",
+                            feed: "Noticias",
+                            collections: "Colecciones",
+                            admin: "Administración"
+                        },
+                        searchPlaceholder: "Buscar...",
+                        theme: {
+                            toLight: "Cambiar a modo claro",
+                            toDark: "Cambiar a modo oscuro"
+                        },
+                        notifications: {
+                            title: "Notificaciones",
+                            markAllRead: "Marcar como leídas",
+                            empty: "No hay notificaciones."
+                        },
+                        profile: {
+                            connected: "Conectado",
+                            settings: "Ajustes",
+                            logout: "Desconectarse"
+                        },
+                        auth: {
+                            login: "Conexión",
+                            register: "Registrarse"
+                        },
+                        searchPopup: {
+                            advancedSearch: "Búsqueda avanzada",
+                            noResults: "Ningún resultado",
+                            viewFullSearch: "Ver búsqueda completa",
+                            users: "Usuarios",
+                            shows: "Programas",
+                            collections: "Colecciones",
+                            noDescription: "Ninguna descripción",
+                            viewAllResults: "Ver todos los resultados para \"{{query}}\""
+                        }
+                    },
+
+                    collections: {
+                        errors: {
+                            load: "No se pueden cargar las colecciones",
+                            create: "Error al crear la colección",
+                            modify: "Error al modificar la colección",
+                            delete: "Error al eliminar la colección",
+                            loadSingle: "No se puede cargar la colección",
+                            deleteItem: "No se puede eliminar el elemento",
+                            notFound: "Colección no encontrada"
+                        },
+                        title: "Tu Biblioteca",
+                        create: "Crear",
+                        loading: "Cargando colecciones…",
+                        loadingSingle: "Cargando...",
+                        myCollections: "Mis colecciones",
+                        noDescription: "Ninguna descripción",
+                        public: "Público",
+                        private: "Privado",
+                        delete: "Eliminar",
+                        modify: "Modificar",
+                        publicCollections: "Colecciones públicas",
+                        latestCreated: "Últimas colecciones creadas",
+                        view: "Ver →",
+                        stats: "Tus estadísticas",
+                        privateCollections: "Colecciones privadas",
+                        details: {
+                            back: "← Atrás",
+                            label: "Colección",
+                            publicBadge: "🌍 Pública",
+                            privateBadge: "🔒 Privada",
+                            itemCount: "{{count}} elemento",
+                            itemCountPlural: "{{count}} elementos",
+                            content: "Contenido",
+                            empty: "Ningún elemento en esta colección",
+                            emptyHint: "Ve a la página de un programa y haz clic en “Guardar” para agregarlo a esta colección.",
+                            searchShow: "Buscar un programa",
+                            position: "Posición: {{pos}}",
+                            viewShow: "Ver la página del programa →"
+                        },
+                        createModal: {
+                            title: "Crear una colección",
+                            subtitle: "¡Organiza tu biblioteca como quieras!",
+                            nameLabel: "Nombre",
+                            namePlaceholder: "Mi colección",
+                            descLabel: "Descripción",
+                            descPlaceholder: "Describe tu colección...",
+                            publicLabel: "Colección pública",
+                            privateLabel: "Colección privada",
+                            cancel: "Cancelar",
+                            creating: "Creando...",
+                            submit: "Crear"
+                        },
+                        deleteModal: {
+                            title: "Eliminar la colección",
+                            confirmText: "¿Estás seguro de que quieres eliminar:",
+                            cancel: "Cancelar",
+                            deleting: "Eliminando...",
+                            submit: "Eliminar"
+                        },
+                        modifyModal: {
+                            title: "Modificar la colección",
+                            nameLabel: "Nombre",
+                            descLabel: "Descripción",
+                            publicLabel: "Colección pública",
+                            privateLabel: "Colección privada",
+                            cancel: "Cancelar",
+                            submit: "Guardar"
+                        }
+                    },
+
+                    reports: {
+                        reportReview: "Reportar una reseña",
+                        reportUser: "Reportar un usuario",
+                        explain: "Explica brevemente el problema para ayudar a la moderación.",
+                        chooseReason: "Por favor elige un motivo.",
+                        describeProblem: "Por favor describe el problema.",
+                        needLogin: "Debes iniciar sesión para reportar.",
+                        sent: "Reporte enviado. Gracias por tu ayuda.",
+                        send: "Enviar reporte",
+                        sending: "Enviando...",
+                        spoiler: "Spoiler sin marcar",
+                        insults: "Insultos o acoso",
+                        spam: "Spam",
+                        inappropriate: "Contenido inapropiado",
+                        suspicious: "Cuenta sospechosa",
+                        harassment: "Acoso",
+                        other: "Otro",
+                        sendError: "Error al enviar el reporte.",
+                        needLoginContent: "Debes iniciar sesión para reportar un contenido.",
+                        report: "Reportar",
+                        aboutToReport: "Estás a punto de reportar: {{label}}",
+                        describeProblemPlaceholder: "Describe el problema..."
+                    },
+
+                    admin: {
+                        dashboard: "Panel de Admin",
+                        reports: "Reportes",
+                        users: "Usuarios registrados",
+                        reviews: "Reseñas",
+                        connectedAdmin: "Administrador conectado",
+                        manageUsers: "Usuarios",
+                        manageUsersText: "Gestionar cuentas y bloqueos",
+                        manageReports: "Reportes",
+                        manageReportsText: "Moderar usuarios y reseñas reportados",
+                        manageReviews: "Gestión de reseñas",
+                        manageReviewsText: "Destacar o eliminar reseñas",
+                        noReports: "Sin reportes",
+                        noReviews: "Sin reseñas disponibles",
+                        featured: "Destacado",
+                        feature: "Destacar",
+                        unfeature: "Quitar destacado",
+                        deleteReview: "Eliminar reseña",
+                        deleteReport: "Eliminar este reporte",
+                        clearReports: "Eliminar todos los reportes",
+                        ban: "Bloquear",
+                        viewProfile: "Ver perfil",
+                        reportedReviews: "Reseñas reportadas",
+                        reportedUsers: "Usuarios reportados",
+                        loadingReports: "Cargando reportes...",
+                        errorLoadingReports: "Fallo al cargar los reportes",
+                        noReviewReports: "No hay reportes de reseñas",
+                        noReviewReportsText: "Las reseñas reportadas aparecerán aquí.",
+                        reportedReview: "Reseña reportada",
+                        reportType: "Tipo de reporte:",
+                        description: "Descripción:",
+                        concernedReview: "Reseña afectada",
+                        reviewAuthor: "Autor de la reseña",
+                        reportedBy: "Reportado por",
+                        noUserReports: "No hay reportes de usuarios",
+                        noUserReportsText: "Los usuarios reportados aparecerán aquí.",
+                        reportedUser: "Usuario reportado",
+                        concernedUser: "Usuario afectado",
+                        userAlreadyBanned: "Usuario ya bloqueado",
+                        errorLoadingReviews: "Fallo al cargar las reseñas",
+                        confirmDeleteReview: "¿Estás seguro de que quieres eliminar esta reseña?",
+                        confirmBanUser: "¿Estás seguro de que quieres bloquear a este usuario?",
+                        reviewsCreatedText: "Las reseñas creadadas por usuarios aparecerán aquí.",
+                        review: "Reseña",
+                        reviewId: "ID de Reseña",
+                        userId: "ID de Usuario",
+                        contentId: "ID de Contenido",
+                        manageUsersTitle: "Gestión de usuarios",
+                        loadingUsers: "? Cargando...",
+                        searchUserPlaceholder: "Buscar por nombre o correo...",
+                        noName: "sin nombre",
+                        banned: "Bloqueado",
+                        active: "Activo",
+                        unban: "Desbloquear",
+                    },
+
+                    feed: {
+                        title: "Noticias",
+                        loginPrompt: "Inicia sesión para ver las actividades de los usuarios que sigues.",
+                        social: "Social",
+                        description: "Encuentra las últimas reseñas, me gusta y adiciones de colecciones de los usuarios que sigues.",
+                        refresh: "Actualizar",
+                        emptyTitle: "No hay eventos por el momento",
+                        emptyDesc: "Tu muro se llenará cuando los usuarios que sigues publiquen reseñas, den me gusta al contenido o agreguen programas a sus colecciones públicas.",
+                        findUsers: "Encontrar usuarios",
+                        errorLoad: "Imposible cargar el feed de noticias",
+                        time: {
+                            justNow: "Justo ahora",
+                            minutesAgo: "hace {{count}} min",
+                            hoursAgo: "hace {{count}} h",
+                            daysAgo: "hace {{count}} d",
+                        },
+                        content: {
+                            default: "un contenido"
+                        },
+                        collection: {
+                            default: "una colección"
+                        },
+                        actions: {
+                            addedToCollection: "agregó",
+                            to: "a",
+                            likedContent: "le gustó",
+                            postedReview: "publicó una reseña en",
+                            withRating: "con calificación",
+                            likedReview: "le gustó una reseña",
+                            ratedContent: "calificó",
+                            defaultActivity: "realizó una actividad"
+                        },
+                        labels: {
+                            contentLiked: "Contenido que te gusta",
+                            reviewLiked: "Reseña que te gusta",
+                            newReview: "Nueva reseña",
+                            newRating: "Nueva calificación",
+                            recentActivity: "Actividad reciente"
+                        },
+                        user: "Usuario",
+                        untitledContent: "Contenido sin título",
+                        collectionLabel: "Colección:",
+                        viewCollection: "Ver colección",
+                        ratingLabel: "Calificación:"
+                    },
+
+                    friendsModal: {
+                        title: "Mis amigos",
+                        tabs: {
+                            friends: "Amigos ({{count}})",
+                            following: "Siguiendo ({{count}})",
+                            followers: "Seguidores ({{count}})",
+                            pending: "Pendientes ({{count}})",
+                            blocked: "Bloqueados ({{count}})"
+                        },
+                        loading: "Cargando...",
+                        empty: "No hay usuarios en esta categoría.",
+                        unblock: "Desbloquear"
+                    }
                 },
             },
         },

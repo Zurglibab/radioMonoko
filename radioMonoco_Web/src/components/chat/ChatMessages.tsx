@@ -4,6 +4,7 @@ import { MessageSender } from "./MessageSender";
 import { DEFAULT_THEME } from "../../assets/themes/DefaultTheme.ts";
 import { useAppearance } from "../../context/AppearanceContext.tsx";
 import { Loader } from "../utils/Loader.tsx";
+import { useTranslation } from "react-i18next";
 
 export const ChatMessages = ({
                                  messages,
@@ -18,6 +19,7 @@ export const ChatMessages = ({
 }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const { theme } = useAppearance();
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (scrollRef.current && !isLoading) {
@@ -33,7 +35,7 @@ export const ChatMessages = ({
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin">
             {messages.length === 0 ? (
                 <p className={`text-center text-sm ${theme === 'dark' ? 'text-neutral-500' : 'text-neutral-400'}`}>
-                    Aucun message pour le moment.
+                    {t("chat.noMessages")}
                 </p>
             ) : (
                 messages.map((msg) => {
@@ -79,11 +81,11 @@ export const ChatMessages = ({
                                         {isSending ? (
                                             <span className="flex items-center gap-1 animate-pulse">
                                                 <span className="w-1.5 h-1.5 bg-current rounded-full"></span>
-                                                Envoi...
+                                                {t("chat.sending")}
                                             </span>
                                         ) : isError ? (
                                             <span className="flex items-center gap-1 text-red-500 font-medium">
-                                                <span>⚠️</span> Échec
+                                                <span>⚠️</span> {t("chat.failed")}
                                             </span>
                                         ) : (
                                             <span>{msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>

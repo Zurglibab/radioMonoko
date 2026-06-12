@@ -238,7 +238,7 @@ const NavBar = () => {
                                 <input
                                     ref={searchInputRef}
                                     type="text"
-                                    aria-label="Recherche"
+                                    aria-label={t("common.search")}
                                     placeholder={t("navBar.searchPlaceholder")}
                                     value={searchQuery}
                                     onChange={(e) => handleSearch(e.target.value)}
@@ -260,7 +260,7 @@ const NavBar = () => {
 
                                     <div className="px-4 py-3 border-b border-app-border text-app-text flex items-center justify-between">
                                         <p className="text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
-                                            Recherche avancée
+                                            {t("navBar.searchPopup.advancedSearch")}
                                         </p>
 
                                         {searchLoading && (
@@ -271,7 +271,7 @@ const NavBar = () => {
                                     {!searchLoading && !hasPreviewResults && (
                                         <div className="px-4 py-6 text-center">
                                             <p className="text-sm text-app-text-secondary">
-                                                Aucun résultat trouvé
+                                                {t("navBar.searchPopup.noResults")}
                                             </p>
 
                                             <button
@@ -279,7 +279,7 @@ const NavBar = () => {
                                                 onClick={goToSearchPage}
                                                 className="mt-4 text-xs text-rose-400 hover:text-rose-300 font-semibold"
                                             >
-                                                Voir la recherche complète →
+                                                {t("navBar.searchPopup.viewFullSearch")}
                                             </button>
                                         </div>
                                     )}
@@ -290,7 +290,7 @@ const NavBar = () => {
                                             {previewResults.users.length > 0 && (
                                                 <div className="py-2">
                                                     <p className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
-                                                        Utilisateurs
+                                                        {t("navBar.searchPopup.users")}
                                                     </p>
 
                                                     {previewResults.users.slice(0, 3).map((u) => (
@@ -334,7 +334,7 @@ const NavBar = () => {
                                             {previewResults.shows.length > 0 && (
                                                 <div className="py-2 border-t border-app-border">
                                                     <p className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
-                                                        Émissions
+                                                        {t("navBar.searchPopup.shows")}
                                                     </p>
 
                                                     {previewResults.shows.slice(0, 4).map((show) => (
@@ -357,7 +357,7 @@ const NavBar = () => {
                                                             </p>
 
                                                             <p className="text-xs text-app-text-secondary mt-1 line-clamp-2">
-                                                                {show.standFirst || "Aucune description disponible"}
+                                                                {show.standFirst || t("navBar.searchPopup.noDescription")}
                                                             </p>
                                                         </button>
                                                     ))}
@@ -367,7 +367,7 @@ const NavBar = () => {
                                             {previewResults.collections.length > 0 && (
                                                 <div className="py-2 border-t border-app-border">
                                                     <p className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
-                                                        Collections
+                                                        {t("navBar.searchPopup.collections")}
                                                     </p>
 
                                                     {previewResults.collections.slice(0, 3).map((collection) => (
@@ -385,7 +385,7 @@ const NavBar = () => {
                                                             </p>
 
                                                             <p className="text-xs text-app-text-secondary mt-1 line-clamp-2">
-                                                                {collection.description || "Aucune description"}
+                                                                {collection.description || t("navBar.searchPopup.noDescription")}
                                                             </p>
                                                         </button>
                                                     ))}
@@ -398,7 +398,7 @@ const NavBar = () => {
                                                     onClick={goToSearchPage}
                                                     className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold transition"
                                                 >
-                                                    Voir tous les résultats et filtres pour “{searchQuery.trim()}”
+                                                    {t("navBar.searchPopup.viewAllResults", { query: searchQuery.trim() })}
                                                 </button>
                                             </div>
                                         </div>
@@ -451,7 +451,7 @@ const NavBar = () => {
                                         >
                                             <p className={`text-[10px] uppercase tracking-[0.2em] font-black 
                                                 ${theme === 'dark' ? 'text-neutral-400' : 'text-neutral-500'}`}>
-                                                Notifications
+                                                {t("navBar.notifications.title")}
                                             </p>
                                             {unreadCount > 0 && (
                                                 <button
@@ -487,7 +487,7 @@ const NavBar = () => {
                                             )) : (
                                                 <p className={`p-4 text-center text-xs opacity-50 
                                                         ${theme === 'dark' ? 'text-neutral-400' : 'text-neutral-600'}`}>
-                                                    Aucune notification.
+                                                    {t("navBar.notifications.empty")}
                                                 </p>
                                             )}
                                         </div>
@@ -540,7 +540,7 @@ const NavBar = () => {
                                             }}
                                             className="w-full flex items-center gap-3 px-4 py-2 text-sm text-app-text/70 hover:text-app-text hover:bg-app-text/5 transition-colors text-left cursor-pointer outline-none"
                                         >
-                                            <HiOutlineUserGroup className="text-lg" /> Mes Amis
+                                            <HiOutlineUserGroup className="text-lg" /> {t("friendsModal.title")}
                                         </button>
                                         <button
                                             onClick={() => { setIsSettingsOpen(true); setIsProfileOpen(false); }}

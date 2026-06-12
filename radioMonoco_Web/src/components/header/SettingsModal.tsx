@@ -138,9 +138,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                 <div className="flex flex-col md:flex-row h-140">
                     <div className="w-full md:w-52 border-b md:border-b-0 md:border-r border-app-border p-4 space-y-1">
                         {[
-                            { id: 'profile', label: 'Profil', icon: <HiOutlineUser /> },
-                            { id: 'notifs', label: 'Notifications', icon: <HiOutlineBell /> },
-                            { id: 'appearance', label: 'Apparence', icon: <HiOutlineColorSwatch /> },
+                            { id: 'profile', label: t('settings.tabs.profile'), icon: <HiOutlineUser /> },
+                            { id: 'notifs', label: t('settings.tabs.notifs'), icon: <HiOutlineBell /> },
+                            { id: 'appearance', label: t('settings.tabs.appearance'), icon: <HiOutlineColorSwatch /> },
                         ].map((s) => (
                             <button
                                 key={s.id}
@@ -222,8 +222,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                         </label>
                                         <div className="p-4 bg-app-text/5 rounded-2xl border border-app-border flex items-center justify-between">
                                             <div>
-                                                <p className="text-sm font-bold">Exporter mes données</p>
-                                                <p className="text-[11px] opacity-50">Téléchargez une copie complète de vos informations.</p>
+                                                <p className="text-sm font-bold">{t("settings.profile.exportData")}</p>
+                                                <p className="text-[11px] opacity-50">{t("settings.profile.exportDesc")}</p>
                                             </div>
                                             <button
                                                 onClick={async () => {
@@ -240,7 +240,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                                 }}
                                                 className="text-[11px] font-black uppercase tracking-wider text-primary hover:bg-primary/10 px-4 py-2 rounded-lg transition-colors cursor-pointer"
                                             >
-                                                Exporter
+                                                {t("settings.profile.exportBtn")}
                                             </button>
                                         </div>
                                     </div>
@@ -270,8 +270,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                                     <HiOutlineMail />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold">Notifications par email</p>
-                                                    <p className="text-[11px] opacity-50">Recevoir des alertes par email.</p>
+                                                    <p className="text-sm font-bold">{t("settings.notifs.emailNotifs")}</p>
+                                                    <p className="text-[11px] opacity-50">{t("settings.notifs.emailNotifsDesc")}</p>
                                                 </div>
                                             </div>
                                             <div className="relative flex items-center justify-center w-10">

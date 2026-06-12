@@ -41,7 +41,7 @@ const UserProfilePage = () => {
                 setLoading(true);
                 setError("");
                 if (!id) {
-                    setError("ID utilisateur manquant.");
+                    setError(t("userProfile.missingUserId"));
                     return;
                 }
 
@@ -102,10 +102,10 @@ const UserProfilePage = () => {
 
     const sendNotification = async (targetUserId: string, type: "follow") => {
         if (!connectedUser) return;
-        const senderName = connectedUser?.display_name || connectedUser?.username || "Quelqu'un";
+        const senderName = connectedUser?.display_name || connectedUser?.username || t("userProfile.someone", "Quelqu'un");
         if (targetUserId === connectedUser?.id) return;
         const messages = {
-            follow: `${senderName} a commencé à vous suivre`
+            follow: `${senderName} ${t("userProfile.startedFollowing")}`
         };
 
         const user = await UsersService.getUserById(targetUserId);
@@ -144,7 +144,7 @@ const UserProfilePage = () => {
             }
         } catch (err) {
             console.error("Erreur lors de l'interaction :", err);
-            alert("Une erreur est survenue.");
+            alert(t("userProfile.errorOccurred"));
         } finally {
             setIsActionLoading(false);
         }
@@ -152,7 +152,7 @@ const UserProfilePage = () => {
 
     const handleBlockToggle = async () => {
         if (!id || isBlockLoading) return;
-        if (!isBlocked && !window.confirm("Êtes-vous sûr de vouloir bloquer cet utilisateur ?")) return;
+        if (!isBlocked && !window.confirm(t("userProfile.confirmBlock"))) return;
         setIsBlockLoading(true);
         try {
             if (isBlocked) {
@@ -165,7 +165,7 @@ const UserProfilePage = () => {
                 setIsFriend(false);
             }
         } catch (err) {
-            alert("Une erreur est survenue lors du blocage.");
+            alert(t("userProfile.errorBlocking"));
         } finally {
             setIsBlockLoading(false);
         }
@@ -327,7 +327,7 @@ const UserProfilePage = () => {
                                         ) : (
                                             <>
                                                 {isFollow ? <FiCheck /> : <FiUserPlus />}
-                                                {isFollow ? "Abonné" : "Suivre"}
+                                                {isFollow ? t("userProfile.following") : t("userProfile.follow")}
                                             </>
                                         )}
                                     </button>
@@ -351,7 +351,7 @@ const UserProfilePage = () => {
                                     ) : (
                                         <>
                                             {isBlocked ? <FiUserCheck /> : <FiUserX />}
-                                            {isBlocked ? "Utilisateur bloqué" : "Bloquer"}
+                                            {isBlocked ? t("userProfile.blockedUser") : t("userProfile.block")}
                                         </>
                                     )}
                                 </button>
@@ -398,7 +398,7 @@ const UserProfilePage = () => {
                                 : "bg-neutral-50 border-neutral-200"
                         }`}>
                             <p className={`text-sm ${theme === "dark" ? "text-neutral-500" : "text-neutral-600"}`}>
-                                Amis
+                                {t("userProfile.friends")}
                             </p>
                             <p className="text-3xl font-black mt-2">
                                 {friends.length}
@@ -491,7 +491,7 @@ const UserProfilePage = () => {
 
                 <div className="mt-12">
                     <h2 className="text-2xl font-bold mb-6">
-                        Amis de <span className="text-rose-500">{profilUser.username}</span>
+                        {t("userProfile.friendsOf")} <span className="text-rose-500">{profilUser.username}</span>
                     </h2>
 
                     {friends.length === 0 ? (
@@ -501,7 +501,7 @@ const UserProfilePage = () => {
                                 : "bg-white border-neutral-200 shadow-sm"
                         }`}>
                             <p className={theme === "dark" ? "text-neutral-400" : "text-neutral-600"}>
-                                Cet utilisateur n'a pas encore d'amis.
+                                {t("userProfile.noFriends")}
                             </p>
                         </div>
                     ) : (
