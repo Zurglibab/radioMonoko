@@ -6,15 +6,9 @@ import { mapNotificationDtoToApp } from "@/utils/mappers/notification.mapper";
 import { AppNotification } from "@/types/content";
 import { NotificationDTO } from "@/types/notification";
 import { isInBackoff, triggerGlobalBackoff } from "@/utils/rateLimitGuard";
+import { toArray } from "@/utils/apiFetch";
 
 const POLL_INTERVAL = 30_000;
-
-function toArray<T>(raw: unknown): T[] {
-  if (Array.isArray(raw)) return raw as T[];
-  if (raw && typeof raw === "object" && Array.isArray((raw as any).data))
-    return (raw as any).data as T[];
-  return [];
-}
 
 export const useNotifications = () => {
   const { token, user, isLoading: isAuthLoading } = useAuthContext();

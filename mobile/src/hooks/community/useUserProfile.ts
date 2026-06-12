@@ -9,15 +9,8 @@ import { CollectionService } from "@/services/collections/collection.service";
 import { Friend } from "@/types/social";
 import { CollectionDTO } from "@/types/collection";
 
-// Cache local pour l'état de suivi des profils, afin d'éviter les incohérences d'UI lors du follow/unfollow
 const followCache = new Map<string, boolean>();
 
-/**
- * UserProfileState : Interface de l'état du profil utilisateur.
- * Cette interface définit la structure de l'état géré par le hook useUserProfile, 
- * incluant les informations de base du profil, le nombre d'amis en commun, la liste des amis en commun, 
- * les collections publiques de l'utilisateur, et l'état de suivi.
- */
 export interface UserProfileState {
   profile: PublicUserProfile | null;
   targetFriendsCount: number;
@@ -26,13 +19,6 @@ export interface UserProfileState {
   isFollowing: boolean;
 }
 
-/**
- * useUserProfile : Hook de gestion du profil utilisateur.
- * Ce hook centralise la logique de chargement et de gestion du profil d'un utilisateur, 
- * incluant les informations de base, les amis en commun, les collections publiques, 
- * et l'état de suivi. Il gère également les actions de suivi/désabonnement et de blocage,
- * @returns 
- */
 export const useUserProfile = () => {
   const { id, username: usernameParam } = useLocalSearchParams<{ id: string; username?: string }>();
   const router = useRouter();

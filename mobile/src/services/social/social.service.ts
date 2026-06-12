@@ -1,4 +1,4 @@
-import { apiFetch } from "@/utils/apiFetch";
+import { apiFetch, toArray } from "@/utils/apiFetch";
 import { ReviewService } from "@/services/reviews/review.service";
 import { ContentApiService } from "@/services/content/content-api.service";
 import { UserService } from "@/services/users/user.service";
@@ -11,28 +11,12 @@ import {
   RelationActionResponse,
 } from "@/types/social";
 
-// Plafond de 20 activités pour éviter les temps de chargement trop longs sur le feed d'accueil
 const FEED_LIMIT = 20;
 
-// Permet de gérer les différentes formes de données que le backend peut renvoyer (liste directe ou enveloppée dans un objet { data: [...] })
-function toArray<T>(raw: unknown): T[] {
-  if (Array.isArray(raw)) return raw as T[];
-  if (raw && typeof raw === "object" && Array.isArray((raw as any).data))
-    return (raw as any).data as T[];
-  return [];
-}
-
-// Le backend peut renvoyer le statut "mis en avant"
 function isReviewFeatured(review: any): boolean {
   return Boolean(review?.featured ?? review?.is_featured);
 }
 
-/**
- * SocialService : Gestion des interactions sociales (amis, feed, commentaires).
- * Centralise toutes les fonctionnalités liées à la dimension sociale de l'application,
- * comme la gestion des amis, le suivi, le feed d'activité, et les commentaires sur les critiques.
- * Il interagit avec plusieurs endpoints de l'API pour fournir une expérience sociale riche et cohérente.
- */
 export const SocialService = {
   fetchMyFriends: (token: string): Promise<Friend[]> =>
     apiFetch<Friend[]>("/userRelation/friends", { token }),
@@ -82,7 +66,6 @@ export const SocialService = {
   getFeed: async (token: string, currentUserId?: string): Promise<SocialActivity[]> => {
     const allReviewsRaw = await ReviewService.getAll(token);
     const allReviews = toArray<any>(allReviewsRaw);
-    // Les critiques mises en avant par l'admin remontent toujours en tête du flux
     const topLevel = allReviews
       .filter((r: any) => !r.parent_review_id)
       .sort((a: any, b: any) => {
@@ -132,15 +115,12 @@ export const SocialService = {
         }
       }),
       (async () => {
-        // Notes attribuées par les utilisateurs, pour afficher la note avec la critique dans le flux
         try {
           const allRatings = await RatingService.getAll(token);
           for (const rating of allRatings) {
             ratingMap[`${rating.user_id}_${rating.content_id}`] = rating.average_rating;
           }
-        } catch {
-          // pas de notation disponible
-        }
+        } catch {}
       })(),
     ]);
 
