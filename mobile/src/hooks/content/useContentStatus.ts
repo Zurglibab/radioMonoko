@@ -5,15 +5,6 @@ import { ContentApiService } from "@/services/content/content-api.service";
 import { Station, MediaStatus } from "@/types/content";
 import { findStatusMeta, findStatusMetaByModel } from "@/constants/library-status";
 
-/**
- * useContentStatus : Hook de gestion du statut d'un contenu pour l'utilisateur connecté.
- * 
- * Ce hook permet de récupérer et de mettre à jour le statut d'un contenu (ex: "À écouter", "Écouté", etc.)
- * dans la bibliothèque de l'utilisateur. Il gère l'état de chargement, les erreurs, et fournit une fonction
- * setStatus pour modifier le statut de manière optimiste.
- * @param apiId 
- * @returns 
- */
 export const useContentStatus = (apiId: string | null) => {
   const { token, user } = useAuthContext();
   const [currentStatus, setCurrentStatus] = useState<MediaStatus | null>(null);

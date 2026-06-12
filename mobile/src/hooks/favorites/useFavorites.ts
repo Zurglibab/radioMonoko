@@ -5,15 +5,6 @@ import { ContentApiService } from "@/services/content/content-api.service";
 import { ContentFavorite } from "@/types/favorite";
 import { Station, BackendContent } from "@/types/content";
 
-/**
- * useFavorites : Hook de gestion des favoris de contenus pour l'utilisateur connecté.
- * 
- * Ce hook centralise la logique de récupération, enrichissement et manipulation des favoris
- * de l'utilisateur. Il gère l'état de chargement, les erreurs, et fournit une fonction
- * toggleFavorite pour ajouter ou retirer un contenu des favoris de manière optimiste.
- * @param skipInitialFetch 
- * @returns 
- */
 export const useFavorites = (skipInitialFetch = false) => {
   const { token, user, isLoading: isAuthLoading } = useAuthContext();
   const [favorites, setFavorites] = useState<ContentFavorite[]>([]);
