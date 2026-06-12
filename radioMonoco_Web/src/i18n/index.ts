@@ -130,11 +130,23 @@ i18n
                         noCollections: "Aucune collection trouvée",
                         shows: "Émissions",
                         noShows: "Aucune émission trouvée",
+                        noShowsFilter: "Aucune émission ne correspond à ces filtres",
                         publicProfile: "Profil public",
                         privateProfile: "Profil privé",
                         viewProfile: "Voir le profil →",
                         viewShow: "Voir l'émission →",
+                        viewCollection: "Voir la collection →",
                         noDescription: "Aucune description disponible",
+                        filters: {
+                            genre: "Genre",
+                            genrePlaceholder: "Ex: Humour, Politique...",
+                            year: "Année",
+                            yearPlaceholder: "Ex: 2024",
+                            author: "Auteur",
+                            authorPlaceholder: "Ex: Léa Salamé...",
+                            filterBtn: "Filtrer",
+                            resetBtn: "Réinitialiser"
+                        }
                     },
 
 
@@ -653,11 +665,23 @@ i18n
                         noCollections: "No collections found",
                         shows: "Shows",
                         noShows: "No shows found",
+                        noShowsFilter: "No shows match these filters",
                         publicProfile: "Public profile",
                         privateProfile: "Private profile",
                         viewProfile: "View profile →",
                         viewShow: "View show →",
+                        viewCollection: "View collection →",
                         noDescription: "No description available",
+                        filters: {
+                            genre: "Genre",
+                            genrePlaceholder: "Ex: Comedy, Politics...",
+                            year: "Year",
+                            yearPlaceholder: "Ex: 2024",
+                            author: "Author",
+                            authorPlaceholder: "Ex: John Doe...",
+                            filterBtn: "Filter",
+                            resetBtn: "Reset"
+                        }
                     },
 
 
@@ -1176,11 +1200,23 @@ i18n
                         noCollections: "Ninguna colección encontrada",
                         shows: "Programas",
                         noShows: "Ningún programa encontrado",
+                        noShowsFilter: "Ningún programa coincide con estos filtros",
                         publicProfile: "Perfil público",
                         privateProfile: "Perfil privado",
                         viewProfile: "Ver el perfil →",
                         viewShow: "Ver el programa →",
+                        viewCollection: "Ver la colección →",
                         noDescription: "Ninguna descripción disponible",
+                        filters: {
+                            genre: "Género",
+                            genrePlaceholder: "Ej: Humor, Política...",
+                            year: "Año",
+                            yearPlaceholder: "Ej: 2024",
+                            author: "Autor",
+                            authorPlaceholder: "Ej: Juan Pérez...",
+                            filterBtn: "Filtrar",
+                            resetBtn: "Restablecer"
+                        }
                     },
 
                     radio: {
@@ -1248,33 +1284,27 @@ i18n
                             appearance: "Apariencia"
                         },
                         profile: {
-                            usernameDesc: "Este nombre se mostrará en su perfil y comentarios.",
-                            emailDesc: "Nunca compartiremos tu correo electrónico con nadie.",
+                            displayName: "Nombre para mostrar",
+                            displayNamePlaceholder: "Tu apodo...",
                             website: "Sitio web",
-                            websiteDesc: "Enlace a tu portafolio, blog o redes sociales.",
                             bio: "Biografía",
-                            bioDesc: "Escribe algo interesante sobre ti."
+                            bioPlaceholder: "Cuéntanos algo sobre ti...",
+                            visibility: "Visibilidad",
+                            public: "Público",
+                            private: "Privado",
+                            dataManagement: "Gestión de Datos",
+                            exportData: "Exportar mis datos",
+                            exportDesc: "Descargar una copia de tus datos personales",
+                            exportBtn: "Exportar"
                         },
                         security: {
-                            passwordDesc: "Te enviaremos un correo electrónico para confirmar el cambio de contraseña.",
+                            changePassword: "Cambiar la contraseña",
                             currentPassword: "Contraseña actual",
-                            newPassword: "Nueva contraseña",
-                            confirmPassword: "Confirmar nueva contraseña",
+                            newPassword: "Nueva",
+                            confirmPassword: "Confirmación",
                             updatePasswordButton: "Actualizar contraseña",
-                            privacy: "Privacidad",
-                            publicAccount: "Cuenta pública",
-                            publicAccountDesc: "Cualquiera puede ver tu perfil y tus colecciones públicas.",
-                            privateAccount: "Cuenta privada",
-                            privateAccountDesc: "Solo tus amigos pueden ver tu perfil completo y tus colecciones.",
-                            dataManagement: "Gestión de Datos",
-                            exportData: "Exportar Mis Datos",
-                            exportDataDesc: "Descargar una copia de tus datos personales.",
-                            exportButton: "Exportar Datos",
-                            deleteAccount: "Eliminar Cuenta",
-                            deleteAccountDesc: "Eliminar permanentemente tu cuenta y todos sus datos asociados.",
-                            deleteAccountButton: "Eliminar Cuenta",
-                            advancedSecurity: "Seguridad Avanzada",
-                            twoFactorAuth: "Autenticación de Dos Factores (2FA)",
+                            advancedSecurity: "Seguridad avanzada",
+                            twoFactorAuth: "Autenticación de dos factores (2FA)",
                             twoFactorDesc: "Asegura tu cuenta con un código móvil."
                         },
                         notifs: {
