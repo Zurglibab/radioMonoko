@@ -53,8 +53,7 @@ export const useUserProfile = () => {
     setIsLoading(true);
 
     Promise.all([
-      UserService.getById(token, id).catch((e) => {
-        if (__DEV__) console.warn("[UserProfile] getById failed:", e?.message);
+      UserService.getById(token, id).catch(() => {
         if (usernameParam) return { id, username: usernameParam } as PublicUserProfile;
         return null;
       }),

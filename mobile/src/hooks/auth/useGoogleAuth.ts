@@ -31,7 +31,7 @@ export const useGoogleAuth = () => {
     if (!response) return;
 
     if (response.type === "error") {
-      setError(response.error?.message ?? "Erreur Google OAuth.");
+      setError("Erreur Google OAuth.");
       setIsLoading(false);
       return;
     }
@@ -71,8 +71,8 @@ export const useGoogleAuth = () => {
       if (result.type !== "success") {
         setIsLoading(false);
       }
-    } catch (err: any) {
-      setError(err?.message ?? "Connexion Google impossible.");
+    } catch {
+      setError("Connexion Google impossible.");
       setIsLoading(false);
     }
   };

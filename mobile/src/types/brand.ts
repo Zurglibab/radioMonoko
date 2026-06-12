@@ -35,28 +35,3 @@ export interface ApiEnvelope<T> {
   success: boolean;
   data: T;
 }
-
-/**
- * Réponses spécifiques des autres endpoints Brand.
- */
-export interface BrandStatsCount {
-  count: number;
-}
-
-/**
- * Résultat de l'opération de rafraîchissement des données d'une Brand (POST /api/brands/{brandId}/refresh).
- */
-export interface BrandRefreshResult {
-  message: string;
-  updatedAt?: string;
-  count?: number;
-}
-
-/**
- * Enveloppe de la réponse /api/brands (le backend utilise { success, data })
- */
-export interface BrandsResponse {
-  data: {
-    brands: Brand[];
-  };
-}

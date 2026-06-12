@@ -14,8 +14,7 @@ export default function Index() {
       try {
         const seen = await getOnboardingSeen();
         setHasSeenOnboarding(seen);
-      } catch (e) {
-        console.error("Erreur lors de l'initialisation du routage:", e);
+      } catch {
       } finally {
         setIsCheckingOnboarding(false);
       }

@@ -31,7 +31,6 @@ export const useNotifications = () => {
       setNotifications(mapped);
       setError(null);
     } catch (err: any) {
-      if (__DEV__) console.warn("[useNotifications]", err?.message);
       if (err?.message === "HTTP 429") triggerGlobalBackoff();
       if (!silent) setError("Impossible de charger les notifications.");
     } finally {
@@ -89,8 +88,7 @@ export const useNotifications = () => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     try {
       await NotificationService.markAsRead(token, id);
-    } catch (err: any) {
-      if (__DEV__) console.warn("[useNotifications] markAsRead rollback", err?.message);
+    } catch {
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: false } : n));
     }
   }, [token]);
@@ -102,8 +100,7 @@ export const useNotifications = () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     try {
       await NotificationService.markAllAsRead(token, user.id);
-    } catch (err: any) {
-      if (__DEV__) console.warn("[useNotifications] markAllAsRead failed", err?.message);
+    } catch {
       loadNotifications(true);
     }
   }, [token, user?.id, notifications, loadNotifications]);

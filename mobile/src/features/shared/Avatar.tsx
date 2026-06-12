@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Image } from "react-native";
 
 interface AvatarProps {
-  name: string;
+  name: string | null | undefined;
   avatar?: string;
   size?: number;
   colors: any;
@@ -31,7 +31,7 @@ export const Avatar = ({ name, avatar, size = 48, colors }: AvatarProps) => {
       }}
     >
       <Text style={{ color: colors.text, fontWeight: "900", fontSize: size * 0.35, textTransform: "uppercase" }}>
-        {name[0]}
+        {name?.[0] ?? "?"}
       </Text>
     </View>
   );

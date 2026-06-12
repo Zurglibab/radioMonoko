@@ -22,8 +22,7 @@ export const useCollections = (skipInitialFetch = false) => {
       const data = await CollectionService.getUserCollections(token, user.id);
       setCollections(data.filter(c => c.user_id === user.id));
       setError(null);
-    } catch (err: any) {
-      if (__DEV__) console.warn("[useCollections] load error:", err?.message);
+    } catch {
       if (!silent) setError("Impossible de charger vos collections.");
     } finally {
       if (!silent) setIsLoading(false);
@@ -58,7 +57,6 @@ export const useCollections = (skipInitialFetch = false) => {
 
       return created;
     } catch (err: any) {
-      if (__DEV__) console.warn("[useCollections] create error:", err?.message);
       throw err;
     }
   }, [token, user?.id]);
@@ -73,7 +71,6 @@ export const useCollections = (skipInitialFetch = false) => {
       setCollections(prev => prev.map(c => c.id === id ? updated : c));
       return updated;
     } catch (err: any) {
-      if (__DEV__) console.warn("[useCollections] update error:", err?.message);
       throw err;
     }
   }, [token]);
@@ -92,7 +89,6 @@ export const useCollections = (skipInitialFetch = false) => {
     try {
       await CollectionService.remove(token, id);
     } catch (err: any) {
-      if (__DEV__) console.warn("[useCollections] delete failed, rolling back", err?.message);
       setCollections(previous);
       throw err;
     }

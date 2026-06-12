@@ -49,9 +49,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
           playThroughEarpieceAndroid: false,
         });
-      } catch (e) {
-        console.error("[PlayerProvider] Erreur configuration système audio :", e);
-      }
+      } catch {}
     };
     setupAudioSystem();
 
@@ -80,8 +78,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       } else {
         setLiveSongTitle(null);
       }
-    } catch (e) {
-      console.error("[PlayerProvider] Impossible de récupérer les métadonnées en direct :", e);
+    } catch {
       setLiveSongTitle(null);
     }
   };
@@ -124,8 +121,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       // Détermination de l'URL de streaming : Priorité à l'URL fournie par le back, sinon construction d'une URL générique basée sur l'ID de la station
       const finalStreamUrl = track.streamUrl || `https://icecast.radiofrance.fr/${track.id.toLowerCase().replace(/_/g, '')}-midfi.mp3?id=openapi`;
 
-      if (__DEV__) console.log(`[PlayerContext] Lancement du flux natif : ${finalStreamUrl}`);
-
       // Création de l'instance audio avec le flux de streaming et configuration du gestionnaire de statut pour synchroniser les états de lecture et de buffering avec l'UI
       const { sound } = await Audio.Sound.createAsync(
         { uri: finalStreamUrl },
@@ -139,8 +134,6 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           if (status.isLoaded) {
             setIsPlaying(status.isPlaying);
             setIsLoadingAudio(status.isBuffering);
-          } else if (status.error) {
-            console.error(`[PlayerContext] Erreur décodeur natif : ${status.error}`);
           }
         }
       );
@@ -161,8 +154,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         livePollingInterval.current = setInterval(() => updateLiveMetadata(track.id), 20000);
       }
 
-    } catch (error) {
-      console.error("[PlayerContext] Échec du chargement du flux audio :", error);
+    } catch {
       setIsLoadingAudio(false);
       setIsPlaying(false);
     }
@@ -185,9 +177,7 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setIsPlaying(true);
         setIsLoadingAudio(false);
       }
-    } catch (error) {
-      console.error("[PlayerContext] Impossible de basculer la lecture :", error);
-    }
+    } catch {}
   };
 
   return (

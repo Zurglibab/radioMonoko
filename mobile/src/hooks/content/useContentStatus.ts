@@ -31,8 +31,7 @@ export const useContentStatus = (apiId: string | null) => {
       const meta = findStatusMetaByModel(record?.status);
       setCurrentStatus(meta?.frontStatus ?? null);
       setError(null);
-    } catch (err: any) {
-      if (__DEV__) console.warn("[useContentStatus] load error :", err?.message);
+    } catch {
       setError("Impossible de charger le statut.");
     } finally {
       setIsLoading(false);

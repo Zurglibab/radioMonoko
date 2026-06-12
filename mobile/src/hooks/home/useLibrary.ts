@@ -7,14 +7,6 @@ import { useFavorites } from "@/hooks/favorites/useFavorites";
 import { useMyStatuses } from "@/hooks/content/useMyStatuses";
 import { useCollections } from "@/hooks/collections/useCollections";
 
-/**
- * useLibrary : Hook centralisé pour la gestion de la bibliothèque utilisateur.
- * 
- * Ce hook regroupe la logique de gestion des favoris, des statuts de contenus et des playlists
- * de l'utilisateur connecté. Il fournit une interface unifiée pour accéder à ces données,
- * ainsi que des fonctions pour les manipuler (ex: toggleFavorite, refetch, etc.).
- * @returns 
- */
 export const useLibrary = () => {
   const { token, user: authUser, logout: authLogout, updateProfile: authUpdateProfile } = useAuthContext();
 
@@ -44,8 +36,8 @@ export const useLibrary = () => {
         "Favoris",
         isNowFavorite ? "Ajouté à vos Titres Likés" : "Retiré de vos Titres Likés"
       );
-    } catch (err: any) {
-      Alert.alert("Erreur", err?.message || "Impossible de modifier le favori.");
+    } catch {
+      Alert.alert("Erreur", "Impossible de modifier le favori.");
     }
   };
 
@@ -66,8 +58,8 @@ export const useLibrary = () => {
     try {
       await authUpdateProfile(payload);
       Alert.alert("Succès", "Profil mis à jour !");
-    } catch (err: any) {
-      Alert.alert("Erreur", err?.message || "Impossible de mettre à jour le profil.");
+    } catch {
+      Alert.alert("Erreur", "Impossible de mettre à jour le profil.");
     }
   };
 
@@ -94,21 +86,18 @@ export const useLibrary = () => {
     activeTab,
     setActiveTab,
 
-    // Statuts
     statuses,
     statusItems: statusCounts,
     getByFrontStatus,
     isStatusesLoading,
     refetchStatuses,
 
-    // Favoris
     favorites: realFavorites,
     isFavoritesLoading,
     refetchFavorites,
     toggleFavorite,
     isFavoriteByContentId,
 
-    // Playlists stabilisées
     playlists: mappedPlaylists,
     isCollectionsLoading,
     refetchCollections

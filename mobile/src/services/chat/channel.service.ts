@@ -27,9 +27,6 @@ export const ChannelService = {
   getAll: (token: string): Promise<ChannelDTO[]> =>
     apiFetch<unknown>("/channels", { token }).then(raw => toArray<ChannelDTO>(raw)),
 
-  getById: (token: string, channelId: string): Promise<ChannelDTO> =>
-    apiFetch<ChannelDTO>(`/channels/${channelId}`, { token }),
-
   getMembers: (token: string, channelId: string): Promise<ChannelMemberDTO[]> =>
     apiFetch<unknown>(`/channels/${channelId}/members`, { token }).then(raw =>
       toArray<ChannelMemberDTO>(raw)
@@ -41,9 +38,6 @@ export const ChannelService = {
       method: "POST",
       body: { userId },
     }),
-
-  removeMember: (token: string, channelId: string, userId: string): Promise<void> =>
-    apiFetch<void>(`/channels/${channelId}/members/${userId}`, { token, method: "DELETE" }),
 
   getMessages: async (token: string, channelId: string, limit = 50): Promise<MessageDTO[]> => {
     const raw = await apiFetch<unknown>(
@@ -69,18 +63,6 @@ export const ChannelService = {
     apiFetch<void>(`/channels/${channelId}/messages/${messageId}`, {
       token,
       method: "DELETE",
-    }),
-
-  editMessage: (
-    token: string,
-    channelId: string,
-    messageId: string,
-    content: string
-  ): Promise<MessageDTO> =>
-    apiFetch<MessageDTO>(`/channels/${channelId}/messages/${messageId}`, {
-      token,
-      method: "PATCH",
-      body: { content },
     }),
 
   getOrCreateDM: async (

@@ -23,8 +23,7 @@ export default function SplashScreen() {
           preloadAppAssets(),
           new Promise(resolve => setTimeout(resolve, 2500)),
         ]);
-      } catch (e) {
-        console.warn("Erreur chargement assets:", e);
+      } catch {
       } finally {
         router.replace("/onboarding");
       }

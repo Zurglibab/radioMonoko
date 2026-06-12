@@ -42,8 +42,7 @@ export const useCollectionItems = (collectionId: string | null) => {
       enriched.sort((a, b) => a.position - b.position);
       setItems(enriched);
       setError(null);
-    } catch (err: any) {
-      if (__DEV__) console.warn("[useCollectionItems]", err?.message);
+    } catch {
       setError("Impossible de charger les éléments de cette collection.");
     } finally {
       setIsLoading(false);
@@ -60,8 +59,7 @@ export const useCollectionItems = (collectionId: string | null) => {
     setItems(prev => prev.filter(i => i.contentId !== contentId));
     try {
       await CollectionService.removeItem(token, collectionId, contentId);
-    } catch (err: any) {
-      if (__DEV__) console.warn("[useCollectionItems] removeItem échoué, rollback", err?.message);
+    } catch {
       setItems(previous);
     }
   }, [token, collectionId, items]);

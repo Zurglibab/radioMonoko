@@ -6,9 +6,6 @@ import { ContentApiService } from "@/services/content/content-api.service";
 import { Station } from "@/types/content";
 import { isInBackoff } from "@/utils/rateLimitGuard";
 
-/**
- * useReviewForm : Hook de gestion du formulaire de critique et de notation.
- */
 export const useReviewForm = (station: Station | null) => {
   const { token, user } = useAuthContext();
   const [initialRating, setInitialRating] = useState(0);
@@ -16,10 +13,6 @@ export const useReviewForm = (station: Station | null) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  /**
-   * Charge la note existante de l'utilisateur sur cette œuvre (si elle existe).
-   * Permet de pré-remplir le formulaire pour modifier sa note.
-   */
   useEffect(() => {
     if (!token || !user?.id || !station) return;
     if (isInBackoff()) return;
@@ -37,17 +30,13 @@ export const useReviewForm = (station: Station | null) => {
         } catch {
           setInitialRating(0);
         }
-      } catch (err: any) {
-        if (__DEV__) console.warn("[useReviewForm] preload", err?.message);
+      } catch {
       } finally {
         setIsLoadingExisting(false);
       }
     })();
   }, [token, user?.id, station]);
 
-  /**
-   * submit : Publie la critique + la note en parallèle.
-   */
   const submit = useCallback(async (rating: number, comment: string) => {
     if (!token || !user?.id || !station) {
       throw new Error("Session invalide.");

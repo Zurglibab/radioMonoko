@@ -17,8 +17,7 @@ export const useCommunity = (skipInitialFetch = false) => {
     try {
       const data = await SocialService.getFeed(token, user.id);
       setFeed(Array.isArray(data) ? data : []);
-    } catch (error) {
-      if (__DEV__) console.warn("[useCommunity]", error);
+    } catch {
     } finally {
       if (!silent) setIsLoading(false);
     }
