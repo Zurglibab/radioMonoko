@@ -33,7 +33,7 @@
     },
     "security": {
       "label": "Security",
-      "secondary": "Password, Biometrics"
+      "secondary": "Biometrics"
     },
     "experienceSection": "Experience",
     "appearance": {
@@ -76,10 +76,6 @@
     "protectionEnhanced": "Enhanced",
     "protectionStandard": "Standard",
     "accessSection": "Access & Biometrics",
-    "password": {
-      "label": "Password",
-      "secondary": "Change via security email"
-    },
     "biometry": {
       "label": "Face ID / Touch ID",
       "secondary": "Fast and secure sign-in"
@@ -90,9 +86,6 @@
     "fallbackLabel": "Use device passcode",
     "biometryEnabledTitle": "Success",
     "biometryEnabledMessage": "Biometrics enabled for your next sign-ins.",
-    "changePasswordTitle": "Change password",
-    "changePasswordMessage": "We will send a secure verification code to: {{email}}",
-    "sendCode": "Send code",
     "privacyNote": "RadioMonoco uses end-to-end encryption to protect your session data and broadcast preferences."
   },
   "legal": {

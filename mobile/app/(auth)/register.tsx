@@ -1,39 +1,28 @@
 import React, { useState } from "react";
-import { ScrollView, TouchableOpacity, Text, View, ActivityIndicator } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-
 import { theme } from "@/constants/theme";
 import { AuthInput } from "@/features/auth/components/AuthInput";
 import { SocialButtons } from "@/features/auth/components/SocialButtons";
 import { AuthHeader } from "@/features/auth/components/AuthHeader";
 import { AuthDivider } from "@/features/auth/components/AuthDivider";
 import { AuthCheckbox } from "@/features/auth/components/AuthCheckbox";
+import { AuthErrorBanner } from "@/features/auth/components/AuthErrorBanner";
+import { AuthSubmitButton } from "@/features/auth/components/AuthSubmitButton";
+import { AuthFooterLink } from "@/features/auth/components/AuthFooterLink";
 import { useRegister } from "@/hooks/auth/useRegister";
 
-/**
- * RegisterScreen : Écran de création de compte.
- * Gère la saisie des informations utilisateur et l'acceptation des conditions.
- */
 export default function RegisterScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-
-  // Utilisation d'un hook dédié pour isoler la logique d'inscription
   const { register, registerWithGoogle, isLoading, error } = useRegister();
-  
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
-
-  /**
-   * Calcul de l'état du bouton :
-   * Je bloque l'action si un chargement est en cours OU si la checkbox n'est pas cochée.
-   */
-  const isButtonDisabled = isLoading || !agree;
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: theme.dark.colors.background }}>
@@ -48,12 +37,7 @@ export default function RegisterScreen() {
           subtitle={t('auth.register.subtitle')}
         />
 
-        {/* Zone d'affichage des erreurs provenant du backend */}
-        {error && (
-          <View className="bg-red-500/10 border border-red-500 p-3 rounded-xl mb-6">
-            <Text className="text-red-500 text-center font-bold text-sm">{error}</Text>
-          </View>
-        )}
+        {error && <AuthErrorBanner message={error} />}
 
         <View className="mb-2">
           <AuthInput
@@ -84,60 +68,31 @@ export default function RegisterScreen() {
           />
         </View>
 
-        {/* Validation des CGU, élément bloquant pour l'inscription */}
         <AuthCheckbox
           label={t('auth.register.agreeToTerms')}
           value={agree}
           onValueChange={setAgree}
         />
 
-        {/* Bouton d'action avec changement de style dynamique */}
-        <TouchableOpacity 
+        <AuthSubmitButton
+          label={t('auth.register.submitButton')}
           onPress={() => register(email, password, confirmPassword, username, agree)}
-          disabled={isButtonDisabled}
-          className="h-16 rounded-2xl items-center justify-center shadow-lg mt-6"
-          style={{ 
-            backgroundColor: isButtonDisabled 
-              ? theme.dark.colors.surface // Aspect grisé si bloqué
-              : theme.dark.colors.primary,
-            opacity: isButtonDisabled ? 0.5 : 1 
-          }}
-        >
-          {isLoading ? (
-            <ActivityIndicator color={theme.dark.colors.secondary} />
-          ) : (
-            <Text
-              style={{
-                color: isButtonDisabled
-                  ? theme.dark.colors.muted
-                  : theme.dark.colors.secondary
-              }}
-              className="font-bold text-lg uppercase tracking-widest"
-            >
-              {t('auth.register.submitButton')}
-            </Text>
-          )}
-        </TouchableOpacity>
-
-        {/* Séparateur et options d'inscription sociale */}
-        <AuthDivider />
-        <SocialButtons
-         onGooglePress={registerWithGoogle}
-         disabled={isLoading} 
+          isLoading={isLoading}
+          disabled={!agree}
+          className="mt-6"
         />
 
-        {/* Redirection vers le login pour les utilisateurs déjà inscrits */}
-        <View className="flex-row justify-center mt-12 mb-6">
-          <Text style={{ color: theme.dark.colors.muted }}>{t('auth.register.alreadyMember')}</Text>
-          <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
-            <Text
-              style={{ color: theme.dark.colors.text }}
-              className="font-bold underline"
-            >
-              {t('auth.register.loginLink')}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <AuthDivider />
+        <SocialButtons
+          onGooglePress={registerWithGoogle}
+          disabled={isLoading}
+        />
+
+        <AuthFooterLink
+          promptText={t('auth.register.alreadyMember')}
+          actionText={t('auth.register.loginLink')}
+          onPress={() => router.push("/(auth)/login")}
+        />
       </ScrollView>
     </SafeAreaView>
   );

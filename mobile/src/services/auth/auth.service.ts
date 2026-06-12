@@ -1,5 +1,4 @@
 import { AuthResponse, User, UpdateUserPayload } from "@/types/auth";
-import { validatePassword } from "@/utils/validation/validation";
 import { apiFetch } from "@/utils/apiFetch";
 
 /**
@@ -127,66 +126,6 @@ export const AuthService = {
         throw new Error("Utilisateur non trouvé.");
       }
       throw new Error("Erreur lors de la mise à jour des informations.");
-    }
-  },
-
-  /**
-   * sendResetPasswordEmail : Envoie un email de réinitialisation de mot de passe à l'adresse fournie.
-   * En cas de succès, confirme l'envoi de l'email.
-   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (email non associé à un compte, etc.).
-   * @param email 
-   */
-  sendResetPasswordEmail: async (email: string): Promise<void> => {
-    try {
-      await apiFetch<void>('/user/reset-password', {
-        method: 'POST',
-        body: { email },
-      });
-    } catch (error: any) {
-      if (error?.message?.includes("HTTP 404")) {
-        throw new Error("Aucun compte associé à cet email.");
-      }
-      throw new Error("Impossible d'envoyer l'email de réinitialisation.");
-    }
-  },
-
-  /**
-   * verifyOtpCode : Vérifie le code OTP envoyé par email pour valider la réinitialisation du mot de passe.
-   * En cas de succès, confirme la validité du code.
-   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (code incorrect, expiré, etc.).
-   * @param code 
-   */
-  verifyOtpCode: async (code: string): Promise<void> => {
-    try {
-      await apiFetch<void>('/user/verify-otp', {
-        method: 'POST',
-        body: { otp: code },
-      });
-    } catch (error: any) {
-      if (error?.message?.includes("HTTP 400")) {
-        throw new Error("Code de vérification incorrect ou expiré.");
-      }
-      throw new Error("Impossible de vérifier le code.");
-    }
-  },
-
-  /**
-   * resetPassword : Réinitialise le mot de passe de l'utilisateur après validation du code OTP.
-   * En cas de succès, confirme la réinitialisation du mot de passe.
-   * En cas d'échec, lance une erreur avec un message clair selon le type d'erreur rencontré (mot de passe non conforme, etc.).
-   * @param password 
-   */
-  resetPassword: async (password: string): Promise<void> => {
-    const pass = validatePassword(password);
-    if (!pass.isValid) throw new Error(pass.message);
-
-    try {
-      await apiFetch<void>('/user/reset-password/confirm', {
-        method: 'POST',
-        body: { newPassword: password },
-      });
-    } catch {
-      throw new Error("Impossible de réinitialiser le mot de passe.");
     }
   },
 

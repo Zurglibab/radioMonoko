@@ -33,7 +33,7 @@
     },
     "security": {
       "label": "Sécurité",
-      "secondary": "Mot de passe, Biométrie"
+      "secondary": "Biométrie"
     },
     "experienceSection": "Expérience",
     "appearance": {
@@ -76,10 +76,6 @@
     "protectionEnhanced": "Renforcée",
     "protectionStandard": "Standard",
     "accessSection": "Accès & Biométrie",
-    "password": {
-      "label": "Mot de passe",
-      "secondary": "Modifier via email de sécurité"
-    },
     "biometry": {
       "label": "Face ID / Touch ID",
       "secondary": "Connexion rapide et sécurisée"
@@ -90,9 +86,6 @@
     "fallbackLabel": "Utiliser le code de l'appareil",
     "biometryEnabledTitle": "Succès",
     "biometryEnabledMessage": "Biométrie activée pour vos prochaines connexions.",
-    "changePasswordTitle": "Modifier le mot de passe",
-    "changePasswordMessage": "Nous allons envoyer un code de vérification sécurisé sur l'adresse : {{email}}",
-    "sendCode": "Envoyer le code",
     "privacyNote": "RadioMonoco utilise un cryptage de bout en bout pour protéger vos données de session et vos préférences de diffusion."
   },
   "legal": {

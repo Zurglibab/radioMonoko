@@ -1,63 +1,46 @@
 import React, { useState } from "react";
-import { ScrollView, TouchableOpacity, Text, View, ActivityIndicator } from "react-native";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-
 import { theme } from "@/constants/theme";
 import { AuthInput } from "@/features/auth/components/AuthInput";
 import { SocialButtons } from "@/features/auth/components/SocialButtons";
 import { AuthHeader } from "@/features/auth/components/AuthHeader";
 import { AuthDivider } from "@/features/auth/components/AuthDivider";
+import { AuthErrorBanner } from "@/features/auth/components/AuthErrorBanner";
+import { AuthSubmitButton } from "@/features/auth/components/AuthSubmitButton";
+import { AuthFooterLink } from "@/features/auth/components/AuthFooterLink";
 import { useAuth } from "@/hooks/auth/useAuth";
 
-/**
- * LoginScreen : Écran d'authentification par email/mot de passe.
- * Utilise le hook 'useAuth' pour séparer la logique métier (API/Validation) de la couche de présentation.
- */
 export default function LoginScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // J'extrait les états et méthodes nécessaires depuis notre hook d'authentification
   const { login, loginWithGoogle, isLoading, error } = useAuth();
-  
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  /**
-   * Déclenche la procédure de connexion.
-   * La gestion des erreurs et du stockage du token est déléguée au hook 'useAuth'.
-   */
   const onLoginPress = async () => {
     await login(email, password);
   };
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: theme.dark.colors.background }}>
-      <ScrollView 
-        className="flex-1 px-8" 
+      <ScrollView
+        className="flex-1 px-8"
         showsVerticalScrollIndicator={false}
-        // On assure un padding confortable pour éviter que le contenu ne colle aux bords sur petit écran
         contentContainerStyle={{ paddingTop: 40, paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* En-tête de page */}
         <AuthHeader
           title={t('auth.login.title')}
           subtitle={t('auth.login.subtitle')}
         />
 
-        {/* Feedback d'erreur*/}
-        {error && (
-          <View className="bg-red-500/10 border border-red-500 p-4 rounded-xl mb-6">
-            <Text className="text-red-500 text-center font-bold text-sm">
-              {error}
-            </Text>
-          </View>
-        )}
+        {error && <AuthErrorBanner message={error} />}
 
-        {/* Formulaire de saisie */}
         <View className="mb-2">
           <AuthInput
             label={t('auth.login.emailLabel')}
@@ -68,67 +51,30 @@ export default function LoginScreen() {
           <AuthInput
             label={t('auth.login.passwordLabel')}
             placeholder={t('auth.login.passwordPlaceholder')}
-            isPassword // Masque la saisie
+            isPassword
             value={password}
             onChangeText={setPassword}
           />
         </View>
 
-        {/* Lien vers la récupération de mot de passe */}
-        <TouchableOpacity 
-          onPress={() => router.push("/(auth)/forgot-password")}
-          activeOpacity={0.7}
-          className="items-end mb-10"
-        >
-          <Text
-            style={{ color: theme.dark.colors.muted }}
-            className="text-sm font-semibold"
-          >
-            {t('auth.login.forgotPassword')}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Action de connexion */}
-        <TouchableOpacity 
+        <AuthSubmitButton
+          label={t('auth.login.submitButton')}
           onPress={onLoginPress}
-          disabled={isLoading}
-          className="h-16 rounded-2xl items-center justify-center shadow-lg"
-          style={{ 
-            backgroundColor: theme.dark.colors.primary,
-            opacity: isLoading ? 0.7 : 1 
-          }}
-        >
-          {isLoading ? (
-            <ActivityIndicator color={theme.dark.colors.secondary} />
-          ) : (
-            <Text
-              style={{ color: theme.dark.colors.secondary }}
-              className="font-bold text-lg uppercase tracking-widest"
-            >
-              {t('auth.login.submitButton')}
-            </Text>
-          )}
-        </TouchableOpacity>
+          isLoading={isLoading}
+          className="mt-8"
+        />
 
-        {/* Connexion via réseaux sociaux */}
         <AuthDivider />
-        <SocialButtons 
+        <SocialButtons
           onGooglePress={loginWithGoogle}
           disabled={isLoading}
         />
 
-        {/* Navigation vers l'inscription */}
-        <View className="flex-row justify-center mt-12 mb-6">
-          <Text style={{ color: theme.dark.colors.muted }}>{t('auth.login.noAccount')}</Text>
-          <TouchableOpacity onPress={() => router.push("/(auth)/register")}>
-            <Text
-               style={{ color: theme.dark.colors.text }}
-               className="font-bold underline"
-            >
-              {t('auth.login.registerLink')}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <AuthFooterLink
+          promptText={t('auth.login.noAccount')}
+          actionText={t('auth.login.registerLink')}
+          onPress={() => router.push("/(auth)/register")}
+        />
       </ScrollView>
     </SafeAreaView>
   );
