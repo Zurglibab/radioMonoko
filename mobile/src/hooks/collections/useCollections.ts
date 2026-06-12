@@ -5,10 +5,6 @@ import { ContentApiService } from "@/services/content/content-api.service";
 import { CollectionDTO, CollectionItemDTO } from "@/types/collection";
 import { Station } from "@/types/content";
 
-/**
- * useCollections : Pilote les collections et leurs éléments pour l'utilisateur connecté.
- * @param skipInitialFetch Si true, désactive le chargement automatique au montage pour éviter les conflits
- */
 export const useCollections = (skipInitialFetch = false) => {
   const { token, user, isLoading: isAuthLoading } = useAuthContext();
   const [collections, setCollections] = useState<CollectionDTO[]>([]);
@@ -24,8 +20,6 @@ export const useCollections = (skipInitialFetch = false) => {
     if (!silent) setIsLoading(true);
     try {
       const data = await CollectionService.getUserCollections(token, user.id);
-      // Filtre défensif : ne garder que les collections appartenant à cet utilisateur
-      // (protection si le backend retourne des collections publiques d'autres users)
       setCollections(data.filter(c => c.user_id === user.id));
       setError(null);
     } catch (err: any) {
@@ -44,7 +38,6 @@ export const useCollections = (skipInitialFetch = false) => {
     loadCollections();
   }, [isAuthLoading, skipInitialFetch, loadCollections]);
 
-  // Créer une collection (POST /collections)
   const createCollection = useCallback(async (
     name: string,
     description: string,
@@ -70,7 +63,6 @@ export const useCollections = (skipInitialFetch = false) => {
     }
   }, [token, user?.id]);
 
-  // Mettre à jour (PUT /collections/{id})
   const updateCollection = useCallback(async (
     id: string,
     payload: { name?: string; description?: string; is_public?: boolean; status?: string }
@@ -86,19 +78,17 @@ export const useCollections = (skipInitialFetch = false) => {
     }
   }, [token]);
 
-  // Basculer Public / Privé
   const toggleVisibility = useCallback(async (id: string) => {
     const target = collections.find(c => c.id === id);
     if (!target) return;
     return updateCollection(id, { is_public: !target.is_public });
   }, [collections, updateCollection]);
 
-  // Supprimer (DELETE /collections/{id})
   const deleteCollection = useCallback(async (id: string) => {
     if (!token) return;
     const previous = collections;
     setCollections(prev => prev.filter(c => c.id !== id));
-    
+
     try {
       await CollectionService.remove(token, id);
     } catch (err: any) {
