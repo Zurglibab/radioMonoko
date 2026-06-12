@@ -1,25 +1,17 @@
 import React, { useCallback } from "react";
-import { View, Text, ScrollView, TouchableOpacity, useColorScheme, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ChevronLeft, Bell, Heart, MessageSquare, UserPlus, Sparkles, CheckCheck } from "lucide-react-native";
-import { useRouter } from "expo-router";
-import { useFocusEffect } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useNotificationContext } from "@/context/NotificationContext";
 import { NotificationType } from "@/types/content";
 
-/**
- * NotificationsScreen : Centre de notifications de l'utilisateur.
- * Affiche l'historique des interactions et les recommandations système.
- * Mise à jour temps réel assurée par le polling du hook useNotifications.
- */
 export default function NotificationsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const colors = useThemeColors();
 
   const {
     notifications,
@@ -33,18 +25,9 @@ export default function NotificationsScreen() {
 
   useFocusEffect(useCallback(() => { refetch(true); }, [refetch]));
 
-  // LOGIQUE DE THÈME
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-
-  /**
-   * getIcon : mappe le type de notification à une icône sémantique.
-   */
   const getIcon = (type: NotificationType) => {
     switch (type) {
-      case 'like': return <Heart size={18} color={theme.dark.colors.live} />;
+      case 'like': return <Heart size={18} color={colors.live} />;
       case 'comment': return <MessageSquare size={18} color="#38BDF8" />;
       case 'follow': return <UserPlus size={18} color="#A855F7" />;
       default: return <Sparkles size={18} color="#FBBF24" />;
@@ -53,8 +36,6 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-
-      {/* HEADER */}
       <View className="flex-row items-center justify-between px-6 py-4">
         <View className="flex-row items-center">
           <TouchableOpacity
@@ -68,7 +49,6 @@ export default function NotificationsScreen() {
           </Text>
         </View>
 
-        {/* Bouton "Tout lire" si des non-lus subsistent */}
         {unreadCount > 0 && (
           <TouchableOpacity onPress={markAllAsRead} className="flex-row items-center active:opacity-50">
             <CheckCheck size={16} color={colors.muted} />
@@ -122,7 +102,7 @@ export default function NotificationsScreen() {
                   {!item.isRead && (
                     <View
                       className="w-2 h-2 rounded-full mt-1"
-                      style={{ backgroundColor: theme.dark.colors.live }}
+                      style={{ backgroundColor: colors.live }}
                     />
                   )}
                 </View>

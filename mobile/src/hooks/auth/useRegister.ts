@@ -38,13 +38,6 @@ const validateRegisterForm = (
   return null;
 };
 
-/**
- * useRegister : Hook personnalisé pour gérer l'inscription des utilisateurs.
- * Il gère la validation du formulaire d'inscription, l'appel au service d'authentification pour créer un compte,
- * la mise à jour du contexte global d'authentification, et la navigation vers l'écran d'accueil après une inscription réussie.
- * Il intègre également l'option d'inscription via Google OAuth en utilisant le hook useGoogleAuth.
- * @returns 
- */
 export const useRegister = () => {
   const [isFormLoading, setIsFormLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
