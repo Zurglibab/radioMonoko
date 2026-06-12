@@ -202,11 +202,11 @@ const FeedItemCard = ({
                             @{item.actor_username || actorName}
                         </button>
 
-                        <span className="text-neutral-400 text-sm">
+                        <span className="text-app-text text-sm">
                             {getActionText(item)}
                         </span>
 
-                        <span className="text-neutral-600 text-sm">
+                        <span className="text-app-text text-sm">
                             · {formatTimeAgo(item.created_at)}
                         </span>
                     </div>
@@ -223,7 +223,7 @@ const FeedItemCard = ({
                                 : ""
                         }`}
                     >
-                        <div className="flex items-center gap-2 text-sm text-neutral-400 mb-3">
+                        <div className="flex items-center gap-2 text-sm text-app-text mb-3">
                             {getIcon(item.type)}
                             <span>{getCardLabel(item.type)}</span>
                         </div>

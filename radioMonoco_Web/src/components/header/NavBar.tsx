@@ -206,13 +206,11 @@ const NavBar = () => {
                     {(
                         <div
                             ref={searchContainerRef}
-                            className={`
-        relative flex items-center h-9 md:h-10 rounded-full transition-all 
-        duration-500
-        ${isSearchOpen
+                            className={`relative flex items-center h-9 md:h-10 rounded-full transition-all duration-500
+                            ${isSearchOpen
                                 ? "bg-app-text/10 px-3 w-64 md:w-96 border border-app-border shadow-lg"
                                 : "w-10 bg-transparent border-transparent"}
-    `}
+                                `}
                         >
                             <button
                                 onClick={() => {
@@ -223,12 +221,11 @@ const NavBar = () => {
                                     }
                                 }}
                                 className={`
-            ${IconCircleStyle} w-9! h-9! md:w-10! md:h-10! absolute left-0
-            transition-all duration-500 z-10
-            ${isSearchOpen
+                                ${IconCircleStyle} w-9! h-9! md:w-10! md:h-10! absolute left-0 transition-all duration-500 z-10
+                                ${isSearchOpen
                                     ? "text-primary rotate-90 scale-110 hover:bg-transparent"
                                     : "text-app-text rotate-0 scale-100"}
-        `}
+                                    `}
                             >
                                 {isSearchOpen ? (
                                     <HiOutlineX className="text-lg" />
@@ -261,9 +258,9 @@ const NavBar = () => {
                             {isSearchOpen && searchQuery.trim().length >= 2 && (
                                 <div className="absolute top-full left-0 mt-3 w-[320px] md:w-[430px] bg-app-bg border border-app-border rounded-2xl shadow-2xl overflow-hidden z-[80]">
 
-                                    <div className="px-4 py-3 border-b border-app-border flex items-center justify-between">
+                                    <div className="px-4 py-3 border-b border-app-border text-app-text flex items-center justify-between">
                                         <p className="text-[10px] uppercase tracking-[0.2em] text-app-text-secondary font-black">
-                                            Recherche dynamique
+                                            Recherche avancée
                                         </p>
 
                                         {searchLoading && (
@@ -288,7 +285,7 @@ const NavBar = () => {
                                     )}
 
                                     {hasPreviewResults && (
-                                        <div className="max-h-[420px] overflow-y-auto">
+                                        <div className="max-h-[420px] text-app-text overflow-y-auto">
 
                                             {previewResults.users.length > 0 && (
                                                 <div className="py-2">
@@ -314,9 +311,9 @@ const NavBar = () => {
                                                                         className="w-full h-full object-cover"
                                                                     />
                                                                 ) : (
-                                                                    <span className="text-white font-black text-sm">
-                                                {u.username?.charAt(0)?.toUpperCase() || "U"}
-                                            </span>
+                                                                    <span className="text-app-text font-black text-sm">
+                                                                        {u.username?.charAt(0)?.toUpperCase() || "U"}
+                                                                    </span>
                                                                 )}
                                                             </div>
 
@@ -401,7 +398,7 @@ const NavBar = () => {
                                                     onClick={goToSearchPage}
                                                     className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold transition"
                                                 >
-                                                    Voir tous les résultats pour “{searchQuery.trim()}”
+                                                    Voir tous les résultats et filtres pour “{searchQuery.trim()}”
                                                 </button>
                                             </div>
                                         </div>
