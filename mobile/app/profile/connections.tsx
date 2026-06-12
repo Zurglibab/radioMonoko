@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, useColorScheme } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Users, Lock } from "lucide-react-native";
+import { Users, Lock } from "lucide-react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
 
-import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { SocialService } from "@/services/social/social.service";
 import { Friend } from "@/types/social";
+import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
 
 type ConnectionsTab = "followers" | "following";
 
@@ -16,13 +17,8 @@ export default function ConnectionsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string | string[] }>();
-  const { token, appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-
-  const isDark = appearanceSettings.themeMode === "system"
-    ? systemTheme === "dark"
-    : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const { token } = useAuthContext();
+  const colors = useThemeColors();
 
   const initialTab = (Array.isArray(params.tab) ? params.tab[0] : params.tab) === "following"
     ? "following"
@@ -59,18 +55,7 @@ export default function ConnectionsScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-      <View className="flex-row items-center px-6 py-4">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-          className="p-2 rounded-full mr-4 border active:opacity-60"
-        >
-          <ChevronLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-          {t("profile.connections.title")}
-        </Text>
-      </View>
+      <ProfileHeader title={t("profile.connections.title")} colors={colors} />
 
       <View
         style={{ backgroundColor: colors.surface, borderColor: colors.border }}

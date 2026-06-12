@@ -1,24 +1,18 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, useColorScheme } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, ShieldCheck, Fingerprint, ChevronRight } from "lucide-react-native";
-import { useRouter } from "expo-router";
+import { ShieldCheck, Fingerprint, ChevronRight } from "lucide-react-native";
 import * as LocalAuthentication from 'expo-local-authentication';
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors, useIsDarkMode } from "@/utils/useThemeColors";
+import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
 
 export default function SecurityScreen() {
-  const router = useRouter();
   const { t } = useTranslation();
-  const { securitySettings, updateSecurity, appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const { securitySettings, updateSecurity } = useAuthContext();
+  const colors = useThemeColors();
+  const isDark = useIsDarkMode();
 
   const handleToggleBiometry = async (value: boolean) => {
     if (value) {
@@ -46,18 +40,7 @@ export default function SecurityScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-      <View className="flex-row items-center px-6 py-4">
-        <TouchableOpacity 
-          onPress={() => router.back()} 
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-          className="p-2 rounded-full mr-4 border active:opacity-60"
-        >
-          <ChevronLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-          {t("profile.security.headerTitle")}
-        </Text>
-      </View>
+      <ProfileHeader title={t("profile.security.headerTitle")} colors={colors} />
 
       <ScrollView className="flex-1 px-6 mt-6" showsVerticalScrollIndicator={false}>
         <View className="items-center mb-10">

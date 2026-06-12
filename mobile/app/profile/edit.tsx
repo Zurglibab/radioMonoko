@@ -9,36 +9,22 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  useColorScheme
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Camera, Check, Info, RotateCcw, Globe, Lock } from "lucide-react-native";
+import { Camera, Check, Info, RotateCcw, Globe, Lock } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import * as ImagePicker from 'expo-image-picker';
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useLibrary } from "@/hooks/home/useLibrary";
-import { useAuthContext } from "@/context/AuthContext";
+import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
 
-/**
- * EditProfileScreen : Formulaire d'édition du compte utilisateur.
- * Champs alignés sur PUT /user/me : display_name, bio, website, avatar, privacy.
- * Le pseudo unique (username) et l'email ne sont pas modifiables via cette route.
- */
 export default function EditProfileScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { user, updateProfile, checkDisplayNameCooldown } = useLibrary();
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const colors = useThemeColors();
 
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-
-  // États locaux pour gérer les champs du formulaire
   const initialDisplayName = user?.display_name || user?.username || "";
   const [displayName, setDisplayName] = useState(initialDisplayName);
   const [bio, setBio] = useState(user?.bio || "");
@@ -47,7 +33,6 @@ export default function EditProfileScreen() {
   const [avatar, setAvatar] = useState(user?.avatar || null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Vérification des contraintes de changement de nom affiché
   const cooldown = useMemo(() => checkDisplayNameCooldown(), [user]);
 
   const pickImage = async () => {
@@ -78,13 +63,6 @@ export default function EditProfileScreen() {
     return nameChanged || bioChanged || websiteChanged || avatarChanged || privacyChanged;
   }, [displayName, bio, website, avatar, privacy, user, initialDisplayName]);
 
-  /**
-   * Validation du nom affiché :
-   * Doit faire au moins 3 caractères et respecter le cooldown de changement (14 jours).
-   * Le cooldown ne s'applique que si un nom affiché personnalisé existe déjà :
-   * la toute première personnalisation (ex: comptes créés via OAuth, sans display_name)
-   * ne doit jamais être bloquée par lastUsernameChange.
-   */
   const isNameValid = displayName.trim().length >= 3;
   const isNameLockedByCooldown = !!user?.display_name && displayName.trim() !== initialDisplayName && !cooldown.allowed;
 
@@ -110,23 +88,9 @@ export default function EditProfileScreen() {
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
-
-        <View className="flex-row items-center px-6 py-4">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-            className="p-2 rounded-full mr-4 border"
-          >
-            <ChevronLeft size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">
-            {t("profile.editProfile.headerTitle")}
-          </Text>
-        </View>
+        <ProfileHeader title={t("profile.editProfile.headerTitle")} colors={colors} />
 
         <ScrollView className="flex-1 px-6 mt-6" showsVerticalScrollIndicator={false}>
-
-          {/* Image de profil avec badge caméra */}
           <View className="items-center mb-10">
             <TouchableOpacity activeOpacity={0.9} onPress={pickImage} className="relative">
               <Image
@@ -156,7 +120,6 @@ export default function EditProfileScreen() {
             )}
           </View>
 
-          {/* Nom affiché */}
           <View className="mb-6">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
               {t("profile.editProfile.displayNameLabel")}
@@ -179,7 +142,6 @@ export default function EditProfileScreen() {
             )}
           </View>
 
-          {/* Bio */}
           <View className="mb-6">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
               {t("profile.editProfile.bioLabel")}
@@ -196,7 +158,6 @@ export default function EditProfileScreen() {
             />
           </View>
 
-          {/* Site web */}
           <View className="mb-6">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
               {t("profile.editProfile.websiteLabel")}
@@ -213,7 +174,6 @@ export default function EditProfileScreen() {
             />
           </View>
 
-          {/* Confidentialité du profil */}
           <View className="mb-10">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-[2px] mb-2 ml-1">
               {t("profile.editProfile.privacyLabel")}
@@ -254,7 +214,6 @@ export default function EditProfileScreen() {
             </View>
           </View>
 
-          {/* Bouton de sauvegarde */}
           <TouchableOpacity
             onPress={handleSave}
             disabled={isSaveDisabled}
@@ -278,7 +237,6 @@ export default function EditProfileScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Note de sécurité */}
           <View
             style={{ backgroundColor: colors.surface, borderColor: colors.border }}
             className="mt-8 mb-10 p-6 rounded-[32px] border border-dashed"
@@ -287,7 +245,6 @@ export default function EditProfileScreen() {
               {t("profile.editProfile.securityNotePrefix")}<Text style={{ color: colors.text }} className="font-bold">@{user?.username}</Text>{t("profile.editProfile.securityNoteSuffix")}
             </Text>
           </View>
-
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
