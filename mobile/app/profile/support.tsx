@@ -1,31 +1,15 @@
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, Linking, useColorScheme } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Linking } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Mail, Bug, ChevronRight } from "lucide-react-native";
-import { useRouter } from "expo-router";
+import { Mail, Bug, ChevronRight } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
-import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
+import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
 
-/**
- * SupportScreen : Centre d'assistance pour les utilisateurs.
- * Donne accès au contact direct par email et au signalement de bugs.
- */
 export default function SupportScreen() {
-  const router = useRouter();
   const { t } = useTranslation();
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const colors = useThemeColors();
 
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-
-  /**
-   * MenuItem : Composant interne pour uniformiser les entrées du menu support.
-   */
   const MenuItem = ({ icon: Icon, label, secondary, onPress, isLast = false }: any) => (
     <TouchableOpacity
       onPress={onPress}
@@ -56,27 +40,9 @@ export default function SupportScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-
-      {/* Header : Navigation retour et titre épuré */}
-      <View className="flex-row items-center px-6 py-4">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-          className="p-2 rounded-full border shadow-sm active:opacity-60"
-        >
-          <ChevronLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text
-          style={{ color: colors.text }}
-          className="text-xl font-black italic tracking-tighter ml-4"
-        >
-          {t("profile.support.headerTitle")}
-        </Text>
-      </View>
+      <ProfileHeader title={t("profile.support.headerTitle")} colors={colors} />
 
       <ScrollView className="px-6 mt-6" showsVerticalScrollIndicator={false}>
-
-        {/* Aide directe */}
         <Text
           style={{ color: colors.muted }}
           className="text-[9px] font-black uppercase tracking-[3px] ml-4 mb-4"
@@ -103,7 +69,6 @@ export default function SupportScreen() {
           />
         </View>
 
-        {/* Footer : Versionning discret */}
         <View className="mt-4 mb-8 items-center">
           <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[2px] opacity-50">
             {t("profile.support.footer")}

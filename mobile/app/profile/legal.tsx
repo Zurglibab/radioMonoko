@@ -1,39 +1,22 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator, useColorScheme } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ChevronLeft, Download } from "lucide-react-native";
-import { useRouter } from "expo-router";
+import { Download } from "lucide-react-native";
 import { File, Paths } from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
 import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { AuthService } from "@/services/auth/auth.service";
+import { ProfileHeader } from "@/features/profile/components/ProfileHeader";
 
-/**
- * DataPrivacyScreen : Portabilité des données personnelles (RGPD).
- * Permet à l'utilisateur de demander un export complet de ses données.
- */
 export default function DataPrivacyScreen() {
-  const router = useRouter();
   const { t } = useTranslation();
-  const { user, token, appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const { user, token } = useAuthContext();
+  const colors = useThemeColors();
 
   const [isExporting, setIsExporting] = useState(false);
 
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
-
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-
-  /**
-   * Export des données : Conformément au RGPD, l'utilisateur peut télécharger une archive
-   * contenant l'intégralité de ses données personnelles et d'activité (profil, favoris,
-   * statuts, collections, notes), récupérée directement depuis le backend puis partagée
-   * sous forme de fichier JSON.
-   */
   const handleExport = async () => {
     if (!token || !user) return;
     setIsExporting(true);
@@ -60,24 +43,9 @@ export default function DataPrivacyScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-
-      {/* Header : Navigation et Titre */}
-      <View className="flex-row items-center px-6 py-4">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          style={{ backgroundColor: colors.surface, borderColor: colors.border }}
-          className="p-2 rounded-full border shadow-sm active:opacity-60"
-        >
-          <ChevronLeft size={24} color={colors.text} />
-        </TouchableOpacity>
-        <Text style={{ color: colors.text }} className="text-xl font-black italic ml-4 tracking-tighter">
-          {t("profile.legal.headerTitle")}
-        </Text>
-      </View>
+      <ProfileHeader title={t("profile.legal.headerTitle")} colors={colors} />
 
       <ScrollView className="px-6 mt-6" showsVerticalScrollIndicator={false}>
-
-        {/* Portabilité des données */}
         <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] ml-4 mb-4">
           {t("profile.legal.portabilitySection")}
         </Text>
@@ -104,7 +72,6 @@ export default function DataPrivacyScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Footer : Versionning de l'application */}
         <Text className="text-center mb-10 text-[9px] uppercase font-black tracking-[2px] opacity-40" style={{ color: colors.muted }}>
           {t("profile.legal.footer")}
         </Text>
