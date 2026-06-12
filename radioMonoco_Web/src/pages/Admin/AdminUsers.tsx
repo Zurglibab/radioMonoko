@@ -44,7 +44,7 @@ const AdminUsers = () => {
     if (loading) {
         return (
             <div className="p-8">
-                <h1 className="text-4xl font-bold text-white mb-8">
+                <h1 className="text-4xl font-bold text-app-text mb-8">
                     {t("admin.manageUsersTitle")}
                 </h1>
                 <p className="text-neutral-400">
@@ -56,8 +56,8 @@ const AdminUsers = () => {
 
     if (error) {
         return (
-            <div className="p-8">
-                <h1 className="text-4xl font-bold text-white mb-8">
+            <div className="p-8 text-app-text">
+                <h1 className="text-4xl font-bold text-app-text mb-8">
                     {t("admin.manageUsersTitle")}
                 </h1>
                 <div className="bg-red-900/40 border border-red-600 rounded-2xl p-4 text-red-400">
@@ -84,7 +84,7 @@ const AdminUsers = () => {
                 </button>
             </div>
 
-            <h1 className="text-4xl font-bold text-white mb-8">
+            <h1 className="text-4xl font-bold text-app-text mb-8">
                 {t("admin.manageUsersTitle")} ({users.length})
             </h1>
 
@@ -94,7 +94,7 @@ const AdminUsers = () => {
                     placeholder={t("admin.searchUserPlaceholder")} 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full max-w-md bg-neutral-900/50 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-neutral-500 focus:outline-none focus:border-primary transition"
+                    className="w-full max-w-md bg-neutral-900/50 border border-white/10 rounded-xl px-4 py-3 text-app-text placeholder-neutral-500 focus:outline-none focus:border-primary transition"
                 />
             </div>
 

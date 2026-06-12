@@ -78,13 +78,13 @@ const AdminReviews = () => {
             <div className="flex items-center gap-4 mb-8">
                 <button
                     onClick={() => navigate("/admin")}
-                    className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-2 rounded-full transition"
+                    className="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white  px-3 py-2 rounded-full transition"
                 >
                     ← {t("common.back")}
                 </button>
             </div>
 
-            <h1 className="text-4xl font-bold text-white mb-8">
+            <h1 className="text-4xl font-bold text-app-text mb-8">
                 {t("admin.manageReviews")}
             </h1>
 
@@ -102,11 +102,11 @@ const AdminReviews = () => {
 
             {!loading && reviews.length === 0 && (
                 <div className="bg-neutral-900/40 p-6 rounded-2xl text-center">
-                    <p className="text-white font-semibold">
+                    <p className="text-app-text font-semibold">
                         {t("admin.noReviews")}
                     </p>
 
-                    <p className="text-neutral-500 mt-2">
+                    <p className="text-app-text-neutral-500 mt-2">
                         {t("admin.reviewsCreatedText")}
                     </p>
                 </div>
@@ -133,34 +133,34 @@ const AdminReviews = () => {
                                 )}
                             </div>
 
-                            <p className="text-white mb-4">
+                            <p className="text-app-text  mb-4">
                                 {getReviewText(review)}
                             </p>
 
                             <div className="grid md:grid-cols-3 gap-3 text-sm mb-4">
                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
-                                    <p className="text-neutral-500 text-xs">
+                                    <p className="text-app-text-neutral-500 text-xs">
                                         {t("admin.reviewId")}
                                     </p>
-                                    <p className="text-neutral-300 break-all mt-1">
+                                    <p className="text-app-text-neutral-300 break-all mt-1">
                                         {review.id}
                                     </p>
                                 </div>
 
                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
-                                    <p className="text-neutral-500 text-xs">
+                                    <p className="text-app-text-neutral-500 text-xs">
                                         {t("admin.userId")}
                                     </p>
-                                    <p className="text-neutral-300 break-all mt-1">
+                                    <p className="text-app-text-neutral-300 break-all mt-1">
                                         {review.user_id || t("common.unavailable")}
                                     </p>
                                 </div>
 
                                 <div className="bg-black/20 border border-white/5 rounded-xl p-3">
-                                    <p className="text-neutral-500 text-xs">
+                                    <p className="text-app-text-neutral-500 text-xs">
                                         {t("admin.contentId")}
                                     </p>
-                                    <p className="text-neutral-300 break-all mt-1">
+                                    <p className="text-app-text-neutral-300 break-all mt-1">
                                         {review.content_id || "Non renseigné"}
                                     </p>
                                 </div>
@@ -169,14 +169,14 @@ const AdminReviews = () => {
                             <div className="flex flex-wrap gap-3 mt-4">
                                 <button
                                     onClick={() => handleFeature(review.id, featured)}
-                                    className="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl text-white"
+                                    className="bg-rose-600 hover:bg-rose-500 px-4 py-2 rounded-xl text-app-text "
                                 >
                                     {featured ? t("admin.unfeature") : t("admin.feature")}
                                 </button>
 
                                 <button
                                     onClick={() => handleDelete(review.id)}
-                                    className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-white"
+                                    className="bg-red-600 hover:bg-red-500 px-4 py-2 rounded-xl text-app-text "
                                 >
                                     {t("common.delete")}
                                 </button>
