@@ -9,7 +9,7 @@ import type { User } from "../interfaces/Users.types.ts";
 import type { Collection } from "../interfaces/Collections.types.ts";
 import ReportButton from "../components/utils/ReportButton.tsx";
 import {useTranslation} from "react-i18next";
-import {FiGlobe, FiLock, FiUserPlus, FiCheck, FiUserCheck, FiUserX} from "react-icons/fi";
+import {FiGlobe, FiLock, FiUserPlus, FiCheck, FiUserCheck, FiUserX, FiAlertCircle} from "react-icons/fi";
 import NotificationsService from "../services/NotificationsService.ts";
 import {Loader} from "../components/utils/Loader.tsx";
 import {useAppearance} from "../context/AppearanceContext.tsx";
@@ -27,6 +27,7 @@ const UserProfilePage = () => {
     const [isFriend, setIsFriend] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [actionError, setActionError] = useState("");
     const {t} = useTranslation();
     const [isFollow, setFollow] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
@@ -36,6 +37,13 @@ const UserProfilePage = () => {
     const isOwnProfile = connectedUser?.id === profilUser?.id;
     const isPrivateProfil = profilUser?.privacy === "private";
     const {theme} = useAppearance();
+
+    useEffect(() => {
+        if (actionError) {
+            const timer = setTimeout(() => setActionError(""), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [actionError]);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -106,7 +114,7 @@ const UserProfilePage = () => {
             navigate(`/collections/${collection.id}`);
             return;
         }
-        alert(t("userProfile.privateCollectionAlert"));
+        setActionError(t("userProfile.privateCollectionAlert"));
     };
 
     const sendNotification = async (targetUserId: string, type: "follow") => {
@@ -137,6 +145,7 @@ const UserProfilePage = () => {
     const handleFollowToggle = async () => {
         if (!id || !connectedUser?.id || isActionLoading) return;
         setIsActionLoading(true);
+        setActionError("");
         try {
             if (isFollow) {
                 await UserRelationsService.unfollow(id);
@@ -153,7 +162,7 @@ const UserProfilePage = () => {
             }
         } catch (err) {
             console.error("Erreur lors de l'interaction :", err);
-            alert(t("userProfile.errorOccurred"));
+            setActionError(t("userProfile.errorOccurred"));
         } finally {
             setIsActionLoading(false);
         }
@@ -163,6 +172,7 @@ const UserProfilePage = () => {
         if (!id || isBlockLoading) return;
         if (!isBlocked && !window.confirm(t("userProfile.confirmBlock"))) return;
         setIsBlockLoading(true);
+        setActionError("");
         try {
             if (isBlocked) {
                 await UserRelationsService.block(id);
@@ -174,7 +184,7 @@ const UserProfilePage = () => {
                 setIsFriend(false);
             }
         } catch (err) {
-            alert(t("userProfile.errorBlocking"));
+            setActionError(t("userProfile.errorBlocking"));
         } finally {
             setIsBlockLoading(false);
         }
@@ -225,17 +235,27 @@ const UserProfilePage = () => {
             </div>
 
             <div className="relative z-10 max-w-6xl mx-auto">
+                <div className="flex justify-between items-center mb-8">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-full transition ${
+                            theme === "dark"
+                                ? "bg-neutral-800 hover:bg-neutral-700 text-white"
+                                : "bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-200 shadow-sm"
+                        }`}
+                    >
+                        ← {t("common.back")}
+                    </button>
+                </div>
 
-                <button
-                    onClick={() => navigate(-1)}
-                    className={`mb-8 flex items-center gap-2 px-3 py-2 rounded-full transition ${
-                        theme === "dark"
-                            ? "bg-neutral-800 hover:bg-neutral-700 text-white"
-                            : "bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-200 shadow-sm"
-                    }`}
-                >
-                    ← {t("common.back")}
-                </button>
+                {actionError && (
+                    <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-start gap-3 animate-in fade-in slide-in-from-top-4">
+                        <FiAlertCircle className="text-red-500 shrink-0 mt-0.5" size={20} />
+                        <p className="text-red-400 text-sm font-medium">
+                            {actionError}
+                        </p>
+                    </div>
+                )}
 
                 <div className={`rounded-3xl p-8 md:p-10 mb-12 border ${
                     theme === "dark"

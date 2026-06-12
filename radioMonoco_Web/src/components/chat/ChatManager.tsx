@@ -6,6 +6,7 @@ import { DEFAULT_THEME } from "../../assets/themes/DefaultTheme.ts";
 import { useAppearance } from "../../context/AppearanceContext.tsx";
 import { useTranslation } from "react-i18next";
 import { useNewChannel } from '../../hooks/useNewChannel';
+import { Loader } from "../utils/Loader.tsx";
 
 export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
     const [channelNames, setChannelNames] = useState<Record<string, string>>({});
@@ -16,7 +17,7 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
     const { getPseudo } = useUserCache();
     const { theme } = useAppearance();
     const { t } = useTranslation();
-    const { channels, hasNewChannel, newChannelIds, resetNewChannelFlag, refetch } = useNewChannel();
+    const { channels, hasNewChannel, newChannelIds, resetNewChannelFlag, refetch, isLoading, error } = useNewChannel();
 
     useEffect(() => {
         const handleOpenChannel = (e: any) => {
@@ -80,22 +81,32 @@ export const ChatManager = ({ currentUserId }: { currentUserId: string }) => {
                         </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto scrollbar-thin">
-                        {channels.map((c) => {
-                            const isNew = newChannelIds.has(c.id);
-                            return (
-                                <button
-                                    key={c.id}
-                                    onClick={() => { setActiveChannelId(c.id); setShowMenu(false); }}
-                                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between gap-2 
-                                    ${DEFAULT_THEME.bgHover}
-                                    ${isNew ? (theme === 'dark' ? 'bg-rose-500/10 text-rose-400 font-medium' : 'bg-rose-50 text-rose-600 font-medium') : (theme === 'dark' ? 'text-neutral-300' : 'text-neutral-700')}`}
-                                >
-                                    <span className="truncate">{channelNames[c.id] || t("chat.loading")}</span>
-                                    {isNew && <span className="shrink-0 w-2 h-2 rounded-full bg-rose-500" />}
-                                </button>
-                            );
-                        })}
+                    <div className="flex-1 overflow-y-auto scrollbar-thin flex flex-col">
+                        {isLoading ? (
+                            <Loader />
+                        ) : error ? (
+                            <p className="text-center text-sm text-red-500 p-4 m-auto">{error}</p>
+                        ) : channels.length === 0 ? (
+                            <p className={`text-center text-sm ${theme === 'dark' ? 'text-neutral-500' : 'text-neutral-400'} p-4 m-auto`}>
+                                {t("chat.noConversations")}
+                            </p>
+                        ) : (
+                            channels.map((c) => {
+                                const isNew = newChannelIds.has(c.id);
+                                return (
+                                    <button
+                                        key={c.id}
+                                        onClick={() => { setActiveChannelId(c.id); setShowMenu(false); }}
+                                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center justify-between gap-2 
+                                        ${DEFAULT_THEME.bgHover}
+                                        ${isNew ? (theme === 'dark' ? 'bg-rose-500/10 text-rose-400 font-medium' : 'bg-rose-50 text-rose-600 font-medium') : (theme === 'dark' ? 'text-neutral-300' : 'text-neutral-700')}`}
+                                    >
+                                        <span className="truncate">{channelNames[c.id] || t("chat.loading")}</span>
+                                        {isNew && <span className="shrink-0 w-2 h-2 rounded-full bg-rose-500" />}
+                                    </button>
+                                );
+                            })
+                        )}
                     </div>
                 </div>
             )}

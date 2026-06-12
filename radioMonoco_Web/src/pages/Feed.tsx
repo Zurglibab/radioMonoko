@@ -4,7 +4,7 @@ import FeedService from "../services/FeedService.ts";
 import type {FeedItem} from "../interfaces/Feed.types.ts";
 import {useNavigate} from "react-router-dom";
 import {useAuth} from "../context/AuthContext.tsx";
-import { FiRefreshCw, FiUsers } from "react-icons/fi";
+import { FiRefreshCw, FiUsers, FiAlertCircle } from "react-icons/fi";
 import {useAppearance} from "../context/AppearanceContext.tsx";
 import {useTranslation} from "react-i18next";
 
@@ -16,6 +16,13 @@ const Feed = () => {
     const [error, setError] = useState("");
     const {theme} = useAppearance();
     const { t } = useTranslation();
+
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => setError(""), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
 
     const fetchFeed = async () => {
         try {
@@ -145,8 +152,11 @@ const Feed = () => {
                 )}
 
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl p-5 mb-6">
-                        {error}
+                    <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-xl flex items-start gap-3 mb-6 animate-in fade-in slide-in-from-top-4">
+                        <FiAlertCircle className="text-red-500 shrink-0 mt-0.5" size={20} />
+                        <p className="text-red-400 text-sm font-medium">
+                            {error}
+                        </p>
                     </div>
                 )}
 
@@ -191,4 +201,3 @@ const Feed = () => {
 };
 
 export default Feed;
-

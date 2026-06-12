@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.tsx";
 import { useNavigate, Link } from "react-router-dom";
 import {FiMail, FiLock, FiArrowRight, FiUser} from "react-icons/fi";
@@ -16,10 +16,17 @@ const Register = () => {
     const navigate = useNavigate()
     const {t} = useTranslation();
 
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => setError(""), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (password !== confirmPassword) {
-            alert(t("auth.passwordsDoNotMatch"));
+            setError(t("auth.passwordsDoNotMatch"));
             return;
         }
         try {
@@ -123,8 +130,8 @@ const Register = () => {
                         </div>
 
                         {error && (
-                            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3">
-                                <p className="text-red-400 text-sm">
+                            <div className="mt-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 animate-in fade-in">
+                                <p className="text-red-400 text-sm text-center">
                                     {error}
                                 </p>
                             </div>
@@ -133,7 +140,7 @@ const Register = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full mt-10 bg-rose-600 hover:bg-rose-500 disabled:bg-rose-600/50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg shadow-rose-600/20 cursor-pointer"
+                            className="w-full mt-6 bg-rose-600 hover:bg-rose-500 disabled:bg-rose-600/50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group shadow-lg shadow-rose-600/20 cursor-pointer"
                         >
                             {isLoading ? (
                                 <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

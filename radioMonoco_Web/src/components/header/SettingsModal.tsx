@@ -30,6 +30,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
 
     const [loading, setLoading] = useState(false);
     const [notifLoading, setNotifLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const [displayName, setDisplayName] = useState(user?.display_name ?? "");
     const [email, setEmail] = useState(user?.email ?? "");
@@ -63,8 +64,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
             setPrivacy(user.privacy ?? "public");
             setAvatarPreview(user.avatar ?? "");
             setEmailNotifs(user.notifications_email ?? false);
+            setError(null);
         }
     }, [isOpen, user]);
+
+    useEffect(() => {
+        if (error) {
+            const timer = setTimeout(() => setError(null), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [error]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -77,6 +86,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
 
     const handleUpdateProfile = async () => {
         setLoading(true);
+        setError(null);
         try {
             let finalAvatarUrl = user?.avatar;
             if (avatarPreview && avatarPreview.startsWith('data:image')) {
@@ -99,8 +109,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
             updateUser(response);
             onClose();
         } catch (error: any) {
+            const errorMessage = error.response?.data?.message || error.message || t("settings.updateError");
+            setError(errorMessage);
             console.error("Erreur :", error.response?.data || error.message);
-            alert(t("settings.updateError"));
         } finally {
             setLoading(false);
         }
@@ -108,13 +119,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
 
     const handleEmailNotifChange = async (value: boolean) => {
         setNotifLoading(true);
+        setError(null);
         try {
             const updatedUser = await UsersService.updateEmailNotifications(value);
             setEmailNotifs(value);
             updateUser(updatedUser);
-        } catch {
+        } catch (error: any) {
             setEmailNotifs(!value);
-            alert(t("settings.updateError"));
+            const errorMessage = error.response?.data?.message || error.message || t("settings.updateError");
+            setError(errorMessage);
         } finally {
             setNotifLoading(false);
         }
@@ -254,6 +267,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                             </button>
                                         </div>
                                     </div>
+                                    
+                                    {error && activeTab === 'profile' && (
+                                        <div className="text-center text-sm text-red-500 -mb-4 animate-in fade-in">
+                                            {error}
+                                        </div>
+                                    )}
+
                                     <div className="mt-8 pt-4 border-t border-app-border">
                                         <button
                                             onClick={handleUpdateProfile}
@@ -301,6 +321,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                             </div>
                                         </div>
                                     </div>
+                                    {error && activeTab === 'notifs' && (
+                                        <div className="text-center text-sm text-red-500 mt-4 animate-in fade-in">
+                                            {error}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
