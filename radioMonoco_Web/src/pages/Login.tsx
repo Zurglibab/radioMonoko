@@ -86,7 +86,7 @@ const Login = () => {
                 <div className="w-full max-w-md">
                     <form
                         onSubmit={handleSubmit}
-                        className="bg-neutral-900/40 backdrop-blur-2xl p-8 rounded-3xl border border-white/5 shadow-2xl"
+                        className="bg-neutral-900/40 backdrop-blur-2xl p-6 md:p-8 rounded-3xl border border-white/5 shadow-2xl"
                     >
                         <h1 className="text-3xl font-black text-center text-white uppercase tracking-tighter mb-8">
                             {t("auth.loginTitle")}

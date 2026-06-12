@@ -25,7 +25,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
     const [activeTab, setActiveTab] = useState<TabId>('profile');
     const { theme, setTheme } = useAppearance();
     const { updateUser } = useAuth();
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
+    const currentLanguage = i18n.language;
 
     const [loading, setLoading] = useState(false);
     const [notifLoading, setNotifLoading] = useState(false);
@@ -38,12 +39,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
     const [avatarPreview, setAvatarPreview] = useState<string>(user?.avatar ?? "");
 
     const [isSelectOpen, setIsSelectOpen] = useState(false);
+    const [isLanguageOpen, setIsLanguageOpen] = useState(false);
     const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
     const [emailNotifs, setEmailNotifs] = useState(user?.notifications_email ?? false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const selectRef = useRef<HTMLDivElement>(null);
+    const languageRef = useRef<HTMLDivElement>(null);
     const privacyRef = useRef<HTMLDivElement>(null);
+
+    const changeLanguage = (language: "fr" | "en" | "es") => {
+        i18n.changeLanguage(language);
+        localStorage.setItem("language", language);
+        setIsLanguageOpen(false);
+    };
 
     useEffect(() => {
         if (isOpen && user) {
@@ -115,6 +124,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
         const handleClickOutside = (event: MouseEvent) => {
             if (selectRef.current && !selectRef.current.contains(event.target as Node)) setIsSelectOpen(false);
             if (privacyRef.current && !privacyRef.current.contains(event.target as Node)) setIsPrivacyOpen(false);
+            if (languageRef.current && !languageRef.current.contains(event.target as Node)) setIsLanguageOpen(false);
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -322,6 +332,40 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, u
                                                                 <span className={theme === tTheme.id ? "font-bold" : ""}>{tTheme.label}</span>
                                                             </div>
                                                             {theme === tTheme.id && <HiCheck className="text-primary" />}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <label className="text-[11px] font-bold opacity-50 ml-1 block">{t("settings.appearance.language")}</label>
+                                        <div className="relative" ref={languageRef}>
+                                            <button onClick={() => setIsLanguageOpen(!isLanguageOpen)} className="w-full flex items-center justify-between bg-app-text/5 border border-app-border rounded-xl px-4 py-3 text-sm cursor-pointer outline-none transition-colors hover:border-primary/30">
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-primary">🌍</span>
+                                                    <span>{currentLanguage === 'fr' ? 'Français' : currentLanguage === 'en' ? 'English' : 'Español'}</span>
+                                                </div>
+                                                <HiChevronDown className={`transition-transform duration-300 ${isLanguageOpen ? 'rotate-180 text-primary' : ''}`} />
+                                            </button>
+                                            {isLanguageOpen && (
+                                                <div className="absolute z-10 mt-2 w-full bg-app-card border border-app-border rounded-xl shadow-xl overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                                                    {[
+                                                        { id: 'fr', label: 'Français', flag: '🇫🇷' },
+                                                        { id: 'en', label: 'English', flag: '🇬🇧' },
+                                                        { id: 'es', label: 'Español', flag: '🇪🇸' }
+                                                    ].map((lang) => (
+                                                        <button
+                                                            key={lang.id}
+                                                            onClick={() => changeLanguage(lang.id as "fr" | "en" | "es")}
+                                                            className="w-full flex items-center justify-between px-4 py-3 text-sm hover:bg-primary/10 cursor-pointer transition-colors outline-none"
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <span className={currentLanguage === lang.id ? "text-primary" : "opacity-50"}>{lang.flag}</span>
+                                                                <span className={currentLanguage === lang.id ? "font-bold" : ""}>{lang.label}</span>
+                                                            </div>
+                                                            {currentLanguage === lang.id && <HiCheck className="text-primary" />}
                                                         </button>
                                                     ))}
                                                 </div>

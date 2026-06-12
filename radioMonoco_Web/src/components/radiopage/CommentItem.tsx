@@ -40,14 +40,14 @@ export const CommentItem = memo(({
 
     const sendNotification = async (targetUserId: string, type: "like" | "dislike" | "reply", contentPreview: string | null | undefined) => {
         if (targetUserId === currentUser?.id) return;
-        const senderName = currentUser?.display_name || currentUser?.username || "Un utilisateur";
-        const safePreview = (contentPreview || "Aucun contenu").toString();
+        const senderName = currentUser?.display_name || currentUser?.username || t("radio.user", "Un utilisateur");
+        const safePreview = (contentPreview || t("radio.noContent", "Aucun contenu")).toString();
         const user = await UsersService.getUserById(targetUserId);
         if (!user) return;
         const messages = {
-            like: `${senderName} a aimé votre commentaire : "${safePreview.slice(0, 30)}..."`,
-            dislike: `${senderName} a réagi négativement à votre commentaire : "${safePreview.slice(0, 30)}..."`,
-            reply: `${senderName} a répondu à votre commentaire : "${safePreview.slice(0, 30)}..."`,
+            like: `${senderName} ${t("radio.notifLike", { preview: safePreview.slice(0, 30) })}`,
+            dislike: `${senderName} ${t("radio.notifDislike", { preview: safePreview.slice(0, 30) })}`,
+            reply: `${senderName} ${t("radio.notifReply", { preview: safePreview.slice(0, 30) })}`,
         };
         if (!user.notifications_email) {
             try { await NotificationsService.createNotification({ user_id: targetUserId, type, message: messages[type], is_read: false }); }
@@ -93,7 +93,7 @@ export const CommentItem = memo(({
                     <div className="flex items-center gap-2">
                         <span className={`text-xs font-bold ${isDark ? "text-white" : "text-neutral-800"}`}>{authorName}</span>
                         {comment.user_id === currentUser?.id && (
-                            <span className="text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded-md">Vous</span>
+                            <span className="text-[9px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-500 px-1.5 py-0.5 rounded-md">{t("radio.you")}</span>
                         )}
                     </div>
 
@@ -161,7 +161,7 @@ export const CommentItem = memo(({
                                 targetLabel={
                                     typeof comment.comment === "string" && comment.comment.trim()
                                         ? `"${comment.comment.slice(0, 60)}..."`
-                                        : "Commentaire utilisateur"
+                                        : t("radio.userComment", "Commentaire utilisateur")
                                 }
                                 compact
                             />
@@ -200,7 +200,7 @@ export const CommentItem = memo(({
                         const replyUser = usersCache[reply.user_id];
                         const replyAuthorName = replyUser
                             ? (replyUser.display_name || replyUser.username)
-                            : `Auditeur ${reply.user_id ? reply.user_id.slice(-4) : "Anonyme"}`;
+                            : `${t("radio.listener")} ${reply.user_id ? reply.user_id.slice(-4) : t("radio.anonymous")}`;
                         const isOwnReply = isLoggedIn && currentUser?.id && String(reply.user_id) === String(currentUser.id);
 
                         return (
@@ -215,7 +215,7 @@ export const CommentItem = memo(({
                                 <div className="space-y-1.5 flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
                                         <span className={`text-xs font-bold ${isDark ? "text-white" : "text-neutral-800"}`}>{replyAuthorName}</span>
-                                        {isOwnReply && <span className="text-[8px] font-black uppercase tracking-wide bg-rose-500/10 text-rose-500 px-1 py-0.5 rounded">Vous</span>}
+                                        {isOwnReply && <span className="text-[8px] font-black uppercase tracking-wide bg-rose-500/10 text-rose-500 px-1 py-0.5 rounded">{t("radio.you")}</span>}
                                     </div>
 
                                     {editingId === reply.id ? (
@@ -271,7 +271,7 @@ export const CommentItem = memo(({
                                                 targetLabel={
                                                     typeof reply.comment === "string" && reply.comment.trim()
                                                         ? `"${reply.comment.slice(0, 60)}..."`
-                                                        : "Réponse utilisateur"
+                                                        : t("radio.userReply", "Réponse utilisateur")
                                                 }
                                                 compact
                                             />
