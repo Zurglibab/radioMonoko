@@ -5,24 +5,8 @@ import { UserService } from "@/services/users/user.service";
 import { NotificationService } from "@/services/notifications/notification.service";
 import { ReviewComment } from "@/types/community";
 import { useAuthContext } from "@/context/AuthContext";
+import { toArray } from "@/utils/apiFetch";
 
-// Normalise les réponses API : tableau direct ou { data: [...] }
-function toArray<T>(raw: unknown): T[] {
-  if (Array.isArray(raw)) return raw as T[];
-  if (raw && typeof raw === "object" && Array.isArray((raw as any).data))
-    return (raw as any).data as T[];
-  return [];
-}
-
-/**
- * enrichWithUsernames : Fonction d'enrichissement des commentaires avec les noms d'utilisateur.
- * Cette fonction prend une liste de commentaires bruts (contenant seulement les user_id) et enrichit chaque commentaire
- * avec le nom d'utilisateur correspondant. Elle effectue des appels parallèles pour récupérer les profils utilisateur
- * et construire une map d'id vers nom d'utilisateur, afin d'optimiser les performances.
- * @param token 
- * @param raw 
- * @returns 
- */
 const enrichWithUsernames = async (token: string, raw: unknown): Promise<ReviewComment[]> => {
   const dtos = toArray<any>(raw);
   if (dtos.length === 0) return [];
@@ -50,16 +34,6 @@ const enrichWithUsernames = async (token: string, raw: unknown): Promise<ReviewC
   }));
 };
 
-/**
- * enrichWithLikes : Fonction d'enrichissement des commentaires avec les données de like.
- * Cette fonction prend une liste de commentaires et ajoute à chacun le nombre de likes, 
- * ainsi que l'information si l'utilisateur actuel a aimé le commentaire ou pas. 
- * Elle utilise le LikeReviewService pour récupérer les données de like depuis l'API.
- * @param token 
- * @param comments 
- * @param currentUserId 
- * @returns 
- */
 const enrichWithLikes = async (
   token: string,
   comments: ReviewComment[],
@@ -88,16 +62,6 @@ const enrichWithLikes = async (
   );
 };
 
-/**
- * useComments : Hook de gestion des commentaires sur une critique ou un commentaire.
- * Ce hook centralise la logique de chargement, d'enrichissement, et de gestion des commentaires associés à une critique ou à un commentaire spécifique.
- * Il gère l'état des commentaires, le commentaire ciblé (pour les liens directs), les réponses, et les interactions de like. Il utilise les services ReviewService et LikeReviewService pour interagir avec l'API et enrichir les données pour l'affichage.
- * @param activityId 
- * @param targetCommentId 
- * @param externalContentId 
- * @param parentAuthorId 
- * @returns 
- */
 export const useComments = (
   activityId: string,
   targetCommentId?: string,
@@ -190,7 +154,6 @@ export const useComments = (
       setComments(prev => prev.map(c =>
         c.id === optimistic.id ? { ...optimistic, id: created.id } : c
       ));
-      // Notifier l'auteur du post original (sauf si c'est soi-même)
       if (parentAuthorId && parentAuthorId !== user.id) {
         NotificationService.create(token, {
           user_id: parentAuthorId,
@@ -246,7 +209,7 @@ export const useComments = (
   const deleteMyComment = async (commentId: string) => {
     setComments(prev => prev.filter(c => c.id !== commentId));
     if (token) {
-      try { await ReviewService.remove(token, commentId); } catch { /* non-blocking */ }
+      try { await ReviewService.remove(token, commentId); } catch {}
     }
   };
 

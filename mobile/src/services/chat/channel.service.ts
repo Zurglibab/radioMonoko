@@ -1,4 +1,4 @@
-import { apiFetch } from "@/utils/apiFetch";
+import { apiFetch, toArray } from "@/utils/apiFetch";
 
 export interface ChannelDTO {
   id: string;
@@ -18,13 +18,6 @@ export interface MessageDTO {
   sender_id: string;
   content: string;
   created_at: string;
-}
-
-function toArray<T>(raw: unknown): T[] {
-  if (Array.isArray(raw)) return raw as T[];
-  if (raw && typeof raw === "object" && Array.isArray((raw as any).data))
-    return (raw as any).data as T[];
-  return [];
 }
 
 export const ChannelService = {
