@@ -65,7 +65,6 @@ export default function SearchScreen() {
             isPlaying={isPlaying}
             onPlayPress={(s) => playTrack(s)}
             onLongPress={(s) => {
-              // Gérer une onde (favoris, statut, collections) nécessite un compte
               if (!token || !user) {
                 promptLogin(t('common.guestAccess.manageStationAction'));
                 return;

@@ -62,7 +62,6 @@ export default function LibraryScreen() {
     return activeTab === "Radios" ? !isPodcast : isPodcast;
   });
 
-  // Labels traduits affichés pour chaque onglet
   const TAB_LABELS: Record<string, string> = {
     'Tout': t('library.library.tabs.all'),
     'Radios': t('library.library.tabs.radios'),
@@ -70,7 +69,6 @@ export default function LibraryScreen() {
     'Playlists': t('library.library.tabs.playlists'),
   };
 
-  // Réintégration de la fonction de création appelée par le modal
   const handleCreateCollection = async (data: CollectionFormData) => {
     try {
       await createCollection(data.name, data.description, data.isPublic);
@@ -81,7 +79,6 @@ export default function LibraryScreen() {
     }
   };
 
-  // Gestion d'édition/suppression au clic prolongé
   const handleLongPress = (id: string, name: string, isPublic: boolean) => {
     Alert.alert(
       t('library.library.manageCollection'),
@@ -116,7 +113,6 @@ export default function LibraryScreen() {
     }
   };
 
-  // La bibliothèque est propre à un compte
   if (!token || !user) {
     return (
       <GuestAccessPrompt
@@ -130,7 +126,6 @@ export default function LibraryScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-      {/* Header */}
       <View className="px-6 pt-4 mb-6 flex-row justify-between items-center">
         <Text style={{ color: colors.text }} className="text-3xl font-black italic tracking-tighter">{t('library.library.title')}</Text>
         <TouchableOpacity onPress={() => setModalVisible(true)} style={{ backgroundColor: colors.primary }} className="w-10 h-10 items-center justify-center rounded-full">
@@ -138,7 +133,6 @@ export default function LibraryScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Filtrage horizontal */}
       <View className="max-h-12 mb-4">
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-6">
           {['Tout', 'Radios', 'Podcasts', 'Playlists'].map((tab) => (
@@ -150,7 +144,6 @@ export default function LibraryScreen() {
       </View>
 
       <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-        {/* Ma Collection */}
         {activeTab === 'Tout' && (
           <View className="mb-10">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">{t('library.library.myCollection')}</Text>
@@ -171,12 +164,10 @@ export default function LibraryScreen() {
           </View>
         )}
 
-        {/* Vos Créations */}
         {(activeTab === 'Tout' || activeTab === 'Playlists') && (
           <View className="mb-10">
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">{t('library.library.yourCreations')}</Text>
 
-            {/* Titres Likés */}
             <TouchableOpacity onPress={() => router.push("/playlist/liked")} style={{ backgroundColor: colors.surface, borderColor: colors.border }} className="flex-row items-center mb-4 p-3 rounded-2xl border">
               <View className="mr-4">
                 <PlaylistCover
@@ -201,7 +192,6 @@ export default function LibraryScreen() {
               <MoreVertical size={18} color={colors.muted} />
             </TouchableOpacity>
 
-            {/* Collections Personnalisées */}
             {isCollectionsLoading ? (
               <Text style={{ color: colors.muted }} className="text-xs italic py-4">{t('library.library.loadingCollections')}</Text>
             ) : collections.length === 0 ? (
@@ -234,7 +224,6 @@ export default function LibraryScreen() {
           </View>
         )}
 
-        {/* Section Enregistrés */}
         {activeTab !== 'Playlists' && (
           <View>
             <Text style={{ color: colors.muted }} className="text-[10px] font-black uppercase tracking-widest mb-4">{activeTab === 'Tout' ? t('library.library.saved') : TAB_LABELS[activeTab]}</Text>

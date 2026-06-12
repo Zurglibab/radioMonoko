@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useEffect } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity, RefreshControl,
-  ActivityIndicator, useColorScheme, TextInput, Image, Alert,
+  ActivityIndicator, Image, Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
-import { Heart, MessageSquare, UserPlus, UserCheck, MoreVertical, Star, PenLine, Newspaper } from "lucide-react-native";
-import { theme } from "@/constants/theme";
+import { Heart, MessageSquare, MoreVertical, Star, PenLine, Newspaper } from "lucide-react-native";
+import { useThemeColors } from "@/utils/useThemeColors";
+import { getAvatarFallbackUrl } from "@/utils/avatarFallback";
 import { useAuthContext } from "@/context/AuthContext";
 import { useCommunity } from "@/hooks/community/useCommunity";
 import { SocialService } from "@/services/social/social.service";
@@ -19,14 +20,9 @@ import { GuestAccessPrompt } from "@/features/shared/GuestAccessPrompt";
 
 export default function FeedScreen() {
   const { t } = useTranslation();
-  const { appearanceSettings, token, user } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const { token, user } = useAuthContext();
+  const colors = useThemeColors();
   const router = useRouter();
-
-  const isDark = appearanceSettings.themeMode === "system"
-    ? systemTheme === "dark"
-    : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   const { feed, isLoading, refetch } = useCommunity();
   const [refreshing, setRefreshing] = useState(false);
@@ -37,7 +33,6 @@ export default function FeedScreen() {
     setRefreshing(false);
   }, [refetch]);
 
-  // Le flux communautaire nécessite un compte
   if (!token || !user) {
     return (
       <GuestAccessPrompt
@@ -51,8 +46,6 @@ export default function FeedScreen() {
 
   return (
     <SafeAreaView className="flex-1" style={{ backgroundColor: colors.background }}>
-
-      {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 border-b" style={{ borderColor: colors.border }}>
         <Text style={{ color: colors.text }} className="text-[20px] font-black italic tracking-tighter">{t('community.feed.title')}</Text>
         <TouchableOpacity
@@ -65,7 +58,6 @@ export default function FeedScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Composer bar */}
       <TouchableOpacity
         onPress={() => router.push("/(tabs)/search" as any)}
         className="flex-row items-center px-4 py-3 border-b"
@@ -73,7 +65,7 @@ export default function FeedScreen() {
         activeOpacity={0.7}
       >
         <Image
-          source={{ uri: user?.avatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.username ?? 'Me')}&background=333&color=fff` }}
+          source={{ uri: user?.avatar ?? getAvatarFallbackUrl(user?.username ?? 'Me') }}
           className="w-10 h-10 rounded-full mr-3"
         />
         <View className="flex-1 rounded-full px-4 py-2.5 border" style={{ borderColor: colors.border, backgroundColor: colors.surface }}>
@@ -224,20 +216,17 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
         onPress={() => router.push(`/community/comments/${activity.id}` as any)}
         className="px-4 py-3 flex-row"
       >
-        {/* Avatar column */}
         <TouchableOpacity
           onPress={() => router.push(`/community/user/${activity.userId}` as any)}
           className="mr-3 mt-0.5"
         >
           <Image
-            source={{ uri: activity.avatar ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(activity.user)}&background=333&color=fff` }}
+            source={{ uri: activity.avatar ?? getAvatarFallbackUrl(activity.user) }}
             className="w-11 h-11 rounded-full"
           />
         </TouchableOpacity>
 
-        {/* Content column */}
         <View className="flex-1">
-          {/* Name + timestamp + follow + more */}
           <View className="flex-row items-center justify-between mb-1">
             <View className="flex-row items-center flex-1 mr-2">
               <TouchableOpacity onPress={() => router.push(`/community/user/${activity.userId}` as any)}>
@@ -263,7 +252,6 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
             </View>
           </View>
 
-          {/* Badge "Mis en avant" par l'administration */}
           {activity.featured && (
             <View
               style={{ backgroundColor: colors.primary + "22", borderColor: colors.primary }}
@@ -276,7 +264,6 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
             </View>
           )}
 
-          {/* Media name + stars */}
           <Text style={{ color: colors.muted }} className="text-[13px] mb-1">
             {t('community.feed.reviewOf')}{" "}
             <Text style={{ color: colors.text }} className="font-semibold italic">{activity.targetMedia}</Text>
@@ -290,12 +277,10 @@ function FeedCard({ activity, token, currentUserId, currentUsername, colors, rou
             </View>
           )}
 
-          {/* Review text */}
           {activity.text && (
             <Text style={{ color: colors.text }} className="text-[15px] leading-[22px] mb-3">{activity.text}</Text>
           )}
 
-          {/* Interactions */}
           <View className="flex-row items-center gap-x-6 mt-1">
             <TouchableOpacity
               className="flex-row items-center"

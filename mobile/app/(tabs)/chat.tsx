@@ -1,14 +1,14 @@
 import React, { useCallback, useState } from "react";
 import {
   View, Text, FlatList, TouchableOpacity, Image,
-  ActivityIndicator, useColorScheme, RefreshControl,
+  ActivityIndicator, RefreshControl,
   Modal, TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter, useFocusEffect } from "expo-router";
 import { MessageSquare, Plus, X, Search } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useAuthContext } from "@/context/AuthContext";
 import { useConversations, Conversation } from "@/hooks/chat/useConversations";
 import { SocialService } from "@/services/social/social.service";
@@ -61,15 +61,9 @@ function Avatar({ name, avatar, size = 48, colors }: { name: string; avatar?: st
 
 export default function ChatScreen() {
   const { t, i18n } = useTranslation();
-  const { appearanceSettings, token, user } = useAuthContext();
-  const systemTheme = useColorScheme();
+  const { token, user } = useAuthContext();
+  const colors = useThemeColors();
   const router = useRouter();
-
-  const isDark =
-    appearanceSettings.themeMode === "system"
-      ? systemTheme === "dark"
-      : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
 
   const { conversations, isLoading, refetch } = useConversations();
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -120,7 +114,6 @@ export default function ChatScreen() {
       )
     : friends;
 
-  // La messagerie nécessite un compte
   if (!token || !user) {
     return (
       <GuestAccessPrompt
@@ -166,8 +159,6 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-
-      {/* Header */}
       <View
         style={{
           flexDirection: "row",
@@ -227,7 +218,6 @@ export default function ChatScreen() {
         />
       )}
 
-      {/* Sélecteur de contact */}
       <Modal
         visible={pickerVisible}
         animationType="slide"
@@ -235,7 +225,6 @@ export default function ChatScreen() {
         onRequestClose={closePicker}
       >
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-          {/* Header modal */}
           <View
             style={{
               flexDirection: "row",
@@ -255,7 +244,6 @@ export default function ChatScreen() {
             </TouchableOpacity>
           </View>
 
-          {/* Recherche */}
           <View
             style={{
               flexDirection: "row",

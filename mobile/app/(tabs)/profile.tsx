@@ -1,12 +1,13 @@
 import React, { useCallback, useRef } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert, useColorScheme } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   LogOut, ShieldCheck, CircleHelp,
   User, Paintbrush, FileText,
 } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
+import { useThemeColors } from "@/utils/useThemeColors";
+import { getAvatarFallbackUrl } from "@/utils/avatarFallback";
 import { useLibrary } from "@/hooks/home/useLibrary";
 import { useRouter, useFocusEffect } from "expo-router";
 import { useAuthContext } from "@/context/AuthContext";
@@ -32,14 +33,9 @@ const StatBox = ({ label, value, colors, onPress, widthClass = "w-[31%]" }: { la
 export default function ProfileScreen() {
   const { t, i18n } = useTranslation();
   const { user, favorites, playlists, statusItems, refetchFavorites, refetchStatuses, refetchCollections } = useLibrary();
-  const { token, logout, appearanceSettings } = useAuthContext();
+  const { token, logout } = useAuthContext();
   const router = useRouter();
-  const systemTheme = useColorScheme();
-
-  const isDark = appearanceSettings.themeMode === "system"
-    ? systemTheme === "dark"
-    : appearanceSettings.themeMode === "dark";
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
 
   const { requests, isLoading: pendingLoading, respondingId, accept, refuse } = usePendingRequests(token);
   const { friendsCount: followingCount, followersCount, isLoadingSocial, refetch: refetchSocial } = useSocialStats(true);
@@ -73,7 +69,6 @@ export default function ProfileScreen() {
     ]);
   };
 
-  // Le profil est propre à un compte
   if (!user) {
     return (
       <GuestAccessPrompt
@@ -96,7 +91,7 @@ export default function ProfileScreen() {
         <View className="items-center mt-8">
           <View className="relative">
             <Image
-              source={{ uri: user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.display_name || user.username)}&background=333&color=fff` }}
+              source={{ uri: user.avatar || getAvatarFallbackUrl(user.display_name || user.username) }}
               style={{ borderColor: colors.border, backgroundColor: colors.surface }}
               className="w-32 h-32 rounded-[40px] border-2"
             />
