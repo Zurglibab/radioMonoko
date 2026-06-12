@@ -398,7 +398,7 @@ const NavBar = () => {
                                                     onClick={goToSearchPage}
                                                     className="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold transition"
                                                 >
-                                                    Voir tous les résultats pour “{searchQuery.trim()}”
+                                                    Voir tous les résultats et filtres pour “{searchQuery.trim()}”
                                                 </button>
                                             </div>
                                         </div>

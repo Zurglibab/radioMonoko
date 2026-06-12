@@ -7,3 +7,9 @@ export interface SearchResult {
     collections: Collection[];
     shows: ApiShow[];
 }
+
+export interface SearchFilters{
+    genre?: string;
+    year?: string;
+    author?: string;
+}
