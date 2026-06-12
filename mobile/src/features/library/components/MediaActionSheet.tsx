@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Modal, Pressable, Image, Aler
 import { Heart, ListPlus, PlusCircle, ScrollText, PlayCircle, CheckCircle2, XCircle, X, ChevronLeft, Star, Globe, Lock, FolderPlus } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
-import { theme } from "@/constants/theme";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { MediaStatus, Station } from "@/types/content";
 import { useCollections } from "@/hooks/collections/useCollections";
 import { useFavorites } from "@/hooks/favorites/useFavorites";
@@ -11,6 +11,7 @@ import { useContentStatus } from "@/hooks/content/useContentStatus";
 import { useAuthContext } from "@/context/AuthContext";
 import { ContentApiService } from "@/services/content/content-api.service";
 import { CollectionFormModal, CollectionFormData } from "@/features/library/components/CollectionFormModal";
+import { ActionSheetItem } from "@/features/library/components/ActionSheetItem";
 
 interface MediaActionSheetProps {
   isVisible: boolean;
@@ -19,17 +20,10 @@ interface MediaActionSheetProps {
   onRefreshData?: () => Promise<void> | void; 
 }
 
-/**
- * MediaActionSheet : Composant de feuille d'action pour les œuvres (radios/podcasts).
- * Affiche des actions contextuelles pour une œuvre sélectionnée : ajout aux favoris, gestion des statuts, ajout à des collections, etc.
- * Permet également de naviguer vers l'écran de critique et de gérer la création de nouvelles collections.
- * @param param0 
- * @returns 
- */
 export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }: MediaActionSheetProps) => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { token, appearanceSettings } = useAuthContext();
+  const { token } = useAuthContext();
   
   const { isFavoriteByContentId, toggleFavorite: toggleFavoriteBackend } = useFavorites();
   const { currentStatus, setStatus, isLoading: isStatusLoading } = useContentStatus(station?.id ?? null);
@@ -42,8 +36,7 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<MediaStatus | null>(null);
 
-  const isDark = appearanceSettings.themeMode === 'system' ? true : appearanceSettings.themeMode === 'dark';
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
+  const colors = useThemeColors();
 
   useEffect(() => {
     if (isVisible && refetchCollections) {
@@ -168,32 +161,11 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
     }
   };
 
-  const ActionItem = ({ icon, label, onPress, textColor, secondary = "", disabled = false, trailing = null, highlighted = false }: any) => (
-    <TouchableOpacity
-      style={{
-        borderBottomColor: colors.border,
-        opacity: disabled ? 0.5 : 1,
-        backgroundColor: highlighted ? colors.primary + '15' : 'transparent',
-      }}
-      className="flex-row items-center py-4 border-b px-2"
-      onPress={onPress}
-      disabled={disabled}
-      activeOpacity={0.7}
-    >
-      <View className="w-10 items-center">{icon}</View>
-      <View className="flex-1 ml-3">
-        <Text style={{ color: textColor || colors.text }} className="text-sm font-bold">{label}</Text>
-        {secondary ? <Text style={{ color: colors.muted }} className="text-[10px] font-medium">{secondary}</Text> : null}
-      </View>
-      {trailing}
-    </TouchableOpacity>
-  );
-
   const renderStatusItem = (status: MediaStatus, icon: React.ReactNode, label: string) => {
     const isCurrent = currentStatus === status;
     const isPending = pendingStatus === status;
     return (
-      <ActionItem
+      <ActionSheetItem
         icon={icon}
         label={label}
         highlighted={isCurrent}
@@ -225,7 +197,7 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
 
             <ScrollView showsVerticalScrollIndicator={false} className="mt-8">
               <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mb-2">{t('library.mediaActionSheet.socialSection')}</Text>
-              <ActionItem
+              <ActionSheetItem
                 icon={<Star size={20} color={colors.primary} />}
                 label={t('library.mediaActionSheet.rateAndReview')}
                 secondary={t('library.mediaActionSheet.shareOpinion')}
@@ -235,15 +207,15 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
                 }}
               />
               <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mt-8 mb-2">{t('library.mediaActionSheet.favoritesSection')}</Text>
-              <ActionItem
+              <ActionSheetItem
                 icon={<Heart size={20} color={colors.live} fill={isFavorite ? colors.live : 'none'} />}
                 label={isFavorite ? t('library.mediaActionSheet.removeFromLiked') : t('library.mediaActionSheet.addToLiked')}
                 onPress={handleToggleFavorite}
                 disabled={isFavoriteLoading}
                 trailing={isFavoriteLoading ? <ActivityIndicator size="small" color={colors.primary} /> : null}
               />
-              <ActionItem icon={<ListPlus size={20} color={colors.text} />} label={t('library.mediaActionSheet.addToCollection')} onPress={() => setView('playlists')} />
-              <ActionItem icon={<PlusCircle size={20} color={colors.text} />} label={t('library.mediaActionSheet.newCollection')} onPress={() => setCreateModalVisible(true)} />
+              <ActionSheetItem icon={<ListPlus size={20} color={colors.text} />} label={t('library.mediaActionSheet.addToCollection')} onPress={() => setView('playlists')} />
+              <ActionSheetItem icon={<PlusCircle size={20} color={colors.text} />} label={t('library.mediaActionSheet.newCollection')} onPress={() => setCreateModalVisible(true)} />
 
               <Text style={{ color: colors.muted }} className="text-[9px] font-black uppercase tracking-[3px] mt-8 mb-2">{t('library.mediaActionSheet.myCollectionSection')}</Text>
               {isStatusLoading && !currentStatus ? (
@@ -267,14 +239,14 @@ export const MediaActionSheet = ({ isVisible, onClose, station, onRefreshData }:
               <Text style={{ color: colors.text }} className="text-xl font-black italic tracking-tighter">{t('library.mediaActionSheet.chooseCollection')}</Text>
             </View>
             <ScrollView showsVerticalScrollIndicator={false}>
-              <ActionItem icon={<FolderPlus size={20} color={colors.primary} />} label={t('library.mediaActionSheet.createNewCollection')} textColor={colors.primary} onPress={() => setCreateModalVisible(true)} />
+              <ActionSheetItem icon={<FolderPlus size={20} color={colors.primary} />} label={t('library.mediaActionSheet.createNewCollection')} textColor={colors.primary} onPress={() => setCreateModalVisible(true)} />
               {isCollectionsLoading ? (
                 <ActivityIndicator color={colors.primary} className="mt-8" />
               ) : collections.length === 0 ? (
                 <Text style={{ color: colors.muted }} className="text-xs italic text-center mt-8">{t('library.mediaActionSheet.noCollectionsCreateOne')}</Text>
               ) : (
                 collections.map((col) => (
-                  <ActionItem
+                  <ActionSheetItem
                     key={col.id}
                     icon={col.is_public ? <Globe size={20} color={colors.muted} /> : <Lock size={20} color={colors.muted} />}
                     label={col.name}
