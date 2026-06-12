@@ -1,23 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "../context/AuthContext.tsx";
 import NotificationsService from "../services/NotificationsService.ts";
-
-export interface NotificationDto {
-    id: string;
-    user_id: string;
-    type: string;
-    message: string;
-    is_read: boolean;
-    createdAt: string;
-}
-
-export interface AppNotification {
-    id: string;
-    message: string;
-    isRead: boolean;
-    timestamp: string;
-    type: 'like' | 'dislike' | 'reply' | 'system';
-}
+import type {AppNotification, NotificationDto} from "../interfaces/Notifications.types.ts";
 
 const mapNotificationDtoToApp = (dto: NotificationDto): AppNotification => ({
     id: dto.id,
