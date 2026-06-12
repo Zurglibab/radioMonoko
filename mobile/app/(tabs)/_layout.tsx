@@ -1,4 +1,3 @@
-import { theme } from "@/constants/theme";
 import { Tabs } from "expo-router";
 import {
   LayoutDashboard,
@@ -9,76 +8,47 @@ import {
   MessageSquare,
 } from "lucide-react-native";
 import React from "react";
-import { Platform, useColorScheme } from "react-native";
+import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthContext } from "@/context/AuthContext";
+import { useThemeColors } from "@/utils/useThemeColors";
 import { useTranslation } from "react-i18next";
 
-/**
- * TabsLayout : Structure de navigation principale par onglets.
- * Gère l'apparence de la TabBar et l'adaptation aux différentes tailles d'écran.
- */
 export default function TabsLayout() {
   const { t } = useTranslation();
-
-  // Récupération des préférences d'apparence de l'utilisateur
   const { appearanceSettings } = useAuthContext();
-
-  // Détection du thème système pour le mode "system"
-  const systemTheme = useColorScheme();
-  
-  // Récupération des zones sécurisées pour éviter les conflits avec les éléments système (notch, barre de navigation)
+  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
 
-  // Détermination du thème sombre en fonction des préférences de l'utilisateur et du système
-  const isDark = appearanceSettings.themeMode === 'system' 
-    ? systemTheme === 'dark' 
-    : appearanceSettings.themeMode === 'dark';
-
-  // Utilisation du thème dark par défaut pour la barre de navigation
-  const colors = isDark ? theme.dark.colors : theme.light.colors;
-
-  // Couleur d'accent dynamique selon les préférences de l'utilisateur
   const activeColor = appearanceSettings.accentColor;
-  
-  // Calcul dynamique de la hauteur pour garantir un rendu parfait sur tous les devices
   const baseHeight = 58;
   const bottom = Math.max(insets.bottom, 10);
 
   return (
     <Tabs
       screenOptions={{
-        headerShown: false, // J'utilise nos propres headers personnalisés
-
-        // Couleurs dynamiques selon l'état de l'onglet
+        headerShown: false,
         tabBarActiveTintColor: activeColor,
         tabBarInactiveTintColor: colors.muted,
-
-        // Style de la barre de navigation
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopWidth: 1,
           borderTopColor: colors.border,
           height: baseHeight + bottom,
-          paddingBottom: bottom, // Protection contre la zone de balayage système
+          paddingBottom: bottom,
           paddingTop: 8,
-          elevation: 8, // Ombre portée pour Android
+          elevation: 8,
         },
-
-        // Style du texte sous les icônes
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: "700",
-          // Ajustement optique spécifique à iOS pour l'alignement
           marginTop: Platform.OS === "ios" ? 2 : 0,
         },
-
         tabBarIconStyle: {
           marginTop: 2,
         },
       }}
     >
-      {/* Onglet Accueil */}
       <Tabs.Screen
         name="home"
         options={{
@@ -87,7 +57,6 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* Onglet Flux */}
       <Tabs.Screen
         name="feed"
         options={{
@@ -96,7 +65,6 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* Onglet Recherche */}
       <Tabs.Screen
         name="search"
         options={{
@@ -105,7 +73,6 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* Onglet Bibliothèque / Ma Radio */}
       <Tabs.Screen
         name="library"
         options={{
@@ -114,7 +81,6 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* Onglet Messages */}
       <Tabs.Screen
         name="chat"
         options={{
@@ -123,7 +89,6 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* Onglet Profil Utilisateur */}
       <Tabs.Screen
         name="profile"
         options={{

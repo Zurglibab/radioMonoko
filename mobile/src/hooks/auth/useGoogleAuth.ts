@@ -8,20 +8,11 @@ import { AuthService } from "@/services/auth/auth.service";
 
 WebBrowser.maybeCompleteAuthSession();
 
-// Redirection URI personnalisée pour les plateformes natives, 
-// nécessaire pour le bon fonctionnement de l'authentification Google sur mobile.
 const NATIVE_REDIRECT_URI = Platform.select({
   ios: "com.googleusercontent.apps.854362312297-6s78m7j9kmar35pcc5lf9rnrj5agsi72:/oauth2redirect",
   android: "com.googleusercontent.apps.854362312297-b2he06fmomo8eklirs3nsiv95o83m13d:/oauth2redirect",
 });
 
-/**
- * Hook personnalisé pour gérer l'authentification Google OAuth dans l'application.
- * Il encapsule la logique d'initialisation de la requête d'authentification, 
- * le traitement de la réponse, l'échange du token Google contre un token d'authentification de l'application, 
- * et la gestion des états de chargement et d'erreur.
- * @returns 
- */
 export const useGoogleAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

@@ -9,7 +9,8 @@ import "../global.css";
 import "../src/i18n";
 import { useTranslation } from "react-i18next";
 import { MiniPlayer } from "@/features/player/components/MiniPlayer";
-import { useColorScheme, Alert } from "react-native";
+import { Alert } from "react-native";
+import { useIsDarkMode } from "@/utils/useThemeColors";
 
 function NotificationWatcher() {
   const { t } = useTranslation();
@@ -31,24 +32,15 @@ function NotificationWatcher() {
         notif.message,
         [{ text: t('common.close'), style: "cancel" }]
       );
-      break; // une alerte à la fois pour ne pas spammer
+      break;
     }
   }, [notifications, token, user?.id, t]);
 
   return null;
 }
 
-/**
- * AppContent : Le conteneur logique de l'application.
- * Séparé du RootLayout pour pouvoir consommer les Contextes (useAuthContext).
- */
 function AppContent() {
-  const { appearanceSettings } = useAuthContext();
-  const systemTheme = useColorScheme();
-
-  const isDark = appearanceSettings.themeMode === 'system'
-    ? systemTheme === 'dark'
-    : appearanceSettings.themeMode === 'dark';
+  const isDark = useIsDarkMode();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
