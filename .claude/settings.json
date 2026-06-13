@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(grep -rl \"^/\\\\*\\\\*\" services hooks)",
-      "Bash(cd .. && npx tsc --noEmit)",
-      "Read(//c/Users/Elise/OneDrive/Documents/Supinfo/**)"
-    ]
-  }
-}
