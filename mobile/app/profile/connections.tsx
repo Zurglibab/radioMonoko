@@ -43,9 +43,7 @@ export default function ConnectionsScreen() {
         setFollowers(Array.isArray(followersData) ? followersData : []);
         setFollowing(Array.isArray(followingData) ? followingData : []);
       })
-      .catch(err => {
-        if (__DEV__) console.warn("[Connections] Error loading lists:", err?.message);
-      })
+      .catch(() => {})
       .finally(() => { if (isMounted) setIsLoading(false); });
 
     return () => { isMounted = false; };
@@ -120,11 +118,11 @@ export default function ConnectionsScreen() {
                 className="items-center justify-center mr-4"
               >
                 <Text style={{ color: colors.primary, fontWeight: "900", fontSize: 14 }}>
-                  {item.username[0]?.toUpperCase() ?? "?"}
+                  {item.username?.[0]?.toUpperCase() ?? "?"}
                 </Text>
               </View>
               <Text style={{ color: colors.text }} className="font-bold text-sm flex-1">
-                {item.username}
+                {item.username ?? "Utilisateur"}
               </Text>
               {!item.isPublic && <Lock size={14} color={colors.muted} />}
             </TouchableOpacity>

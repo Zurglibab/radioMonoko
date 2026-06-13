@@ -4,12 +4,6 @@ import { SocialService } from "@/services/social/social.service";
 import { PendingFriendRequest } from "@/types/social";
 import { isInBackoff } from "@/utils/rateLimitGuard";
 
-/**
- * usePendingRequests : Hook personnalisé pour gérer les demandes d'amitié en attente.
- * Il récupère la liste des demandes d'amitié reçues, et fournit des fonctions pour accepter ou refuser ces demandes.
- * @param token 
- * @returns 
- */
 export const usePendingRequests = (token: string | null) => {
   const [requests, setRequests] = useState<PendingFriendRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);

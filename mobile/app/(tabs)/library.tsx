@@ -74,8 +74,8 @@ export default function LibraryScreen() {
       await createCollection(data.name, data.description, data.isPublic);
       setModalVisible(false);
       if (refetchCollections) await refetchCollections();
-    } catch (err: any) {
-      Alert.alert(t('common.error'), err?.message || t('library.library.errorCreateCollection'));
+    } catch {
+      Alert.alert(t('common.error'), t('library.library.errorCreateCollection'));
     }
   };
 

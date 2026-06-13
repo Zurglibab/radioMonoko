@@ -41,7 +41,7 @@ export default function PrivateHome({ user }: { user: User }) {
         refetchBrands(),
         refetchSocial(),
         refetchFeed()
-      ]).catch(err => console.warn("[PrivateHome] Synchro err:", err?.message));
+      ]).catch(() => {});
     }, [refetchStatuses, refetchBrands, refetchSocial, refetchFeed])
   );
 

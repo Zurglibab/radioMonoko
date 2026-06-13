@@ -11,10 +11,6 @@ import { ContentDTO } from "@/types/content-api";
 import { CollectionDTO } from "@/types/collection";
 import { mapBrandToStation, mapWebRadioToStation } from "@/utils/mappers/brand.mapper";
 
-/**
- * useSearch : Hook personnalisé pour gérer la recherche d'éléments dans l'application.
- * @returns Un objet contenant les données de recherche et les fonctions de gestion.
- */
 export const useSearch = () => {
   const { token } = useAuthContext();
   const [query, setQuery] = useState("");

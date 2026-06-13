@@ -26,7 +26,6 @@ export const useAuth = () => {
     setIsFormLoading(true);
     try {
       const res = await AuthService.login(emailCleaned, password);
-      if (__DEV__) console.log("[useAuth] Jeton reçu, initialisation de la session globale...");
       await updateGlobalState(res.token);
       router.replace("/(tabs)/home");
     } catch (err: any) {

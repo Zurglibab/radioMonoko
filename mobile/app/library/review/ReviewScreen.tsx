@@ -66,8 +66,7 @@ export default function ReviewScreen() {
         setStation(brand);
         setStationError(null);
       })
-      .catch(err => {
-        if (__DEV__) console.warn("[ReviewScreen]", err?.message);
+      .catch(() => {
         setStationError(t('library.reviewScreen.loadMediaError'));
       })
       .finally(() => setIsStationLoading(false));
@@ -89,8 +88,8 @@ export default function ReviewScreen() {
         t('library.reviewScreen.publishedMessage'),
         [{ text: t('library.reviewScreen.great'), onPress: () => router.back() }]
       );
-    } catch (err: any) {
-      Alert.alert(t('common.error'), err?.message || t('library.reviewScreen.publishError'));
+    } catch {
+      Alert.alert(t('common.error'), t('library.reviewScreen.publishError'));
     }
   };
 

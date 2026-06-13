@@ -5,22 +5,6 @@ export const FavoriteService = {
   getUserFavorites: (token: string, userId: string): Promise<ContentFavorite[]> =>
     apiFetch<ContentFavorite[]>(`/content/favorites/user/${userId}`, { token }),
 
-  checkIsFavorite: async (
-    token: string,
-    contentId: string,
-    userId: string
-  ): Promise<ContentFavorite | null> => {
-    try {
-      return await apiFetch<ContentFavorite>(
-        `/content/favorites/${contentId}/user/${userId}`,
-        { token }
-      );
-    } catch (err: any) {
-      if (err?.message?.includes('404')) return null;
-      throw err;
-    }
-  },
-
   addFavorite: (
     token: string,
     payload: CreateContentFavoritePayload

@@ -45,12 +45,12 @@ export const PendingRequestsSection = ({ requests, isLoading, respondingId, onAc
               className="items-center justify-center mr-3"
             >
               <Text style={{ color: colors.primary, fontWeight: "900", fontSize: 14 }}>
-                {req.username[0]?.toUpperCase() ?? "?"}
+                {req.username?.[0]?.toUpperCase() ?? "?"}
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity className="flex-1" onPress={() => router.push(`/community/user/${req.id}` as any)}>
-              <Text style={{ color: colors.text }} className="font-bold text-sm">{req.username}</Text>
+              <Text style={{ color: colors.text }} className="font-bold text-sm">{req.username ?? "Utilisateur"}</Text>
               <Text style={{ color: colors.muted }} className="text-[10px]">{t("profile.pendingRequests.wantsToFollow")}</Text>
             </TouchableOpacity>
 
