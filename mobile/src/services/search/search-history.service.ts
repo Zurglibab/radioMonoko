@@ -4,10 +4,13 @@ import { HistoryEntry } from "@/types/search";
 const STORAGE_KEY = "@radiomonoko:search_history";
 const MAX_ENTRIES = 10;
 
+const getKey = (userId: string): string => `${STORAGE_KEY}:${userId}`;
+
 export const SearchHistoryService = {
-  load: async (): Promise<HistoryEntry[]> => {
+  load: async (userId: string): Promise<HistoryEntry[]> => {
+    if (!userId) return [];
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
+      const raw = await AsyncStorage.getItem(getKey(userId));
       if (!raw) return [];
       const parsed = JSON.parse(raw) as HistoryEntry[];
       return Array.isArray(parsed) ? parsed : [];
@@ -16,9 +19,10 @@ export const SearchHistoryService = {
     }
   },
 
-  save: async (entries: HistoryEntry[]): Promise<void> => {
+  save: async (userId: string, entries: HistoryEntry[]): Promise<void> => {
+    if (!userId) return;
     try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      await AsyncStorage.setItem(getKey(userId), JSON.stringify(entries));
     } catch {}
   },
 
@@ -33,9 +37,10 @@ export const SearchHistoryService = {
     return updated.slice(0, MAX_ENTRIES);
   },
 
-  clear: async (): Promise<void> => {
+  clear: async (userId: string): Promise<void> => {
+    if (!userId) return;
     try {
-      await AsyncStorage.removeItem(STORAGE_KEY);
+      await AsyncStorage.removeItem(getKey(userId));
     } catch {}
   },
 };
