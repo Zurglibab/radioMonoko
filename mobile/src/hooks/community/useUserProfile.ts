@@ -58,7 +58,7 @@ export const useUserProfile = () => {
         return null;
       }),
       SocialService.fetchUserFriends(token, id).catch(() => [] as Friend[]),
-      SocialService.fetchMyFollowing(token).catch(() => [] as Friend[]),
+      SocialService.fetchMyFollowing(token, currentUser?.id).catch(() => [] as Friend[]),
       SocialService.fetchMyFriends(token).catch(() => [] as Friend[]),
       CollectionService.getUserCollections(token, id).catch(() => [] as CollectionDTO[]),
     ])
@@ -76,7 +76,7 @@ export const useUserProfile = () => {
       })
       .catch(() => setError("Impossible de charger ce profil."))
       .finally(() => setIsLoading(false));
-  }, [id, token]);
+  }, [id, token, currentUser?.id]);
 
   const handleFollowToggle = async () => {
     if (!token || isFollowLoading) return;

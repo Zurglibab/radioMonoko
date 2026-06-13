@@ -12,7 +12,7 @@ import { CollectionDTO } from "@/types/collection";
 import { mapBrandToStation, mapWebRadioToStation } from "@/utils/mappers/brand.mapper";
 
 export const useSearch = () => {
-  const { token } = useAuthContext();
+  const { token, user } = useAuthContext();
   const [query, setQuery] = useState("");
   const [stations, setStations] = useState<Station[]>([]);
   const [users, setUsers] = useState<Friend[]>([]);
@@ -23,22 +23,28 @@ export const useSearch = () => {
   const [allBrands, setAllBrands] = useState<Brand[]>([]);
 
   useEffect(() => {
-    SearchHistoryService.load().then(setHistory);
+    if (user?.id) {
+      SearchHistoryService.load(user.id).then(setHistory);
+    } else {
+      setHistory([]);
+    }
     BrandService.fetchAllBrands().then(setAllBrands).catch(() => {});
-  }, []);
+  }, [user?.id]);
 
   const addToHistory = useCallback(async (q: string) => {
+    if (!user?.id) return;
+    const userId = user.id;
     setHistory((prev) => {
       const updated = SearchHistoryService.addEntry(prev, q);
-      SearchHistoryService.save(updated);
+      SearchHistoryService.save(userId, updated);
       return updated;
     });
-  }, []);
+  }, [user?.id]);
 
   const clearHistory = useCallback(async () => {
     setHistory([]);
-    await SearchHistoryService.clear();
-  }, []);
+    if (user?.id) await SearchHistoryService.clear(user.id);
+  }, [user?.id]);
 
   useEffect(() => {
     if (!query.trim()) {

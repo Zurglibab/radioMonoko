@@ -17,7 +17,7 @@ export default function ConnectionsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{ tab?: string | string[] }>();
-  const { token } = useAuthContext();
+  const { token, user } = useAuthContext();
   const colors = useThemeColors();
 
   const initialTab = (Array.isArray(params.tab) ? params.tab[0] : params.tab) === "following"
@@ -35,8 +35,8 @@ export default function ConnectionsScreen() {
     setIsLoading(true);
 
     Promise.all([
-      SocialService.fetchMyFollowers(token),
-      SocialService.fetchMyFollowing(token),
+      SocialService.fetchMyFollowers(token, user?.id),
+      SocialService.fetchMyFollowing(token, user?.id),
     ])
       .then(([followersData, followingData]) => {
         if (!isMounted) return;
@@ -47,7 +47,7 @@ export default function ConnectionsScreen() {
       .finally(() => { if (isMounted) setIsLoading(false); });
 
     return () => { isMounted = false; };
-  }, [token]);
+  }, [token, user?.id]);
 
   const items = activeTab === "followers" ? followers : following;
 

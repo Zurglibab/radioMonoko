@@ -21,11 +21,15 @@ export const SocialService = {
   fetchMyFriends: (token: string): Promise<Friend[]> =>
     apiFetch<Friend[]>("/userRelation/friends", { token }),
 
-  fetchMyFollowing: (token: string): Promise<Friend[]> =>
-    apiFetch<Friend[]>("/userRelation/following", { token }),
+  fetchMyFollowing: async (token: string, currentUserId?: string): Promise<Friend[]> => {
+    const data = toArray<Friend>(await apiFetch<Friend[]>("/userRelation/following", { token }));
+    return currentUserId ? data.filter((f) => f.id !== currentUserId) : data;
+  },
 
-  fetchMyFollowers: (token: string): Promise<Friend[]> =>
-    apiFetch<Friend[]>("/userRelation/followers", { token }),
+  fetchMyFollowers: async (token: string, currentUserId?: string): Promise<Friend[]> => {
+    const data = toArray<Friend>(await apiFetch<Friend[]>("/userRelation/followers", { token }));
+    return currentUserId ? data.filter((f) => f.id !== currentUserId) : data;
+  },
 
   fetchUserFriends: (token: string, userId: string): Promise<Friend[]> =>
     apiFetch<Friend[]>(`/userRelation/friends/${userId}`, { token }),
